@@ -1,0 +1,19 @@
+# ship.obj - a tiny dart-shaped ship, made for Lesson 9
+#
+# A line starting with # is a comment: the loader skips it.
+#
+# 'v x y z' = one corner. The 1st v line is corner 1.
+v  0.0  0.0  2.0
+v -1.5  0.0 -1.0
+v  1.5  0.0 -1.0
+v  0.0  0.6 -1.0
+v  0.0 -0.6 -1.0
+#
+# 'f a b c' = one face, made of corners a, b and c.
+# Corner numbers start at 1, NOT 0.
+# The last face has 4 corners: the diamond at the back.
+f 1 4 2
+f 1 3 4
+f 1 2 5
+f 1 5 3
+f 2 4 3 5

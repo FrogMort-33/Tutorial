@@ -1,0 +1,2778 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframe 3D, Lesson 9</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Chakra+Petch:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one readable column, like a lab notebook; diagrams and code break out slightly wider. */
+:root {
+  --bg:#f3f6f4; --paper:#ffffff; --fg:#17201b; --muted:#56635c; --line:#d5ded8;
+  --accent:#0d8a4a; --accent-soft:#e2f3e9; --code-bg:#121815; --code-fg:#d9f5e3; --warn:#9a6a00;
+  --display:"Chakra Petch", "Trebuchet MS", sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; --code-bg:#0a0e0c; --code-fg:#d9f5e3; --warn:#e6b84a; color-scheme:dark; } }
+:root[data-theme="dark"] {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; --code-bg:#0a0e0c; --code-fg:#d9f5e3; --warn:#e6b84a; color-scheme:dark; }
+body { background:var(--bg); color:var(--fg); font-family:var(--body); font-size:17px; line-height:1.6;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:32px 64px; }
+main { max-width:780px; margin:0 auto; display:flex; flex-direction:column; gap:20px; }
+h1,h2,h3 { font-family:var(--display); text-wrap:balance; line-height:1.2; margin:0; }
+h1 { font-size:clamp(30px,6vw,44px); }
+h2 { font-size:26px; margin-top:28px; padding-top:20px; border-top:2px solid var(--line); display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; }
+h2 .mins { font-family:var(--mono); font-size:14px; color:var(--accent); font-weight:600; letter-spacing:.04em; }
+h3 { font-size:20px; margin-top:12px; }
+p { margin:0; max-width:68ch; }
+.eyebrow { font-family:var(--mono); font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); }
+.lede { font-size:19px; color:var(--muted); }
+code { font-family:var(--mono); font-size:.88em; background:var(--accent-soft); padding:1px 5px; border-radius:4px; }
+pre { margin:0; background:var(--code-bg); color:var(--code-fg); padding:16px 18px; border-radius:8px; overflow-x:auto; font-size:14px; line-height:1.5; }
+pre code { background:none; padding:0; font-size:inherit; color:inherit; }
+figure { margin:0; display:flex; flex-direction:column; gap:8px; }
+figure img { width:100%; border-radius:8px; display:block; border:1px solid var(--line); }
+figcaption { font-size:14px; color:var(--muted); }
+table { border-collapse:collapse; width:100%; font-size:15px; }
+.tablewrap { overflow-x:auto; }
+th,td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+td.t { font-family:var(--mono); white-space:nowrap; color:var(--accent); font-variant-numeric:tabular-nums; }
+ul,ol { margin:0; padding-left:22px; max-width:68ch; }
+li+li { margin-top:4px; }
+.key { background:var(--accent-soft); border-left:4px solid var(--accent); padding:14px 18px; border-radius:0 8px 8px 0; display:flex; flex-direction:column; gap:6px; }
+.key strong { font-family:var(--display); }
+.q { background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:14px 18px; display:flex; flex-direction:column; gap:8px; }
+.qq { font-weight:700; display:flex; gap:10px; }
+.qn { font-family:var(--mono); color:var(--accent); flex:none; }
+details summary { cursor:pointer; color:var(--accent); font-weight:700; }
+details summary:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.ans { padding-top:8px; color:var(--fg); display:flex; flex-direction:column; gap:8px; }
+details.full { border:1px dashed var(--line); border-radius:8px; padding:10px 14px; }
+details.full[open] summary { margin-bottom:10px; }
+.check { display:flex; flex-direction:column; gap:12px; }
+.files li code { white-space:nowrap; }
+.key a { color:var(--accent); font-weight:700; }
+
+.fignum { font-family:var(--mono); font-weight:600; color:var(--accent); margin-right:6px; white-space:nowrap; }
+.panels { display:block; margin-top:4px; }
+.panels b { font-family:var(--mono); color:var(--fg); font-weight:600; }
+.tabcap { font-size:14px; color:var(--muted); margin-bottom:-12px; }
+figure, .tabcap { scroll-margin-top:16px; }
+/* Key concept box (same as Lesson 1). */
+.keyconcept { background:#14110a; border:3px solid #ffd23c; border-radius:10px; padding:18px 20px 20px; display:flex; flex-direction:column; gap:12px; }
+.keyconcept .kc-label { align-self:flex-start; background:#ffd23c; color:#14110a; font-family:var(--mono); font-weight:800; font-size:15px; letter-spacing:.14em; padding:4px 10px; border-radius:4px; }
+.keyconcept pre { background:none; color:#ffd23c; padding:0; font-size:clamp(14px, 3.6vw, 28px); font-weight:700; line-height:1.6; overflow-x:auto; }
+.keyconcept p { margin:0; color:#f3e7b5; font-size:16px; }
+</style>
+
+</head>
+<body>
+<main>
+<nav style="font-family:var(--mono, monospace);font-size:14px;"><a style="color:var(--accent)" href="../">&larr; All lessons</a> &middot; <a style="color:var(--accent)" href="../figures/">Figure index</a></nav>
+
+<header style="display:flex;flex-direction:column;gap:12px">
+  <span class="eyebrow">Wireframe 3D course · Lesson 9 · about 60 minutes</span>
+  <h1>Models from files: the teapot</h1>
+  <p class="lede">Every shape so far was typed in by hand: 8 corners for the cube, 5 for the pyramid. Real 3D models have thousands. Today we write one function, <code>load_obj()</code>, that reads a model from a plain text file. We test it on a tiny 5-corner ship first, then load the most famous model in computer graphics: the Utah teapot, with 3,644 corners and 6,320 faces.</p>
+</header>
+
+<figure id="fig-9-0-1"><img src="images/course_map.png" alt="Course map: lessons on a road from Lesson 1 to Lesson 11. Lesson 9, Models from files, with a teapot drawing, is highlighted as you are here; Lessons 1 to 8 are done; Lesson 10, the depth buffer, and Lesson 11, movement and collisions, are still to come." loading="lazy"><figcaption><span class="fignum">Fig 9.0.1</span>The course map. Coloured cards are done or today; darker cards are still to come.</figcaption></figure>
+<div class="key">
+  <strong>Where this lesson fits</strong>
+  <p><strong>Before:</strong> <a href="../lesson8/">Lesson 8</a> added four big rocks to Cube Hunt and cut faces cleanly at the NEAR wall.<br><strong>Today:</strong> read shapes from <code>.obj</code> text files: first a little ship, then the teapot.<br><strong>Next:</strong> Lesson 10, the depth buffer: a closest-per-pixel check, so faces are never drawn in the wrong order.</p>
+  <p>The game is unchanged. The gold pickups become ships read from a file, and a giant teapot stands just past the left wall.</p>
+</div>
+
+<figure id="fig-9-0-2"><img src="images/o01_why_files.png" alt="Two panels. Left, Lessons 1 to 8: the Python list cube_points with 8 corners and cube_faces with 6 faces, beside a green cube; 14 lines of numbers. Right, Lesson 9: the start of teapot.obj with v and f lines, beside a blue teapot; 3,644 corners plus 6,320 faces = 9,964 lines, 14 hours of typing at one line every 5 seconds." loading="lazy"><figcaption><span class="fignum">Fig 9.0.2</span>Why we need files. The cube is 14 lines of numbers. The teapot is 9,964. Nobody types that: we write <code>load_obj()</code> once and let Python read it.<span class="panels">Panels: <b>9.0.2a</b> (left) typed in by hand · <b>9.0.2b</b> (right) read from teapot.obj</span></figcaption></figure>
+
+<h2>Lesson plan</h2>
+<p><strong>Who it's for:</strong> someone who finished Lesson 8 and can run <code>step3_clipped_hunt.py</code>. You need faces, the clock test and the light (Lesson 3), the model and thing dictionaries and <code>"size"</code> (Lesson 5), Pythagoras in <code>distance_3d()</code> (Lesson 7) and <code>clip_face()</code> (Lesson 8). <strong>Needs:</strong> Python 3 and <code>pip install pygame-ce</code>, as before. The <code>.obj</code> files must sit in the same folder as the scripts.</p>
+<p><strong>By the end, the learner can:</strong></p>
+<ol>
+  <li>Read an <code>.obj</code> file by eye: say which lines are corners, which are faces, and which corners a face joins.</li>
+  <li>Turn a line of text into numbers with <code>split()</code>, <code>float()</code> and <code>int()</code>.</li>
+  <li>Name the five changes <code>load_obj()</code> makes on the way in, and say why each one is needed.</li>
+  <li>Work out a face's pointer by hand with <code>cross()</code>, and shrink it to 1 unit.</li>
+  <li>Put a loaded model into the world as a thing, and explain why 6,320 faces cost more time per frame than 72.</li>
+</ol>
+
+<p class="tabcap" id="fig-9-0-3"><span class="fignum">Table 9.0.3</span>Lesson plan: time, part and what happens</p>
+<div class="tablewrap"><table>
+<tr><th>Time</th><th>Part</th><th>What happens</th></tr>
+<tr><td class="t">0–3</td><td>Recap</td><td>Where Lesson 8 left the program, and why typing shapes in stops working.</td></tr>
+<tr><td class="t">3–11</td><td>1. Inside an .obj file</td><td>Open <code>ship.obj</code> in a text editor: comments, v lines and f lines. The ship's 5 corners and 5 faces. Q1–Q2.</td></tr>
+<tr><td class="t">11–20</td><td>2. Reading text in Python</td><td><code>split()</code>, <code>float()</code>, <code>int()</code>, and the read loop. Run <code>step1_read_ship.py</code>. Q3–Q4.</td></tr>
+<tr><td class="t">20–34</td><td>3. The five changes</td><td>Count from 0; turn z round and reverse; centre and size; skip the rest. (The pointer gets Part 4.) Q5–Q7.</td></tr>
+<tr><td class="t">34–47</td><td>4. The pointer: cross()</td><td>Why Lesson 3's averaging fails, two arrows on a face, <code>cross()</code>, shrinking to 1 unit. Run <code>step2_ship_from_file.py</code>. Q8–Q9.</td></tr>
+<tr><td class="t">47–56</td><td>5. The teapot</td><td>Where it stands, outlines, and what 6,320 faces cost. Run <code>step3_teapot_hunt.py</code>. Q10.</td></tr>
+<tr><td class="t">56–60</td><td>Wrap up</td><td>Everything in one picture, final check Q11, and what comes next.</td></tr>
+</table></div>
+
+<h2>Recap: where Lesson 8 left us <span class="mins">3 MIN</span></h2>
+<p>Lesson 5 gave every shape a <strong>model</strong>: a dictionary with two lists. <code>"points"</code> holds the corners in SHAPE coordinates (the shape's own middle is (0, 0, 0), +x right, +y up, +z away from you). <code>"faces"</code> holds one entry per face: <code>(corners, colour, pointer)</code>, where <code>corners</code> lists the corner numbers clockwise as seen from outside, and <code>pointer</code> is a 1-unit arrow straight out of the face, for Lesson 3's light.</p>
+<p>A <strong>thing</strong> then places a model in the world: <code>"position"</code>, <code>"size"</code>, <code>"angles"</code>, <code>"colour"</code>. Lesson 8's game has 12 things (8 gold cubes and 4 rocks), and every one of them uses the same typed-in <code>cube_model</code>.</p>
+<p>That is the key to today. If we can build that same dictionary from a file, the rest of the program (Lessons 1 to 8) will draw it without knowing the difference.</p>
+
+<h2>Part 1: Inside an .obj file <span class="mins">8 MIN</span></h2>
+<p>An <code>.obj</code> file (Wavefront OBJ, from 1990) is the simplest common 3D model format. It is plain text: you can open it in Notepad or IDLE and read it. Most 3D programs, such as Blender, can save one. We start with a file made just for this lesson, <code>ship.obj</code>: a little dart with 5 corners.</p>
+<h3>Three kinds of line</h3>
+<figure id="fig-9-1-1"><img src="images/o02_obj_file.png" alt="The 19 lines of ship.obj with line numbers: comment lines starting with # in grey, five v lines in blue (lines 6 to 10) and five f lines in orange (lines 15 to 19). Three boxes on the right explain comment lines, v = vertex (a corner), and f = face." loading="lazy"><figcaption><span class="fignum">Fig 9.1.1</span>The whole of <code>ship.obj</code>. Each line is one thing: a note for people (#), a corner (v), or a face (f). The first v line is corner 1, the second is corner 2, and so on: the file never writes the corner numbers down, it just counts lines.<span class="panels">Panels: <b>9.1.1a</b> (left) the file · <b>9.1.1b</b> (top right) comment lines · <b>9.1.1c</b> (middle right) v lines · <b>9.1.1d</b> (bottom right) f lines</span></figcaption></figure>
+<p>"v" stands for <em>vertex</em>, the proper word for a corner. Each v line has three numbers: x, y and z. Each f line lists which corners a face joins, by their corner numbers. A face can have 3 corners (a triangle), 4 (like the cube's squares) or more.</p>
+
+<h3>The ship's 5 corners</h3>
+<figure id="fig-9-1-2"><img src="images/o03_ship_corners.png" alt="The ship drawn in 3D with labelled axes: +x right, +y up, +z drawn down-left towards you, -z into the screen. Corner 1, the nose, is at (0, 0, 2); corner 2, the left wing, (-1.5, 0, -1); corner 3, the right wing, (1.5, 0, -1); corner 4, the top fin, (0, 0.6, -1); corner 5, the bottom fin, (0, -0.6, -1). Boxes list the 5 v lines and what each corner is." loading="lazy"><figcaption><span class="fignum">Fig 9.1.2</span>FILE coordinates: the numbers exactly as written in <code>ship.obj</code>, with the centre (0, 0, 0) wherever the ship's maker put it. Notice the nose is at z = +2, and in FILE coordinates +z points <em>out of the screen, towards you</em>. That is the opposite of our SHAPE coordinates; Part 3 fixes it.<span class="panels">Panels: <b>9.1.2a</b> (left) the corners in FILE coordinates · <b>9.1.2b</b> (top right) the 5 v lines · <b>9.1.2c</b> (middle right) what each corner is · <b>9.1.2d</b> (bottom right) why the nose is +z</span></figcaption></figure>
+<p>Why these numbers? The ship is 3 units from wing tip to wing tip (−1.5 to 1.5) and 3 long (nose at z = 2, tail at z = −1), so it is about as big as a cube. The fins are only 0.6 high, so it looks flat, like a dart. The exact sizes do not matter much: Part 3 resizes every model anyway.</p>
+
+<h3>The ship's 5 faces</h3>
+<figure id="fig-9-1-3"><img src="images/o04_ship_faces.png" alt="Five small copies of the ship, each with one face filled in colour and its corner numbers shown: f 1 4 2 top-left, f 1 3 4 top-right, f 1 2 5 bottom-left, f 1 5 3 bottom-right, all triangles, and f 2 4 3 5, the back diamond with 4 corners." loading="lazy"><figcaption><span class="fignum">Fig 9.1.3</span>FILE coordinates, the same view as Fig 9.1.2. Four triangles meet at the nose (corner 1); the diamond closes the back.<span class="panels">Panels: <b>9.1.3a</b> top-left · <b>9.1.3b</b> top-right · <b>9.1.3c</b> bottom-left · <b>9.1.3d</b> bottom-right · <b>9.1.3e</b> back diamond</span></figcaption></figure>
+<div class="check"><div class="q"><p class="qq"><span class="qn">Q1</span><span>Which corners does the line <code>f 2 4 3 5</code> join? Name them.</span></p><details><summary>Show answer</summary><div class="ans"><p>Corner 2 (left wing), corner 4 (top fin), corner 3 (right wing) and corner 5 (bottom fin). Four corners, so it is a 4-sided face: the diamond at the back of the ship.</p></div></details></div><div class="q"><p class="qq"><span class="qn">Q2</span><span>If Lesson 1's cube were saved as an .obj file, how many v lines and how many f lines would it have?</span></p><details><summary>Show answer</summary><div class="ans"><p>8 v lines, one per corner, and 6 f lines, one per square face, each with 4 corner numbers. That is the same 14 lines of numbers as Fig 9.0.2a, just written a different way.</p></div></details></div></div>
+
+<h2>Part 2: Reading text in Python <span class="mins">9 MIN</span></h2>
+<p>To Python, a line of a file is just text: letters, spaces and dots. Before we can do sums with it, we have to cut it into pieces and turn the pieces into numbers. Three small built-in tools do it.</p>
+<h3>split(), float() and int()</h3>
+<figure id="fig-9-2-1"><img src="images/o05_split.png" alt="Top: the text &quot;v  0.0  0.6 -1.0&quot; goes through line.split() to a list of four text pieces, then float() on pieces 1 to 3 gives the corner (0.0, 0.6, -1.0). Bottom: &quot;f 1 4 2&quot; goes through split() to four pieces; int() gives 1, 4, 2; subtracting 1 gives (0, 3, 1)." loading="lazy"><figcaption><span class="fignum">Fig 9.2.1</span><code>split()</code> cuts at the spaces, however many there are, and throws them away. <code>float()</code> turns text such as <code>"0.6"</code> into the number 0.6; <code>int()</code> does the same for whole numbers.<span class="panels">Panels: <b>9.2.1a</b> (top) a corner line · <b>9.2.1b</b> (bottom) a face line</span></figcaption></figure>
+<pre><code>line = "v  0.0  0.6 -1.0"
+parts = line.split()          # ["v", "0.0", "0.6", "-1.0"]   4 pieces of TEXT
+x = float(parts[1])           # 0.0
+y = float(parts[2])           # 0.6
+z = float(parts[3])           # -1.0
+
+line = "f 1 4 2"
+parts = line.split()          # ["f", "1", "4", "2"]
+parts[1:]                     # ["1", "4", "2"]   every piece after the "f"
+int("4")                      # 4</code></pre>
+<p>Why not just use the text? Because <code>"0.6" * 2</code> is not 1.2: for text, <code>*</code> means "repeat", so it gives <code>"0.60.6"</code>, and <code>"0.6" + 1</code> is an error. Numbers and text that look like numbers are different things in Python.</p>
+<h3>The read loop</h3>
+<figure id="fig-9-2-2"><img src="images/o06_read_loop.png" alt="A flow chart. with open(FILE_PATH) as file opens ship.obj; for line in file hands over the next line; parts = line.split(); then three branches: parts[0] == &quot;v&quot; appends a corner, parts[0] == &quot;f&quot; appends a face, anything else is skipped. Every branch loops back for the next line; when no lines are left the loop ends and the file is closed. Result: 5 corners and 5 faces." loading="lazy"><figcaption><span class="fignum">Fig 9.2.2</span>One loop, one line at a time. The same loop reads 19 lines for the ship or 9,965 for the teapot; only the v and f lines add anything.</figcaption></figure>
+<pre><code>CODE_FOLDER = os.path.dirname(os.path.abspath(__file__))   # the folder this script is in
+FILE_PATH = os.path.join(CODE_FOLDER, "ship.obj")          # ...plus the file name
+
+points = []
+faces = []
+with open(FILE_PATH) as file:          # open it; closed again for us at the end
+    for line in file:                  # one line of text each time round
+        parts = line.split()
+        if len(parts) == 0:            # an empty line
+            continue
+        if parts[0] == "v":
+            points.append( (float(parts[1]), float(parts[2]), float(parts[3])) )
+        elif parts[0] == "f":
+            corners = []
+            for word in parts[1:]:
+                corners.append( (int(word) - 1) )     # the "- 1" is Part 3's CHANGE 1
+            faces.append(tuple(corners))</code></pre>
+<p>Why <code>CODE_FOLDER</code>? <code>open("ship.obj")</code> on its own looks in whatever folder Python was started from, which is not always the script's folder (IDLE and some editors start somewhere else). <code>__file__</code> is the full path of the script itself, and <code>os.path.dirname()</code> cuts off the file name to leave its folder, so the file is always found.</p>
+<h3>Run it: step 1</h3>
+<p>Run <code>step1_read_ship.py</code>. There is no window this time: it prints what happens to every line of the file.</p>
+<figure id="fig-9-2-3"><img src="images/run_step1_read_ship.png" alt="Terminal output of step 1. Comment and empty lines say skip; each v line is shown split into pieces and becomes corner 0 to 4; each f line becomes face 0 to 4, for example [&quot;f&quot;, &quot;1&quot;, &quot;4&quot;, &quot;2&quot;] becomes face 0 = (0, 3, 1). At the end: the points list, the faces list, 5 corners and 5 faces, and face 0's corners named nose, top fin and left wing." loading="lazy"><figcaption><span class="fignum">Fig 9.2.3</span>The terminal after step 1. Blue lines made a corner, orange lines made a face, grey lines were skipped. The two lists at the end are exactly the kind of lists Lessons 1 to 8 typed in.</figcaption></figure>
+<details class="full"><summary>Full code: <code>step1_read_ship.py</code> (about 130 lines)</summary><pre><code># ======================================================================
+# LESSON 9 - STEP 1: READ A SHAPE FROM A TEXT FILE
+# ----------------------------------------------------------------------
+# Goal: open ship.obj, read it one line at a time, and turn the text
+# into the two lists every lesson has used since Lesson 1:
+#
+#     points  = the corners,  e.g. (0.0, 0.0, 2.0)
+#     faces   = which corners make each face,  e.g. (0, 3, 1)
+#
+# There is NO window in this step. Everything is printed, so you can
+# watch each line of the file turn into numbers (lesson Part 2).
+#
+# What happens to each line of the file:
+#
+#   "v  0.0  0.6 -1.0"
+#      -&gt; .split()  -&gt; ["v", "0.0", "0.6", "-1.0"]     4 pieces of text
+#      -&gt; float()   -&gt; (0.0, 0.6, -1.0)                 3 real numbers
+#
+#   "f 1 4 2"
+#      -&gt; .split()  -&gt; ["f", "1", "4", "2"]
+#      -&gt; int()     -&gt; 1, 4, 2
+#      -&gt; minus 1   -&gt; (0, 3, 1)      .obj counts from 1, Python from 0
+#
+# This step does only the FIRST of Lesson 9's five changes
+# (subtract 1). Step 2 does all five, inside a function load_obj().
+#
+# Run:  python step1_read_ship.py
+#       (ship.obj must be in the same folder as this script)
+# ======================================================================
+
+import os
+
+# ---- Where is the file? -----------------------------------------------
+# __file__ is the full path of THIS script, for example
+#     C:/course/lesson9/code/step1_read_ship.py
+# os.path.dirname() cuts off the last part, leaving the folder:
+#     C:/course/lesson9/code
+# os.path.join() glues the folder and the file name together with the
+# right slash for your computer:
+#     C:/course/lesson9/code/ship.obj
+# So the script finds ship.obj even if you run it from another folder.
+CODE_FOLDER = os.path.dirname(os.path.abspath(__file__))
+FILE_PATH = os.path.join(CODE_FOLDER, "ship.obj")
+
+points = []     # will hold (x, y, z) for each corner
+faces = []      # will hold (corner, corner, corner, ...) for each face
+
+# ---- Read the file, one line at a time ---------------------------------
+# "with open(...) as file:" opens the file and closes it again for us
+# when the indented block ends.
+# "for line in file:" hands us one line of text each time round.
+line_number = 0
+with open(FILE_PATH) as file:
+    for line in file:
+        line_number = (line_number + 1)
+
+        # .split() cuts the line at every run of spaces and throws the
+        # spaces away:  "v  0.0  0.6 -1.0"  -&gt;  ["v", "0.0", "0.6", "-1.0"]
+        # An empty line gives an empty list: [].
+        parts = line.split()
+
+        # Empty line, or a comment line starting with "#": skip it.
+        # "continue" jumps straight to the next line of the file.
+        if len(parts) == 0:
+            print("line", line_number, ": (empty)  -&gt; skip")
+            continue
+        # .startswith("#") is True when the first piece BEGINS with #,
+        # so "#" and "#hello" are both caught.
+        if parts[0].startswith("#"):
+            print("line", line_number, ": comment  -&gt; skip")
+            continue
+
+        # ---- A CORNER line: "v x y z" ----------------------------------
+        if parts[0] == "v":
+            # parts[1], parts[2], parts[3] are still TEXT, like "0.6".
+            # float() turns text into a real number:  "0.6" -&gt; 0.6
+            x = float(parts[1])
+            y = float(parts[2])
+            z = float(parts[3])
+            points.append( (x, y, z) )
+            # len(points) - 1 is the Python number of the corner we just
+            # added: the first v line becomes corner 0.
+            print("line", line_number, ":", parts, " -&gt; corner",
+                  (len(points) - 1), "=", (x, y, z))
+
+        # ---- A FACE line: "f a b c ..." ---------------------------------
+        elif parts[0] == "f":
+            corners = []
+            # parts[1:] means "every piece from number 1 to the end":
+            # ["f", "1", "4", "2"][1:]  -&gt;  ["1", "4", "2"]
+            for word in parts[1:]:
+                # int() turns text into a whole number: "4" -&gt; 4.
+                # CHANGE 1 (lesson Part 3): .obj counts corners from 1,
+                # Python counts list items from 0, so subtract 1.
+                corners.append( (int(word) - 1) )
+            # tuple() freezes the list into a tuple, like Lesson 3's
+            # face tuples:  [0, 3, 1] -&gt; (0, 3, 1)
+            faces.append(tuple(corners))
+            print("line", line_number, ":", parts, " -&gt; face",
+                  (len(faces) - 1), "=", tuple(corners))
+
+        # ---- Anything else: skip (step 2 explains which lines) ---------
+        else:
+            print("line", line_number, ": '" + parts[0] + "' line  -&gt; skip")
+
+# ---- Show what we built ------------------------------------------------
+print()
+print("points =", points)
+print("faces  =", faces)
+print()
+print(len(points), "corners and", len(faces), "faces")
+
+# ---- The worked example from the lesson ----------------------------------
+# The file line "f 1 4 2" is face 0. Its corners in Python are 0, 3, 1:
+#   corner 0 = the nose, corner 3 = the top fin, corner 1 = the left wing.
+nose_number, top_number, left_number = faces[0]
+print()
+print("face 0 uses corners", faces[0])
+print("   corner", nose_number, "=", points[nose_number], " (the nose)")
+print("   corner", top_number, "=", points[top_number], " (the top fin)")
+print("   corner", left_number, "=", points[left_number], " (the left wing)")
+
+# ----------------------------------------------------------------------
+# What you should see at the end:
+#   points = [(0.0, 0.0, 2.0), (-1.5, 0.0, -1.0), (1.5, 0.0, -1.0),
+#             (0.0, 0.6, -1.0), (0.0, -0.6, -1.0)]
+#   faces  = [(0, 3, 1), (0, 2, 3), (0, 1, 4), (0, 4, 2), (1, 3, 2, 4)]
+#   5 corners and 5 faces
+#
+# TRY THIS:
+#   * Change FILE_PATH to "teapot.obj". How many corners and faces?
+#     (Expect 3,644 and 6,320, and a LOT of printing. Comment out the
+#     two print() lines inside the v and f parts first.)
+#   * Take the "- 1" out. Which corner number does face 4 ask for that
+#     does not exist? What happens if you try points[5]?
+#   * Add a 6th corner to ship.obj, under the nose: "v 0.0 -1.0 1.5".
+#     Run again. Is it read? (It is, but no face uses it, so step 2
+#     would never draw it.)
+# ----------------------------------------------------------------------</code></pre></details>
+<div class="check"><div class="q"><p class="qq"><span class="qn">Q3</span><span>What does <code>"v 1.5 0.0 -1.0".split()</code> give? What is <code>float(parts[3])</code>?</span></p><details><summary>Show answer</summary><div class="ans"><p><code>["v", "1.5", "0.0", "-1.0"]</code>: four pieces of text. <code>parts[3]</code> is the text <code>"-1.0"</code>, and <code>float()</code> turns it into the number −1.0. That is corner 3, the right wing.</p></div></details></div><div class="q"><p class="qq"><span class="qn">Q4</span><span>A line in a file is <code>"vt 0.80 0.66"</code>. Which branch of the loop does it go down?</span></p><details><summary>Show answer</summary><div class="ans"><p><code>parts[0]</code> is <code>"vt"</code>. That is not equal to <code>"v"</code> (the whole piece must match, not just the first letter) and not <code>"f"</code>, so it goes down "anything else" and is skipped. Part 3 says what vt lines are.</p></div></details></div></div>
+
+<h2>Part 3: The five changes <span class="mins">14 MIN</span></h2>
+<p>Step 1 read the file, but the lists it made are not ready for our engine. The file was written by someone else, with their own habits. On the way in, <code>load_obj()</code> makes five changes, so the result follows the rules of our course.</p>
+<figure id="fig-9-3-1"><img src="images/o08_five_changes.png" alt="Five rows. CHANGE 1, count from 0: f 1 4 2 becomes (0, 3, 1), code int(word) - 1. CHANGE 2, turn z round: v 0 0 2 becomes (0, 0, -2) and (0, 3, 1) becomes (1, 3, 0), code z = -z and corners.reverse(). CHANGE 3, make pointers: (-0.365, 0.913, -0.183) from cross(arrow_a, arrow_b). CHANGE 4, centre and size: the teapot 6.434 wide becomes 2 units wide with its middle at (0,0,0), code centre_and_size(). CHANGE 5, skip the rest: vn lines skipped and 7/2/9 becomes 7, code split('/')[0]." loading="lazy"><figcaption><span class="fignum">Fig 9.3.1</span>The five changes. Left of each arrow: FILE coordinates and the file's habits. Right: SHAPE coordinates and Lesson 5's model dictionary. This part does changes 1, 2, 4 and 5; change 3, the pointer, has Part 4 to itself.</figcaption></figure>
+<div class="keyconcept" role="note" aria-label="Key concept">
+<span class="kc-label">KEY CONCEPT</span>
+<pre><code>Fix the file ONCE, on the way in.
+Then a loaded model is just a model.</code></pre>
+<p>All five changes happen inside <code>load_obj()</code>, once, when the game starts. Nothing in Lessons 1 to 8 has to change to draw a loaded model.</p>
+</div>
+
+<h3>CHANGE 1: count from 0</h3>
+<figure id="fig-9-3-2"><img src="images/o09_count_from_1.png" alt="Top: five boxes, corner 1 to corner 5 in ship.obj (nose, left wing, right wing, top fin, bottom fin), each with an arrow down to points[0] to points[4]. Bottom: worked example, f 1 4 2 becomes ((1 - 1), (4 - 1), (2 - 1)) = (0, 3, 1)." loading="lazy"><figcaption><span class="fignum">Fig 9.3.2</span>Same 5 corners, two ways of counting. The file's first corner is "1"; Python's first list item is <code>points[0]</code>. Subtract 1 from every corner number of every face.<span class="panels">Panels: <b>9.3.2a</b> (top) file numbers and Python numbers · <b>9.3.2b</b> (bottom) worked example</span></figcaption></figure>
+<pre><code>corners.append( (int(number_text) - 1) )     # "4" -> 4 -> 3</code></pre>
+<p>Without the − 1, <code>f 2 4 3 5</code> would ask for <code>points[5]</code>. The ship has only 5 corners, numbered 0 to 4, so Python stops with <code>IndexError: list index out of range</code>.</p>
+
+<h3>CHANGE 2: turn z round, and reverse each face</h3>
+<p>Fig 9.1.2 showed the problem: in FILE coordinates +z points out of the screen, towards you. That is the usual habit for .obj files. In our course, since Lesson 1, +z points <em>away</em> from you, into the screen. So we flip the sign of every z:</p>
+<figure id="fig-9-3-3"><img src="images/o10_z_flip.png" alt="Two views of the ship from above, x across and z up the page, axes through (0, 0, 0). Left, FILE coordinates: the nose at z = 2, and the maker's camera at +z looking towards -z. Right, SHAPE coordinates after z = -z: the nose at z = -2, and our camera at -z looking towards +z. In both, the nose points at the camera." loading="lazy"><figcaption><span class="fignum">Fig 9.3.3</span>The ship from above. Flipping z keeps the picture its maker meant: the nose still points at the camera. Without the flip our camera would see the ship tail-first.<span class="panels">Panels: <b>9.3.3a</b> (left) FILE coordinates · <b>9.3.3b</b> (right) SHAPE coordinates · <b>9.3.3c</b> (bottom) what changes</span></figcaption></figure>
+<pre><code>raw_points.append( (x, y, (-z)) )     # v 0.0 0.0 2.0  ->  (0.0, 0.0, -2.0)</code></pre>
+<p>But flipping z is a <strong>mirror</strong>: front and back swap. Wave your right hand at a mirror and the mirror-you waves its left. A mirror also swaps clockwise and anticlockwise, and Lesson 3's clock test depends on that: it draws a face only when its corners go clockwise on the screen.</p>
+<figure id="fig-9-3-4"><img src="images/o11_mirror_winding.png" alt="Two copies of the ship's top-left face on the screen, the ship placed at WORLD (0, -0.8, 3). Left, after z = -z only, corners (0, 3, 1): the walk goes anticlockwise and the clock test says HIDDEN, which is wrong. Right, after reverse, corners (1, 3, 0): the walk goes clockwise and the clock test says DRAWN, which is right. The screen cross sums are -12000 and 12000." loading="lazy"><figcaption><span class="fignum">Fig 9.3.4</span>SCREEN pixels, (0, 0) at the top-left, y down. The same three corners walked in two orders. <code>corners.reverse()</code> walks them the other way round, which puts every face back to clockwise as seen from outside.<span class="panels">Panels: <b>9.3.4a</b> (left) after z = −z only · <b>9.3.4b</b> (right) after <code>.reverse()</code> · <b>9.3.4c</b> (bottom) why</span></figcaption></figure>
+<pre><code>corners.reverse()                     # [0, 3, 1]  ->  [1, 3, 0]</code></pre>
+<p>So CHANGE 2 has two halves, and you need both. With only the flip, every face you should see is hidden, and the ship looks inside-out.</p>
+
+<h3>CHANGE 4: centre and size</h3>
+<p>(Change 3 comes in Part 4.) Every file uses its own size and its own middle. Our engine expects every model to be like Lesson 1's cube: 2 units across, middle at (0, 0, 0). Then Lesson 5's <code>"size"</code> means the same for every model.</p>
+<figure id="fig-9-3-5"><img src="images/o12_sizes.png" alt="Left, straight from the files, each model 5 in front of you: the cube, 2 wide, is 160 px; the teapot, 6.434 wide, is 515 px and sits above the middle; the bunny, 0.156 wide, is a 12 px speck. Right, after centre_and_size(): all three are 160 px wide with their middles on the cross." loading="lazy"><figcaption><span class="fignum">Fig 9.3.5</span>CAMERA z = 5, FOCAL 400, the 800 × 600 window drawn at half size. Width on the screen is Lesson 1's rule, <code>((width * FOCAL) / z)</code>: the cube is <code>((2 * 400) / 5)</code> = 160 px, the raw teapot <code>((6.434 * 400) / 5)</code> = 515 px, the raw Stanford bunny <code>((0.156 * 400) / 5)</code> = 12 px.<span class="panels">Panels: <b>9.3.5a</b> (left) straight from the files · <b>9.3.5b</b> (right) after <code>centre_and_size()</code></span></figcaption></figure>
+<p><code>centre_and_size()</code> does three jobs. First it finds the smallest and biggest x, y and z (like Lesson 7's "nearest cube" search). The middle of each side is halfway between them. Then it subtracts the middle from every corner, so the middle moves to (0, 0, 0), and multiplies by <code>scale = (2 / biggest)</code>, so the biggest side becomes 2.</p>
+<figure id="fig-9-3-6"><img src="images/o13_centre_scale.png" alt="The teapot from the side as 3,644 dots, one per v line. Left, FILE coordinates: x from -3 to 3.434, y from 0 to 3.15, middle (0.217, 1.575). Right, SHAPE coordinates: middle (0, 0, 0), 2 units long and 0.979 tall. Below, the sums for the middle and the scale, and corner 0 at FILE (-3, 1.8, 0) becoming (-1.0, 0.07, 0)." loading="lazy"><figcaption><span class="fignum">Fig 9.3.6</span>The teapot from the side (x across, y up). Its biggest side is x, 6.434 long, so <code>scale = (2 / 6.434)</code> = 0.311. Corner 0, the back of the handle, ends up at x = −1.0: exactly the left edge of the 2-unit box.<span class="panels">Panels: <b>9.3.6a</b> (left) before, FILE coordinates · <b>9.3.6b</b> (right) after, SHAPE coordinates · <b>9.3.6c</b> (bottom) the sums</span></figcaption></figure>
+<pre><code>middle_x = ( (min_x + max_x) / 2 )                  # ((-3 + 3.434) / 2) = 0.217
+biggest = max( (max_x - min_x), (max_y - min_y), (max_z - min_z) )   # 6.434
+scale = (2 / biggest)                               # 0.311
+
+points.append( ( ((x - middle_x) * scale),
+                 ((y - middle_y) * scale),
+                 ((z - middle_z) * scale) ) )</code></pre>
+<p>Why scale all three sides by the <em>same</em> number? If we stretched each side to 2 separately, the teapot would become a fat 2 × 2 × 2 lump. One scale keeps its shape.</p>
+
+<h3>CHANGE 5: skip the rest</h3>
+<figure id="fig-9-3-7"><img src="images/o14_skip_lines.png" alt="A table of lines from three real .obj files. vn lines are a pointer per corner for smooth light, skipped; vt lines say where a picture goes, skipped; comments, s, o and usemtl lines are skipped; f 1//1 3//3 45//45 47//47 keeps 1, 3, 45, 47; f 739/1 735/2 736/3 keeps 739, 735, 736." loading="lazy"><figcaption><span class="fignum">Fig 9.3.7</span>Real files carry extra data for smooth lighting and pictures (textures). We make our own pointers and paint one colour, so we keep only v lines and the first number of each corner in an f line.</figcaption></figure>
+<pre><code>number_text = word.split("/")[0]      # "739/1/12" -> ["739", "1", "12"] -> "739"
+                                      # "4" has no "/", so it stays "4"</code></pre>
+<p>Other lines need no code at all: the loop only acts on <code>"v"</code> and <code>"f"</code>, so everything else falls through and is skipped.</p>
+<div class="check"><div class="q"><p class="qq"><span class="qn">Q5</span><span>The ship's back face is <code>f 2 4 3 5</code>. What does it become after CHANGE 1 and CHANGE 2?</span></p><details><summary>Show answer</summary><div class="ans"><p>CHANGE 1: subtract 1 from each, giving (1, 3, 2, 4). CHANGE 2: reverse the list, giving (4, 2, 3, 1). (The z flip changes corners, not face lists, so only the reverse touches it.)</p></div></details></div><div class="q"><p class="qq"><span class="qn">Q6</span><span>The ship's right wing is <code>v 1.5 0.0 -1.0</code>. After the z flip, the ship's z goes from −2 (nose) to 1 (tail), x from −1.5 to 1.5 and y from −0.6 to 0.6. Where does the right wing end up after CHANGE 4?</span></p><details><summary>Show answer</summary><div class="ans"><p>After the flip it is (1.5, 0, 1). Middles: x <code>((-1.5 + 1.5) / 2)</code> = 0, y 0, z <code>((-2 + 1) / 2)</code> = −0.5. Sides: 3, 1.2 and 3, so biggest = 3 and scale = <code>(2 / 3)</code> = 0.667. Right wing: <code>( ((1.5 - 0) * 0.667), ((0 - 0) * 0.667), ((1 - -0.5) * 0.667) )</code> = (1, 0, 1).</p></div></details></div><div class="q"><p class="qq"><span class="qn">Q7</span><span>The Stanford bunny is 0.156 units wide in its file. What is its scale, and is it made bigger or smaller?</span></p><details><summary>Show answer</summary><div class="ans"><p><code>scale = (2 / 0.156)</code> = 12.8. Every corner is multiplied by 12.8, so the bunny is made about 13 times bigger: from a 12 px speck to 160 px, like the others in Fig 9.3.5b.</p></div></details></div></div>
+
+<h2>Part 4: The pointer: cross() <span class="mins">13 MIN</span></h2>
+<p>Lesson 3's light needs every face to have a <code>pointer</code>: a 1-unit arrow straight out of the face. For the cube we typed them in, (0, 0, −1) for the front and so on. A plain .obj file has no pointers at all, and the teapot has 6,320 faces. CHANGE 3 works each one out from the face's corners.</p>
+<h3>Why not Lesson 3's averaging trick?</h3>
+<p>For the cube, Lesson 3 found a pointer by averaging a face's corners: the middle of the front face is straight in front of the cube's middle. Try that on the ship's top-left face (corners after <code>load_obj()</code>: left wing, top fin, nose):</p>
+<figure id="fig-9-4-1"><img src="images/o15_why_not_average.png" alt="The ship's top-left face in SHAPE coordinates: left wing (-1, 0, 1), top fin (0, 0.4, 1), nose (0, 0, -1). A red arrow from the ship's middle to the average of the corners, (-0.333, 0.133, 0.333), points back and only a little up. A green arrow shows the true pointer, up and a little forward. A box shows the sums." loading="lazy"><figcaption><span class="fignum">Fig 9.4.1</span>SHAPE coordinates, (0, 0, 0) = the ship's own middle. The average points mostly backwards (+z); the face really faces up. Averaging only works when the shape's middle is right behind every face, as in a cube.<span class="panels">Panels: <b>9.4.1a</b> (left) the face and the two arrows · <b>9.4.1b</b> (right) the sums</span></figcaption></figure>
+<h3>Two arrows on the face</h3>
+<p>Here is a better way. Take the face's first three corners, a, b and c. Subtract to get two arrows that run along the face's edges, so both lie flat <em>on</em> the face:</p>
+<figure id="fig-9-4-2"><img src="images/o16_two_arrows.png" alt="The same face. a = left wing (-1, 0, 1), b = top fin (0, 0.4, 1), c = nose (0, 0, -1). Blue arrow_a = b - a = (1, 0.4, 0) runs from a to b; purple arrow_b = c - a = (1, 0, -2) runs from a to c." loading="lazy"><figcaption><span class="fignum">Fig 9.4.2</span>SHAPE coordinates, corners in the loaded order (1, 3, 0). Both arrows start at corner a. The pointer we want sticks straight out of the face, at a right angle to both.<span class="panels">Panels: <b>9.4.2a</b> (left) the two arrows · <b>9.4.2b</b> (right) the subtraction</span></figcaption></figure>
+<pre><code>arrow_a = ( (b_x - a_x), (b_y - a_y), (b_z - a_z) )    # ( (0 - -1), (0.4 - 0), (1 - 1) )  = (1, 0.4, 0)
+arrow_b = ( (c_x - a_x), (c_y - a_y), (c_z - a_z) )    # ( (0 - -1), (0 - 0),   (-1 - 1) ) = (1, 0, -2)</code></pre>
+<h3>cross(): the arrow out of the face</h3>
+<p>The <strong>cross product</strong> takes two arrows and gives back a third that is at a right angle to both. Each part of the answer uses the <em>other</em> two parts of the arrows:</p>
+<div class="keyconcept" role="note" aria-label="Key concept">
+<span class="kc-label">KEY CONCEPT</span>
+<pre><code>x = (a_y * b_z) - (a_z * b_y)
+y = (a_z * b_x) - (a_x * b_z)
+z = (a_x * b_y) - (a_y * b_x)</code></pre>
+<p><code>cross(arrow_a, arrow_b)</code>: two arrows flat on a face in, one arrow straight out of the face back. With the corners clockwise from outside, it points outwards.</p>
+</div>
+<p>A new formula should be checked on something we already know. Lesson 3 typed the cube's front face pointer as (0, 0, −1):</p>
+<figure id="fig-9-4-3"><img src="images/o17_cross_check_cube.png" alt="Left: the cube in SHAPE coordinates with its front face (4, 5, 1, 0) highlighted and the pointer (0, 0, -1) sticking out towards -z. a = corner 4 (-1, 1, -1), b = corner 5 (1, 1, -1), c = corner 1 (1, -1, -1); arrow_a = (2, 0, 0), arrow_b = (2, -2, 0). Right: the three cross sums giving (0, 0, -4), which shrinks to (0, 0, -1)." loading="lazy"><figcaption><span class="fignum">Fig 9.4.3</span>Lesson 1's cube, SHAPE coordinates. <code>cross()</code> gives (0, 0, −4): it points at −z, straight out of the front face. Shrunk to 1 unit it is (0, 0, −1), the same as Lesson 3.<span class="panels">Panels: <b>9.4.3a</b> (left) the front face · <b>9.4.3b</b> (right) the sums</span></figcaption></figure>
+<p>It agrees. Now the ship's face:</p>
+<figure id="fig-9-4-4"><img src="images/o18_cross_ship.png" alt="Three rows of sums with arrow_a = (1, 0.4, 0) and arrow_b = (1, 0, -2). x = (0.4 * -2) - (0 * 0) = -0.8; y = (0 * 1) - (1 * -2) = 2; z = (1 * 0) - (0.4 * 1) = -0.4. The pointer before shrinking is (-0.8, 2, -0.4): left a bit, up a lot, forward a bit." loading="lazy"><figcaption><span class="fignum">Fig 9.4.4</span>The ship's top-left face, step by step. (−0.8, 2, −0.4) is the green arrow of Fig 9.4.1, nothing like the average. Order matters: <code>cross(arrow_b, arrow_a)</code> gives (0.8, −2, 0.4), the same arrow pointing <em>into</em> the ship.</figcaption></figure>
+<h3>You have met the z part before</h3>
+<figure id="fig-9-4-5"><img src="images/o19_clock_link.png" alt="Left, Lesson 3's is_facing_you(): two screen arrows and one cross sum, (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x), giving one number, + clockwise, - anticlockwise. Right, Lesson 9's cross(): out_x, out_y, out_z; the out_z line is the same sum." loading="lazy"><figcaption><span class="fignum">Fig 9.4.5</span>Lesson 3's clock test worked on SCREEN points, x and y only, so it could only say "which way round". With z as well, <code>cross()</code> says which way the face points in 3D.<span class="panels">Panels: <b>9.4.5a</b> (left) Lesson 3 · <b>9.4.5b</b> (right) Lesson 9</span></figcaption></figure>
+<h3>Shrink to 1 unit, then light it</h3>
+<figure id="fig-9-4-6"><img src="images/o20_shrink_and_light.png" alt="Top: the length of (-0.8, 2, -0.4) is math.sqrt(0.64 + 4 + 0.16) = math.sqrt(4.8) = 2.191; dividing each part by 2.191 gives the pointer (-0.365, 0.913, -0.183). Bottom: Lesson 3's light, LIGHT = (0.48, 0.6, -0.64), brightness = dot = 0.49, shade = (0.2 + ((1 - 0.2) * 0.49)) = 0.59." loading="lazy"><figcaption><span class="fignum">Fig 9.4.6</span>Lesson 3's light needs 1-unit pointers: a dot of 1 means "facing the light exactly". Dividing every part by the length keeps the direction and makes the length 1. Then Lesson 3's sums, unchanged, give this face 59% of its full colour.<span class="panels">Panels: <b>9.4.6a</b> (top) shrink · <b>9.4.6b</b> (bottom) light</span></figcaption></figure>
+<pre><code>def face_pointer(corners, points):
+    a_x, a_y, a_z = points[corners[0]]
+    b_x, b_y, b_z = points[corners[1]]
+    c_x, c_y, c_z = points[corners[2]]
+    arrow_a = ( (b_x - a_x), (b_y - a_y), (b_z - a_z) )
+    arrow_b = ( (c_x - a_x), (c_y - a_y), (c_z - a_z) )
+    p_x, p_y, p_z = cross(arrow_a, arrow_b)
+    length = math.sqrt( (p_x * p_x) + (p_y * p_y) + (p_z * p_z) )   # Lesson 7's Pythagoras
+    if length == 0:
+        return None            # all corners in a line: no area, nothing to draw
+    return ( (p_x / length), (p_y / length), (p_z / length) )</code></pre>
+<p>Why the <code>length == 0</code> check? Some files contain "faces" whose corners sit in a straight line. Their cross is (0, 0, 0), and dividing by 0 would crash the program. <code>load_obj()</code> simply leaves those faces out.</p>
+<h3>load_obj(): all five changes together</h3>
+<pre><code>def load_obj(file_name):
+    raw_points = []
+    file_faces = []
+    with open(os.path.join(CODE_FOLDER, file_name)) as file:
+        for line in file:
+            parts = line.split()
+            if len(parts) == 0:
+                continue
+            if parts[0] == "v":
+                x = float(parts[1])
+                y = float(parts[2])
+                z = float(parts[3])
+                raw_points.append( (x, y, (-z)) )           # CHANGE 2, first half
+            elif parts[0] == "f":
+                corners = []
+                for word in parts[1:]:
+                    number_text = word.split("/")[0]         # CHANGE 5
+                    corners.append( (int(number_text) - 1) )   # CHANGE 1
+                corners.reverse()                            # CHANGE 2, second half
+                file_faces.append(tuple(corners))
+            # any other line: CHANGE 5, skipped
+
+    points = centre_and_size(raw_points)                     # CHANGE 4
+
+    faces = []
+    for corners in file_faces:
+        pointer = face_pointer(corners, points)              # CHANGE 3
+        if pointer is None:
+            continue
+        faces.append( (corners, WHITE, pointer) )
+    return {"points": points, "faces": faces}
+
+ship_model = load_obj("ship.obj")</code></pre>
+<p>Why <code>WHITE</code> as each face's colour? Lesson 5's things paint every face in <code>thing["colour"]</code>, so the model's own colour is never used. The pointers are worked out <em>after</em> CHANGE 4 and from the reversed corners, so they point outwards in SHAPE coordinates, ready for <code>spin_matrix()</code> to turn them with the thing.</p>
+<h3>Run it: step 2</h3>
+<p>In <code>step2_ship_from_file.py</code> the 8 gold pickups use <code>ship_model</code> instead of <code>cube_model</code>, and the mini-map draws each ship as a little triangle. Nothing else in the game changes. Run it, turn right a little, look up a little and fly forward towards rock 0:</p>
+<figure id="fig-9-4-7"><img src="images/run_step2_ship_from_file.png" alt="Screenshot of step 2: a gold ship spinning in front of grey rock 0, a second gold ship further right, the floor grid, the edge of another rock on the left, and the mini-map with 8 small gold triangles. The text says nearest ship 2.3." loading="lazy"><figcaption><span class="fignum">Fig 9.4.7</span>Step 2 at WORLD (1.85, 0.66, 3.02). The gold ships are read from <code>ship.obj</code>, lit by Lesson 3's light using the pointers from <code>cross()</code>: the top faces are bright, the faces underneath are dark.</figcaption></figure>
+<details class="full"><summary>Full code: <code>step2_ship_from_file.py</code> (about 1,110 lines)</summary><pre><code># ======================================================================
+# LESSON 9 - STEP 2: SHIPS FROM A FILE
+# ----------------------------------------------------------------------
+# Goal: the game's pickups are no longer typed-in cubes. They are
+# ships, read from the text file ship.obj when the game starts.
+#
+# This starts from Lesson 8's finished game (step3_clipped_hunt.py):
+# Cube Hunt with 4 stone rocks and faces clipped at the NEAR wall.
+# The game itself does not change at all: same field, same clock,
+# same collecting. Only WHERE THE SHAPE COMES FROM changes.
+#
+# What is new:
+#
+#   1. load_obj("ship.obj")  (lesson Parts 2 to 4)
+#        Reads the file and builds the same {"points", "faces"}
+#        dictionary Lesson 5 typed in by hand, making five changes
+#        on the way in:
+#          CHANGE 1  corner numbers count from 0, not 1   (minus 1)
+#          CHANGE 2  z = -z, and each face's corners reversed
+#          CHANGE 3  each face's pointer from cross()
+#          CHANGE 4  centred on (0, 0, 0), biggest side 2 units
+#          CHANGE 5  skip other lines; "7/2/9" -&gt; 7
+#
+#   2. cross(arrow_a, arrow_b)  (lesson Part 4)
+#        The one new piece of maths: an arrow straight out of a face.
+#
+#   3. The pickups use ship_model instead of cube_model, and the
+#        mini-map draws each ship's nose and two wing tips.
+#
+# Controls:  LEFT / RIGHT = turn,   UP / DOWN = look up / down
+#            W / S = fly forward / back (the way you LOOK)
+#            A / D = slide left / right,   Q / E = straight down / up
+#            R = play again (after TIME UP)
+#            G = floor grid on / off,   L = light on / off
+# Run:  python step2_ship_from_file.py
+#       (ship.obj must be in the same folder as this script)
+# ======================================================================
+
+import math
+import random                 # (Lesson 7) for random.uniform
+import os                     # NEW: to find the .obj files next to this script
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Lesson 9, step 2 - ships from a file")
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+big_font = pygame.font.SysFont(None, 96)    # (Lesson 7) for "TIME UP"
+
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+PINK = (255, 105, 200)        # the colour we use for YOU (the camera)
+MAP_BACK = (25, 30, 36)       # dark grey-blue behind the mini-map
+GRID_COLOUR = (40, 90, 70)    # (Lesson 5) dim green for the floor lines
+WALL_RED = (235, 80, 80)      # (Lesson 7) the wall square on the mini-map
+SUN_GOLD = (250, 200, 70)     # (Lesson 7) the colour of every pickup
+STONE = (150, 150, 160)       # (Lesson 8): the colour of every rock
+
+# ---- One colour for each face direction (from Lesson 3) ---------------
+RED = (235, 80, 80)          # front (-z)
+PURPLE = (160, 100, 230)     # back  (+z)
+BLUE = (70, 150, 255)        # left  (-x)
+GREEN = (70, 210, 120)       # right (+x)
+GOLD = (245, 200, 60)        # top   (+y)
+ORANGE = (245, 140, 50)      # bottom (-y)
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400
+
+
+# ======================================================================
+# MODELS (from Lesson 5, unchanged)
+# ======================================================================
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+# (corners clockwise from outside,  colour,  pointer)
+cube_faces = [
+    ((4, 5, 1, 0), RED,    ( 0,  0, -1)),   # front
+    ((6, 7, 3, 2), PURPLE, ( 0,  0,  1)),   # back
+    ((7, 4, 0, 3), BLUE,   (-1,  0,  0)),   # left
+    ((5, 6, 2, 1), GREEN,  ( 1,  0,  0)),   # right
+    ((7, 6, 5, 4), GOLD,   ( 0,  1,  0)),   # top
+    ((2, 3, 0, 1), ORANGE, ( 0, -1,  0)),   # bottom
+]
+cube_model = {"points": cube_points, "faces": cube_faces}
+# (Lesson 9) the rocks still use cube_model; the pickups do not.
+
+
+# ======================================================================
+# NEW: LOADING MODELS FROM .obj FILES (Lesson 9)
+# ======================================================================
+# An .obj file is plain text. The two kinds of line we use:
+#     v x y z         one corner        e.g.  v 0.0 0.6 -1.0
+#     f a b c ...     one face          e.g.  f 1 4 2
+# load_obj() reads them and makes the SAME model dictionary that
+# Lesson 5 typed in by hand:
+#     {"points": [...], "faces": [ (corners, colour, pointer), ... ]}
+# so the rest of the program can't tell a loaded model from cube_model.
+#
+# On the way in it makes FIVE changes (lesson Part 3):
+#   CHANGE 1  corner numbers: .obj counts from 1, Python from 0 -&gt; minus 1
+#   CHANGE 2  .obj's +z points AT you, ours points AWAY:
+#               z = -z on every corner, and because that is a mirror,
+#               each face's corner list is turned round (.reverse())
+#               so it stays clockwise from outside (Lesson 3's rule)
+#   CHANGE 3  no pointers in the file: work each one out with cross()
+#   CHANGE 4  every file uses its own size: centre the model on
+#               (0, 0, 0) and make its biggest side 2 units, like the cube
+#   CHANGE 5  skip every line that is not "v" or "f", and in a face
+#               keep only the number before the first "/"
+
+# Where are the .obj files? In the same folder as this script.
+# __file__ = this script's full path; os.path.dirname() = its folder.
+CODE_FOLDER = os.path.dirname(os.path.abspath(__file__))
+
+
+def cross(arrow_a, arrow_b):
+    """NEW: the CROSS PRODUCT of two arrows (lesson Part 4).
+
+    Give it two arrows that lie flat ON a face, and it gives back an
+    arrow that sticks straight OUT of the face: the face's pointer.
+
+    Each part uses the OTHER two parts of the arrows:
+        x = (a_y * b_z) - (a_z * b_y)
+        y = (a_z * b_x) - (a_x * b_z)
+        z = (a_x * b_y) - (a_y * b_x)   &lt;- Lesson 3's clock test!
+
+    Worked example (lesson Part 4), the ship's top-left face:
+        arrow_a = (1, 0.4, 0),  arrow_b = (1, 0, -2)
+        x = (0.4 * -2) - (0 * 0)  = -0.8
+        y = (0 * 1)    - (1 * -2) =  2
+        z = (1 * 0)    - (0.4 * 1) = -0.4      -&gt; (-0.8, 2, -0.4)
+    """
+    a_x, a_y, a_z = arrow_a
+    b_x, b_y, b_z = arrow_b
+    out_x = ( (a_y * b_z) - (a_z * b_y) )
+    out_y = ( (a_z * b_x) - (a_x * b_z) )
+    out_z = ( (a_x * b_y) - (a_y * b_x) )
+    return (out_x, out_y, out_z)
+
+
+def face_pointer(corners, points):
+    """NEW (CHANGE 3): the 1-unit pointer straight out of one face.
+
+    Uses the face's first 3 corners, a, b and c:
+        arrow_a = b - a,   arrow_b = c - a      (two arrows along the face)
+        pointer = cross(arrow_a, arrow_b)        (sticks out of the face)
+    then shrinks the pointer to 1 unit long, because Lesson 3's light
+    needs 1-unit pointers (a dot of 1 = full brightness).
+
+    Returns None for a face with no area (all corners in a line):
+    its pointer has length 0, and we can't divide by 0.
+    """
+    a_x, a_y, a_z = points[corners[0]]
+    b_x, b_y, b_z = points[corners[1]]
+    c_x, c_y, c_z = points[corners[2]]
+    arrow_a = ( (b_x - a_x), (b_y - a_y), (b_z - a_z) )
+    arrow_b = ( (c_x - a_x), (c_y - a_y), (c_z - a_z) )
+    p_x, p_y, p_z = cross(arrow_a, arrow_b)
+    # How long is it? Lesson 7's Pythagoras, done on one arrow.
+    length = math.sqrt( (p_x * p_x) + (p_y * p_y) + (p_z * p_z) )
+    if length == 0:
+        return None
+    return ( (p_x / length), (p_y / length), (p_z / length) )
+
+
+def centre_and_size(raw_points):
+    """NEW (CHANGE 4): move the model so its middle is SHAPE (0, 0, 0),
+    and scale it so its biggest side is 2 units (the cube is 2 wide).
+
+    Worked example (lesson Part 3), the teapot:
+        x from -3 to 3.434   -&gt;  middle 0.217,  width 6.434
+        y from  0 to 3.15    -&gt;  middle 1.575,  height 3.15
+        z from -2 to 2       -&gt;  middle 0,      depth 4
+        biggest side = 6.434,  scale = (2 / 6.434) = 0.311
+    """
+    # Start the smallest and biggest at the first corner, then let
+    # every other corner push them out (like Lesson 7's "nearest").
+    min_x, min_y, min_z = raw_points[0]
+    max_x, max_y, max_z = raw_points[0]
+    for x, y, z in raw_points:
+        if x &lt; min_x:
+            min_x = x
+        if x &gt; max_x:
+            max_x = x
+        if y &lt; min_y:
+            min_y = y
+        if y &gt; max_y:
+            max_y = y
+        if z &lt; min_z:
+            min_z = z
+        if z &gt; max_z:
+            max_z = z
+
+    # The middle of each side is halfway between its two ends.
+    middle_x = ( (min_x + max_x) / 2 )
+    middle_y = ( (min_y + max_y) / 2 )
+    middle_z = ( (min_z + max_z) / 2 )
+
+    # The biggest of the three sides decides the scale.
+    biggest = max( (max_x - min_x), (max_y - min_y), (max_z - min_z) )
+    scale = (2 / biggest)
+
+    # Subtract the middle (so it moves to 0, 0, 0), then scale.
+    points = []
+    for x, y, z in raw_points:
+        points.append( ( ((x - middle_x) * scale),
+                         ((y - middle_y) * scale),
+                         ((z - middle_z) * scale) ) )
+    return points
+
+
+def load_obj(file_name):
+    """NEW: read an .obj file and return a Lesson 5 model dictionary:
+        {"points": [(x, y, z), ...],
+         "faces":  [(corners, colour, pointer), ...]}
+
+    Every face gets WHITE as its colour: the game paints each thing in
+    its own thing["colour"] anyway (Lesson 5).
+    """
+    raw_points = []
+    file_faces = []
+    with open(os.path.join(CODE_FOLDER, file_name)) as file:
+        for line in file:
+            parts = line.split()        # "v 0 0.6 -1" -&gt; ["v", "0", "0.6", "-1"]
+            if len(parts) == 0:
+                continue                # empty line
+
+            if parts[0] == "v":
+                x = float(parts[1])
+                y = float(parts[2])
+                z = float(parts[3])
+                # CHANGE 2 (first half): flip z, so +z points away.
+                raw_points.append( (x, y, (-z)) )
+
+            elif parts[0] == "f":
+                corners = []
+                for word in parts[1:]:
+                    # CHANGE 5: "739/1/12" -&gt; "739".  .split("/") cuts
+                    # at each "/", and [0] keeps the first piece.
+                    # "4" has no "/", so it stays "4".
+                    number_text = word.split("/")[0]
+                    # CHANGE 1: count from 0, not 1.
+                    corners.append( (int(number_text) - 1) )
+                # CHANGE 2 (second half): the z flip was a mirror, and a
+                # mirror turns clockwise into anticlockwise. Turning the
+                # list round puts it back to clockwise from outside.
+                #     [0, 3, 1]  -&gt;  [1, 3, 0]
+                corners.reverse()
+                file_faces.append(tuple(corners))
+
+            # CHANGE 5: any other line ("#", "vn", "vt", "s", "o",
+            # "usemtl" ...) falls through to here and is skipped.
+
+    # CHANGE 4: centre the corners and make the model 2 units big.
+    points = centre_and_size(raw_points)
+
+    # CHANGE 3: one pointer per face, worked out from the corners.
+    faces = []
+    for corners in file_faces:
+        pointer = face_pointer(corners, points)
+        if pointer is None:
+            continue                    # no area: nothing to draw
+        faces.append( (corners, WHITE, pointer) )
+
+    return {"points": points, "faces": faces}
+
+
+# ---- NEW: the pickups' shape, read from ship.obj ----------------------
+# 5 corners and 5 faces (4 triangles and a diamond at the back).
+# After load_obj(), in SHAPE coordinates (lesson Part 3):
+#   corner 0 = nose (0, 0, -1)          points at -z, towards you
+#   corner 1 = left wing (-1, 0, 1),    corner 2 = right wing (1, 0, 1)
+#   corner 3 = top fin (0, 0.4, 1),     corner 4 = bottom fin (0, -0.4, 1)
+ship_model = load_obj("ship.obj")
+
+
+# ======================================================================
+# THE PLAYING FIELD (lesson Part 1)
+# ======================================================================
+
+# ---- (Lesson 7) the sizes of the field ------------------------------------
+# FIELD = 10: new ships appear with x and z from -10 to 10, a 20 x 20
+#   square. You fly 3 units a second, so edge to edge is
+#   (20 / 3) = 6.7 seconds: some flying, but never boring.
+# WALL = 12: you can't fly further than 12 from the centre, 2 more than
+#   FIELD, so you can always fly round a ship at the edge.
+FIELD = 10
+WALL = 12
+
+# ---- (Lesson 7) the floor (from Lesson 5), now as big as the walls --------
+FLOOR_Y = -1
+GRID_LEFT = (-WALL)       # -12
+GRID_RIGHT = WALL         # 12
+GRID_NEAR = (-WALL)       # -12
+GRID_FAR = WALL           # 12
+
+# ---- (Lesson 7) the pickups ------------------------------------------------
+# PICKUP_SIZE = 0.5: Lesson 5's "size". Lesson 7's pickup cubes were 1
+#   unit wide; the ship is loaded 2 units long (Lesson 9, CHANGE 4), so
+#   size 0.5 makes it 1 unit long too: nose at -0.5, tail at 0.5.
+#   1 unit 5 away is ((1 * 400) / 5) = 80 px; 20 away it is 20 px.
+PICKUP_SIZE = 0.5
+
+# (Lesson 7) pickup heights: their centres float from y = 0 to y = 2.
+#   0 is your eye height at the start; the lowest ship's bottom fin is
+#   then at (0 - (0.4 * 0.5)) = -0.2, above the floor (FLOOR_Y = -1).
+PICKUP_LOW = 0
+PICKUP_HIGH = 2
+
+# (Lesson 7) the 8 spots the ships start at, in WORLD coordinates.
+# The same every game, so you can learn a good route. Ship 0 at
+# (3, 1, 5) is Lesson 7's worked example.
+START_SPOTS = [
+    (3, 1, 5),      # 0  ahead and to the right: the first one you see
+    (-2, 0, 8),     # 1
+    (0, 0, 10),     # 2  straight ahead, at the far edge
+    (-6, 1, 3),     # 3
+    (6, 0, -2),     # 4  behind you, to the right
+    (-4, 2, -7),    # 5  behind you, up high
+    (8, 0, 7),      # 6
+    (2, 1, -9),     # 7  far behind you
+]
+
+# (Lesson 7) COLLECT_RADIUS = 1.0: you collect a ship when your eye is
+#   1 unit or less from its CENTRE. (Lesson 7 chose 1.0 for a 1-unit
+#   cube; a 1-unit ship is the same length, so 1.0 still fits.)
+COLLECT_RADIUS = 1.0
+
+# (Lesson 7) MIN_SPAWN_DISTANCE = 5: a new ship never appears closer than
+#   5 to you, so it is at least (5 / 3) = 1.7 seconds of flying away.
+MIN_SPAWN_DISTANCE = 5
+
+# ---- (Lesson 8): ROCKS, big scenery cubes (lesson Part 1) -------------------
+# ROCK_SIZE = 1.5: Lesson 5's "size", so a rock is (2 * 1.5) = 3 units
+#   wide, 3 times a gold ship's length. Big enough that you can fly right up
+#   beside one while most of it is still on the screen: its front face,
+#   2.5 away, is ((3 * 400) / 2.5) = 480 px wide.
+ROCK_SIZE = 1.5
+
+# Each rock SITS on the floor: its centre is ROCK_SIZE above FLOOR_Y,
+#   so centre y = (-1 + 1.5) = 0.5, bottom at -1, top at 2.
+ROCK_Y = (FLOOR_Y + ROCK_SIZE)
+
+# Where the 4 rocks are, in WORLD coordinates. Rock 0 is straight ahead
+# of where you start: the lesson's worked example.
+ROCK_SPOTS = [
+    (0, ROCK_Y, 4),       # 0  straight ahead, its front face at z = 2.5
+    (-5, ROCK_Y, -3),     # 1  behind you, to the left
+    (5, ROCK_Y, 10),      # 2  far ahead, to the right
+    (7, ROCK_Y, -7),      # 3  behind you, to the right
+]
+
+# ROCK_CLEARANCE = 3: a new gold ship must be at least 3 from every
+#   rock's centre: 1.5 (half a rock) + 0.5 (half a gold ship) + 1 (your
+#   COLLECT_RADIUS, so you can always reach it) = 3.
+ROCK_CLEARANCE = ( (ROCK_SIZE + PICKUP_SIZE) + COLLECT_RADIUS )
+
+# ---- (Lesson 7) how high and low you can fly (lesson Part 5) -----------------
+# GROUND = -0.5: your eye stays half a unit above the floor (y = -1).
+# CEILING = 4: two more than PICKUP_HIGH, so you can look down on every
+#   ship but never fly off where none could be.
+GROUND = (FLOOR_Y + 0.5)     # (-1 + 0.5) = -0.5
+CEILING = 4
+
+# ---- (Lesson 7) the clock (lesson Part 6) -------------------------------------
+# 60 seconds: at 3 units a second that is (3 * 60) = 180 units of
+# flying, enough for a good handful of ships, short enough to retry.
+GAME_SECONDS = 60
+
+
+def make_pickups():
+    """(Lesson 7) build a fresh list of 8 pickup THINGS (Lesson 5's
+    dictionaries), one at each START_SPOTS position.
+
+    NEW: each one is now a small gold SHIP from ship.obj. Size 0.5
+    makes it 1 unit long, nose to tail, the same as the old 1-unit
+    cube. It spins slowly so it catches your eye: 1 degree a frame of
+    turn = one turn in 6 seconds, and 0.5 of tip so it wobbles too.
+    """
+    pickups = []
+    for spot in START_SPOTS:
+        pickups.append({"model": ship_model, "position": spot,   # NEW: ship
+                        "size": PICKUP_SIZE, "angles": [0, 0, 0],
+                        "speeds": (0.5, 1, 0), "colour": SUN_GOLD,
+                        "pickup": True})          # (Lesson 8)
+    return pickups
+
+
+def make_rocks():
+    """(Lesson 8): build a list of 4 rock THINGS, one at each ROCK_SPOTS position.
+
+    Same dictionary keys as a gold ship, with three differences:
+    size 1.5, speeds (0, 0, 0) so they never spin, and "pickup": False
+    so you can't collect them.
+    """
+    rocks = []
+    for spot in ROCK_SPOTS:
+        rocks.append({"model": cube_model, "position": spot,
+                      "size": ROCK_SIZE, "angles": [0, 0, 0],
+                      "speeds": (0, 0, 0), "colour": STONE,
+                      "pickup": False})
+    return rocks
+
+
+def make_world():
+    """(Lesson 8): the whole world = 8 gold ships + 4 rocks.
+
+    "+" joins two lists into one longer list: (8 + 4) = 12 things.
+    The gold ships come first, so things[0] is ship 0.
+    """
+    return (make_pickups() + make_rocks())
+
+
+# "things" is Lesson 5's list of everything in the world.
+# (Lesson 8): 8 gold ships AND 4 rocks.
+things = make_world()
+
+# ---- Where YOU are (from Lesson 4) ------------------------------------
+cam_x = 0
+cam_y = 0
+cam_z = 0
+cam_turn = 0        # degrees, positive = turned LEFT
+cam_tip = 0         # degrees, positive = looking DOWN
+TIP_LIMIT = 60
+MOVE_SPEED = 0.05   # (0.05 * 60) = 3 units a second
+TURN_SPEED = 1.5    # (1.5 * 60) = 90 degrees a second
+NEAR = 0.1          # closer than this (CAMERA z) is not drawn
+
+# ---- The light (from Lesson 3, unchanged) -----------------------------
+LIGHT = (0.48, 0.6, -0.64)
+AMBIENT = 0.2
+use_light = True
+show_grid = True
+# (Lesson 8): K turns clipping on / off, so you can see the difference.
+use_clipping = True
+
+# ---- (Lesson 7) the score ------------------------------------------------
+score = 0
+# ---- (Lesson 7) the clock and the game's two states (lesson Part 6) ----------
+best_score = 0                         # NOT reset by R
+frames_left = (GAME_SECONDS * 60)      # (60 * 60) = 3600
+game_over = False                      # False = PLAYING, True = TIME UP
+
+# ---- The mini-map (lesson Part 1: resized for the whole field) ---------
+MAP_LEFT = 630
+MAP_TOP = 430
+MAP_SIZE = 160
+# (Lesson 7) the WORLD centre now sits in the MIDDLE of the box, because
+# the field goes the same distance every way (-12 to 12).
+MAP_CX = (MAP_LEFT + (MAP_SIZE / 2))    # (630 + 80) = 710
+MAP_CY = (MAP_TOP + (MAP_SIZE / 2))     # (430 + 80) = 510
+# (Lesson 7) 6 px per unit: the walls are 24 units across, and
+# (24 * 6) = 144 px fits the 160 px box with 8 px to spare.
+MAP_SCALE = 6
+
+
+# ======================================================================
+# MATRIX TOOLS (from Lesson 6, unchanged)
+# ======================================================================
+
+def matrix_times_point(matrix, point_3d):
+    """Put one point through a matrix: each ROW dotted with the point."""
+    row_0, row_1, row_2 = matrix
+    new_x = dot(row_0, point_3d)
+    new_y = dot(row_1, point_3d)
+    new_z = dot(row_2, point_3d)
+    return (new_x, new_y, new_z)
+
+
+def tip_matrix(angle_degrees):
+    """Lesson 2B's TIP as a grid. x is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (1, 0,     0         ),
+        (0, cos_a, (-sin_a)  ),
+        (0, sin_a, cos_a     ),
+    )
+
+
+def turn_matrix(angle_degrees):
+    """Lesson 2's TURN as a grid. y is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, 0, (-sin_a)),
+        (0,     1, 0       ),
+        (sin_a, 0, cos_a   ),
+    )
+
+
+def roll_matrix(angle_degrees):
+    """Lesson 2B's ROLL as a grid. z is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, (-sin_a), 0),
+        (sin_a, cos_a,    0),
+        (0,     0,        1),
+    )
+
+
+def column(matrix, column_number):
+    """One COLUMN of a matrix = where that axis arrow lands."""
+    row_0, row_1, row_2 = matrix
+    return (row_0[column_number], row_1[column_number], row_2[column_number])
+
+
+def combine(first, second):
+    """ONE matrix that does 'first', then 'second' (Lesson 6)."""
+    new_col_0 = matrix_times_point(second, column(first, 0))
+    new_col_1 = matrix_times_point(second, column(first, 1))
+    new_col_2 = matrix_times_point(second, column(first, 2))
+    return (
+        (new_col_0[0], new_col_1[0], new_col_2[0]),
+        (new_col_0[1], new_col_1[1], new_col_2[1]),
+        (new_col_0[2], new_col_1[2], new_col_2[2]),
+    )
+
+
+def spin_matrix(angles):
+    """A thing's whole spin as ONE matrix: tip, then turn, then roll."""
+    tip_then_turn = combine(tip_matrix(angles[0]), turn_matrix(angles[1]))
+    return combine(tip_then_turn, roll_matrix(angles[2]))
+
+
+# ======================================================================
+# THE 3D PIPELINE (Lessons 1 to 6, unchanged)
+# ======================================================================
+
+def to_world(shape_point, thing):
+    """(Lesson 5) SHAPE -&gt; WORLD: size, then spin, then place."""
+    x, y, z = shape_point
+    size = thing["size"]
+    sized = ( (x * size), (y * size), (z * size) )
+    spun = matrix_times_point(thing["matrix"], sized)
+    pos_x, pos_y, pos_z = thing["position"]
+    sx, sy, sz = spun
+    return ( (sx + pos_x), (sy + pos_y), (sz + pos_z) )
+
+
+def to_camera(world_point):
+    """(Lessons 4 and 6) WORLD -&gt; CAMERA: subtract you, then camera_matrix."""
+    x, y, z = world_point
+    moved = ( (x - cam_x), (y - cam_y), (z - cam_z) )
+    return matrix_times_point(camera_matrix, moved)
+
+
+def project(point_3d):
+    """(Lesson 1) CAMERA -&gt; SCREEN. Only call it with z &gt;= NEAR."""
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+def average_z(corners, camera_points):
+    """(Lesson 3) how far away is this face? Uses CAMERA z."""
+    total = 0
+    for corner_number in corners:
+        x, y, z = camera_points[corner_number]
+        total = (total + z)
+    return (total / len(corners))
+
+
+def is_facing_you(face_points):
+    """(Lesson 3) the clock test: True if clockwise on the screen."""
+    a_x, a_y = face_points[0]
+    b_x, b_y = face_points[1]
+    c_x, c_y = face_points[2]
+    arrow_a_x = (b_x - a_x)
+    arrow_a_y = (b_y - a_y)
+    arrow_b_x = (c_x - a_x)
+    arrow_b_y = (c_y - a_y)
+    cross = ( (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x) )
+    return (cross &gt; 0)
+
+
+def dot(arrow_1, arrow_2):
+    """(Lesson 3) the dot product."""
+    x1, y1, z1 = arrow_1
+    x2, y2, z2 = arrow_2
+    return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
+
+
+def shade_colour(colour, pointer):
+    """(Lesson 3) brighter when the face points at the light."""
+    brightness = dot(pointer, LIGHT)
+    if brightness &lt; 0:
+        brightness = 0
+    shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )
+    red, green, blue = colour
+    return ( round(red * shade), round(green * shade), round(blue * shade) )
+
+
+def keep_under_360(angle):
+    """Keep an angle between 0 and 360."""
+    if angle &gt;= 360:
+        angle = (angle - 360)
+    if angle &lt; 0:
+        angle = (angle + 360)
+    return angle
+
+
+def add_faces_of(thing, faces_to_draw):
+    """(Lesson 5) work out every face of ONE thing and add the ones to
+    paint to the shared list.
+
+    (Lesson 8) each face is CLIPPED in CAMERA coordinates first,
+    and only then projected. So we no longer project every corner up
+    front: a face's cut points only exist once that face is clipped.
+    """
+    model = thing["model"]
+    camera_points = []
+    for p in model["points"]:
+        world = to_world(p, thing)                     # WORLD
+        camera_points.append(to_camera(world))         # CAMERA
+
+    for corners, face_colour, pointer in model["faces"]:
+        # (Lesson 8) this face's corners in CAMERA coordinates, clockwise.
+        face_camera = []
+        for corner_number in corners:
+            face_camera.append(camera_points[corner_number])
+
+        if use_clipping:
+            # (Lesson 8) cut the face at the NEAR wall (lesson Part 3).
+            face_camera = clip_face(face_camera)
+            # Fewer than 3 corners left: nothing to paint.
+            if len(face_camera) &lt; 3:
+                continue
+        else:
+            # Lesson 4's old rule, for comparing (K): any corner behind
+            # the NEAR wall? Skip the whole face.
+            too_close = False
+            for camera in face_camera:
+                if camera[2] &lt; NEAR:
+                    too_close = True
+            if too_close:
+                continue
+
+        # Every corner left is now in front of NEAR, so project() is safe.
+        face_points = []
+        for camera in face_camera:
+            face_points.append(project(camera))        # SCREEN
+        # The clock test works on any number of corners (it only looks
+        # at the first 3), and clipping keeps them clockwise.
+        if not is_facing_you(face_points):
+            continue
+        distance = average_z(corners, camera_points)
+        colour = thing["colour"]
+        if use_light:
+            spun_pointer = matrix_times_point(thing["matrix"], pointer)
+            colour = shade_colour(colour, spun_pointer)
+        faces_to_draw.append( (distance, face_points, colour) )
+
+
+def draw_floor():
+    """(Lesson 8): the floor grid as LONG lines, right across the field.
+
+    25 lines running away from you (x = -12 to 12) and 25 lines running
+    across (z = -12 to 12): (25 + 25) = 50 lines a frame. Lesson 5 had
+    to cut them into 1-unit pieces, (25 * 24) * 2 = 1,200 of them, so
+    that only the pieces behind you were lost. Clipping keeps the part
+    of a long line in front of you, so the pieces are not needed.
+
+    A long line is still exactly right on the screen: a straight line
+    in 3D projects to a straight line on the screen, so its two ends
+    are all we need (lesson Part 2).
+    """
+    for x in range(GRID_LEFT, (GRID_RIGHT + 1)):
+        draw_floor_line( (x, FLOOR_Y, GRID_NEAR), (x, FLOOR_Y, GRID_FAR) )
+    for z in range(GRID_NEAR, (GRID_FAR + 1)):
+        draw_floor_line( (GRID_LEFT, FLOOR_Y, z), (GRID_RIGHT, FLOOR_Y, z) )
+
+
+def draw_floor_line(world_start, world_end):
+    """(Lesson 8): one long floor line, WORLD -&gt; CAMERA -&gt; clip -&gt; SCREEN."""
+    start = to_camera(world_start)
+    end = to_camera(world_end)
+    if use_clipping:
+        clipped = clip_line(start, end)
+        if clipped is None:              # both ends behind you
+            return
+        start, end = clipped
+    else:
+        # Lesson 4's old rule, for comparing (K): any end behind? skip.
+        if (start[2] &lt; NEAR) or (end[2] &lt; NEAR):
+            return
+    pygame.draw.line(screen, GRID_COLOUR, project(start), project(end), 1)
+
+# ======================================================================
+# CLIPPING (Lesson 8)
+# ======================================================================
+# Everything here works in CAMERA coordinates: (0, 0, 0) is your eye,
+# +x is right, +y is up, +z is straight ahead. The NEAR wall is the
+# flat sheet z = NEAR (0.1) just in front of your eye.
+#   "in"  = in front of the wall:  z &gt;= NEAR   (safe to project)
+#   "out" = behind the wall:       z &lt;  NEAR   (must never be projected)
+
+def cut_at_near(point_a, point_b):
+    """(Lesson 8): the CAMERA point where the line from point_a to point_b
+    crosses the NEAR wall. One end must be in, the other out.
+
+    t says how far along the line the wall is: 0 = at point_a,
+    1 = at point_b, 0.5 = halfway (lesson Part 2).
+
+        t = ( (NEAR - a_z) / (b_z - a_z) )
+
+    Then each of x and y moves the same fraction t of its own gap:
+
+        x = ( a_x + (t * (b_x - a_x)) )
+
+    Worked example (lesson Part 2): a = (-2, -1, -1), b = (2, -1, 3)
+        t = ( (0.1 - (-1)) / (3 - (-1)) ) = (1.1 / 4) = 0.275
+        x = ( -2 + (0.275 * (2 - (-2))) ) = ( -2 + 1.1 ) = -0.9
+        y = ( -1 + (0.275 * (-1 - (-1))) ) = -1
+        z = NEAR = 0.1          -&gt; (-0.9, -1, 0.1)
+    """
+    a_x, a_y, a_z = point_a
+    b_x, b_y, b_z = point_b
+    t = ( (NEAR - a_z) / (b_z - a_z) )
+    cut_x = ( a_x + (t * (b_x - a_x)) )
+    cut_y = ( a_y + (t * (b_y - a_y)) )
+    # The same sum for z would give exactly NEAR, which is the whole
+    # point of t, so we just use NEAR.
+    return (cut_x, cut_y, NEAR)
+
+
+def clip_line(start, end):
+    """(Lesson 8): keep the part of a CAMERA line that is in front of NEAR.
+
+    Gives back (start, end) with any end behind you swapped for the
+    cut point, or None ("nothing to draw") if both ends are behind.
+    """
+    start_in = (start[2] &gt;= NEAR)
+    end_in = (end[2] &gt;= NEAR)
+    if start_in and end_in:
+        return (start, end)                       # all in front: keep it all
+    if (not start_in) and (not end_in):
+        return None                               # all behind: nothing
+    cut = cut_at_near(start, end)
+    if start_in:
+        return (start, cut)                       # end was behind
+    return (cut, end)                             # start was behind
+
+
+def clip_face(face_corners):
+    """(Lesson 8) cut one face at the NEAR wall (lesson Part 3).
+
+    face_corners: the face's corners in CAMERA coordinates, clockwise.
+    Gives back the corners of the part in front of NEAR, still in
+    clockwise order. That can be 3, 4 or 5 corners, or an empty list
+    if the whole face is behind you.
+
+    We walk round the face one edge at a time. Each edge goes from the
+    PREVIOUS corner to the CURRENT one, and there are only 4 cases:
+
+        previous  current   keep
+        in        in        current
+        in        out       the cut point
+        out       in        the cut point, then current
+        out       out       nothing
+
+    face_corners[-1] means "the LAST item in the list". Starting with
+    it as "previous" makes the first edge go last corner -&gt; first
+    corner, so the walk goes all the way round and closes the face.
+
+    Worked example (lesson Part 3): the right face of rock 0, seen from
+    WORLD (2.5, 0, 3). CAMERA corners in clockwise order:
+        5 (-1, 2, -0.5) out    6 (-1, 2, 2.5) in
+        2 (-1, -1, 2.5) in     1 (-1, -1, -0.5) out
+    Edges 1-&gt;5 nothing,  5-&gt;6 cut (-1, 2, 0.1) then 6,
+          6-&gt;2 keep 2,    2-&gt;1 cut (-1, -1, 0.1)
+    Result: 4 corners  (-1, 2, 0.1) (-1, 2, 2.5) (-1, -1, 2.5) (-1, -1, 0.1)
+    """
+    kept = []
+    previous = face_corners[-1]
+    for current in face_corners:
+        previous_in = (previous[2] &gt;= NEAR)
+        current_in = (current[2] &gt;= NEAR)
+        if previous_in and current_in:
+            kept.append(current)
+        elif previous_in and (not current_in):
+            kept.append(cut_at_near(previous, current))
+        elif (not previous_in) and current_in:
+            kept.append(cut_at_near(previous, current))
+            kept.append(current)
+        # out -&gt; out: keep nothing
+        previous = current
+    return kept
+
+
+# ======================================================================
+# THE GAME TOOLS (Lesson 7)
+# ======================================================================
+
+def distance_3d(point_a, point_b):
+    """(Lesson 7) how far apart are two WORLD points? (lesson Part 2)
+
+    Subtract, square each part, add them up, square-root the total:
+    Pythagoras done twice, in one line.
+
+    Worked example (lesson Part 2): you at (1, 0, 3), ship 0 at (3, 1, 5)
+        dx = (3 - 1) = 2,  dy = (1 - 0) = 1,  dz = (5 - 3) = 2
+        math.sqrt( (2 * 2) + (1 * 1) + (2 * 2) ) = math.sqrt(9) = 3
+    """
+    ax, ay, az = point_a
+    bx, by, bz = point_b
+    dx = (bx - ax)
+    dy = (by - ay)
+    dz = (bz - az)
+    return math.sqrt( (dx * dx) + (dy * dy) + (dz * dz) )
+
+
+def far_from_rocks(spot):
+    """(Lesson 8): True if this WORLD spot is at least ROCK_CLEARANCE (3) from
+    the centre of every rock, so a new gold ship never hides inside one.
+
+    Worked example (lesson Part 1): spot (1, 1, 5) and rock 0 at
+    (0, 0.5, 4): math.sqrt( (1 * 1) + (0.5 * 0.5) + (1 * 1) ) = 1.5,
+    less than 3, so False: try again.
+    """
+    for rock_spot in ROCK_SPOTS:
+        if distance_3d(spot, rock_spot) &lt; ROCK_CLEARANCE:
+            return False
+    return True
+
+
+def new_pickup_spot():
+    """(Lesson 7) a random WORLD spot for a ship, at least
+    MIN_SPAWN_DISTANCE from you (lesson Part 4).
+
+    "while True" repeats for ever, until "return" jumps out. Usually the
+    first try is far enough; about 1 try in 5 is too close and we
+    simply pick again.
+    """
+    you = (cam_x, cam_y, cam_z)
+    while True:
+        new_x = random.uniform((-FIELD), FIELD)
+        new_y = random.uniform(PICKUP_LOW, PICKUP_HIGH)
+        new_z = random.uniform((-FIELD), FIELD)
+        spot = (new_x, new_y, new_z)
+        # (Lesson 8): "and far_from_rocks(spot)": BOTH must be True.
+        if (distance_3d(you, spot) &gt;= MIN_SPAWN_DISTANCE) and far_from_rocks(spot):
+            return spot
+
+
+def to_map(x, z):
+    """A WORLD (x, z) -&gt; a pixel on the mini-map (from Lesson 4)."""
+    map_x = MAP_CX + (x * MAP_SCALE)
+    map_y = MAP_CY - (z * MAP_SCALE)
+    return (map_x, map_y)
+
+
+def draw_map():
+    """The mini-map: the wall square, every ship and rock, and you, from above."""
+    box = pygame.Rect(MAP_LEFT, MAP_TOP, MAP_SIZE, MAP_SIZE)
+    pygame.draw.rect(screen, MAP_BACK, box)
+    screen.set_clip(box)
+    # (Lesson 7) the walls: from map (-12, 12) to map (12, -12)
+    wall_left, wall_top = to_map((-WALL), WALL)          # (638, 438)
+    wall_size = ( (2 * WALL) * MAP_SCALE )                # (24 * 6) = 144
+    pygame.draw.rect(screen, WALL_RED,
+                     pygame.Rect(wall_left, wall_top, wall_size, wall_size), 1)
+    # Which corners to draw for each thing, seen from above:
+    #   a rock (cube_model): its 4 bottom corners, a square (Lesson 5)
+    #   NEW: a ship: its nose and two wing tips (corners 0, 1 and 2),
+    #        a small triangle that points the way the ship faces
+    #   anything else: not on the map (the teapot in step 3)
+    for thing in things:
+        if thing["model"] == cube_model:
+            map_corners = (0, 1, 2, 3)
+        elif thing["model"] == ship_model:
+            map_corners = (0, 1, 2)
+        else:
+            continue
+        outline = []
+        for corner_number in map_corners:
+            corner = thing["model"]["points"][corner_number]
+            x, y, z = to_world(corner, thing)
+            outline.append(to_map(x, z))
+        pygame.draw.polygon(screen, thing["colour"], outline, 2)
+    # You: pink dot and a line the way your BODY faces.
+    forward_x, forward_y, forward_z = column(turn_matrix(cam_turn), 2)
+    you = to_map(cam_x, cam_z)
+    nose = to_map( (cam_x + (forward_x * 1.5)), (cam_z + (forward_z * 1.5)) )
+    pygame.draw.line(screen, PINK, you, nose, 2)
+    pygame.draw.circle(screen, PINK, you, 4)
+    screen.set_clip(None)
+    pygame.draw.rect(screen, WHITE, box, 1)
+
+
+# ======================================================================
+# THE MAIN LOOP
+# ======================================================================
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_l:
+                use_light = not use_light
+            if event.key == pygame.K_g:
+                show_grid = not show_grid
+            if event.key == pygame.K_k:                  # (Lesson 8)
+                use_clipping = not use_clipping
+            # (Lesson 7) R only works after TIME UP, so you can't restart by
+            # accident in the middle of a good game.
+            if (event.key == pygame.K_r) and game_over:
+                # Every game number back to its start value...
+                cam_x = 0
+                cam_y = 0
+                cam_z = 0
+                cam_turn = 0
+                cam_tip = 0
+                things = make_world()      # (Lesson 8): ships AND rocks
+                score = 0
+                frames_left = (GAME_SECONDS * 60)
+                game_over = False
+                # ...but NOT best_score: it remembers your best.
+
+    # ==================================================================
+    # PLAYING: everything in this "if" stops when game_over is True.
+    # ==================================================================
+    if not game_over:
+        keys = pygame.key.get_pressed()
+
+        # ---- Turning and looking (from Lesson 4, unchanged) ----------
+        if keys[pygame.K_LEFT]:
+            cam_turn = (cam_turn + TURN_SPEED)
+        if keys[pygame.K_RIGHT]:
+            cam_turn = (cam_turn - TURN_SPEED)
+        if keys[pygame.K_UP]:
+            cam_tip = (cam_tip - TURN_SPEED)
+        if keys[pygame.K_DOWN]:
+            cam_tip = (cam_tip + TURN_SPEED)
+        if cam_tip &gt; TIP_LIMIT:
+            cam_tip = TIP_LIMIT
+        if cam_tip &lt; (-TIP_LIMIT):
+            cam_tip = (-TIP_LIMIT)
+
+        # ---- (Lesson 7) fly where you LOOK (lesson Part 5) -----------------
+        # Build the arrow the way your head points: tip first (the head
+        # nods), then turn (the body turns), and read off column 2,
+        # where the +z arrow lands (Lesson 6).
+        #   cam_tip -30, cam_turn 0:   forward = (0, 0.5, 0.866)   climbing
+        #   cam_tip -30, cam_turn 90:  forward = (-0.866, 0.5, 0)  left + up
+        # Right stays level (from your body only), so A and D slide
+        # sideways without climbing.
+        look = combine(tip_matrix(cam_tip), turn_matrix(cam_turn))
+        forward_x, forward_y, forward_z = column(look, 2)
+        right_x, right_y, right_z = column(turn_matrix(cam_turn), 0)
+        if keys[pygame.K_w]:
+            cam_x = (cam_x + (forward_x * MOVE_SPEED))
+            cam_y = (cam_y + (forward_y * MOVE_SPEED))   # (Lesson 7) y too
+            cam_z = (cam_z + (forward_z * MOVE_SPEED))
+        if keys[pygame.K_s]:
+            cam_x = (cam_x - (forward_x * MOVE_SPEED))
+            cam_y = (cam_y - (forward_y * MOVE_SPEED))   # (Lesson 7) y too
+            cam_z = (cam_z - (forward_z * MOVE_SPEED))
+        if keys[pygame.K_d]:
+            cam_x = (cam_x + (right_x * MOVE_SPEED))
+            cam_z = (cam_z + (right_z * MOVE_SPEED))
+        if keys[pygame.K_a]:
+            cam_x = (cam_x - (right_x * MOVE_SPEED))
+            cam_z = (cam_z - (right_z * MOVE_SPEED))
+        if keys[pygame.K_e]:
+            cam_y = (cam_y + MOVE_SPEED)
+        if keys[pygame.K_q]:
+            cam_y = (cam_y - MOVE_SPEED)
+
+        # ---- (Lesson 7) walls, ground and ceiling (lesson Part 5) ----------
+        # Past a limit? Put it back ON the limit. You slide along the
+        # wall instead of going through it.
+        if cam_x &gt; WALL:
+            cam_x = WALL
+        if cam_x &lt; (-WALL):
+            cam_x = (-WALL)
+        if cam_z &gt; WALL:
+            cam_z = WALL
+        if cam_z &lt; (-WALL):
+            cam_z = (-WALL)
+        if cam_y &gt; CEILING:
+            cam_y = CEILING
+        if cam_y &lt; GROUND:
+            cam_y = GROUND
+
+        # ---- (Lesson 7) collect any ship you are touching (Part 3) -----
+        you = (cam_x, cam_y, cam_z)
+        for thing in things:
+            # (Lesson 8): rocks have "pickup": False, so they are never collected.
+            if not thing["pickup"]:
+                continue
+            if distance_3d(you, thing["position"]) &lt;= COLLECT_RADIUS:
+                score = (score + 1)
+                # (Lesson 7) the same ship jumps to a new spot (Part 4):
+                # there are always exactly 8 ships to find.
+                thing["position"] = new_pickup_spot()
+
+        # ---- (Lesson 7) tick the clock (lesson Part 6) ---------------------
+        frames_left = (frames_left - 1)
+        if frames_left &lt;= 0:
+            frames_left = 0
+            game_over = True
+            if score &gt; best_score:
+                best_score = score
+
+    # ---- Every pickup spins (Lesson 5), even after TIME UP -------------
+    for thing in things:
+        angles = thing["angles"]
+        speeds = thing["speeds"]
+        angles[0] = keep_under_360( (angles[0] + speeds[0]) )
+        angles[1] = keep_under_360( (angles[1] + speeds[1]) )
+        angles[2] = keep_under_360( (angles[2] + speeds[2]) )
+        thing["matrix"] = spin_matrix(angles)
+
+    # ---- The camera's matrix, once a frame (Lesson 6) ------------------
+    camera_matrix = combine(turn_matrix(-cam_turn), tip_matrix(-cam_tip))
+
+    # ==================================================================
+    # DRAW: the world first, then the HUD on top (lesson Part 2)
+    # ==================================================================
+    screen.fill(BLACK)
+    if show_grid:
+        draw_floor()
+    faces_to_draw = []
+    for thing in things:
+        add_faces_of(thing, faces_to_draw)
+    faces_to_draw.sort(reverse=True)
+    for distance, face_points, colour in faces_to_draw:
+        pygame.draw.polygon(screen, colour, face_points)
+        pygame.draw.polygon(screen, BLACK, face_points, 2)
+
+    draw_map()
+
+    # ---- (Lesson 7) how far is the nearest ship? -------------------------
+    # Start with a huge number, then keep the smallest distance found.
+    nearest = 1000
+    for thing in things:
+        if not thing["pickup"]:          # (Lesson 8): rocks don't count
+            continue
+        d = distance_3d((cam_x, cam_y, cam_z), thing["position"])
+        if d &lt; nearest:
+            nearest = d
+
+    # ---- The HUD: words drawn LAST, so nothing in the world can hide them -----------
+    # str() turns a number into letters so + can join it to words.
+    text = ("score " + str(score) + "   best " + str(best_score))
+    screen.blit(font.render(text, True, SUN_GOLD), (20, 20))
+    text = ("nearest ship " + str(round(nearest, 1)))
+    screen.blit(font.render(text, True, PINK), (20, 50))
+    # (Lesson 8): say whether clipping is on, so screenshots are never confusing.
+    if use_clipping:
+        text = "clipping ON (K)"
+    else:
+        text = "clipping OFF (K)"
+    screen.blit(font.render(text, True, WHITE), (20, 80))
+    # (Lesson 7) math.ceil rounds UP, so the clock never shows 0 while you
+    # can still play: 59.98 seconds left shows as 60.
+    seconds = math.ceil(frames_left / 60)
+    screen.blit(font.render("time " + str(seconds), True, WHITE), (680, 20))
+    screen.blit(font.render("ARROWS look,  W / S fly,  A / D slide,  Q / E down / up",
+                            True, YELLOW), (20, 570))
+
+    # ---- (Lesson 7) TIME UP on top of everything -------------------------
+    if game_over:
+        words = big_font.render("TIME UP", True, WHITE)
+        # Centre it: half its width to the left of the screen's middle.
+        # get_width() is how many pixels wide the words came out.
+        left = (CENTRE_X - (words.get_width() / 2))
+        screen.blit(words, (left, 200))
+        words = font.render("score " + str(score) + "   best " + str(best_score) +
+                            "      press R to play again", True, YELLOW)
+        left = (CENTRE_X - (words.get_width() / 2))
+        screen.blit(words, (left, 290))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Swap ship_model back to cube_model in make_pickups(). The game is
+#     Lesson 8's clipped Cube Hunt again: load_obj() changed nothing else.
+#   * Open ship.obj in a text editor and make the wings longer:
+#     change -1.5 and 1.5 to -3.0 and 3.0. Run again. Is the ship
+#     longer or shorter on screen than before? Why? (Hint: CHANGE 4.)
+#   * In load_obj(), delete the line  corners.reverse() . Fly up to a
+#     ship. What do you see, and which Lesson 3 rule explains it?
+#   * Make your own .obj: a pyramid. Copy Lesson 5's pyramid_points
+#     (add 1 to every corner number for the f lines!) into pyramid.obj.
+# ----------------------------------------------------------------------</code></pre></details>
+<div class="check"><div class="q"><p class="qq"><span class="qn">Q8</span><span>Work out <code>cross((1, 0, 0), (0, 1, 0))</code>: an arrow along +x and one along +y.</span></p><details><summary>Show answer</summary><div class="ans"><p>x = <code>((0 * 0) - (0 * 1))</code> = 0. y = <code>((0 * 0) - (1 * 0))</code> = 0. z = <code>((1 * 1) - (0 * 0))</code> = 1. So (0, 0, 1): along +z, at a right angle to both, as promised.</p></div></details></div><div class="q"><p class="qq"><span class="qn">Q9</span><span>The top-right face loads as corners (3, 2, 0): a = top fin (0, 0.4, 1), b = right wing (1, 0, 1), c = nose (0, 0, −1). Find its pointer.</span></p><details><summary>Show answer</summary><div class="ans"><p>arrow_a = b − a = (1, −0.4, 0). arrow_b = c − a = (0, −0.4, −2).</p><p>x = <code>((-0.4 * -2) - (0 * -0.4))</code> = 0.8. y = <code>((0 * 0) - (1 * -2))</code> = 2. z = <code>((1 * -0.4) - (-0.4 * 0))</code> = −0.4. Cross = (0.8, 2, −0.4), length <code>math.sqrt(4.8)</code> = 2.191, pointer (0.365, 0.913, −0.183).</p><p>It is the top-left pointer with x mirrored: right a bit instead of left a bit, as you would expect for the other side of the ship.</p></div></details></div></div>
+
+<h2>Part 5: The teapot <span class="mins">9 MIN</span></h2>
+<p>The Utah teapot was measured by hand by Martin Newell in 1975, from a real teapot on his desk, and it has been the first test model of computer graphics ever since. Our <code>teapot.obj</code> has 3,644 corners and 6,320 triangles. <code>load_obj()</code> reads it in about 0.02 seconds.</p>
+<h3>Where the teapot stands</h3>
+<figure id="fig-9-5-1"><img src="images/o21_teapot_map.png" alt="WORLD from above, x across and z up the page, the red wall square from -12 to 12, four rocks and eight gold ships. The teapot is a blue circle of radius 4 centred on (-17, 1, 4), left of the wall; its spout can reach x = -13. You are a pink dot at (0, 0, 0) facing +z, with a white arrow showing LEFT for 1 s = 90 degrees. Boxes list make_teapot()'s values and why." loading="lazy"><figcaption><span class="fignum">Fig 9.5.1</span>WORLD coordinates from above, 1 grid square = 1 unit, the centre (0, 0, 0) is where you start, facing +z. The teapot stands just past the left wall, where you can fly up to it but never into it. Hold LEFT for 1 second (<code>(1.5 * 60)</code> = 90 degrees) and it is in front of you.<span class="panels">Panels: <b>9.5.1a</b> (left) the field from above · <b>9.5.1b</b> (top right) <code>make_teapot()</code> · <b>9.5.1c</b> (middle right) why these numbers</span></figcaption></figure>
+<pre><code>TEAPOT_BLUE = (90, 170, 255)
+teapot_model = load_obj("teapot.obj")
+
+def make_teapot():
+    return {"model": teapot_model, "position": (-17, 1, 4), "size": 4,
+            "angles": [0, 0, 0], "speeds": (0, 0.25, 0),
+            "colour": TEAPOT_BLUE, "pickup": False, "outline": 0}
+
+def make_world():
+    return (make_pickups() + make_rocks() + [make_teapot()])   # (8 + 4 + 1) = 13 things</code></pre>
+<p>Why these numbers? The loaded teapot is 2 units long, so <code>"size": 4</code> makes it <code>(2 * 4)</code> = 8 long and <code>(0.979 * 4)</code> = 3.9 tall: a giant next to 1-unit ships. Its middle at x = −17 means that, as it turns, the spout tip reaches <code>(-17 + 4)</code> = −13, one unit past the wall at −12. y = 1 puts its bottom at <code>(1 - (0.4895 * 4))</code> = −0.96, just above the floor at −1. A spin of 0.25 degrees a frame is <code>(360 / (0.25 * 60))</code> = 24 seconds for one slow turn. It is not a pickup, like the rocks.</p>
+<h3>Outlines: 2 px is too much</h3>
+<p>Since Lesson 3 every face has had a 2 px black edge. On a rock face 200 px wide that is a neat line. On the teapot most triangles are only about 3 px across, and 2 px of edge on each side covers the whole triangle:</p>
+<figure id="fig-9-5-2"><img src="images/o22_outline.png" alt="Three enlarged crops of the same frame of the teapot. Outline 2: almost all black. Outline 1, after pressing O: every triangle is visible as a small cell. Outline 0, the default: smooth and lit." loading="lazy"><figcaption><span class="fignum">Fig 9.5.2</span>The same frame of step 3 three times, turned left 90 and flown 2 units, crops enlarged 2 times. Each thing now has an <code>"outline"</code> width: 2 for ships and rocks (their faces are big), 0 for the teapot. Press O to switch the teapot to 1 px and count its triangles.<span class="panels">Panels: <b>9.5.2a</b> (left) 2 px · <b>9.5.2b</b> (middle) 1 px · <b>9.5.2c</b> (right) 0 px</span></figcaption></figure>
+<pre><code>for distance, face_points, colour, outline in faces_to_draw:
+    pygame.draw.polygon(screen, colour, face_points)
+    if outline > 0:
+        pygame.draw.polygon(screen, BLACK, face_points, outline)</code></pre>
+<p>Why the <code>if</code>? In pygame, a width of 0 does not mean "no edge": it means "fill the shape". Drawing the edge with width 0 would paint the whole face black. So we skip the edge call completely when the outline is 0.</p>
+<h3>What 6,320 faces cost</h3>
+<p>Every face of every thing goes through Lessons 1 to 8 every frame: spin, place, camera, clip, sort, light, draw. More faces means more time per frame. At 60 frames a second, each frame has <code>(1000 / 60)</code> = 16.7 milliseconds.</p>
+<figure id="fig-9-5-3"><img src="images/o23_speed.png" alt="A bar chart of milliseconds per frame. Lesson 8 with 8 cubes and 4 rocks: 1.9 ms, 72 faces. Step 2 with 8 ships and 4 rocks: 2.5 ms, 64 faces. With Suzanne instead of the teapot: 3.7 ms, plus 500 faces. With Spot the cow: 17.9 ms, plus 5,856 faces. Step 3 with the teapot: 19.5 ms, plus 6,320 faces. With the Stanford bunny: 250.8 ms, off the chart, about 4 frames a second. A red line marks 16.7 ms." loading="lazy"><figcaption><span class="fignum">Fig 9.5.3</span>Measured on the computer that made this lesson, facing the model, clipping on; yours may be faster or slower. The teapot just crosses the red line, so the game runs at about 50 frames a second instead of 60 while you look at it. The bunny, at 69,451 faces, is far too much for our pure-Python engine.</figcaption></figure>
+<h3>Run it: step 3</h3>
+<p>Run <code>step3_teapot_hunt.py</code>. Hold LEFT for 1 second. The fps counter at the top right shows how many frames a second you are getting:</p>
+<figure id="fig-9-5-4"><img src="images/run_step3_teapot_hunt.png" alt="Screenshot of step 3 after turning left 90 degrees: the big blue teapot ahead past the wall, smooth and lit with no outlines, a gold ship near its spout, the edge of rock 1 on the left, the floor grid, and the HUD showing fps 50." loading="lazy"><figcaption><span class="fignum">Fig 9.5.4</span>Step 3 at the start, turned left 90 degrees (<code>cam_turn = 90</code>). The teapot is 17 units away, so it looks small; fly towards it with W. The HUD reads fps 50.</figcaption></figure>
+<details class="full"><summary>Full code: <code>step3_teapot_hunt.py</code> (about 1,160 lines)</summary><pre><code># ======================================================================
+# LESSON 9 - STEP 3: SHIP HUNT, WITH A GIANT TEAPOT
+# ----------------------------------------------------------------------
+# Goal: load a REAL model that nobody could type in by hand. The Utah
+# teapot (3,644 corners, 6,320 faces) stands just past the left wall,
+# slowly turning, while you hunt the ships from step 2.
+#
+# This is Lesson 9's finished script: step 2 plus the parts below.
+#
+# What is new since step 2:
+#
+#   1. teapot_model = load_obj("teapot.obj")  (lesson Part 5)
+#        The very same load_obj(). Nothing in it knows about teapots.
+#
+#   2. The teapot is one more thing in the world, with "pickup": False
+#        like Lesson 8's rocks: drawn, never collected.
+#
+#   3. "outline" on every thing: how many pixels of black edge to draw
+#        round each face. Ships 2 (as before), teapot 0, because 2 px
+#        of black round triangles only 3 px wide paints them all black
+#        (lesson Part 5). O shows the teapot's triangles with 1 px.
+#
+#   4. fps on the HUD: frames drawn per second, so you can SEE what
+#        6,320 faces cost (lesson Part 5).
+#
+# Controls:  LEFT / RIGHT = turn,   UP / DOWN = look up / down
+#            W / S = fly forward / back (the way you LOOK)
+#            A / D = slide left / right,   Q / E = straight down / up
+#            R = play again (after TIME UP)
+#            G = floor grid on / off,   L = light on / off
+#            O = teapot outlines on / off
+# Run:  python step3_teapot_hunt.py
+#       (ship.obj and teapot.obj must be in the same folder)
+# ======================================================================
+
+import math
+import random                 # (Lesson 7) for random.uniform
+import os                     # NEW: to find the .obj files next to this script
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Lesson 9, step 3 - Ship Hunt, with a giant teapot")
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+big_font = pygame.font.SysFont(None, 96)    # (Lesson 7) for "TIME UP"
+
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+PINK = (255, 105, 200)        # the colour we use for YOU (the camera)
+MAP_BACK = (25, 30, 36)       # dark grey-blue behind the mini-map
+GRID_COLOUR = (40, 90, 70)    # (Lesson 5) dim green for the floor lines
+WALL_RED = (235, 80, 80)      # (Lesson 7) the wall square on the mini-map
+SUN_GOLD = (250, 200, 70)     # (Lesson 7) the colour of every pickup
+TEAPOT_BLUE = (90, 170, 255)  # NEW: the teapot's colour
+STONE = (150, 150, 160)       # (Lesson 8): the colour of every rock
+
+# ---- One colour for each face direction (from Lesson 3) ---------------
+RED = (235, 80, 80)          # front (-z)
+PURPLE = (160, 100, 230)     # back  (+z)
+BLUE = (70, 150, 255)        # left  (-x)
+GREEN = (70, 210, 120)       # right (+x)
+GOLD = (245, 200, 60)        # top   (+y)
+ORANGE = (245, 140, 50)      # bottom (-y)
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400
+
+
+# ======================================================================
+# MODELS (from Lesson 5, unchanged)
+# ======================================================================
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+# (corners clockwise from outside,  colour,  pointer)
+cube_faces = [
+    ((4, 5, 1, 0), RED,    ( 0,  0, -1)),   # front
+    ((6, 7, 3, 2), PURPLE, ( 0,  0,  1)),   # back
+    ((7, 4, 0, 3), BLUE,   (-1,  0,  0)),   # left
+    ((5, 6, 2, 1), GREEN,  ( 1,  0,  0)),   # right
+    ((7, 6, 5, 4), GOLD,   ( 0,  1,  0)),   # top
+    ((2, 3, 0, 1), ORANGE, ( 0, -1,  0)),   # bottom
+]
+cube_model = {"points": cube_points, "faces": cube_faces}
+# (Lesson 9) the rocks still use cube_model; the pickups do not.
+
+
+# ======================================================================
+# NEW: LOADING MODELS FROM .obj FILES (Lesson 9)
+# ======================================================================
+# An .obj file is plain text. The two kinds of line we use:
+#     v x y z         one corner        e.g.  v 0.0 0.6 -1.0
+#     f a b c ...     one face          e.g.  f 1 4 2
+# load_obj() reads them and makes the SAME model dictionary that
+# Lesson 5 typed in by hand:
+#     {"points": [...], "faces": [ (corners, colour, pointer), ... ]}
+# so the rest of the program can't tell a loaded model from cube_model.
+#
+# On the way in it makes FIVE changes (lesson Part 3):
+#   CHANGE 1  corner numbers: .obj counts from 1, Python from 0 -&gt; minus 1
+#   CHANGE 2  .obj's +z points AT you, ours points AWAY:
+#               z = -z on every corner, and because that is a mirror,
+#               each face's corner list is turned round (.reverse())
+#               so it stays clockwise from outside (Lesson 3's rule)
+#   CHANGE 3  no pointers in the file: work each one out with cross()
+#   CHANGE 4  every file uses its own size: centre the model on
+#               (0, 0, 0) and make its biggest side 2 units, like the cube
+#   CHANGE 5  skip every line that is not "v" or "f", and in a face
+#               keep only the number before the first "/"
+
+# Where are the .obj files? In the same folder as this script.
+# __file__ = this script's full path; os.path.dirname() = its folder.
+CODE_FOLDER = os.path.dirname(os.path.abspath(__file__))
+
+
+def cross(arrow_a, arrow_b):
+    """NEW: the CROSS PRODUCT of two arrows (lesson Part 4).
+
+    Give it two arrows that lie flat ON a face, and it gives back an
+    arrow that sticks straight OUT of the face: the face's pointer.
+
+    Each part uses the OTHER two parts of the arrows:
+        x = (a_y * b_z) - (a_z * b_y)
+        y = (a_z * b_x) - (a_x * b_z)
+        z = (a_x * b_y) - (a_y * b_x)   &lt;- Lesson 3's clock test!
+
+    Worked example (lesson Part 4), the ship's top-left face:
+        arrow_a = (1, 0.4, 0),  arrow_b = (1, 0, -2)
+        x = (0.4 * -2) - (0 * 0)  = -0.8
+        y = (0 * 1)    - (1 * -2) =  2
+        z = (1 * 0)    - (0.4 * 1) = -0.4      -&gt; (-0.8, 2, -0.4)
+    """
+    a_x, a_y, a_z = arrow_a
+    b_x, b_y, b_z = arrow_b
+    out_x = ( (a_y * b_z) - (a_z * b_y) )
+    out_y = ( (a_z * b_x) - (a_x * b_z) )
+    out_z = ( (a_x * b_y) - (a_y * b_x) )
+    return (out_x, out_y, out_z)
+
+
+def face_pointer(corners, points):
+    """NEW (CHANGE 3): the 1-unit pointer straight out of one face.
+
+    Uses the face's first 3 corners, a, b and c:
+        arrow_a = b - a,   arrow_b = c - a      (two arrows along the face)
+        pointer = cross(arrow_a, arrow_b)        (sticks out of the face)
+    then shrinks the pointer to 1 unit long, because Lesson 3's light
+    needs 1-unit pointers (a dot of 1 = full brightness).
+
+    Returns None for a face with no area (all corners in a line):
+    its pointer has length 0, and we can't divide by 0.
+    """
+    a_x, a_y, a_z = points[corners[0]]
+    b_x, b_y, b_z = points[corners[1]]
+    c_x, c_y, c_z = points[corners[2]]
+    arrow_a = ( (b_x - a_x), (b_y - a_y), (b_z - a_z) )
+    arrow_b = ( (c_x - a_x), (c_y - a_y), (c_z - a_z) )
+    p_x, p_y, p_z = cross(arrow_a, arrow_b)
+    # How long is it? Lesson 7's Pythagoras, done on one arrow.
+    length = math.sqrt( (p_x * p_x) + (p_y * p_y) + (p_z * p_z) )
+    if length == 0:
+        return None
+    return ( (p_x / length), (p_y / length), (p_z / length) )
+
+
+def centre_and_size(raw_points):
+    """NEW (CHANGE 4): move the model so its middle is SHAPE (0, 0, 0),
+    and scale it so its biggest side is 2 units (the cube is 2 wide).
+
+    Worked example (lesson Part 3), the teapot:
+        x from -3 to 3.434   -&gt;  middle 0.217,  width 6.434
+        y from  0 to 3.15    -&gt;  middle 1.575,  height 3.15
+        z from -2 to 2       -&gt;  middle 0,      depth 4
+        biggest side = 6.434,  scale = (2 / 6.434) = 0.311
+    """
+    # Start the smallest and biggest at the first corner, then let
+    # every other corner push them out (like Lesson 7's "nearest").
+    min_x, min_y, min_z = raw_points[0]
+    max_x, max_y, max_z = raw_points[0]
+    for x, y, z in raw_points:
+        if x &lt; min_x:
+            min_x = x
+        if x &gt; max_x:
+            max_x = x
+        if y &lt; min_y:
+            min_y = y
+        if y &gt; max_y:
+            max_y = y
+        if z &lt; min_z:
+            min_z = z
+        if z &gt; max_z:
+            max_z = z
+
+    # The middle of each side is halfway between its two ends.
+    middle_x = ( (min_x + max_x) / 2 )
+    middle_y = ( (min_y + max_y) / 2 )
+    middle_z = ( (min_z + max_z) / 2 )
+
+    # The biggest of the three sides decides the scale.
+    biggest = max( (max_x - min_x), (max_y - min_y), (max_z - min_z) )
+    scale = (2 / biggest)
+
+    # Subtract the middle (so it moves to 0, 0, 0), then scale.
+    points = []
+    for x, y, z in raw_points:
+        points.append( ( ((x - middle_x) * scale),
+                         ((y - middle_y) * scale),
+                         ((z - middle_z) * scale) ) )
+    return points
+
+
+def load_obj(file_name):
+    """NEW: read an .obj file and return a Lesson 5 model dictionary:
+        {"points": [(x, y, z), ...],
+         "faces":  [(corners, colour, pointer), ...]}
+
+    Every face gets WHITE as its colour: the game paints each thing in
+    its own thing["colour"] anyway (Lesson 5).
+    """
+    raw_points = []
+    file_faces = []
+    with open(os.path.join(CODE_FOLDER, file_name)) as file:
+        for line in file:
+            parts = line.split()        # "v 0 0.6 -1" -&gt; ["v", "0", "0.6", "-1"]
+            if len(parts) == 0:
+                continue                # empty line
+
+            if parts[0] == "v":
+                x = float(parts[1])
+                y = float(parts[2])
+                z = float(parts[3])
+                # CHANGE 2 (first half): flip z, so +z points away.
+                raw_points.append( (x, y, (-z)) )
+
+            elif parts[0] == "f":
+                corners = []
+                for word in parts[1:]:
+                    # CHANGE 5: "739/1/12" -&gt; "739".  .split("/") cuts
+                    # at each "/", and [0] keeps the first piece.
+                    # "4" has no "/", so it stays "4".
+                    number_text = word.split("/")[0]
+                    # CHANGE 1: count from 0, not 1.
+                    corners.append( (int(number_text) - 1) )
+                # CHANGE 2 (second half): the z flip was a mirror, and a
+                # mirror turns clockwise into anticlockwise. Turning the
+                # list round puts it back to clockwise from outside.
+                #     [0, 3, 1]  -&gt;  [1, 3, 0]
+                corners.reverse()
+                file_faces.append(tuple(corners))
+
+            # CHANGE 5: any other line ("#", "vn", "vt", "s", "o",
+            # "usemtl" ...) falls through to here and is skipped.
+
+    # CHANGE 4: centre the corners and make the model 2 units big.
+    points = centre_and_size(raw_points)
+
+    # CHANGE 3: one pointer per face, worked out from the corners.
+    faces = []
+    for corners in file_faces:
+        pointer = face_pointer(corners, points)
+        if pointer is None:
+            continue                    # no area: nothing to draw
+        faces.append( (corners, WHITE, pointer) )
+
+    return {"points": points, "faces": faces}
+
+
+# ---- NEW: the pickups' shape, read from ship.obj ----------------------
+# 5 corners and 5 faces (4 triangles and a diamond at the back).
+# After load_obj(), in SHAPE coordinates (lesson Part 3):
+#   corner 0 = nose (0, 0, -1)          points at -z, towards you
+#   corner 1 = left wing (-1, 0, 1),    corner 2 = right wing (1, 0, 1)
+#   corner 3 = top fin (0, 0.4, 1),     corner 4 = bottom fin (0, -0.4, 1)
+ship_model = load_obj("ship.obj")
+
+# ---- NEW: the Utah teapot, read from teapot.obj (lesson Part 5) ---------
+# 3,644 corners and 6,320 triangles. Martin Newell measured a real
+# teapot in 1975, and it has been the test shape of 3D graphics ever
+# since. Reading it takes about a tenth of a second, once, at the start.
+# After load_obj() it is 2 units long (spout tip to handle) and
+# (3.15 * 0.311) = 0.979 units tall (lesson Part 3).
+teapot_model = load_obj("teapot.obj")
+
+
+# ======================================================================
+# THE PLAYING FIELD (lesson Part 1)
+# ======================================================================
+
+# ---- (Lesson 7) the sizes of the field ------------------------------------
+# FIELD = 10: new ships appear with x and z from -10 to 10, a 20 x 20
+#   square. You fly 3 units a second, so edge to edge is
+#   (20 / 3) = 6.7 seconds: some flying, but never boring.
+# WALL = 12: you can't fly further than 12 from the centre, 2 more than
+#   FIELD, so you can always fly round a ship at the edge.
+FIELD = 10
+WALL = 12
+
+# ---- (Lesson 7) the floor (from Lesson 5), now as big as the walls --------
+FLOOR_Y = -1
+GRID_LEFT = (-WALL)       # -12
+GRID_RIGHT = WALL         # 12
+GRID_NEAR = (-WALL)       # -12
+GRID_FAR = WALL           # 12
+
+# ---- (Lesson 7) the pickups ------------------------------------------------
+# PICKUP_SIZE = 0.5: Lesson 5's "size". Lesson 7's pickup cubes were 1
+#   unit wide; the ship is loaded 2 units long (Lesson 9, CHANGE 4), so
+#   size 0.5 makes it 1 unit long too: nose at -0.5, tail at 0.5.
+#   1 unit 5 away is ((1 * 400) / 5) = 80 px; 20 away it is 20 px.
+PICKUP_SIZE = 0.5
+
+# (Lesson 7) pickup heights: their centres float from y = 0 to y = 2.
+#   0 is your eye height at the start; the lowest ship's bottom fin is
+#   then at (0 - (0.4 * 0.5)) = -0.2, above the floor (FLOOR_Y = -1).
+PICKUP_LOW = 0
+PICKUP_HIGH = 2
+
+# (Lesson 7) the 8 spots the ships start at, in WORLD coordinates.
+# The same every game, so you can learn a good route. Ship 0 at
+# (3, 1, 5) is Lesson 7's worked example.
+START_SPOTS = [
+    (3, 1, 5),      # 0  ahead and to the right: the first one you see
+    (-2, 0, 8),     # 1
+    (0, 0, 10),     # 2  straight ahead, at the far edge
+    (-6, 1, 3),     # 3
+    (6, 0, -2),     # 4  behind you, to the right
+    (-4, 2, -7),    # 5  behind you, up high
+    (8, 0, 7),      # 6
+    (2, 1, -9),     # 7  far behind you
+]
+
+# (Lesson 7) COLLECT_RADIUS = 1.0: you collect a ship when your eye is
+#   1 unit or less from its CENTRE. (Lesson 7 chose 1.0 for a 1-unit
+#   cube; a 1-unit ship is the same length, so 1.0 still fits.)
+COLLECT_RADIUS = 1.0
+
+# (Lesson 7) MIN_SPAWN_DISTANCE = 5: a new ship never appears closer than
+#   5 to you, so it is at least (5 / 3) = 1.7 seconds of flying away.
+MIN_SPAWN_DISTANCE = 5
+
+# ---- (Lesson 8): ROCKS, big scenery cubes (lesson Part 1) -------------------
+# ROCK_SIZE = 1.5: Lesson 5's "size", so a rock is (2 * 1.5) = 3 units
+#   wide, 3 times a gold ship's length. Big enough that you can fly right up
+#   beside one while most of it is still on the screen: its front face,
+#   2.5 away, is ((3 * 400) / 2.5) = 480 px wide.
+ROCK_SIZE = 1.5
+
+# Each rock SITS on the floor: its centre is ROCK_SIZE above FLOOR_Y,
+#   so centre y = (-1 + 1.5) = 0.5, bottom at -1, top at 2.
+ROCK_Y = (FLOOR_Y + ROCK_SIZE)
+
+# Where the 4 rocks are, in WORLD coordinates. Rock 0 is straight ahead
+# of where you start: the lesson's worked example.
+ROCK_SPOTS = [
+    (0, ROCK_Y, 4),       # 0  straight ahead, its front face at z = 2.5
+    (-5, ROCK_Y, -3),     # 1  behind you, to the left
+    (5, ROCK_Y, 10),      # 2  far ahead, to the right
+    (7, ROCK_Y, -7),      # 3  behind you, to the right
+]
+
+# ROCK_CLEARANCE = 3: a new gold ship must be at least 3 from every
+#   rock's centre: 1.5 (half a rock) + 0.5 (half a gold ship) + 1 (your
+#   COLLECT_RADIUS, so you can always reach it) = 3.
+ROCK_CLEARANCE = ( (ROCK_SIZE + PICKUP_SIZE) + COLLECT_RADIUS )
+
+# ---- (Lesson 7) how high and low you can fly (lesson Part 5) -----------------
+# GROUND = -0.5: your eye stays half a unit above the floor (y = -1).
+# CEILING = 4: two more than PICKUP_HIGH, so you can look down on every
+#   ship but never fly off where none could be.
+GROUND = (FLOOR_Y + 0.5)     # (-1 + 0.5) = -0.5
+CEILING = 4
+
+# ---- (Lesson 7) the clock (lesson Part 6) -------------------------------------
+# 60 seconds: at 3 units a second that is (3 * 60) = 180 units of
+# flying, enough for a good handful of ships, short enough to retry.
+GAME_SECONDS = 60
+
+
+def make_pickups():
+    """(Lesson 7) build a fresh list of 8 pickup THINGS (Lesson 5's
+    dictionaries), one at each START_SPOTS position.
+
+    NEW: each one is now a small gold SHIP from ship.obj. Size 0.5
+    makes it 1 unit long, nose to tail, the same as the old 1-unit
+    cube. It spins slowly so it catches your eye: 1 degree a frame of
+    turn = one turn in 6 seconds, and 0.5 of tip so it wobbles too.
+    """
+    pickups = []
+    for spot in START_SPOTS:
+        pickups.append({"model": ship_model, "position": spot,   # NEW: ship
+                        "size": PICKUP_SIZE, "angles": [0, 0, 0],
+                        "speeds": (0.5, 1, 0), "colour": SUN_GOLD,
+                        "pickup": True,
+                        "outline": 2})      # NEW: 2 px black edges, as before
+    return pickups
+
+
+def make_rocks():
+    """(Lesson 8): build a list of 4 rock THINGS, one at each ROCK_SPOTS position.
+
+    Same dictionary keys as a gold ship, with three differences:
+    size 1.5, speeds (0, 0, 0) so they never spin, and "pickup": False
+    so you can't collect them.
+    """
+    rocks = []
+    for spot in ROCK_SPOTS:
+        rocks.append({"model": cube_model, "position": spot,
+                      "size": ROCK_SIZE, "angles": [0, 0, 0],
+                      "speeds": (0, 0, 0), "colour": STONE,
+                      "pickup": False,
+                      "outline": 2})        # NEW: 2 px black edges, as before
+    return rocks
+
+
+def make_teapot():
+    """NEW: the giant teapot, one thing with "pickup": False (Part 5).
+
+    It stands just past the LEFT wall (WALL = 12). From the start, hold
+    LEFT for 1 second: (1.5 * 60) = 90 degrees, and it is in front of you.
+      "size" 4:  the loaded teapot is 2 units long, so this one is
+                 (2 * 4) = 8 units long and (0.979 * 4) = 3.9 units tall.
+      "position" (-17, 1, 4): its middle is 17 to the left of the start.
+                 Its spout tip is (1 * 4) = 4 units from the middle, so
+                 even when the spout swings round to face you, the tip is
+                 at x = (-17 + 4) = -13, one unit past the wall: you can
+                 fly up to the teapot but never into it. z = 4 keeps it
+                 clear of rock 1 behind you. y = 1 puts its bottom at
+                 (1 - (0.4895 * 4)) = -0.96, just above the floor
+                 (FLOOR_Y = -1).
+      "speeds" (0, 0.25, 0): a slow turn, (360 / 0.25) = 1,440 frames
+                 = 24 seconds for one full turn.
+      "outline" 0: no black edges (lesson Part 5). O turns 1 px on.
+    """
+    return {"model": teapot_model, "position": (-17, 1, 4), "size": 4,
+            "angles": [0, 0, 0], "speeds": (0, 0.25, 0),
+            "colour": TEAPOT_BLUE, "pickup": False, "outline": 0}
+
+
+def make_world():
+    """(Lesson 8): the whole world = 8 gold ships + 4 rocks.
+
+    "+" joins two lists into one longer list: (8 + 4) = 12 things.
+    The gold ships come first, so things[0] is ship 0.
+    """
+    # NEW: + the teapot, in a list of one so + can join it on.
+    return (make_pickups() + make_rocks() + [make_teapot()])
+
+
+# "things" is Lesson 5's list of everything in the world.
+# (Lesson 8): 8 gold ships AND 4 rocks.
+things = make_world()
+
+# ---- Where YOU are (from Lesson 4) ------------------------------------
+cam_x = 0
+cam_y = 0
+cam_z = 0
+cam_turn = 0        # degrees, positive = turned LEFT
+cam_tip = 0         # degrees, positive = looking DOWN
+TIP_LIMIT = 60
+MOVE_SPEED = 0.05   # (0.05 * 60) = 3 units a second
+TURN_SPEED = 1.5    # (1.5 * 60) = 90 degrees a second
+NEAR = 0.1          # closer than this (CAMERA z) is not drawn
+
+# ---- The light (from Lesson 3, unchanged) -----------------------------
+LIGHT = (0.48, 0.6, -0.64)
+AMBIENT = 0.2
+use_light = True
+show_grid = True
+# (Lesson 8): K turns clipping on / off, so you can see the difference.
+use_clipping = True
+
+# ---- (Lesson 7) the score ------------------------------------------------
+score = 0
+# ---- (Lesson 7) the clock and the game's two states (lesson Part 6) ----------
+best_score = 0                         # NOT reset by R
+frames_left = (GAME_SECONDS * 60)      # (60 * 60) = 3600
+game_over = False                      # False = PLAYING, True = TIME UP
+
+# ---- The mini-map (lesson Part 1: resized for the whole field) ---------
+MAP_LEFT = 630
+MAP_TOP = 430
+MAP_SIZE = 160
+# (Lesson 7) the WORLD centre now sits in the MIDDLE of the box, because
+# the field goes the same distance every way (-12 to 12).
+MAP_CX = (MAP_LEFT + (MAP_SIZE / 2))    # (630 + 80) = 710
+MAP_CY = (MAP_TOP + (MAP_SIZE / 2))     # (430 + 80) = 510
+# (Lesson 7) 6 px per unit: the walls are 24 units across, and
+# (24 * 6) = 144 px fits the 160 px box with 8 px to spare.
+MAP_SCALE = 6
+
+
+# ======================================================================
+# MATRIX TOOLS (from Lesson 6, unchanged)
+# ======================================================================
+
+def matrix_times_point(matrix, point_3d):
+    """Put one point through a matrix: each ROW dotted with the point."""
+    row_0, row_1, row_2 = matrix
+    new_x = dot(row_0, point_3d)
+    new_y = dot(row_1, point_3d)
+    new_z = dot(row_2, point_3d)
+    return (new_x, new_y, new_z)
+
+
+def tip_matrix(angle_degrees):
+    """Lesson 2B's TIP as a grid. x is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (1, 0,     0         ),
+        (0, cos_a, (-sin_a)  ),
+        (0, sin_a, cos_a     ),
+    )
+
+
+def turn_matrix(angle_degrees):
+    """Lesson 2's TURN as a grid. y is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, 0, (-sin_a)),
+        (0,     1, 0       ),
+        (sin_a, 0, cos_a   ),
+    )
+
+
+def roll_matrix(angle_degrees):
+    """Lesson 2B's ROLL as a grid. z is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, (-sin_a), 0),
+        (sin_a, cos_a,    0),
+        (0,     0,        1),
+    )
+
+
+def column(matrix, column_number):
+    """One COLUMN of a matrix = where that axis arrow lands."""
+    row_0, row_1, row_2 = matrix
+    return (row_0[column_number], row_1[column_number], row_2[column_number])
+
+
+def combine(first, second):
+    """ONE matrix that does 'first', then 'second' (Lesson 6)."""
+    new_col_0 = matrix_times_point(second, column(first, 0))
+    new_col_1 = matrix_times_point(second, column(first, 1))
+    new_col_2 = matrix_times_point(second, column(first, 2))
+    return (
+        (new_col_0[0], new_col_1[0], new_col_2[0]),
+        (new_col_0[1], new_col_1[1], new_col_2[1]),
+        (new_col_0[2], new_col_1[2], new_col_2[2]),
+    )
+
+
+def spin_matrix(angles):
+    """A thing's whole spin as ONE matrix: tip, then turn, then roll."""
+    tip_then_turn = combine(tip_matrix(angles[0]), turn_matrix(angles[1]))
+    return combine(tip_then_turn, roll_matrix(angles[2]))
+
+
+# ======================================================================
+# THE 3D PIPELINE (Lessons 1 to 6, unchanged)
+# ======================================================================
+
+def to_world(shape_point, thing):
+    """(Lesson 5) SHAPE -&gt; WORLD: size, then spin, then place."""
+    x, y, z = shape_point
+    size = thing["size"]
+    sized = ( (x * size), (y * size), (z * size) )
+    spun = matrix_times_point(thing["matrix"], sized)
+    pos_x, pos_y, pos_z = thing["position"]
+    sx, sy, sz = spun
+    return ( (sx + pos_x), (sy + pos_y), (sz + pos_z) )
+
+
+def to_camera(world_point):
+    """(Lessons 4 and 6) WORLD -&gt; CAMERA: subtract you, then camera_matrix."""
+    x, y, z = world_point
+    moved = ( (x - cam_x), (y - cam_y), (z - cam_z) )
+    return matrix_times_point(camera_matrix, moved)
+
+
+def project(point_3d):
+    """(Lesson 1) CAMERA -&gt; SCREEN. Only call it with z &gt;= NEAR."""
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+def average_z(corners, camera_points):
+    """(Lesson 3) how far away is this face? Uses CAMERA z."""
+    total = 0
+    for corner_number in corners:
+        x, y, z = camera_points[corner_number]
+        total = (total + z)
+    return (total / len(corners))
+
+
+def is_facing_you(face_points):
+    """(Lesson 3) the clock test: True if clockwise on the screen."""
+    a_x, a_y = face_points[0]
+    b_x, b_y = face_points[1]
+    c_x, c_y = face_points[2]
+    arrow_a_x = (b_x - a_x)
+    arrow_a_y = (b_y - a_y)
+    arrow_b_x = (c_x - a_x)
+    arrow_b_y = (c_y - a_y)
+    cross = ( (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x) )
+    return (cross &gt; 0)
+
+
+def dot(arrow_1, arrow_2):
+    """(Lesson 3) the dot product."""
+    x1, y1, z1 = arrow_1
+    x2, y2, z2 = arrow_2
+    return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
+
+
+def shade_colour(colour, pointer):
+    """(Lesson 3) brighter when the face points at the light."""
+    brightness = dot(pointer, LIGHT)
+    if brightness &lt; 0:
+        brightness = 0
+    shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )
+    red, green, blue = colour
+    return ( round(red * shade), round(green * shade), round(blue * shade) )
+
+
+def keep_under_360(angle):
+    """Keep an angle between 0 and 360."""
+    if angle &gt;= 360:
+        angle = (angle - 360)
+    if angle &lt; 0:
+        angle = (angle + 360)
+    return angle
+
+
+def add_faces_of(thing, faces_to_draw):
+    """(Lesson 5) work out every face of ONE thing and add the ones to
+    paint to the shared list.
+
+    (Lesson 8) each face is CLIPPED in CAMERA coordinates first,
+    and only then projected. So we no longer project every corner up
+    front: a face's cut points only exist once that face is clipped.
+    """
+    model = thing["model"]
+    camera_points = []
+    for p in model["points"]:
+        world = to_world(p, thing)                     # WORLD
+        camera_points.append(to_camera(world))         # CAMERA
+
+    for corners, face_colour, pointer in model["faces"]:
+        # (Lesson 8) this face's corners in CAMERA coordinates, clockwise.
+        face_camera = []
+        for corner_number in corners:
+            face_camera.append(camera_points[corner_number])
+
+        if use_clipping:
+            # (Lesson 8) cut the face at the NEAR wall (lesson Part 3).
+            face_camera = clip_face(face_camera)
+            # Fewer than 3 corners left: nothing to paint.
+            if len(face_camera) &lt; 3:
+                continue
+        else:
+            # Lesson 4's old rule, for comparing (K): any corner behind
+            # the NEAR wall? Skip the whole face.
+            too_close = False
+            for camera in face_camera:
+                if camera[2] &lt; NEAR:
+                    too_close = True
+            if too_close:
+                continue
+
+        # Every corner left is now in front of NEAR, so project() is safe.
+        face_points = []
+        for camera in face_camera:
+            face_points.append(project(camera))        # SCREEN
+        # The clock test works on any number of corners (it only looks
+        # at the first 3), and clipping keeps them clockwise.
+        if not is_facing_you(face_points):
+            continue
+        distance = average_z(corners, camera_points)
+        colour = thing["colour"]
+        if use_light:
+            spun_pointer = matrix_times_point(thing["matrix"], pointer)
+            colour = shade_colour(colour, spun_pointer)
+        # NEW: the thing's outline width rides along with the face.
+        faces_to_draw.append( (distance, face_points, colour, thing["outline"]) )
+
+
+def draw_floor():
+    """(Lesson 8): the floor grid as LONG lines, right across the field.
+
+    25 lines running away from you (x = -12 to 12) and 25 lines running
+    across (z = -12 to 12): (25 + 25) = 50 lines a frame. Lesson 5 had
+    to cut them into 1-unit pieces, (25 * 24) * 2 = 1,200 of them, so
+    that only the pieces behind you were lost. Clipping keeps the part
+    of a long line in front of you, so the pieces are not needed.
+
+    A long line is still exactly right on the screen: a straight line
+    in 3D projects to a straight line on the screen, so its two ends
+    are all we need (lesson Part 2).
+    """
+    for x in range(GRID_LEFT, (GRID_RIGHT + 1)):
+        draw_floor_line( (x, FLOOR_Y, GRID_NEAR), (x, FLOOR_Y, GRID_FAR) )
+    for z in range(GRID_NEAR, (GRID_FAR + 1)):
+        draw_floor_line( (GRID_LEFT, FLOOR_Y, z), (GRID_RIGHT, FLOOR_Y, z) )
+
+
+def draw_floor_line(world_start, world_end):
+    """(Lesson 8): one long floor line, WORLD -&gt; CAMERA -&gt; clip -&gt; SCREEN."""
+    start = to_camera(world_start)
+    end = to_camera(world_end)
+    if use_clipping:
+        clipped = clip_line(start, end)
+        if clipped is None:              # both ends behind you
+            return
+        start, end = clipped
+    else:
+        # Lesson 4's old rule, for comparing (K): any end behind? skip.
+        if (start[2] &lt; NEAR) or (end[2] &lt; NEAR):
+            return
+    pygame.draw.line(screen, GRID_COLOUR, project(start), project(end), 1)
+
+# ======================================================================
+# CLIPPING (Lesson 8)
+# ======================================================================
+# Everything here works in CAMERA coordinates: (0, 0, 0) is your eye,
+# +x is right, +y is up, +z is straight ahead. The NEAR wall is the
+# flat sheet z = NEAR (0.1) just in front of your eye.
+#   "in"  = in front of the wall:  z &gt;= NEAR   (safe to project)
+#   "out" = behind the wall:       z &lt;  NEAR   (must never be projected)
+
+def cut_at_near(point_a, point_b):
+    """(Lesson 8): the CAMERA point where the line from point_a to point_b
+    crosses the NEAR wall. One end must be in, the other out.
+
+    t says how far along the line the wall is: 0 = at point_a,
+    1 = at point_b, 0.5 = halfway (lesson Part 2).
+
+        t = ( (NEAR - a_z) / (b_z - a_z) )
+
+    Then each of x and y moves the same fraction t of its own gap:
+
+        x = ( a_x + (t * (b_x - a_x)) )
+
+    Worked example (lesson Part 2): a = (-2, -1, -1), b = (2, -1, 3)
+        t = ( (0.1 - (-1)) / (3 - (-1)) ) = (1.1 / 4) = 0.275
+        x = ( -2 + (0.275 * (2 - (-2))) ) = ( -2 + 1.1 ) = -0.9
+        y = ( -1 + (0.275 * (-1 - (-1))) ) = -1
+        z = NEAR = 0.1          -&gt; (-0.9, -1, 0.1)
+    """
+    a_x, a_y, a_z = point_a
+    b_x, b_y, b_z = point_b
+    t = ( (NEAR - a_z) / (b_z - a_z) )
+    cut_x = ( a_x + (t * (b_x - a_x)) )
+    cut_y = ( a_y + (t * (b_y - a_y)) )
+    # The same sum for z would give exactly NEAR, which is the whole
+    # point of t, so we just use NEAR.
+    return (cut_x, cut_y, NEAR)
+
+
+def clip_line(start, end):
+    """(Lesson 8): keep the part of a CAMERA line that is in front of NEAR.
+
+    Gives back (start, end) with any end behind you swapped for the
+    cut point, or None ("nothing to draw") if both ends are behind.
+    """
+    start_in = (start[2] &gt;= NEAR)
+    end_in = (end[2] &gt;= NEAR)
+    if start_in and end_in:
+        return (start, end)                       # all in front: keep it all
+    if (not start_in) and (not end_in):
+        return None                               # all behind: nothing
+    cut = cut_at_near(start, end)
+    if start_in:
+        return (start, cut)                       # end was behind
+    return (cut, end)                             # start was behind
+
+
+def clip_face(face_corners):
+    """(Lesson 8) cut one face at the NEAR wall (lesson Part 3).
+
+    face_corners: the face's corners in CAMERA coordinates, clockwise.
+    Gives back the corners of the part in front of NEAR, still in
+    clockwise order. That can be 3, 4 or 5 corners, or an empty list
+    if the whole face is behind you.
+
+    We walk round the face one edge at a time. Each edge goes from the
+    PREVIOUS corner to the CURRENT one, and there are only 4 cases:
+
+        previous  current   keep
+        in        in        current
+        in        out       the cut point
+        out       in        the cut point, then current
+        out       out       nothing
+
+    face_corners[-1] means "the LAST item in the list". Starting with
+    it as "previous" makes the first edge go last corner -&gt; first
+    corner, so the walk goes all the way round and closes the face.
+
+    Worked example (lesson Part 3): the right face of rock 0, seen from
+    WORLD (2.5, 0, 3). CAMERA corners in clockwise order:
+        5 (-1, 2, -0.5) out    6 (-1, 2, 2.5) in
+        2 (-1, -1, 2.5) in     1 (-1, -1, -0.5) out
+    Edges 1-&gt;5 nothing,  5-&gt;6 cut (-1, 2, 0.1) then 6,
+          6-&gt;2 keep 2,    2-&gt;1 cut (-1, -1, 0.1)
+    Result: 4 corners  (-1, 2, 0.1) (-1, 2, 2.5) (-1, -1, 2.5) (-1, -1, 0.1)
+    """
+    kept = []
+    previous = face_corners[-1]
+    for current in face_corners:
+        previous_in = (previous[2] &gt;= NEAR)
+        current_in = (current[2] &gt;= NEAR)
+        if previous_in and current_in:
+            kept.append(current)
+        elif previous_in and (not current_in):
+            kept.append(cut_at_near(previous, current))
+        elif (not previous_in) and current_in:
+            kept.append(cut_at_near(previous, current))
+            kept.append(current)
+        # out -&gt; out: keep nothing
+        previous = current
+    return kept
+
+
+# ======================================================================
+# THE GAME TOOLS (Lesson 7)
+# ======================================================================
+
+def distance_3d(point_a, point_b):
+    """(Lesson 7) how far apart are two WORLD points? (lesson Part 2)
+
+    Subtract, square each part, add them up, square-root the total:
+    Pythagoras done twice, in one line.
+
+    Worked example (lesson Part 2): you at (1, 0, 3), ship 0 at (3, 1, 5)
+        dx = (3 - 1) = 2,  dy = (1 - 0) = 1,  dz = (5 - 3) = 2
+        math.sqrt( (2 * 2) + (1 * 1) + (2 * 2) ) = math.sqrt(9) = 3
+    """
+    ax, ay, az = point_a
+    bx, by, bz = point_b
+    dx = (bx - ax)
+    dy = (by - ay)
+    dz = (bz - az)
+    return math.sqrt( (dx * dx) + (dy * dy) + (dz * dz) )
+
+
+def far_from_rocks(spot):
+    """(Lesson 8): True if this WORLD spot is at least ROCK_CLEARANCE (3) from
+    the centre of every rock, so a new gold ship never hides inside one.
+
+    Worked example (lesson Part 1): spot (1, 1, 5) and rock 0 at
+    (0, 0.5, 4): math.sqrt( (1 * 1) + (0.5 * 0.5) + (1 * 1) ) = 1.5,
+    less than 3, so False: try again.
+    """
+    for rock_spot in ROCK_SPOTS:
+        if distance_3d(spot, rock_spot) &lt; ROCK_CLEARANCE:
+            return False
+    return True
+
+
+def new_pickup_spot():
+    """(Lesson 7) a random WORLD spot for a ship, at least
+    MIN_SPAWN_DISTANCE from you (lesson Part 4).
+
+    "while True" repeats for ever, until "return" jumps out. Usually the
+    first try is far enough; about 1 try in 5 is too close and we
+    simply pick again.
+    """
+    you = (cam_x, cam_y, cam_z)
+    while True:
+        new_x = random.uniform((-FIELD), FIELD)
+        new_y = random.uniform(PICKUP_LOW, PICKUP_HIGH)
+        new_z = random.uniform((-FIELD), FIELD)
+        spot = (new_x, new_y, new_z)
+        # (Lesson 8): "and far_from_rocks(spot)": BOTH must be True.
+        if (distance_3d(you, spot) &gt;= MIN_SPAWN_DISTANCE) and far_from_rocks(spot):
+            return spot
+
+
+def to_map(x, z):
+    """A WORLD (x, z) -&gt; a pixel on the mini-map (from Lesson 4)."""
+    map_x = MAP_CX + (x * MAP_SCALE)
+    map_y = MAP_CY - (z * MAP_SCALE)
+    return (map_x, map_y)
+
+
+def draw_map():
+    """The mini-map: the wall square, every ship and rock, and you, from above."""
+    box = pygame.Rect(MAP_LEFT, MAP_TOP, MAP_SIZE, MAP_SIZE)
+    pygame.draw.rect(screen, MAP_BACK, box)
+    screen.set_clip(box)
+    # (Lesson 7) the walls: from map (-12, 12) to map (12, -12)
+    wall_left, wall_top = to_map((-WALL), WALL)          # (638, 438)
+    wall_size = ( (2 * WALL) * MAP_SCALE )                # (24 * 6) = 144
+    pygame.draw.rect(screen, WALL_RED,
+                     pygame.Rect(wall_left, wall_top, wall_size, wall_size), 1)
+    # Which corners to draw for each thing, seen from above:
+    #   a rock (cube_model): its 4 bottom corners, a square (Lesson 5)
+    #   NEW: a ship: its nose and two wing tips (corners 0, 1 and 2),
+    #        a small triangle that points the way the ship faces
+    #   anything else: not on the map (the teapot in step 3)
+    for thing in things:
+        if thing["model"] == cube_model:
+            map_corners = (0, 1, 2, 3)
+        elif thing["model"] == ship_model:
+            map_corners = (0, 1, 2)
+        else:
+            continue
+        outline = []
+        for corner_number in map_corners:
+            corner = thing["model"]["points"][corner_number]
+            x, y, z = to_world(corner, thing)
+            outline.append(to_map(x, z))
+        pygame.draw.polygon(screen, thing["colour"], outline, 2)
+    # You: pink dot and a line the way your BODY faces.
+    forward_x, forward_y, forward_z = column(turn_matrix(cam_turn), 2)
+    you = to_map(cam_x, cam_z)
+    nose = to_map( (cam_x + (forward_x * 1.5)), (cam_z + (forward_z * 1.5)) )
+    pygame.draw.line(screen, PINK, you, nose, 2)
+    pygame.draw.circle(screen, PINK, you, 4)
+    screen.set_clip(None)
+    pygame.draw.rect(screen, WHITE, box, 1)
+
+
+# ======================================================================
+# THE MAIN LOOP
+# ======================================================================
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_l:
+                use_light = not use_light
+            if event.key == pygame.K_g:
+                show_grid = not show_grid
+            # NEW: O = the teapot's outlines: 0 px -&gt; 1 px -&gt; 0 px ...
+            if event.key == pygame.K_o:
+                for thing in things:
+                    if thing["model"] == teapot_model:
+                        if thing["outline"] == 0:
+                            thing["outline"] = 1
+                        else:
+                            thing["outline"] = 0
+            if event.key == pygame.K_k:                  # (Lesson 8)
+                use_clipping = not use_clipping
+            # (Lesson 7) R only works after TIME UP, so you can't restart by
+            # accident in the middle of a good game.
+            if (event.key == pygame.K_r) and game_over:
+                # Every game number back to its start value...
+                cam_x = 0
+                cam_y = 0
+                cam_z = 0
+                cam_turn = 0
+                cam_tip = 0
+                things = make_world()      # (Lesson 8): ships AND rocks
+                score = 0
+                frames_left = (GAME_SECONDS * 60)
+                game_over = False
+                # ...but NOT best_score: it remembers your best.
+
+    # ==================================================================
+    # PLAYING: everything in this "if" stops when game_over is True.
+    # ==================================================================
+    if not game_over:
+        keys = pygame.key.get_pressed()
+
+        # ---- Turning and looking (from Lesson 4, unchanged) ----------
+        if keys[pygame.K_LEFT]:
+            cam_turn = (cam_turn + TURN_SPEED)
+        if keys[pygame.K_RIGHT]:
+            cam_turn = (cam_turn - TURN_SPEED)
+        if keys[pygame.K_UP]:
+            cam_tip = (cam_tip - TURN_SPEED)
+        if keys[pygame.K_DOWN]:
+            cam_tip = (cam_tip + TURN_SPEED)
+        if cam_tip &gt; TIP_LIMIT:
+            cam_tip = TIP_LIMIT
+        if cam_tip &lt; (-TIP_LIMIT):
+            cam_tip = (-TIP_LIMIT)
+
+        # ---- (Lesson 7) fly where you LOOK (lesson Part 5) -----------------
+        # Build the arrow the way your head points: tip first (the head
+        # nods), then turn (the body turns), and read off column 2,
+        # where the +z arrow lands (Lesson 6).
+        #   cam_tip -30, cam_turn 0:   forward = (0, 0.5, 0.866)   climbing
+        #   cam_tip -30, cam_turn 90:  forward = (-0.866, 0.5, 0)  left + up
+        # Right stays level (from your body only), so A and D slide
+        # sideways without climbing.
+        look = combine(tip_matrix(cam_tip), turn_matrix(cam_turn))
+        forward_x, forward_y, forward_z = column(look, 2)
+        right_x, right_y, right_z = column(turn_matrix(cam_turn), 0)
+        if keys[pygame.K_w]:
+            cam_x = (cam_x + (forward_x * MOVE_SPEED))
+            cam_y = (cam_y + (forward_y * MOVE_SPEED))   # (Lesson 7) y too
+            cam_z = (cam_z + (forward_z * MOVE_SPEED))
+        if keys[pygame.K_s]:
+            cam_x = (cam_x - (forward_x * MOVE_SPEED))
+            cam_y = (cam_y - (forward_y * MOVE_SPEED))   # (Lesson 7) y too
+            cam_z = (cam_z - (forward_z * MOVE_SPEED))
+        if keys[pygame.K_d]:
+            cam_x = (cam_x + (right_x * MOVE_SPEED))
+            cam_z = (cam_z + (right_z * MOVE_SPEED))
+        if keys[pygame.K_a]:
+            cam_x = (cam_x - (right_x * MOVE_SPEED))
+            cam_z = (cam_z - (right_z * MOVE_SPEED))
+        if keys[pygame.K_e]:
+            cam_y = (cam_y + MOVE_SPEED)
+        if keys[pygame.K_q]:
+            cam_y = (cam_y - MOVE_SPEED)
+
+        # ---- (Lesson 7) walls, ground and ceiling (lesson Part 5) ----------
+        # Past a limit? Put it back ON the limit. You slide along the
+        # wall instead of going through it.
+        if cam_x &gt; WALL:
+            cam_x = WALL
+        if cam_x &lt; (-WALL):
+            cam_x = (-WALL)
+        if cam_z &gt; WALL:
+            cam_z = WALL
+        if cam_z &lt; (-WALL):
+            cam_z = (-WALL)
+        if cam_y &gt; CEILING:
+            cam_y = CEILING
+        if cam_y &lt; GROUND:
+            cam_y = GROUND
+
+        # ---- (Lesson 7) collect any ship you are touching (Part 3) -----
+        you = (cam_x, cam_y, cam_z)
+        for thing in things:
+            # (Lesson 8): rocks have "pickup": False, so they are never collected.
+            if not thing["pickup"]:
+                continue
+            if distance_3d(you, thing["position"]) &lt;= COLLECT_RADIUS:
+                score = (score + 1)
+                # (Lesson 7) the same ship jumps to a new spot (Part 4):
+                # there are always exactly 8 ships to find.
+                thing["position"] = new_pickup_spot()
+
+        # ---- (Lesson 7) tick the clock (lesson Part 6) ---------------------
+        frames_left = (frames_left - 1)
+        if frames_left &lt;= 0:
+            frames_left = 0
+            game_over = True
+            if score &gt; best_score:
+                best_score = score
+
+    # ---- Every pickup spins (Lesson 5), even after TIME UP -------------
+    for thing in things:
+        angles = thing["angles"]
+        speeds = thing["speeds"]
+        angles[0] = keep_under_360( (angles[0] + speeds[0]) )
+        angles[1] = keep_under_360( (angles[1] + speeds[1]) )
+        angles[2] = keep_under_360( (angles[2] + speeds[2]) )
+        thing["matrix"] = spin_matrix(angles)
+
+    # ---- The camera's matrix, once a frame (Lesson 6) ------------------
+    camera_matrix = combine(turn_matrix(-cam_turn), tip_matrix(-cam_tip))
+
+    # ==================================================================
+    # DRAW: the world first, then the HUD on top (lesson Part 2)
+    # ==================================================================
+    screen.fill(BLACK)
+    if show_grid:
+        draw_floor()
+    faces_to_draw = []
+    for thing in things:
+        add_faces_of(thing, faces_to_draw)
+    faces_to_draw.sort(reverse=True)
+    for distance, face_points, colour, outline in faces_to_draw:
+        pygame.draw.polygon(screen, colour, face_points)
+        # NEW: only draw an edge if the thing asks for one. (Careful:
+        # in pygame a width of 0 means FILL the shape, not "no edge",
+        # so we must skip the call, not pass 0.)
+        if outline &gt; 0:
+            pygame.draw.polygon(screen, BLACK, face_points, outline)
+
+    draw_map()
+
+    # ---- (Lesson 7) how far is the nearest ship? -------------------------
+    # Start with a huge number, then keep the smallest distance found.
+    nearest = 1000
+    for thing in things:
+        if not thing["pickup"]:          # (Lesson 8): rocks don't count
+            continue
+        d = distance_3d((cam_x, cam_y, cam_z), thing["position"])
+        if d &lt; nearest:
+            nearest = d
+
+    # ---- The HUD: words drawn LAST, so nothing in the world can hide them -----------
+    # str() turns a number into letters so + can join it to words.
+    text = ("score " + str(score) + "   best " + str(best_score))
+    screen.blit(font.render(text, True, SUN_GOLD), (20, 20))
+    text = ("nearest ship " + str(round(nearest, 1)))
+    screen.blit(font.render(text, True, PINK), (20, 50))
+    # (Lesson 8): say whether clipping is on, so screenshots are never confusing.
+    if use_clipping:
+        text = "clipping ON (K)"
+    else:
+        text = "clipping OFF (K)"
+    screen.blit(font.render(text, True, WHITE), (20, 80))
+    # (Lesson 7) math.ceil rounds UP, so the clock never shows 0 while you
+    # can still play: 59.98 seconds left shows as 60.
+    seconds = math.ceil(frames_left / 60)
+    # NEW: clock.get_fps() = how many frames pygame managed in the last
+    # second or so. 60 means it keeps up; less means each frame takes
+    # longer than (1000 / 60) = 16.7 milliseconds (lesson Part 5).
+    fps = round(clock.get_fps())
+    screen.blit(font.render("fps " + str(fps), True, WHITE), (680, 50))
+    screen.blit(font.render("time " + str(seconds), True, WHITE), (680, 20))
+    screen.blit(font.render("ARROWS look,  W / S fly,  A / D slide,  Q / E down / up",
+                            True, YELLOW), (20, 570))
+
+    # ---- (Lesson 7) TIME UP on top of everything -------------------------
+    if game_over:
+        words = big_font.render("TIME UP", True, WHITE)
+        # Centre it: half its width to the left of the screen's middle.
+        # get_width() is how many pixels wide the words came out.
+        left = (CENTRE_X - (words.get_width() / 2))
+        screen.blit(words, (left, 200))
+        words = font.render("score " + str(score) + "   best " + str(best_score) +
+                            "      press R to play again", True, YELLOW)
+        left = (CENTRE_X - (words.get_width() / 2))
+        screen.blit(words, (left, 290))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Press O and fly towards the teapot. Every outlined triangle is
+#     one "f" line of teapot.obj. Where are the triangles smallest?
+#   * Set the teapot's "size" to 8. Does fps change? (The number of
+#     faces is the same; only bigger triangles cost more to fill.)
+#   * Add a second teapot at (-16, 1, 0) in make_world(), turning the other
+#     way ("speeds" (0, -0.25, 0)). What happens to fps?
+#   * Download a low-poly model (kenney.nl has free ones, look for
+#     .obj in the pack), put it next to this script, and load it with
+#     load_obj(). Keep it under about 1,000 faces.
+#   * Make the teapot collectable for 5 points: give every thing a
+#     "points" key (1 for ships, 5 for the teapot) and move the teapot
+#     inside the walls.
+# ----------------------------------------------------------------------</code></pre></details>
+<div class="check"><div class="q"><p class="qq"><span class="qn">Q10</span><span>You want the teapot 12 units long instead of 8. What <code>"size"</code> do you need, and what else must change?</span></p><details><summary>Show answer</summary><div class="ans"><p>The loaded teapot is 2 long, so <code>"size": 6</code> gives <code>(2 * 6)</code> = 12. But now the spout reaches <code>(-17 + 6)</code> = −11, inside the wall at −12, and you could fly into it. Move the middle out to at least x = <code>(-12 - 6 - 1)</code> = −19. Its bottom would also be at <code>(1 - (0.4895 * 6))</code> = −1.94, under the floor, so raise y to about 2.</p></div></details></div></div>
+
+<h2>Wrap up <span class="mins">4 MIN</span></h2>
+<figure id="fig-9-w-1"><img src="images/o24_summary.png" alt="Five boxes in a row joined by arrows: teapot.obj, a text file of 9,965 lines; load_obj(), 5 changes, once, about 0.02 s; teapot_model, the points and faces dictionary; make_teapot(), a thing with size and position; every frame, Lessons 1 to 8: world, camera, clip, draw. Below: the five changes, and the line: the game never knows the difference between a typed-in cube and a loaded teapot." loading="lazy"><figcaption><span class="fignum">Fig 9.W.1</span>Everything new today in one picture. <code>load_obj()</code> runs once, at the start. After that a loaded model is just another model.</figcaption></figure>
+<ul>
+  <li>An <code>.obj</code> file is plain text: <code>v x y z</code> for each corner, <code>f a b c</code> for each face, counting corners from 1 (Fig 9.1.1).</li>
+  <li><code>split()</code> cuts a line into pieces of text; <code>float()</code> and <code>int()</code> turn them into numbers (Fig 9.2.1).</li>
+  <li>The five changes: <strong>1</strong> subtract 1; <strong>2</strong> z = −z <em>and</em> reverse each face; <strong>3</strong> a pointer from <code>cross()</code>; <strong>4</strong> centre and size 2; <strong>5</strong> skip everything else.</li>
+  <li><code>cross()</code> turns two arrows on a face into one arrow out of it. Its z part is Lesson 3's clock test (Fig 9.4.5).</li>
+  <li>Thousands of faces cost time: the teapot takes about 19.5 ms a frame, just over the 16.7 ms that 60 fps allows (Fig 9.5.3).</li>
+</ul>
+<div class="check"><div class="q"><p class="qq"><span class="qn">Q11</span><span>Final check. A file holds one triangle: <code>v 0 0 0</code>, <code>v 0 2 0</code>, <code>v 2 0 0</code>, <code>f 1 2 3</code>. Put it through all five changes, then place it 5 in front of you, at WORLD (0, 0, 5), size 1, while you stand at the start. Will you see it?</span></p><details><summary>Show answer</summary><div class="ans"><p>1. CHANGE 1: <code>f 1 2 3</code> → (0, 1, 2). CHANGE 2: every z is 0, so −0 = 0 and the corners do not move; the face is reversed to (2, 1, 0).</p><p>2. CHANGE 4: x from 0 to 2, middle 1; y from 0 to 2, middle 1; z middle 0. Biggest side 2, so scale = <code>(2 / 2)</code> = 1. Corners: 0 = (−1, −1, 0), 1 = (−1, 1, 0), 2 = (1, −1, 0).</p><p>3. CHANGE 3: a = corner 2 (1, −1, 0), b = corner 1 (−1, 1, 0), c = corner 0 (−1, −1, 0). arrow_a = (−2, 2, 0), arrow_b = (−2, 0, 0). x = <code>((2 * 0) - (0 * 0))</code> = 0, y = <code>((0 * -2) - (-2 * 0))</code> = 0, z = <code>((-2 * 0) - (2 * -2))</code> = 4. Pointer (0, 0, 1).</p><p>4. The pointer is +z: it points <em>away</em> from you. You are looking at the triangle's back, so Lesson 3's clock test hides it and you see nothing. Fly round behind it (to z = 10, turned 180) and it appears. In the file, its front faced the file's −z, which is our +z after the flip.</p></div></details></div></div>
+<h3>What comes next</h3>
+<p>Fly close to the teapot and turn round it. Lesson 3's painter's sort orders whole faces by their average distance. With thousands of small faces at all angles, and big rocks beside small ships, it can get the order wrong: a face further away is drawn over one in front of it. Lesson 10, the depth buffer, fixes that by checking the closest thing <em>for every pixel</em>. Some ideas to try first (the scripts' TRY THIS boxes have more):</p>
+<ul>
+  <li>Make your own .obj file in a text editor: a pyramid with 5 v lines and 5 f lines. Load it as the pickups instead of the ship.</li>
+  <li>Take out <code>corners.reverse()</code> and run step 2. What happens to the ships?</li>
+  <li>Download a free low-poly model (kenney.nl has packs with .obj files), put it next to the script, and load it with <code>load_obj()</code>. Keep it under about 1,000 faces and watch the fps.</li>
+</ul>
+
+<h2>Files</h2>
+<p>Download the code for this lesson (right-click a file and choose <em>Save link as</em>):</p>
+<ul class="files">
+  <li><a href="code/ship.obj" download><code>code/ship.obj</code></a>: the 5-corner ship, made for this lesson</li>
+  <li><a href="code/teapot.obj" download><code>code/teapot.obj</code></a>: the Utah teapot, 3,644 corners and 6,320 faces</li>
+  <li><a href="code/step1_read_ship.py" download><code>code/step1_read_ship.py</code></a>: reads <code>ship.obj</code> and prints every line; no window</li>
+  <li><a href="code/step2_ship_from_file.py" download><code>code/step2_ship_from_file.py</code></a>: <code>cross()</code>, <code>face_pointer()</code>, <code>centre_and_size()</code>, <code>load_obj()</code>; the pickups become ships</li>
+  <li><a href="code/step3_teapot_hunt.py" download><code>code/step3_teapot_hunt.py</code></a>: the giant teapot, <code>"outline"</code> per thing, O key and fps counter; the finished script and Lesson 10's start</li>
+  <li><code>images/</code>: every diagram on this page as a PNG</li>
+  <li><a href="../figures/">Figure index</a>: every figure and table in the course, with its number. Numbers read <code>Fig lesson.part.figure</code>, plus a letter for one panel of a picture (for example <code>Fig 9.3.4b</code>).</li>
+</ul>
+</main>
+</body>
+</html>
