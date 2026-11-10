@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframe 3D, Lesson 1</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Chakra+Petch:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one readable column, like a lab notebook; diagrams and code break out slightly wider. */
+:root {
+  --bg:#f3f6f4; --paper:#ffffff; --fg:#17201b; --muted:#56635c; --line:#d5ded8;
+  --accent:#0d8a4a; --accent-soft:#e2f3e9; --code-bg:#121815; --code-fg:#d9f5e3; --warn:#9a6a00;
+  --display:"Chakra Petch", "Trebuchet MS", sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; --code-bg:#0a0e0c; --code-fg:#d9f5e3; --warn:#e6b84a; color-scheme:dark; } }
+:root[data-theme="dark"] {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; --code-bg:#0a0e0c; --code-fg:#d9f5e3; --warn:#e6b84a; color-scheme:dark; }
+body { background:var(--bg); color:var(--fg); font-family:var(--body); font-size:17px; line-height:1.6;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:32px 64px; }
+main { max-width:780px; margin:0 auto; display:flex; flex-direction:column; gap:20px; }
+h1,h2,h3 { font-family:var(--display); text-wrap:balance; line-height:1.2; margin:0; }
+h1 { font-size:clamp(30px,6vw,44px); }
+h2 { font-size:26px; margin-top:28px; padding-top:20px; border-top:2px solid var(--line); display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; }
+h2 .mins { font-family:var(--mono); font-size:14px; color:var(--accent); font-weight:600; letter-spacing:.04em; }
+h3 { font-size:20px; margin-top:12px; }
+p { margin:0; max-width:68ch; }
+.eyebrow { font-family:var(--mono); font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); }
+.lede { font-size:19px; color:var(--muted); }
+code { font-family:var(--mono); font-size:.88em; background:var(--accent-soft); padding:1px 5px; border-radius:4px; }
+pre { margin:0; background:var(--code-bg); color:var(--code-fg); padding:16px 18px; border-radius:8px; overflow-x:auto; font-size:14px; line-height:1.5; }
+pre code { background:none; padding:0; font-size:inherit; color:inherit; }
+figure { margin:0; display:flex; flex-direction:column; gap:8px; }
+figure img { width:100%; border-radius:8px; display:block; border:1px solid var(--line); }
+figcaption { font-size:14px; color:var(--muted); }
+table { border-collapse:collapse; width:100%; font-size:15px; }
+.tablewrap { overflow-x:auto; }
+th,td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+td.t { font-family:var(--mono); white-space:nowrap; color:var(--accent); font-variant-numeric:tabular-nums; }
+ul,ol { margin:0; padding-left:22px; max-width:68ch; }
+li+li { margin-top:4px; }
+.key { background:var(--accent-soft); border-left:4px solid var(--accent); padding:14px 18px; border-radius:0 8px 8px 0; display:flex; flex-direction:column; gap:6px; }
+.key strong { font-family:var(--display); }
+.q { background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:14px 18px; display:flex; flex-direction:column; gap:8px; }
+.qq { font-weight:700; display:flex; gap:10px; }
+.qn { font-family:var(--mono); color:var(--accent); flex:none; }
+details summary { cursor:pointer; color:var(--accent); font-weight:700; }
+details summary:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.ans { padding-top:8px; color:var(--fg); display:flex; flex-direction:column; gap:8px; }
+details.full { border:1px dashed var(--line); border-radius:8px; padding:10px 14px; }
+details.full[open] summary { margin-bottom:10px; }
+.check { display:flex; flex-direction:column; gap:12px; }
+.files li code { white-space:nowrap; }
+.key a { color:var(--accent); font-weight:700; }
+
+/* KEY CONCEPT box: the most important idea of a section.
+   Dark box with big yellow text in BOTH themes, so it always stands out. */
+.keyconcept { background:#14110a; border:3px solid #ffd23c; border-radius:10px; padding:18px 20px 20px; display:flex; flex-direction:column; gap:12px; }
+.keyconcept .kc-label { align-self:flex-start; background:#ffd23c; color:#14110a; font-family:var(--mono); font-weight:800; font-size:15px; letter-spacing:.14em; padding:4px 10px; border-radius:4px; }
+.keyconcept pre { background:none; color:#ffd23c; padding:0; font-size:clamp(14px, 3.6vw, 28px); font-weight:700; line-height:1.6; overflow-x:auto; }
+.keyconcept p { margin:0; color:#f3e7b5; font-size:16px; }
+.fignum { font-family:var(--mono); font-weight:600; color:var(--accent); margin-right:6px; white-space:nowrap; }
+.panels { display:block; margin-top:4px; }
+.panels b { font-family:var(--mono); color:var(--fg); font-weight:600; }
+.tabcap { font-size:14px; color:var(--muted); margin-bottom:-12px; }
+figure, .tabcap { scroll-margin-top:16px; }
+</style>
+
+</head>
+<body>
+<main>
+<nav style="font-family:var(--mono, monospace);font-size:14px;"><a style="color:var(--accent)" href="../">&larr; All lessons</a> &middot; <a style="color:var(--accent)" href="../figures/">Figure index</a></nav>
+
+<header style="display:flex;flex-direction:column;gap:12px">
+  <span class="eyebrow">Wireframe 3D course · Lesson 1 · about 40 minutes</span>
+  <h1>From one line to a 3D cube</h1>
+  <p class="lede">You will draw a line, then a shape made of points and edges, then a real 3D cube on a flat screen. Everything after this lesson, up to a small wireframe game, is built from these three ideas.</p>
+</header>
+
+<figure id="fig-1-0-1"><img src="images/course_map.png" alt="Course map: eight lessons on a road from Lesson 1 to a mini game. Lesson 1 is highlighted as you are here, at the very start." loading="lazy"><figcaption><span class="fignum">Fig 1.0.1</span>The course map. Coloured cards are done or today; darker cards are still to come. Every lesson adds one idea to the same small program.</figcaption></figure>
+<div class="key">
+  <strong>Where this lesson fits</strong>
+  <p><strong>Before:</strong> nothing. This is the first stop.<br><strong>Today:</strong> draw a line, then a shape made of points and edges, then a 3D wire cube that stays still.<br><strong>Next:</strong> <a href="../lesson2/">Lesson 2, Making the cube spin</a>.</p>
+  <p>Everything after today is built on this lesson's three ideas: points, edges and dividing by z. Lessons 2 to 4 make the cube turn, go solid and let you walk round it; Lessons 5 to 7 fill a small world with shapes and turn it into a game.</p>
+</div>
+
+<h2>Lesson plan</h2>
+<p><strong>Who it's for:</strong> someone who can write basic Python (variables, lists, <code>for</code> loops, functions) and has never done graphics. <strong>Needs:</strong> Python 3 and <code>pip install pygame-ce</code>.</p>
+<p><strong>By the end, the learner can:</strong></p>
+<ol>
+  <li>Explain how screen pixels are numbered, and why y goes down.</li>
+  <li>Store any wireframe shape as a list of <em>points</em> and a list of <em>edges</em>.</li>
+  <li>Describe a 3D point as <code>(x, y, z)</code>.</li>
+  <li>Use the projection rule (divide by z) to turn 3D points into screen points, and say why it makes far things smaller.</li>
+  <li>Run and change a program that draws a 3D cube and moves it nearer and further.</li>
+</ol>
+<p class="tabcap" id="fig-1-0-2"><span class="fignum">Table 1.0.2</span>Lesson plan: time, part and what happens</p>
+<div class="tablewrap"><table>
+<tr><th>Time</th><th>Part</th><th>What happens</th></tr>
+<tr><td class="t">0–3</td><td>Setup</td><td>Install pygame-ce. Show the course map: eight short lessons ending in a game.</td></tr>
+<tr><td class="t">3–8</td><td>1. One line</td><td>Screen coordinates. Run <code>step1_line.py</code>, change the end point. Q1–Q2.</td></tr>
+<tr><td class="t">8–14</td><td>2. Points + edges</td><td>Draw a house from two lists. Run <code>step2_polygon.py</code>, delete an edge. Q3–Q4.</td></tr>
+<tr><td class="t">14–19</td><td>3. Going 3D</td><td>Add a third number, z. Meet the cube and its numbered corners, and slide it away from you. Q5–Q6.</td></tr>
+<tr><td class="t">19–34</td><td>4. Projection</td><td>The rule taken apart one name at a time: centre, offset, z, FOCAL, zoom, the minus sign. Follow corner 5 by hand. Q7–Q10.</td></tr>
+<tr><td class="t">34–39</td><td>5. The cube</td><td>Run <code>step3_cube.py</code>. Use the arrow keys, change FOCAL. Q11–Q12.</td></tr>
+<tr><td class="t">39–42</td><td>Wrap up</td><td>Recap the recipe. Final check Q13. Preview Lesson 2: making the cube spin.</td></tr>
+</table></div>
+
+<h2>Part 1: Draw one line <span class="mins">5 MIN</span></h2>
+<p>A wireframe game is nothing more than lots of straight lines drawn on a flat screen. So we start with one line.</p>
+<p>To draw a line, the computer needs its two ends. Each end is a position on the screen, written <code>(x, y)</code> in pixels. The surprise is that <strong>y counts downward</strong> from the top of the window.</p>
+<figure id="fig-1-1-1"><img src="images/d1_screen_coordinates.png" alt="Screen coordinate diagram with (0,0) at top-left, x to the right, y downward" loading="lazy"><figcaption><span class="fignum">Fig 1.1.1</span>(0, 0) is the top-left corner. x grows to the right, y grows downward.</figcaption></figure>
+<p>The important part of <code>step1_line.py</code>:</p>
+<pre><code>start_point = (100, 500)           # near the bottom-left
+end_point = (700, 100)             # near the top-right
+
+LINE_THICKNESS = 2                 # how many pixels wide each line is
+
+# where, colour, start, end, thickness in pixels
+pygame.draw.line(screen, GREEN, start_point, end_point, LINE_THICKNESS)</code></pre>
+<p>Around it is a <em>main loop</em>: wipe the screen, draw, show, and repeat until the window closes. Every game works this way.</p>
+<figure id="fig-1-1-2"><img src="images/d1b_line_axes.png" alt="The 800 by 600 window in SCREEN coordinates with (0,0) at the top-left, +x to the right and +y down, ticks every 100 pixels. The green line runs from start_point (100, 500) to end_point (700, 100), with dashed guides to each axis." loading="lazy"><figcaption><span class="fignum">Fig 1.1.2</span>What step1_line.py draws, on SCREEN coordinates: (0, 0) is the top-left corner, +x goes right and +y goes down, ticks every 100 pixels. Follow the dashed lines from each end to read its numbers off the axes. The program itself shows only the green line, <code>LINE_THICKNESS</code> = 2 pixels wide; the axes, grid and labels are added here to help you read it.</figcaption></figure>
+<details class="full"><summary>Full code: <code>step1_line.py</code> (about 65 lines)</summary><pre><code># ======================================================================
+# LESSON 1 - STEP 1: DRAW ONE LINE
+# ----------------------------------------------------------------------
+# Goal: open a window and draw a single green line on it.
+#
+# Every wireframe game (including Wireframe Warfare) is, in the end,
+# just LOTS of straight lines drawn on a flat screen. So the very first
+# thing to learn is how to draw ONE line.
+#
+# Install once:   pip install pygame-ce
+# Run:            python step1_line.py
+# Close the window to quit.
+# ======================================================================
+
+import pygame                      # pygame gives us a window and drawing tools
+
+# ---- Set up the window -----------------------------------------------
+pygame.init()                      # switch pygame on
+
+WIDTH = 800                        # window width in pixels
+HEIGHT = 600                       # window height in pixels
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption(&quot;Step 1 - one line&quot;)
+
+# ---- Colours are (Red, Green, Blue), each 0 to 255 -------------------
+BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
+
+# ---- How thick our lines are -------------------------------------------
+# pygame.draw.line&#x27;s last number is the line&#x27;s thickness in pixels.
+# We give it a name instead of typing 2 every time, so:
+#   * the code says WHAT the number means, and
+#   * changing this ONE line makes every line thicker or thinner.
+# 2 pixels is thick enough to see clearly on an 800 x 600 window
+# but thin enough to keep the &quot;wireframe&quot; look. Try 1 or 5.
+LINE_THICKNESS = 2
+
+# ---- The two ends of our line ----------------------------------------
+# A point on the screen is (x, y), measured in pixels.
+#   x counts from the LEFT edge, going right.
+#   y counts from the TOP edge, going DOWN  (this surprises everyone!).
+# So (0, 0) is the top-left corner of the window.
+start_point = (100, 500)           # near the bottom-left
+end_point = (700, 100)             # near the top-right
+
+# ---- The main loop ----------------------------------------------------
+# A game keeps redrawing the screen over and over until you quit.
+running = True
+while running:
+
+    # 1. Check if the user clicked the window&#x27;s close button.
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    # 2. Wipe the screen black (start each picture fresh).
+    screen.fill(BLACK)
+
+    # 3. Draw the line:  where, colour, start, end, thickness in pixels
+    pygame.draw.line(screen, GREEN, start_point, end_point, LINE_THICKNESS)
+
+    # 4. Show what we just drew.
+    pygame.display.flip()
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Change end_point to (700, 500). Which way does the line go now?
+#   * Change GREEN to (255, 0, 0). What colour is the line?
+#   * Change LINE_THICKNESS to 10. How wide is the line now?
+#   * Draw a second line by copying the pygame.draw.line(...) row.
+# ----------------------------------------------------------------------</code></pre></details>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q1</span>The window is 800 × 600. Where on the screen is the point (400, 300)?</p><details><summary>Show answer</summary><div class="ans">Right in the middle. (800 / 2) = 400 and (600 / 2) = 300.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q2</span>You change end_point from (700, 100) to (700, 500). Which way does the line point now?</p><details><summary>Show answer</summary><div class="ans">It becomes flat (horizontal). Both ends now have y = 500, so they are at the same height.</div></details></div>
+</div>
+
+<h2>Part 2: A shape is points + edges <span class="mins">6 MIN</span></h2>
+<p>Writing one <code>draw.line</code> per line gets messy fast. Instead, we keep a shape in two lists:</p>
+<ul>
+  <li><strong>points</strong> say <em>where</em> the corners are. Each corner gets a number: its place in the list, starting at 0.</li>
+  <li><strong>edges</strong> say <em>which</em> corners are joined. <code>(3, 4)</code> means "draw a line from point 3 to point 4".</li>
+</ul>
+<figure id="fig-1-2-1"><img src="images/d2_points_and_edges.png" alt="The house drawn at its real place in the 800 by 600 window, SCREEN axes with (0,0) top-left, +x right, +y down. Each point is labelled with its number and coordinates: 0 (300, 450), 1 (500, 450), 2 (500, 250), 3 (300, 250), 4 (400, 150). The Python lists are beside it." loading="lazy"><figcaption><span class="fignum">Fig 1.2.1</span>The house from step2_polygon.py, drawn where it really sits in the 800 × 600 window. SCREEN coordinates: (0, 0) is the top-left, +x right, +y down. Each label is the point's number, then its (x, y). Wireframe Warfare stores every enemy this way; it calls the points verts.</figcaption></figure>
+<p>One small loop then draws any shape at all:</p>
+<pre><code>for edge in edges:
+    a = edge[0]                 # number of the first corner
+    b = edge[1]                 # number of the second corner
+    start = points[a]           # (x, y) of the first corner
+    end = points[b]             # (x, y) of the second corner
+    pygame.draw.line(screen, GREEN, start, end, LINE_THICKNESS)</code></pre>
+<details class="full"><summary>Full code: <code>step2_polygon.py</code> (about 90 lines)</summary><pre><code># ======================================================================
+# LESSON 1 - STEP 2: A POLYGON MADE OF &quot;POINTS&quot; AND &quot;EDGES&quot;
+# ----------------------------------------------------------------------
+# Goal: draw a house shape (a square with a triangle roof).
+#
+# Instead of writing every line by hand, we store a shape in TWO lists:
+#
+#   points  - WHERE the corners are          (a list of (x, y) pairs)
+#   edges   - WHICH corners join with a line (a list of pairs of numbers)
+#
+# Each edge says &quot;join point number A to point number B&quot;.
+# This is EXACTLY how Wireframe Warfare stores its shapes - there they
+# are called &quot;verts&quot; (vertices = corners) and &quot;edges&quot;.
+#
+# Run:  python step2_polygon.py
+# ======================================================================
+
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption(&quot;Step 2 - points and edges&quot;)
+
+BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
+YELLOW = (255, 255, 0)
+
+# ---- How thick our lines are -------------------------------------------
+# pygame.draw.line&#x27;s last number is the line&#x27;s thickness in pixels.
+# We give it a name instead of typing 2 every time, so:
+#   * the code says WHAT the number means, and
+#   * changing this ONE line makes every line thicker or thinner.
+# 2 pixels is thick enough to see clearly on an 800 x 600 window
+# but thin enough to keep the &quot;wireframe&quot; look. Try 1 or 5.
+LINE_THICKNESS = 2
+
+# ---- The shape&#x27;s corners (points) ------------------------------------
+# Each corner gets a number: its position in the list, starting at 0.
+points = [
+    (300, 450),    # point 0 - bottom-left of the square
+    (500, 450),    # point 1 - bottom-right
+    (500, 250),    # point 2 - top-right
+    (300, 250),    # point 3 - top-left
+    (400, 150),    # point 4 - tip of the roof
+]
+
+# ---- Which corners are joined (edges) --------------------------------
+edges = [
+    (0, 1),        # bottom of the square
+    (1, 2),        # right wall
+    (2, 3),        # top of the square (the ceiling)
+    (3, 0),        # left wall
+    (3, 4),        # left side of the roof
+    (4, 2),        # right side of the roof
+]
+
+# A small font so we can write the point numbers on screen.
+font = pygame.font.SysFont(None, 28)
+
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    screen.fill(BLACK)
+
+    # ---- Draw every edge ---------------------------------------------
+    # For each edge, look up its two point numbers in the points list,
+    # then draw a line between those two positions.
+    for edge in edges:
+        a = edge[0]                 # number of the first corner
+        b = edge[1]                 # number of the second corner
+        start = points[a]           # (x, y) of the first corner
+        end = points[b]             # (x, y) of the second corner
+        pygame.draw.line(screen, GREEN, start, end, LINE_THICKNESS)
+
+    # ---- Label every point with its number (just to help us learn) ---
+    for number in range(len(points)):
+        x, y = points[number]
+        pygame.draw.circle(screen, YELLOW, (x, y), 5)
+        label = font.render(str(number), True, YELLOW)
+        # Put the label a little to the right of, and above, the dot.
+        screen.blit(label, ((x + 8), (y - 22)))
+
+    pygame.display.flip()
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Delete the edge (2, 3). What disappears?
+#   * Add a chimney: two new points and three new edges.
+#   * Move point 4 to (400, 50). What happens to the roof?
+# ----------------------------------------------------------------------</code></pre></details>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q3</span>The house has 5 points and 6 edges. Why are there more edges than points?</p><details><summary>Show answer</summary><div class="ans">Some corners are joined to more than one other corner. Point 3, for example, joins point 0, point 2 and the roof tip, point 4. The number of edges depends on how the corners are connected, not on how many corners there are.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q4</span>You delete the edge (2, 3) from the list. What disappears from the picture?</p><details><summary>Show answer</summary><div class="ans">The ceiling line across the top of the square, between the top-right corner (2) and the top-left corner (3). The points are still there; only that one line is gone.</div></details></div>
+</div>
+
+<h2>Part 3: Going 3D <span class="mins">5 MIN</span></h2>
+<p>A 3D point just has one more number: <code>(x, y, z)</code>.</p>
+<ul>
+  <li><strong>x</strong> is left and right (+ is right).</li>
+  <li><strong>y</strong> is down and up (+ is <em>up</em>, the opposite of the screen).</li>
+  <li><strong>z</strong> is distance away from you (+ is further into the screen).</li>
+</ul>
+<figure id="fig-1-3-1"><img src="images/d3_3d_axes.png" alt="3D axes: x right, y up, z away from the viewer" loading="lazy"><figcaption><span class="fignum">Fig 1.3.1</span>These are the same directions Wireframe Warfare uses.</figcaption></figure>
+<p>A 3D shape is <em>still</em> points + edges. Only the points have changed. The edges list works exactly as it did for the house.</p>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q5</span>A point is at (0, 2, 10). Describe where it is in words.</p><details><summary>Show answer</summary><div class="ans">Straight ahead (x = 0, not left or right), 2 units up (y = 2), and 10 units away from you (z = 10).</div></details></div>
+</div>
+
+<h3>Meet the cube</h3>
+<p>For the rest of this lesson we use one 3D shape: a cube. It has 8 corners and 12 edges. Each corner is a 3D point, and each one gets a number (0 to 7), its place in the <code>cube_points</code> list, just like the house's corners in Part 2.</p>
+<p>To give each corner an (x, y, z) value, we put the x, y and z axes right through the <strong>middle of the cube</strong>, so the cube's centre is (0, 0, 0). The cube is 2 units wide, so every corner is exactly 1 step from the middle along each axis: −1 or +1.</p>
+<figure id="fig-1-3-2"><img src="images/d5_cube_points.png" alt="A cube with x, y and z axes through its centre and its 8 corners numbered 0 to 7 with their coordinates" loading="lazy"><figcaption><span class="fignum">Fig 1.3.2</span>The axes go through the cube's middle. x: −1 left, +1 right. y: −1 bottom, +1 top. z: −1 front (nearest you), +1 back.</figcaption></figure>
+<p>The 4 corners with z = −1 make the <strong>front face</strong>, the side nearest you. The 4 with z = +1 make the <strong>back face</strong>. To read a corner, start at the middle and take one step along each axis. For corner 5, (1, 1, −1):</p>
+<figure id="fig-1-3-3"><img src="images/p4i0_corner5.png" alt="Walking from the cube&#x27;s centre to corner 5: one step right, one step up, one step toward you" loading="lazy"><figcaption><span class="fignum">Fig 1.3.3</span>Corner 5 is (1, 1, −1): right, up, toward you. That makes it the top-right-front corner.</figcaption></figure>
+<p>There's a problem, though. As written, the cube is centred on (0, 0, 0), which is where <em>you</em> are standing: the cube is around your head. So before drawing, we slide it 5 units in front of you by adding <code>cube_distance = 5</code> to every corner's z.</p>
+<figure id="fig-1-3-4"><img src="images/p3_slide_away.png" alt="Seen from above: the cube as written sits around the viewer, then moves to between z = 4 and z = 6 after adding 5 to every z" loading="lazy"><figcaption><span class="fignum">Fig 1.3.4</span>Add 5 to every z. The front face moves to z = 4 and the back face to z = 6.</figcaption></figure>
+<div class="key">
+  <strong>Three kinds of coordinates</strong>
+  <p>So far we have three different sets of numbers, and it's easy to mix them up. Each one measures from a different starting point:</p>
+  <ol>
+    <li><strong>Shape coordinates</strong> (3D, world units) are measured from the <em>cube's own centre</em>, which is (0, 0, 0). A plus number means a step the way the axis arrow points (right, up, away from you). A minus number means a step the opposite way (left, down, toward you). These are what we write in <code>cube_points</code>. Corner 5 is (1, 1, −1): 1 right, 1 up, 1 toward you.</li>
+    <li><strong>World coordinates</strong> (3D, world units) are measured from <em>you</em>, the viewer. After adding <code>cube_distance</code>, corner 5 is (1, 1, 4).</li>
+    <li><strong>Screen coordinates</strong> (2D, pixels) are measured from the <em>window's top-left corner</em>, with y counting down (Part 1). Projection (Part 4) turns corner 5 into (500, 200).</li>
+  </ol>
+</div>
+<figure id="fig-1-3-5"><img src="images/p3_three_systems.png" alt="Corner 5 shown three ways: shape coordinates (1, 1, -1), world coordinates (1, 1, 4), and screen pixels (500, 200)" loading="lazy"><figcaption><span class="fignum">Fig 1.3.5</span>The same corner, three ways. Adding cube_distance takes you from 1 to 2. Part 4 explains how project() takes you from 2 to 3.<span class="panels">Panels: <b>1.3.5a</b> (left) 1. SHAPE coordinates · <b>1.3.5b</b> (middle) 2. WORLD coordinates (seen from above) · <b>1.3.5c</b> (right) 3. SCREEN coordinates</span></figcaption></figure>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q6</span>Which corner is (−1, 1, 1)? Use the cube diagram, Fig 1.3.2.</p><details><summary>Show answer</summary><div class="ans">Corner 7: x = −1 (left), y = +1 (top), z = +1 (back). It's the top-left-back corner.</div></details></div>
+</div>
+
+<h2>Part 4: Projection, the one big idea <span class="mins">15 MIN</span></h2>
+<p>The screen is flat, so every 3D point has to be squashed into a 2D screen point. This is called <strong>projection</strong>. Here is the whole rule. Don't worry if it looks like magic: we'll take it apart one name at a time, with a picture for each.</p>
+<pre><code>screen_x = CENTRE_X + ( (x * FOCAL) / z )
+screen_y = CENTRE_Y - ( (y * FOCAL) / z )</code></pre>
+<div class="key">
+  <strong>Brackets rule for this course</strong>
+  <p>Every calculation in this course has brackets around each part, so you never need to remember whether Python does <code>*</code> before <code>+</code>. Work from the <em>innermost</em> bracket outward:</p>
+  <ol>
+    <li><code>(x * FOCAL)</code>: scale the point by the lens zoom.</li>
+    <li><code>( (x * FOCAL) / z )</code>: shrink it by its distance.</li>
+    <li><code>CENTRE_X + ( ... )</code>: start from the middle of the window.</li>
+  </ol>
+</div>
+
+<h3>Every name in the rule</h3>
+<p class="tabcap" id="fig-1-4-1"><span class="fignum">Table 1.4.1</span>Every name in the projection rule</p>
+<div class="tablewrap"><table>
+<tr><th>Name</th><th>What it means</th><th>Measured in</th><th>Our value</th><th>Why this value</th></tr>
+<tr><td><code>x</code>, <code>y</code></td><td>How far right and how far up the 3D point is</td><td>world units</td><td>from the shape</td><td>The cube's corners use −1 and +1 so the sums stay easy.</td></tr>
+<tr><td><code>z</code></td><td>How far in front of you the point is</td><td>world units</td><td>4 to 6</td><td>The cube sits at distance 5 and is 2 deep, so its faces are at 4 and 6.</td></tr>
+<tr><td><code>CENTRE_X</code></td><td>The middle of the window, left to right</td><td>pixels</td><td><code>(800 / 2)</code> = 400</td><td>Half the window width. Not chosen: it follows from the window size.</td></tr>
+<tr><td><code>CENTRE_Y</code></td><td>The middle of the window, top to bottom</td><td>pixels</td><td><code>(600 / 2)</code> = 300</td><td>Half the window height.</td></tr>
+<tr><td><code>FOCAL</code></td><td>How far your eye is from the screen. This is the zoom.</td><td>pixels</td><td>400</td><td>Half the window width. It gives a 90° view and draws our cube 200 px wide (see 4.6).</td></tr>
+<tr><td><code>screen_x</code>, <code>screen_y</code></td><td>Where the point is drawn on the window</td><td>pixels</td><td>the answer</td><td>Worked out by the rule.</td></tr>
+</table></div>
+
+<h3>4.1 The centre: CENTRE_X and CENTRE_Y</h3>
+<p>Imagine you're looking through the window straight ahead. The spot you are looking at is the exact middle of the window. Anything dead ahead of you (x = 0 and y = 0) should be drawn there, however far away it is.</p>
+<p>The window is 800 pixels wide and 600 tall, so the middle is <code>CENTRE_X = (800 / 2) = 400</code> and <code>CENTRE_Y = (600 / 2) = 300</code>. These numbers aren't picked by taste. If you made the window 1000 wide, CENTRE_X would become <code>(1000 / 2) = 500</code>.</p>
+<figure id="fig-1-4-2"><img src="images/p4a_centre.png" alt="An 800 by 600 window with its centre marked at (400, 300)" loading="lazy"><figcaption><span class="fignum">Fig 1.4.2</span>CENTRE_X and CENTRE_Y are just half the window's width and height.</figcaption></figure>
+
+<h3>4.2 The offset: how far from the centre</h3>
+<p>Every point is drawn somewhere <em>relative to the centre</em>: so many pixels right (or left) and so many pixels up (or down). We call that distance the <strong>offset</strong>. The rule is really just:</p>
+<pre><code>screen_x = CENTRE_X + (offset to the right)
+screen_y = CENTRE_Y - (offset upward)</code></pre>
+<figure id="fig-1-4-3"><img src="images/p4b_offset.png" alt="A point 100 pixels right of and 100 pixels above the centre lands at (500, 200)" loading="lazy"><figcaption><span class="fignum">Fig 1.4.3</span>Start at the centre, then move by the offset. The bracket ( (x * FOCAL) / z ) is the offset.</figcaption></figure>
+<p>So the only hard part is the offset. The next three pictures, Fig 1.4.4 to Fig 1.4.7, explain it.</p>
+
+<h3>4.3 z: how far away</h3>
+<p>z is the distance in front of you, in <strong>world units</strong>. A world unit can be anything you like; think of it as one metre. Our cube is 2 units wide and its centre is 5 units away, so its front face is at <code>(5 - 1) = 4</code> and its back face at <code>(5 + 1) = 6</code>.</p>
+<figure id="fig-1-4-4"><img src="images/p4c_what_is_z.png" alt="Top-down view: you at z = 0, a ruler along z, and the cube between z = 4 and z = 6" loading="lazy"><figcaption><span class="fignum">Fig 1.4.4</span>Seen from above. Distance 5 keeps the cube clear of your face and big enough to see well.</figcaption></figure>
+
+<h3>4.4 FOCAL: where the screen is</h3>
+<p>Pretend the window is a sheet of glass held in front of your eye. <strong>FOCAL is the distance from your eye to that glass, measured in pixels.</strong> To see where a point lands on the glass, draw a straight line from your eye to the point and mark where it crosses the glass.</p>
+<p>That makes two triangles with the same shape: a big one out to the point, and a small one up to the glass. Because they're the same shape, their sides are in the same ratio:</p>
+<div class="keyconcept" role="note" aria-label="Key concept">
+<span class="kc-label">KEY CONCEPT</span>
+<pre><code>( offset / FOCAL ) = ( y / z )
+
+so   offset = ( (y * FOCAL) / z )</code></pre>
+<p>This is the most important idea of Part 4. Every 3D point in this course reaches the screen through this one rule. It works the same way for x, seen from above (Fig 1.4.6 below).</p>
+</div>
+<figure id="fig-1-4-5"><img src="images/p4d_triangles.png" alt="Side view: an eye, a screen 400 pixels away, and a point 1 unit up and 4 units away; the small and big triangles have the same shape" loading="lazy"><figcaption><span class="fignum">Fig 1.4.5</span>The small (orange) triangle and the big (green) one have the same shape. That is where ( (y * FOCAL) / z ) comes from.</figcaption></figure>
+<p>Notice the units: <code>y</code> and <code>z</code> are both world units, so <code>(y / z)</code> has no units at all. Multiplying by FOCAL, which is in pixels, turns it into pixels. That's why the answer can be added to the centre of the window, which is also in pixels.</p>
+<p><strong>Now x.</strong> Fig 1.4.5 is a side view, so it only shows <code>y</code> (up and down). To work out <code>x</code> (left and right), look at the same eye, glass and point from <strong>above</strong>. From up there, across the page is <code>x</code> and up the page is <code>z</code> (away from you). The sight line from your eye to the point makes exactly the same two triangles, with <code>x</code> where <code>y</code> was:</p>
+<pre><code>( offset_x / FOCAL ) = ( x / z )
+
+so   offset_x = ( (x * FOCAL) / z )</code></pre>
+<figure id="fig-1-4-6"><img src="images/p4d2_triangles_x.png" alt="WORLD seen from above: the eye at (0,0,0), +x to the right, +z up the page. The screen line is 400 pixels in front of the eye. A point at x = 1, z = 4. The small yellow triangle up to the screen and the big green triangle out to the point have the same shape, so offset_x = ((1 * 400) / 4) = 100 px and screen_x = 400 + 100 = 500, shown on a strip of the window's width." loading="lazy"><figcaption><span class="fignum">Fig 1.4.6</span>The same point as Fig 1.4.5, x = 1, y = 1, z = 4, now seen from above. WORLD coordinates: the eye is the centre (0, 0, 0), +x is right and +z is away from you (y points out of the page). The small (yellow) triangle and the big (green) one have the same shape, so offset_x = 100 px, and the point lands at screen x = 500.<span class="panels">Panels: <b>1.4.6a</b> (left) WORLD from above: the two triangles · <b>1.4.6b</b> (right) the sums · <b>1.4.6c</b> (bottom right) SCREEN: where x = 500 is in the window</span></figcaption></figure>
+<p>So the two rules are twins. Work them both out for the point (1, 1, 4), one bracket at a time:</p>
+<pre><code>offset_x = ( (x * FOCAL) / z ) = ( (1 * 400) / 4 ) = ( 400 / 4 ) = 100 px
+offset_y = ( (y * FOCAL) / z ) = ( (1 * 400) / 4 ) = ( 400 / 4 ) = 100 px
+
+screen_x = ( CENTRE_X + offset_x ) = ( 400 + 100 ) = 500
+screen_y = ( CENTRE_Y - offset_y ) = ( 300 - 100 ) = 200</code></pre>
+<p>The only difference is the sign. +x means right in the world <em>and</em> on the screen, so x adds. +y means up in the world but screen y counts <em>down</em>, so y subtracts. Section 4.7 shows what goes wrong without that minus.</p>
+
+<h3>4.5 Dividing by z: far things look smaller</h3>
+<p>Keep FOCAL at 400 and take the point (1, 1, z). As z gets bigger, the offset gets smaller, so the point slides toward the centre.</p>
+<figure id="fig-1-4-7"><img src="images/p4e_divide_by_z.png" alt="The point (1, 1, z) at z = 2, 4 and 8 lands 200, 100 and 50 pixels from the centre" loading="lazy"><figcaption><span class="fignum">Fig 1.4.7</span>Double the distance and the offset halves.</figcaption></figure>
+<figure id="fig-1-4-8"><img src="images/d4_projection.png" alt="Side view: an eye, a screen, and two equal posts at distances 4 and 8; the far one appears half as tall on the screen" loading="lazy"><figcaption><span class="fignum">Fig 1.4.8</span>The same idea with two posts of equal height. The one twice as far away shows up half as tall.</figcaption></figure>
+
+<h3>4.6 FOCAL is the zoom, and why 400</h3>
+<p>"Zoom" and FOCAL are the same thing. There's no separate zoom variable. The easiest way to see what it does is to measure something. In Fig 1.4.9 below, the cube stays exactly where it is (distance 5), and only FOCAL changes. Look at how many pixels wide the cube's front face is drawn:</p>
+<figure id="fig-1-4-9"><img src="images/p4f_focal_zoom.png" alt="The same cube at distance 5 drawn with FOCAL 200, 400 and 800; its front face is 100, 200 and 400 pixels wide" loading="lazy"><figcaption><span class="fignum">Fig 1.4.9</span>Same cube, same distance. Doubling FOCAL doubles the width it is drawn at: 100 px, then 200 px, then 400 px.<span class="panels">Panels: <b>1.4.9a</b> (left) FOCAL 200 (wide view) · <b>1.4.9b</b> (middle) FOCAL 400 (our choice) · <b>1.4.9c</b> (right) FOCAL 800 (zoomed in)</span></figcaption></figure>
+<p>The width comes straight from the rule. The front face runs from x = −1 to x = +1 at z = 4, so its width on screen is twice the offset of one corner:</p>
+<pre><code>front face width = ( 2 * ( (1 * FOCAL) / 4 ) )
+
+FOCAL 200:  ( 2 * ( (1 * 200) / 4 ) ) = ( 2 * 50 )  = 100 px
+FOCAL 400:  ( 2 * ( (1 * 400) / 4 ) ) = ( 2 * 100 ) = 200 px
+FOCAL 800:  ( 2 * ( (1 * 800) / 4 ) ) = ( 2 * 200 ) = 400 px</code></pre>
+<p><strong>Why does this happen?</strong> Look from above (Fig 1.4.10). The glass (the screen) is always 800 pixels wide, but FOCAL moves it nearer to or further from your eye. Draw lines from your eye to the two front corners of the cube. Where they cross the glass (the yellow strip) is how much of the screen the cube covers.</p>
+<figure id="fig-1-4-10"><img src="images/p4g_focal_view.png" alt="Top-down view at FOCAL 200, 400 and 800: the cube stays put, the screen moves further from the eye, and the cube covers 100, 200 and then 400 of the screen&#x27;s 800 pixels" loading="lazy"><figcaption><span class="fignum">Fig 1.4.10</span>Top row: seen from above. Bottom row: what you see in the window. With the glass close to your eye (FOCAL 200), the cube covers only a thin strip of it. With the glass far away (FOCAL 800), the cube covers half of it.<span class="panels">Panels: <b>1.4.10a</b> (top left) FOCAL 200 from above (127° view) · <b>1.4.10b</b> (top middle) FOCAL 400 from above (90° view) · <b>1.4.10c</b> (top right) FOCAL 800 from above (53° view) · <b>1.4.10d</b> (bottom left) FOCAL 200 in the window (100 px) · <b>1.4.10e</b> (bottom middle) FOCAL 400 in the window (200 px) · <b>1.4.10f</b> (bottom right) FOCAL 800 in the window (400 px)</span></figcaption></figure>
+<p>The shaded triangle shows how much of the world fits through the window, called the <strong>field of view</strong>. A close glass shows a lot of the world (127°), so each thing gets fewer pixels. A far glass shows less of the world (53°), so each thing gets more pixels.</p>
+<p>So why 400? With <code>FOCAL = (800 / 2) = 400</code>, the glass is as far from your eye as it is wide on each side, so you see 45° to the left and 45° to the right: a 90° view, a bit like a phone camera. In our scene that draws the cube 200 pixels wide, one quarter of the window. That's big enough to see clearly and leaves room to move it around. Wireframe Warfare starts from the angle instead: it picks a 75° view and works FOCAL out from it, which gives about 521 for an 800-wide window. We'll do that in a later lesson. For now, 400 keeps the sums easy.</p>
+
+<h3>4.7 The minus sign</h3>
+<p>In 3D, +y is <strong>up</strong>. On the screen, y counts <strong>down</strong> from the top (Part 1). So a point that is up in 3D needs a <em>smaller</em> screen_y. That's why the y line uses minus: <code>CENTRE_Y - ( ... )</code>.</p>
+<figure id="fig-1-4-11"><img src="images/p4h_minus.png" alt="A pyramid drawn correctly with the minus sign and upside down with a plus sign" loading="lazy"><figcaption><span class="fignum">Fig 1.4.11</span>With a plus sign by mistake, everything is drawn upside down.<span class="panels">Panels: <b>1.4.11a</b> (left) with the minus sign (correct) · <b>1.4.11b</b> (right) with a plus sign (upside down)</span></figcaption></figure>
+
+<h3>4.8 Put it all together: follow one corner</h3>
+<p>Now take one corner of the cube and follow it all the way to the screen, one bracket at a time. We'll use corner 5, the top-right-front corner from Part 3. Its <strong>shape</strong> coordinates are (1, 1, −1). First we slide it 5 units away to get its <strong>world</strong> coordinates, (1, 1, 4). Then the projection rule gives its <strong>screen</strong> coordinates:</p>
+<figure id="fig-1-4-12"><img src="images/p4i_one_corner.png" alt="Corner 5 goes from (1, 1, -1) to (1, 1, 4) and then to screen point (500, 200)" loading="lazy"><figcaption><span class="fignum">Fig 1.4.12</span>Slide it away, then do the brackets from the inside out.</figcaption></figure>
+<pre><code>screen_x = 400 + ( (1 * 400) / 4 )
+         = 400 + ( 400 / 4 )
+         = 400 + 100
+         = 500
+
+screen_y = 300 - ( (1 * 400) / 4 )
+         = 300 - ( 400 / 4 )
+         = 300 - 100
+         = 200</code></pre>
+<p>So corner 5 lands at <strong>(500, 200)</strong>: 100 pixels right of the centre and 100 pixels up. In code, the whole rule is one small function:</p>
+<pre><code>def project(point_3d):
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )   # divide by z: far = nearer the centre
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )   # minus: 3D up is screen up
+    return (screen_x, screen_y)</code></pre>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q7</span>Using the same numbers (CENTRE 400, 300 and FOCAL 400), where does (1, 1, 8) land? Compare it with (1, 1, 4).</p><details><summary>Show answer</summary><div class="ans"><pre><code>screen_x = 400 + ( (1 * 400) / 8 ) = 400 + 50 = 450
+screen_y = 300 - ( (1 * 400) / 8 ) = 300 - 50 = 250</code></pre><p>So (450, 250). It is twice as far away, so it lands only half as far from the centre: 50 pixels instead of 100.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q8</span>You change the window to 1000 × 800. What are the new CENTRE_X and CENTRE_Y? Where does a point dead ahead, (0, 0, 5), land?</p><details><summary>Show answer</summary><div class="ans"><pre><code>CENTRE_X = (1000 / 2) = 500
+CENTRE_Y = (800 / 2)  = 400</code></pre><p>A point dead ahead has offset ( (0 * FOCAL) / 5 ) = 0, so it lands right on the centre, (500, 400).</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q9</span>Change FOCAL to 800. Where does corner 5, now at (1, 1, 4), land? Did the cube get bigger or smaller?</p><details><summary>Show answer</summary><div class="ans"><pre><code>screen_x = 400 + ( (1 * 800) / 4 ) = 400 + 200 = 600
+screen_y = 300 - ( (1 * 800) / 4 ) = 300 - 200 = 100</code></pre><p>(600, 100). The offset doubled from 100 to 200, so the cube is drawn twice as wide (400 px instead of 200 px): we zoomed in.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q10</span>What would go wrong if z were 0? What about a negative z?</p><details><summary>Show answer</summary><div class="ans">With z = 0 the program would divide by zero and crash. A negative z means the point is behind you; dividing by it flips the point to the wrong side of the screen. That's why step3_cube.py never lets the cube come closer than 2. Wireframe Warfare's project() returns None for points behind the camera for the same reason.</div></details></div>
+</div>
+
+<h2>Part 5: The cube <span class="mins">5 MIN</span></h2>
+<p>Now put it all together. You met the cube's 8 corners in Part 3, and you followed corner 5 to the screen in 4.8. The program does exactly the same for every corner: <strong>shape</strong> coordinates from <code>cube_points</code>, then add <code>cube_distance</code> to get <strong>world</strong> coordinates, then <code>project()</code> to get <strong>screen</strong> pixels.</p>
+<figure id="fig-1-5-1"><img src="images/p3_three_systems.png" alt="Corner 5 shown three ways: shape coordinates (1, 1, -1), world coordinates (1, 1, 4), and screen pixels (500, 200)" loading="lazy"><figcaption><span class="fignum">Fig 1.5.1</span>Each of the 8 corners goes through these three steps, every frame. Same picture as Fig 1.3.5.<span class="panels">Panels: <b>1.5.1a</b> (left) 1. SHAPE coordinates · <b>1.5.1b</b> (middle) 2. WORLD coordinates (seen from above) · <b>1.5.1c</b> (right) 3. SCREEN coordinates</span></figcaption></figure>
+<p>In the code, that recipe looks like this:</p>
+<figure id="fig-1-5-2"><img src="images/d6_pipeline.png" alt="Pipeline: 3D points, then project, then 2D points, then draw edges" loading="lazy"><figcaption><span class="fignum">Fig 1.5.2</span>The recipe. It's the same in Wireframe Warfare, just with more shapes.</figcaption></figure>
+<pre><code># Step A: work out where every corner lands on the screen
+screen_points = []
+for p in cube_points:
+    x, y, z = p
+    moved = (x, y, (z + cube_distance))      # slide the cube away from us
+    screen_points.append(project(moved))     # 3D -&gt; 2D
+
+# Step B: draw the edges, exactly like the house
+for a, b in cube_edges:
+    pygame.draw.line(screen, GREEN, screen_points[a], screen_points[b], LINE_THICKNESS)</code></pre>
+<p><strong>Do we project each edge?</strong> No. Every edge needs two points, so it's natural to think each edge must be projected on its own. But Step A projects each of the 8 corners <em>once</em> and keeps the answers in the <code>screen_points</code> list. Step B never calls <code>project()</code>: each edge is just a pair of corner numbers, like <code>(4, 5)</code>, and it looks up those two answers in the list by their numbers. Corner 5 is the end of 3 edges, (4, 5), (5, 6) and (1, 5), but it is worked out only once.</p>
+<figure id="fig-1-5-3"><img src="images/p5_project_once.png" alt="Step A: the 8 WORLD corners each go through project() once, giving the screen_points list [0] to [7] in pixels. Step B: the 12 edges are pairs of corner numbers; the three edges that touch corner 5, (4, 5), (5, 6) and (1, 5), point back to screen_points[5] and their other ends. The window shows the 12 lines drawn from the 8 points. A box counts the work: 8 project() calls this way, 24 if done edge by edge." loading="lazy"><figcaption><span class="fignum">Fig 1.5.3</span>Step A projects each corner once into <code>screen_points</code>. Step B's edges only look up two answers each. That's ( 8 * 1 ) = 8 calls to <code>project()</code>. Projecting edge by edge would take ( 12 * 2 ) = 24, because every corner is the end of 3 edges and would be worked out 3 times.<span class="panels">Panels: <b>1.5.3a</b> (left) STEP A: 8 corners, project() once each · <b>1.5.3b</b> (middle) STEP B: 12 edges look up 2 points each · <b>1.5.3c</b> (right) the window: 12 lines from 8 points · <b>1.5.3d</b> (bottom) count the work: 8 calls, not 24</span></figcaption></figure>
+<figure id="fig-1-5-4"><img src="images/p4j_all_corners.png" alt="All eight cube corners projected onto the 800 by 600 window, with their screen positions" loading="lazy"><figcaption><span class="fignum">Fig 1.5.4</span>Every corner worked out with the same rule. Front corners (z = 4) land 100 pixels from the centre, back corners (z = 6) about 67.</figcaption></figure>
+<figure id="fig-1-5-5"><img src="images/run_step3_cube.png" alt="Output of step 3: a cube seen head-on, a small square inside a bigger square with joined corners" loading="lazy"><figcaption><span class="fignum">Fig 1.5.5</span>What you should see. Press UP and DOWN to push the cube away or pull it closer.</figcaption></figure>
+<details class="full"><summary>Full code: <code>step3_cube.py</code> (about 150 lines)</summary><pre><code># ======================================================================
+# LESSON 1 - STEP 3: A 3D CUBE ON A FLAT SCREEN
+# ----------------------------------------------------------------------
+# Goal: describe a cube in 3D, then draw it on the 2D screen.
+#
+# Three new ideas:
+#
+#   1. A 3D point has THREE numbers: (x, y, z)
+#        x = left / right      (+ is right)
+#        y = down / up         (+ is UP - the opposite of the screen!)
+#        z = distance away     (+ is further into the screen)
+#      Wireframe Warfare uses this same layout.
+#
+#   2. A 3D shape is still just points + edges (like the house in step 2),
+#      only now each point has a z.
+#
+#   3. PROJECTION turns a 3D point into a 2D screen point. The rule:
+#
+#           screen_x = centre_x + ( (x * FOCAL) / z )
+#           screen_y = centre_y - ( (y * FOCAL) / z )
+#
+#      Read the brackets from the INSIDE out:
+#        first  (x * FOCAL)        - scale the point up by the lens zoom
+#        then   ( ... / z)         - shrink it by its distance
+#        last   centre_x + ( ... ) - move it to the middle of the window
+#
+#      BRACKETS RULE FOR THIS COURSE: we put brackets around every part
+#      of every calculation, so you never have to remember which of
+#      + - * / Python does first. The brackets show the order.
+#
+#      Dividing by z is the whole trick: the further away something is
+#      (bigger z), the closer to the centre it lands - so it looks smaller.
+#      That is &quot;perspective&quot;, and it is how your eyes see the world too.
+#
+# Controls:  UP arrow = push the cube away,  DOWN arrow = pull it closer
+# Run:  python step3_cube.py
+# ======================================================================
+
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption(&quot;Step 3 - a 3D cube&quot;)
+clock = pygame.time.Clock()        # used to slow the loop to 60 frames/sec
+
+BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
+YELLOW = (255, 255, 0)
+
+# ---- How thick our lines are -------------------------------------------
+# pygame.draw.line&#x27;s last number is the line&#x27;s thickness in pixels.
+# We give it a name instead of typing 2 every time, so:
+#   * the code says WHAT the number means, and
+#   * changing this ONE line makes every line thicker or thinner.
+# 2 pixels is thick enough to see clearly on an 800 x 600 window
+# but thin enough to keep the &quot;wireframe&quot; look. Try 1 or 5.
+LINE_THICKNESS = 2
+
+# The middle of the screen. In 3D, (x=0, y=0) appears here.
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+
+# FOCAL is like the zoom on a camera lens. Bigger = more zoomed in.
+FOCAL = 400
+
+# ---- The cube&#x27;s 8 corners, in 3D -------------------------------------
+# These are SHAPE coordinates: measured from the cube&#x27;s OWN centre.
+# The x, y and z axes go right through the middle of the cube, so the
+# middle is (0, 0, 0) and every corner is 1 step away: -1 or +1.
+# (Later we add cube_distance to turn them into WORLD coordinates,
+#  measured from you, and project() turns those into SCREEN pixels.)
+# The cube is 2 units wide.
+# Bottom 4 corners have y = -1, top 4 have y = +1.
+# Front 4 corners have z = -1, back 4 have z = +1.
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+
+# ---- The cube&#x27;s 12 edges ---------------------------------------------
+cube_edges = [
+    (0, 1), (1, 2), (2, 3), (3, 0),   # the 4 edges of the bottom square
+    (4, 5), (5, 6), (6, 7), (7, 4),   # the 4 edges of the top square
+    (0, 4), (1, 5), (2, 6), (3, 7),   # the 4 upright edges joining them
+]
+
+# ---- Where the cube is -----------------------------------------------
+# We are standing at z = 0 looking along +z. The cube starts 5 units away.
+cube_distance = 5
+
+
+def project(point_3d):
+    &quot;&quot;&quot;Turn one 3D point (x, y, z) into a 2D screen point (sx, sy).
+
+    This is the most important function in all 3D graphics.
+    Wireframe Warfare has the same one - also called project().
+    &quot;&quot;&quot;
+    x, y, z = point_3d
+
+    # Divide by z: far things move toward the centre (look smaller).
+    #   step 1: (x * FOCAL)          scale by the lens zoom
+    #   step 2: ((x * FOCAL) / z)    shrink by the distance
+    #   step 3: CENTRE_X + (...)     start from the middle of the window
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+
+    # Same steps for y, but MINUS because 3D y goes UP
+    # while screen y goes DOWN.
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+
+    return (screen_x, screen_y)
+
+
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    # ---- Keys move the cube nearer / further -------------------------
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_UP]:
+        cube_distance = (cube_distance + 0.05)
+    if keys[pygame.K_DOWN]:
+        cube_distance = (cube_distance - 0.05)
+    if cube_distance &lt; 2:            # don&#x27;t let it come through the screen
+        cube_distance = 2            # (z must stay above 0 or we&#x27;d divide by 0)
+
+    screen.fill(BLACK)
+
+    # ---- Step A: work out where every corner lands on the screen -----
+    screen_points = []               # will hold 8 (sx, sy) pairs
+    for p in cube_points:
+        x, y, z = p
+        moved = (x, y, (z + cube_distance))      # slide the cube away from us
+        screen_points.append(project(moved))     # 3D -&gt; 2D
+
+    # ---- Step B: draw the edges, exactly like the house in step 2 ----
+    for a, b in cube_edges:
+        pygame.draw.line(screen, GREEN, screen_points[a], screen_points[b], LINE_THICKNESS)
+
+    # A little text so we know the distance.
+    font = pygame.font.SysFont(None, 28)
+    text = &quot;distance = &quot; + str(round(cube_distance, 1)) + &quot;   (UP / DOWN arrows)&quot;
+    screen.blit(font.render(text, True, YELLOW), (20, 20))
+
+    pygame.display.flip()
+    clock.tick(60)                   # at most 60 pictures per second
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Change FOCAL to 200, then 800. What does it do?
+#   * Change the 1s in cube_points to 2s. What happens?
+#   * Add 3 to every x (moved = ((x + 3), y, (z + cube_distance))). Where does it go?
+#   * Turn the cube into a pyramid: 4 bottom corners + 1 top point (0, 1, 0).
+# ----------------------------------------------------------------------</code></pre></details>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q11</span>Looking head-on, the cube looks like a small square inside a big square. Which square is the back of the cube, and why is it smaller?</p><details><summary>Show answer</summary><div class="ans">The small inner square is the back face. Its corners have a bigger z (further away), and dividing by a bigger z pulls them closer to the centre.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q12</span>Why do we add cube_distance to z, and not just write the cube's corners with big z values?</p><details><summary>Show answer</summary><div class="ans">So the shape and its position stay separate. The corners describe the cube's shape around its own centre; cube_distance says where it is. We can then move it by changing one number. Wireframe Warfare does the same: each enemy keeps its shape (verts) and a separate position.</div></details></div>
+</div>
+
+<h2>Wrap up <span class="mins">2 MIN</span></h2>
+<div class="key">
+  <strong>The three ideas from today</strong>
+  <p>1. A screen is a grid of pixels, (0, 0) top-left, y down.<br>2. A wireframe shape is a list of points plus a list of edges.<br>3. Projection turns (x, y, z) into a screen point with <code>CENTRE + ( (x * FOCAL) / z )</code>, so far things look smaller.<br>4. Brackets around every part of a calculation show the order. Work from the inside out.</p>
+</div>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q13</span>Final check: describe in your own words the four steps to draw a 3D wireframe shape.</p><details><summary>Show answer</summary><div class="ans">1. Store the shape as 3D points and edges. 2. Add the shape's position to each point. 3. Project each point to the screen (divide by z). 4. Draw a line for each edge between the projected points.</div></details></div>
+</div>
+<h3>Practice before Lesson 2</h3>
+<ul>
+  <li>Turn the cube into a pyramid: 4 bottom corners plus one top point at (0, 1, 0), and 8 edges.</li>
+  <li>Move the cube to the right: change <code>moved</code> to <code>((x + 3), y, (z + cube_distance))</code>. Notice you can now see its side.</li>
+  <li>Try FOCAL = 200 and FOCAL = 800 and describe the difference.</li>
+</ul>
+<h3>Next time: Lesson 2, spinning</h3>
+<p>Right now the cube only faces us. In Lesson 2 we'll write a small <code>rotate()</code> function that turns every point around the centre a little each frame, so the cube spins. It slots in right before <code>project()</code>, and nothing else in today's code has to change.</p>
+
+<h2>Files</h2>
+<p>Download the code for this lesson (right-click a file and choose <em>Save link as</em>):</p>
+<ul class="files">
+  <li><a href="code/step1_line.py" download><code>code/step1_line.py</code></a>: one line</li>
+  <li><a href="code/step2_polygon.py" download><code>code/step2_polygon.py</code></a>: the house, points and edges</li>
+  <li><a href="code/step3_cube.py" download><code>code/step3_cube.py</code></a>: the 3D cube with arrow-key distance</li>
+  <li><code>images/</code>: every diagram on this page as a PNG</li>
+  <li><a href="../figures/">Figure index</a>: every figure and table in the course, with its number. Numbers read <code>Fig lesson.part.figure</code>, plus a letter for one panel of a picture (for example <code>Fig 3.4.2b</code>).</li>
+</ul>
+</main>
+</body>
+</html>

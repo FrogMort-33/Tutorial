@@ -1,0 +1,1795 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframe 3D, Lesson 4</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Chakra+Petch:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one readable column, like a lab notebook; diagrams and code break out slightly wider. */
+:root {
+  --bg:#f3f6f4; --paper:#ffffff; --fg:#17201b; --muted:#56635c; --line:#d5ded8;
+  --accent:#0d8a4a; --accent-soft:#e2f3e9; --code-bg:#121815; --code-fg:#d9f5e3; --warn:#9a6a00;
+  --display:"Chakra Petch", "Trebuchet MS", sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; --code-bg:#0a0e0c; --code-fg:#d9f5e3; --warn:#e6b84a; color-scheme:dark; } }
+:root[data-theme="dark"] {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; --code-bg:#0a0e0c; --code-fg:#d9f5e3; --warn:#e6b84a; color-scheme:dark; }
+body { background:var(--bg); color:var(--fg); font-family:var(--body); font-size:17px; line-height:1.6;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:32px 64px; }
+main { max-width:780px; margin:0 auto; display:flex; flex-direction:column; gap:20px; }
+h1,h2,h3 { font-family:var(--display); text-wrap:balance; line-height:1.2; margin:0; }
+h1 { font-size:clamp(30px,6vw,44px); }
+h2 { font-size:26px; margin-top:28px; padding-top:20px; border-top:2px solid var(--line); display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; }
+h2 .mins { font-family:var(--mono); font-size:14px; color:var(--accent); font-weight:600; letter-spacing:.04em; }
+h3 { font-size:20px; margin-top:12px; }
+p { margin:0; max-width:68ch; }
+.eyebrow { font-family:var(--mono); font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); }
+.lede { font-size:19px; color:var(--muted); }
+code { font-family:var(--mono); font-size:.88em; background:var(--accent-soft); padding:1px 5px; border-radius:4px; }
+pre { margin:0; background:var(--code-bg); color:var(--code-fg); padding:16px 18px; border-radius:8px; overflow-x:auto; font-size:14px; line-height:1.5; }
+pre code { background:none; padding:0; font-size:inherit; color:inherit; }
+figure { margin:0; display:flex; flex-direction:column; gap:8px; }
+figure img { width:100%; border-radius:8px; display:block; border:1px solid var(--line); }
+figcaption { font-size:14px; color:var(--muted); }
+table { border-collapse:collapse; width:100%; font-size:15px; }
+.tablewrap { overflow-x:auto; }
+th,td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+td.t { font-family:var(--mono); white-space:nowrap; color:var(--accent); font-variant-numeric:tabular-nums; }
+ul,ol { margin:0; padding-left:22px; max-width:68ch; }
+li+li { margin-top:4px; }
+.key { background:var(--accent-soft); border-left:4px solid var(--accent); padding:14px 18px; border-radius:0 8px 8px 0; display:flex; flex-direction:column; gap:6px; }
+.key strong { font-family:var(--display); }
+.q { background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:14px 18px; display:flex; flex-direction:column; gap:8px; }
+.qq { font-weight:700; display:flex; gap:10px; }
+.qn { font-family:var(--mono); color:var(--accent); flex:none; }
+details summary { cursor:pointer; color:var(--accent); font-weight:700; }
+details summary:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.ans { padding-top:8px; color:var(--fg); display:flex; flex-direction:column; gap:8px; }
+details.full { border:1px dashed var(--line); border-radius:8px; padding:10px 14px; }
+details.full[open] summary { margin-bottom:10px; }
+.check { display:flex; flex-direction:column; gap:12px; }
+.files li code { white-space:nowrap; }
+.key a { color:var(--accent); font-weight:700; }
+
+.fignum { font-family:var(--mono); font-weight:600; color:var(--accent); margin-right:6px; white-space:nowrap; }
+.panels { display:block; margin-top:4px; }
+.panels b { font-family:var(--mono); color:var(--fg); font-weight:600; }
+.tabcap { font-size:14px; color:var(--muted); margin-bottom:-12px; }
+figure, .tabcap { scroll-margin-top:16px; }
+</style>
+
+</head>
+<body>
+<main>
+<nav style="font-family:var(--mono, monospace);font-size:14px;"><a style="color:var(--accent)" href="../">&larr; All lessons</a> &middot; <a style="color:var(--accent)" href="../figures/">Figure index</a></nav>
+
+<header style="display:flex;flex-direction:column;gap:12px">
+  <span class="eyebrow">Wireframe 3D course · Lesson 4 · about 50 minutes</span>
+  <h1>Moving the camera</h1>
+  <p class="lede">Until now the cube did all the moving and you sat still. Today you get up and walk: up to the cube, round the back of it, and up high to look down on its top. The surprise is that the computer still can't move you. It moves the whole world the opposite way instead, using only subtraction and the turns you already know.</p>
+</header>
+
+<figure id="fig-4-0-1"><img src="images/course_map.png" alt="Course map: eight lessons on a road from Lesson 1 to a mini game. Lesson 4 is highlighted as you are here; Lessons 1 to 3 are done." loading="lazy"><figcaption><span class="fignum">Fig 4.0.1</span>The course map. Coloured cards are done or today; darker cards are still to come. Every lesson adds one idea to the same small program.</figcaption></figure>
+<div class="key">
+  <strong>Where this lesson fits</strong>
+  <p><strong>Before:</strong> <a href="../lesson3/">Lesson 3</a> made the cube solid and lit.<br><strong>Today:</strong> you walk round the cube and look about, by moving the whole world the opposite way.<br><strong>Next:</strong> <a href="../lesson5/">Lesson 5, A small world</a>, adds a floor grid and many shapes to walk among.</p>
+  <p>This is the halfway point. After today the maths is all in place: Lesson 5 adds more things to look at, Lesson 6 tidies the turns into matrices, and Lesson 7 makes it a game.</p>
+</div>
+
+<h2>Lesson plan</h2>
+<p><strong>Who it's for:</strong> someone who finished Lesson 3 and can run <code>step4_lit_cube.py</code>. You need the projection rule (Lesson 1), <code>rotate_y</code> and <code>rotate_x</code> (Lessons 2 and 2B), and the solid lit cube with its six colours (Lesson 3). <strong>Needs:</strong> Python 3 and <code>pip install pygame-ce</code>, as before.</p>
+<p><strong>By the end, the learner can:</strong></p>
+<ol>
+  <li>Explain why moving yourself and moving the world the opposite way give exactly the same picture.</li>
+  <li>Tell WORLD coordinates (from the map's centre) from CAMERA coordinates (from you).</li>
+  <li>Turn a WORLD point into a CAMERA point by hand: subtract, undo the turn, undo the tip.</li>
+  <li>Explain, with numbers, why points behind you must be skipped, and why <code>NEAR = 0.1</code>.</li>
+  <li>Make W walk the way you face, using a "forward" arrow made with <code>rotate_y</code>.</li>
+</ol>
+<p class="tabcap" id="fig-4-0-2"><span class="fignum">Table 4.0.2</span>Lesson plan: time, part and what happens</p>
+<div class="tablewrap"><table>
+<tr><th>Time</th><th>Part</th><th>What happens</th></tr>
+<tr><td class="t">0–4</td><td>Recap</td><td>Lesson 3's lit cube, and today's recipe with its new steps.</td></tr>
+<tr><td class="t">4–10</td><td>1. The big idea</td><td>Walking right looks the same as the world sliding left. WORLD and CAMERA coordinates.</td></tr>
+<tr><td class="t">10–20</td><td>2. Where you stand</td><td><code>cam_x</code>, <code>cam_y</code>, <code>cam_z</code>, subtracting, corner 5 by hand twice. Q1–Q3.</td></tr>
+<tr><td class="t">20–30</td><td>3. Behind you</td><td>Why z ≤ 0 crashes or draws ghosts, <code>NEAR = 0.1</code>, skipping faces, the mini-map. Run <code>step1_walk.py</code>. Q4–Q5.</td></tr>
+<tr><td class="t">30–40</td><td>4. Turning</td><td><code>cam_turn</code>, the world turns the opposite way, corner 5 at 90° and 30°, why the order matters, Lesson 3's tools after the camera. Q6–Q8.</td></tr>
+<tr><td class="t">40–44</td><td>5. Walk where you look</td><td>The forward and right arrows, one second of W by hand. Run <code>step2_turn.py</code>. Q9–Q10.</td></tr>
+<tr><td class="t">44–49</td><td>6. Look up and down</td><td><code>cam_tip</code>, corner 5 looking up, the whole recipe in one table. Run <code>step3_look_around.py</code>. Q11–Q13.</td></tr>
+<tr><td class="t">49–50</td><td>Wrap up</td><td>Final check Q14. Preview of Lesson 5.</td></tr>
+</table></div>
+
+<h2>Recap: the recipe so far <span class="mins">4 MIN</span></h2>
+<p>Lesson 3 ended with a solid cube: six coloured faces, the clock test to hide faces turned away from you, the painter's sort to draw far faces first, and a lamp that makes some faces brighter than others. Every frame, each corner went SHAPE → spin → add 5 to z → project.</p>
+<p>Today we put new steps into that recipe. Here is the whole of it, so you can see where we are heading. Each pink box gets its own part of the lesson, with its own diagrams, before we use it.</p>
+<figure id="fig-4-0-3"><img src="images/m01_pipeline.png" alt="Flow chart of the recipe for one corner: SHAPE, spin, plus cube_position, WORLD, minus camera, undo your turn, CAMERA, behind you check, project, SCREEN. The new steps are outlined in pink." loading="lazy"><figcaption><span class="fignum">Fig 4.0.3</span>Grey boxes are the steps you already know. Pink boxes are new today. Corner 5 is (1, 1, -1) in SHAPE coordinates and (1, 1, 4) in WORLD coordinates, as in every lesson so far.<span class="panels">Panels: <b>4.0.3a</b> (top row) SHAPE to WORLD · <b>4.0.3b</b> (middle row) camera steps (new) · <b>4.0.3c</b> (bottom row) project() to SCREEN</span></figcaption></figure>
+<p>One small change from Lesson 3: the cube starts <em>still</em>, with all three spin angles at 0, so corner 5 sits at WORLD (1, 1, 4) and all of today's worked examples line up with the screen. Press SPACE in the scripts to set it spinning again.</p>
+
+<h2>Part 1: The big idea <span class="mins">6 MIN</span></h2>
+<p>Our <code>project()</code> rule from Lesson 1 has a hidden assumption: you are standing at (0, 0, 0), looking straight along +z. Dividing by z only makes sense if z means "how far in front of me". So how can you ever walk anywhere?</p>
+<p>The trick is that you don't. When you step 1 to the right, everything you see slides 1 to the left. If instead the cube slid 1 to the left while you stood still, you would see exactly the same picture, pixel for pixel. So the computer keeps you fixed and moves the world.</p>
+<figure id="fig-4-1-1"><img src="images/m02_two_ways.png" alt="Two maps from above. A: the camera steps from (0,0,0) to (1,0,0) while the cube stays at (0,0,5). B: the camera stays at (0,0,0) while the cube slides to (-1,0,5). Beside them, two identical screens showing the cube's red front face." loading="lazy"><figcaption><span class="fignum">Fig 4.1.1</span>WORLD coordinates seen from above, 1 grid square = 1 unit. Both screens show the red front face 200 px wide with its right edge on the centre line, at x = 400.<span class="panels">Panels: <b>4.1.1a</b> (left) A. you step 1 to the right · <b>4.1.1b</b> (middle) B. the cube slides 1 to the left · <b>4.1.1c</b> (top right) what A shows · <b>4.1.1d</b> (bottom right) what B shows</span></figcaption></figure>
+<p>That means we now need two different ways to measure where a point is:</p>
+<figure id="fig-4-1-2"><img src="images/m03_world_vs_camera.png" alt="Left: WORLD map with its centre (0,0,0) fixed, the cube at z 4 to 6, the camera at (2,0,1) and corner 5 at (1,1,4). Right: CAMERA map with you at (0,0,0) and corner 5 at (-1,1,3)." loading="lazy"><figcaption><span class="fignum">Fig 4.1.2</span>The same corner, two answers. The WORLD centre (0, 0, 0) never moves. The CAMERA centre (0, 0, 0) is wherever you are, and its +z always points the way you face.<span class="panels">Panels: <b>4.1.2a</b> (left) 1. WORLD · <b>4.1.2b</b> (right) 2. CAMERA</span></figcaption></figure>
+<div class="key"><strong>Four kinds of coordinates now</strong>
+<p><strong>SHAPE</strong>: from the cube's own centre (<code>cube_points</code>). <strong>WORLD</strong>: from the fixed centre of the map. <strong>CAMERA</strong>: from you, +z the way you face. <strong>SCREEN</strong>: pixels from the window's top-left. In Lessons 1 to 3 you sat at the WORLD centre facing +z, so WORLD and CAMERA were the same thing and we only needed one word.</p></div>
+
+<h2>Part 2: Where you are standing <span class="mins">10 MIN</span></h2>
+<p>First the cube gets a fixed address in the world, and you get one too. Three new variables hold your position.</p>
+<figure id="fig-4-2-1"><img src="images/m04_camera_vars.png" alt="Left: WORLD from above with the camera at (2,0,1), dashed lines showing cam_x = 2 and cam_z = 1. Right: WORLD from the side showing cam_y = 0, level with the cube's middle, and a faded camera at cam_y = 2. Notes explain the start values and cube_position." loading="lazy"><figcaption><span class="fignum">Fig 4.2.1</span>cam_x, cam_y and cam_z are measured in WORLD units from the map's centre. From above you see x and z; from the side you see y (height). The start values and <code>cube_position</code> are chosen so the first frame looks exactly like Lesson 3.<span class="panels">Panels: <b>4.2.1a</b> (left) from above: cam_x and cam_z · <b>4.2.1b</b> (right) from the side: cam_y</span></figcaption></figure>
+<pre><code>cube_position = (0, 0, 5)     # the cube's centre, in WORLD coordinates
+cube_x, cube_y, cube_z = cube_position
+
+cam_x = 0                     # where YOU stand, in WORLD coordinates
+cam_y = 0
+cam_z = 0</code></pre>
+<p>A corner's WORLD position is its SHAPE position plus <code>cube_position</code>: <code>((x + cube_x), (y + cube_y), (z + cube_z))</code>. With <code>cube_position = (0, 0, 5)</code> that is the same "add 5 to z" as before.</p>
+
+<h3>Subtract where you are</h3>
+<p>To find where something is <em>from you</em>, take where it is and subtract where you are. Do it on a single line first:</p>
+<figure id="fig-4-2-2"><img src="images/m05_subtract_line.png" alt="Two number lines. A tree at 5 and you at 2: (5 - 2) = 3, so the tree is 3 in front. A tree at 5 and you at 7: (5 - 7) = -2, so the tree is 2 behind." loading="lazy"><figcaption><span class="fignum">Fig 4.2.2</span>One letter at a time. A positive answer means the tree is on the + side of you; a negative answer means it is on the − side.<span class="panels">Panels: <b>4.2.2a</b> (top line) you at 2 (tree in front) · <b>4.2.2b</b> (bottom line) you at 7 (tree behind)</span></figcaption></figure>
+<p>In 3D you do exactly the same subtraction three times, once for each letter. That is the whole of <code>to_camera()</code> for now:</p>
+<pre><code>def to_camera(world_point):
+    x, y, z = world_point
+    camera_x = (x - cam_x)
+    camera_y = (y - cam_y)
+    camera_z = (z - cam_z)
+    return (camera_x, camera_y, camera_z)</code></pre>
+<p>Here is corner 5 worked by hand from two camera spots. The first is a single step to the right:</p>
+<figure id="fig-4-2-3"><img src="images/m06_corner5_cam_a.png" alt="Worked example A: camera at (1,0,0). Subtracting gives CAMERA (0,1,4). project gives screen (400, 200). The screen shows corner 5 exactly on the vertical centre line." loading="lazy"><figcaption><span class="fignum">Fig 4.2.3</span>You stepped 1 to the right, so you are now lined up with corner 5: its CAMERA x is 0, and it lands on the centre line at screen x = 400.<span class="panels">Panels: <b>4.2.3a</b> (left) 1. WORLD from above · <b>4.2.3b</b> (top right) 2. subtract the camera and 3. project() · <b>4.2.3c</b> (bottom right) 4. SCREEN</span></figcaption></figure>
+<p>The second moves right 2 and forward 1:</p>
+<figure id="fig-4-2-4"><img src="images/m07_corner5_cam_b.png" alt="Worked example B: camera at (2,0,1). Subtracting gives CAMERA (-1,1,3). project gives screen (266.7, 166.7). The screen shows the red front face and the green right face." loading="lazy"><figcaption><span class="fignum">Fig 4.2.4</span>Corner 5 is now 1 to your left (x = −1) and only 3 in front (z = 3). Being closer, it lands further from the centre than before: 133.3 px left and 133.3 px up.<span class="panels">Panels: <b>4.2.4a</b> (left) 1. WORLD from above · <b>4.2.4b</b> (top right) 2. subtract the camera and 3. project() · <b>4.2.4c</b> (bottom right) 4. SCREEN</span></figcaption></figure>
+<p>Put the three camera spots side by side and measure the cube's front face each time:</p>
+<figure id="fig-4-2-5"><img src="images/m08_three_screens.png" alt="Three screens. Camera (0,0,0): front face 200 px wide, centred. Camera (1,0,0): still 200 px but 100 px further left. Camera (2,0,1): 266.7 px wide, and the green right side is showing." loading="lazy"><figcaption><span class="fignum">Fig 4.2.5</span>Stepping sideways slides the picture without changing its size. Stepping forward makes it bigger: 200 px at 4 away, 266.7 px at 3 away.<span class="panels">Panels: <b>4.2.5a</b> (left) camera (0, 0, 0) · <b>4.2.5b</b> (middle) camera (1, 0, 0) · <b>4.2.5c</b> (right) camera (2, 0, 1)</span></figcaption></figure>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q1</span><span>You rise up to <code>cam_y = 2</code> and stay at x = 0, z = 0 (the faded camera in the side view). Where does corner 5 land on the screen?</span></p><details><summary>Show answer</summary><div class="ans"><p>CAMERA: <code>((1 - 0), (1 - 2), (4 - 0))</code> = (1, −1, 4). Screen x = <code>400 + ((1 * 400) / 4)</code> = 400 + (100) = 500. Screen y = <code>300 - ((-1 * 400) / 4)</code> = 300 − (−100) = 400. Corner 5 drops from y = 200 to y = 400, below the middle line, because you are now looking at it from above.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q2</span><span>You are at (3, 0, 0). A corner is at WORLD (3, 1, 4). What are its CAMERA coordinates, and where is it on the screen?</span></p><details><summary>Show answer</summary><div class="ans"><p><code>((3 - 3), (1 - 0), (4 - 0))</code> = (0, 1, 4). It lands at (400, 200): on the centre line, because you are standing right in line with it.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q3</span><span>You walk forward to (0, 0, 3). How wide is the front face on the screen now?</span></p><details><summary>Show answer</summary><div class="ans"><p>The front face is at WORLD z = 4, so CAMERA z = <code>(4 - 3)</code> = 1. Width = <code>((2 * 400) / 1)</code> = 800 px: the whole width of the window.</p></div></details></div>
+</div>
+
+<h2>Part 3: Things behind you <span class="mins">10 MIN</span></h2>
+<p>Once you can walk, you can walk <em>past</em> the cube. Then some of its corners are behind you. Which ones? In CAMERA coordinates the answer is easy, because only z tells you.</p>
+<figure id="fig-4-3-1"><img src="images/m09_front_back.png" alt="CAMERA map from above, green half in front (z greater than 0) and red half behind (z less than 0). Point A (1,0,3) in front, B (2,0,-4) behind, C (-3,0,0) exactly beside you." loading="lazy"><figcaption><span class="fignum">Fig 4.3.1</span>CAMERA coordinates, you at (0, 0, 0) facing +z. Positive z = in front, negative z = behind, z = 0 = level with your eye, out to the side.</figcaption></figure>
+<p>What happens if we project a point behind you anyway? Dividing by a negative z flips the signs, so the point is drawn on the opposite side of the screen and upside down: a ghost. And a z of exactly 0 crashes the program.</p>
+<figure id="fig-4-3-2"><img src="images/m10_ghost.png" alt="A tree top at CAMERA (2,1,-4) behind you. project gives (200, 400): left and down, a ghost on the wrong side. Three boxes: z = 0 crashes with ZeroDivisionError, z = 0.01 lands 80000 px away, z = -4 draws a flipped ghost." loading="lazy"><figcaption><span class="fignum">Fig 4.3.2</span>The tree is to your right, up, and behind you. project() puts it on the left and low down: both signs flipped by the negative z.<span class="panels">Panels: <b>4.3.2a</b> (left) 1. from above · <b>4.3.2b</b> (right) 2. project() anyway</span></figcaption></figure>
+<h3>NEAR: how close is too close?</h3>
+<p>So we need a cut-off: anything with a CAMERA z smaller than some small number is not drawn. We call it <code>NEAR</code>. To choose it, look at where a point just 1 unit to the side lands as it gets closer:</p>
+<figure id="fig-4-3-3"><img src="images/m11_near.png" alt="Bar chart: a point 1 unit to the right lands 100 px from the centre at z = 4, 200 at 2, 400 at 1, 800 at 0.5, 1600 at 0.25 and 4000 at 0.1. A pink line marks the window edge at 400 px." loading="lazy"><figcaption><span class="fignum">Fig 4.3.3</span>Each bar is <code>((1 * 400) / z)</code>, the distance from the screen's centre in pixels. Past z = 1 the point is already off the edge of the window.</figcaption></figure>
+<pre><code>NEAR = 0.1      # closer than this (CAMERA z) is not drawn</code></pre>
+<h3>The simple rule: skip the whole face</h3>
+<p>A face is drawn as one polygon from its 4 corners, so if even one corner is too close we skip the whole face. It is simple and it never crashes. The price is that a face sometimes vanishes a little early, when only part of it has gone behind you:</p>
+<figure id="fig-4-3-4"><img src="images/m12_skip_face.png" alt="Two maps from above with the camera beside the cube facing +z. At z 3.5 every corner of the right face is in front and the green face is drawn. At z 4.5 the right face's front corners are 0.5 behind, so the whole face is skipped and the screen is empty." loading="lazy"><figcaption><span class="fignum">Fig 4.3.4</span>WORLD from above. At z = 4.5 the yellow half of the right face is still in front of you, but the red half is behind, so the simple rule throws the whole face away. (Real games cut the face in two. That can wait.)<span class="panels">Panels: <b>4.3.4a</b> (left) camera at (2.5, 0, 3.5) · <b>4.3.4b</b> (right) camera at (2.5, 0, 4.5)</span></figcaption></figure>
+<pre><code># inside the face loop, before the clock test:
+too_close = False
+for corner_number in corners:
+    if camera_points[corner_number][2] &lt; NEAR:
+        too_close = True
+if too_close:
+    continue</code></pre>
+<p>One more change from Lesson 3: the painter's sort must measure each face's distance from <em>you</em>, so <code>average_z()</code> is now given the CAMERA points instead of the old WORLD points. We will see exactly why it matters in Part 4, once you can turn round.</p>
+<h3>The mini-map</h3>
+<p>Walking in 3D, it is easy to lose track of where you are. So the scripts draw a small map of the WORLD, seen from above, in the bottom-right corner. It uses the same idea as <code>project()</code> without the dividing:</p>
+<figure id="fig-4-3-5"><img src="images/m13_minimap.png" alt="The 800 by 600 window with a 160 by 160 pixel map box in the bottom-right corner, and the map zoomed in: the cube near the middle, world (0,0,0) at pixel (710, 560), and you at (2,0,1) at pixel (730, 550)." loading="lazy"><figcaption><span class="fignum">Fig 4.3.5</span><code>map_x = MAP_CX + (x * MAP_SCALE)</code> and <code>map_y = MAP_CY - (z * MAP_SCALE)</code>. We subtract z because +z goes up the map but screen y counts down: the same trick as <code>screen_y</code> in Lesson 1.<span class="panels">Panels: <b>4.3.5a</b> (left) the 800 x 600 window with the map · <b>4.3.5b</b> (right) the map zoomed in (x2)</span></figcaption></figure>
+<h3>Run it: step 1</h3>
+<p>Run <code>step1_walk.py</code>. W and S walk along +z and −z, A and D along −x and +x, and Q and E move you down and up. You can't turn yet, so you always face +z.</p>
+<figure id="fig-4-3-6"><img src="images/run_step1_walk.png" alt="Output of step 1: you are at (3, 1.5, 2), looking past the cube's right side. The green right face and a little of the gold top fill the lower left. The mini-map shows the pink dot to the right of and below the cube." loading="lazy"><figcaption><span class="fignum">Fig 4.3.6</span>After 1 second of D, 2/3 of a second of W and half a second of E: you are at (3, 1.5, 2), beside the cube and a little above it, so you see its green right side and the gold top.</figcaption></figure>
+<details class="full"><summary>Full code: <code>step1_walk.py</code> (about 470 lines)</summary><pre><code># ======================================================================
+# LESSON 4 - STEP 1: WALK AROUND (no turning yet)
+# ----------------------------------------------------------------------
+# Goal: YOU move, the cube stays still. Walk up to it, past it and
+# round the back of it with the keyboard.
+#
+# This starts from Lesson 3's lit solid cube (step4_lit_cube.py).
+#
+# What is new since Lesson 3:
+#
+#   1. cube_position = (0, 0, 5)
+#        The cube now has a fixed place in the WORLD. This is the same
+#        5 as Lesson 1's cube_distance, so nothing looks different
+#        until you start walking.
+#
+#   2. cam_x, cam_y, cam_z  (start at 0, 0, 0)
+#        Where YOU are standing, in WORLD coordinates.
+#
+#   3. to_camera(world_point)
+#        Turns a WORLD point into a CAMERA point (measured from YOU)
+#        by SUBTRACTING where you stand:
+#
+#           camera_x = (x - cam_x)
+#           camera_y = (y - cam_y)
+#           camera_z = (z - cam_z)
+#
+#   4. NEAR = 0.1
+#        A face with ANY corner closer than 0.1 in front of you (or
+#        behind you) is skipped. Dividing by a z of 0 crashes, and a
+#        negative z draws a flipped "ghost" (lesson Part 3).
+#
+#   5. The painter's sort now uses CAMERA z (distance from YOU).
+#
+#   6. A mini-map in the bottom-right corner: the WORLD seen from
+#      above, with you as a pink dot.
+#
+# The recipe for one corner, every frame:
+#
+#   SHAPE -&gt; spin -&gt; + cube_position -&gt; - camera -&gt; NEAR check -&gt; project
+#   (cube_points)    (WORLD)           (CAMERA)                  (SCREEN)
+#
+# Controls:  W / S = walk forward / back   (along +z / -z)
+#            A / D = step left / right     (along -x / +x)
+#            Q / E = go down / up          (along -y / +y)
+#            SPACE = spin the cube on / off,   R = reset
+#            L = light on / off,   C = six colours / one colour
+# Run:  python step1_walk.py
+# ======================================================================
+
+import math
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Lesson 4, step 1 - walk around")
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+PINK = (255, 105, 200)        # NEW: the colour we use for YOU (the camera)
+MAP_BACK = (25, 30, 36)       # NEW: dark grey-blue behind the mini-map
+
+# ---- One colour for each face (from Lesson 3) -------------------------
+RED = (235, 80, 80)          # front
+PURPLE = (160, 100, 230)     # back
+BLUE = (70, 150, 255)        # left
+GREEN = (70, 210, 120)       # right
+GOLD = (245, 200, 60)        # top
+ORANGE = (245, 140, 50)      # bottom
+CUBE_GREEN = (70, 230, 120)  # one colour for the whole cube (C key)
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400
+
+# ---- The cube's 8 corners, in SHAPE coordinates (same as always) ------
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+
+# ---- The cube's 6 faces (from Lesson 3) -------------------------------
+# Each face lists its 4 corners CLOCKWISE as seen from OUTSIDE the cube.
+cube_faces = [
+    ((4, 5, 1, 0), RED),       # front  (all have z = -1)
+    ((6, 7, 3, 2), PURPLE),    # back   (all have z = +1)
+    ((7, 4, 0, 3), BLUE),      # left   (all have x = -1)
+    ((5, 6, 2, 1), GREEN),     # right  (all have x = +1)
+    ((7, 6, 5, 4), GOLD),      # top    (all have y = +1)
+    ((2, 3, 0, 1), ORANGE),    # bottom (all have y = -1)
+]
+
+# ---- NEW: where the cube lives in the WORLD ----------------------------
+# Before, we added cube_distance to z and that was the whole story,
+# because you never moved. Now the cube gets a proper address on the
+# map, and YOU get one too (below).
+# (0, 0, 5): straight ahead of the starting spot, 5 away - the same 5
+# as Lessons 1 to 3, so the first frame looks exactly like before.
+cube_position = (0, 0, 5)
+cube_x, cube_y, cube_z = cube_position      # unpack the 3 numbers
+
+# ---- NEW: where YOU are standing (the camera), in WORLD coordinates ---
+# Start at (0, 0, 0): the seat you sat in for Lessons 1 to 3.
+cam_x = 0
+cam_y = 0
+cam_z = 0
+
+# NEW: how far you move in ONE frame (60 frames a second).
+#   (0.05 * 60) = 3 units a second.
+# From the start the cube's front face is 4 away, so you reach it in
+# (4 / 3) = 1.3 seconds: quick, but easy to stop in time.
+MOVE_SPEED = 0.05
+
+# NEW: anything closer than this (in CAMERA z) is not drawn.
+# At z = 0.1 a point just 1 unit to the side lands
+# ((1 * 400) / 0.1) = 4000 px from the centre: ten half-windows away.
+# Nothing closer than that could ever be useful to draw.
+NEAR = 0.1
+
+# ---- The light (from Lesson 3, unchanged) -----------------------------
+# The lamp belongs to the WORLD (like the sun), so it does NOT move when
+# you walk. The top of the cube stays the brightest face from anywhere.
+LIGHT = (0.48, 0.6, -0.64)
+AMBIENT = 0.2
+
+# ---- The cube's own spin (from Lessons 2 and 2B) ----------------------
+# NEW: the cube starts STILL, with all angles at 0, so corner 5 is at
+# WORLD (1, 1, 4) like in the lesson's worked examples. SPACE spins it.
+angle_x = 0
+angle_y = 0
+angle_z = 0
+SPEED_X = 0.5
+SPEED_Y = 1
+SPEED_Z = 0.25
+spinning = False       # NEW: SPACE flips this
+use_light = True
+one_colour = False     # NEW default: six colours, so when you walk
+                       # round you can always tell WHICH side you see
+
+# ---- NEW: the mini-map ------------------------------------------------
+# A 160 x 160 px box, 10 px in from the bottom-right corner:
+#   left = (800 - 10 - 160) = 630,   top = (600 - 10 - 160) = 430
+MAP_LEFT = 630
+MAP_TOP = 430
+MAP_SIZE = 160
+# World (0, 0, 0) goes at (MAP_CX, MAP_CY):
+#   across: the middle of the box,  (630 + 80) = 710
+#   down:   30 px above the bottom, (430 + 130) = 560
+# Why so low? The cube is at z = 5, which lands (5 * 10) = 50 px higher,
+# at y = 510: the exact middle of the box. You start at the bottom
+# looking up the map at it, just like the lesson's diagrams.
+MAP_CX = (MAP_LEFT + (MAP_SIZE / 2))    # (630 + 80) = 710
+MAP_CY = (MAP_TOP + 130)                # (430 + 130) = 560
+MAP_SCALE = 10                          # 10 px for every 1 world unit
+                                        # (the box shows 16 units across)
+
+
+# ---- The three turns (from Lesson 2B, unchanged) -----------------------
+def rotate_x(point_3d, angle_degrees):
+    """TIP one point around the x axis (+y swings toward +z)."""
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = x
+    new_y = (y * cos_a) - (z * sin_a)
+    new_z = (y * sin_a) + (z * cos_a)
+    return (new_x, new_y, new_z)
+
+
+def rotate_y(point_3d, angle_degrees):
+    """TURN one point around the y axis (+x swings toward +z)."""
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = (x * cos_a) - (z * sin_a)
+    new_y = y
+    new_z = (x * sin_a) + (z * cos_a)
+    return (new_x, new_y, new_z)
+
+
+def rotate_z(point_3d, angle_degrees):
+    """ROLL one point around the z axis (+x swings toward +y)."""
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = (x * cos_a) - (y * sin_a)
+    new_y = (x * sin_a) + (y * cos_a)
+    new_z = z
+    return (new_x, new_y, new_z)
+
+
+def rotate_all(point_3d):
+    """Spin the cube: tip, then turn, then roll (Lesson 2B's order)."""
+    p = rotate_x(point_3d, angle_x)
+    p = rotate_y(p, angle_y)
+    p = rotate_z(p, angle_z)
+    return p
+
+
+def to_camera(world_point):
+    """NEW: turn one WORLD point into a CAMERA point (measured from YOU).
+
+    Subtract where you are standing, one letter at a time.
+    Worked example (lesson Part 2): you at (2, 0, 1), corner 5 at
+    WORLD (1, 1, 4):
+        ((1 - 2), (1 - 0), (4 - 1))  =  (-1, 1, 3)
+    """
+    x, y, z = world_point
+    camera_x = (x - cam_x)
+    camera_y = (y - cam_y)
+    camera_z = (z - cam_z)
+    return (camera_x, camera_y, camera_z)
+
+
+def project(point_3d):
+    """Turn one 3D CAMERA point into a 2D SCREEN point (from Lesson 1).
+
+    Only ever call this with z &gt;= NEAR, so we never divide by 0.
+    """
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+def average_z(corners, camera_points):
+    """How far away is this face? (from Lesson 3)
+
+    CHANGED: we now pass in CAMERA points, so z means "distance in
+    front of YOU", wherever you are standing. (WORLD z would give the
+    wrong answer as soon as you walk round behind the cube.)
+    """
+    total = 0
+    for corner_number in corners:
+        x, y, z = camera_points[corner_number]
+        total = (total + z)
+    return (total / len(corners))          # len(corners) is 4
+
+
+def is_facing_you(face_points):
+    """The clock test (from Lesson 3, unchanged): True if clockwise on
+    the SCREEN, which means the face is turned toward you."""
+    a_x, a_y = face_points[0]
+    b_x, b_y = face_points[1]
+    c_x, c_y = face_points[2]
+    arrow_a_x = (b_x - a_x)
+    arrow_a_y = (b_y - a_y)
+    arrow_b_x = (c_x - a_x)
+    arrow_b_y = (c_y - a_y)
+    cross = ( (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x) )
+    return (cross &gt; 0)
+
+
+def face_pointer(corners, turned_points):
+    """The arrow straight out of a face (from Lesson 3, unchanged).
+    Uses turned SHAPE points, so the light stays fixed in the world."""
+    total_x = 0
+    total_y = 0
+    total_z = 0
+    for corner_number in corners:
+        x, y, z = turned_points[corner_number]
+        total_x = (total_x + x)
+        total_y = (total_y + y)
+        total_z = (total_z + z)
+    count = len(corners)
+    return ( (total_x / count), (total_y / count), (total_z / count) )
+
+
+def dot(arrow_1, arrow_2):
+    """The dot product (from Lesson 3)."""
+    x1, y1, z1 = arrow_1
+    x2, y2, z2 = arrow_2
+    return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
+
+
+def shade_colour(colour, pointer):
+    """Brighter when the face points at the light (from Lesson 3)."""
+    brightness = dot(pointer, LIGHT)
+    if brightness &lt; 0:
+        brightness = 0
+    shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )
+    red, green, blue = colour
+    return ( round(red * shade), round(green * shade), round(blue * shade) )
+
+
+def keep_under_360(angle):
+    """360 degrees is the same as 0, so start again after a full turn."""
+    if angle &gt;= 360:
+        angle = (angle - 360)
+    return angle
+
+
+def to_map(x, z):
+    """NEW: a WORLD (x, z) -&gt; a pixel on the mini-map.
+
+    Like project(), but with no dividing, because the map is flat.
+    +z goes UP the map, and screen y counts DOWN, so we SUBTRACT z.
+    Example: you at (2, 0, 1) -&gt; (710 + (2 * 10), 560 - (1 * 10))
+                               = (730, 550)
+    """
+    map_x = MAP_CX + (x * MAP_SCALE)
+    map_y = MAP_CY - (z * MAP_SCALE)
+    return (map_x, map_y)
+
+
+def draw_map(world_points):
+    """NEW: draw the mini-map: the cube's outline and you, from above."""
+    box = pygame.Rect(MAP_LEFT, MAP_TOP, MAP_SIZE, MAP_SIZE)
+    pygame.draw.rect(screen, MAP_BACK, box)
+    # set_clip: anything we draw outside the box is cut off, so if you
+    # walk off the edge of the map your dot just disappears.
+    screen.set_clip(box)
+    # The cube from above = its 4 BOTTOM corners (0, 1, 2, 3), x and z only.
+    outline = []
+    for corner_number in (0, 1, 2, 3):
+        x, y, z = world_points[corner_number]
+        outline.append(to_map(x, z))
+    pygame.draw.polygon(screen, GREEN, outline, 2)
+    # You: a pink dot, with a short line showing the way you face (+z).
+    you = to_map(cam_x, cam_z)
+    nose = to_map(cam_x, (cam_z + 1.5))      # 1.5 units in front of you
+    pygame.draw.line(screen, PINK, you, nose, 2)
+    pygame.draw.circle(screen, PINK, you, 4)
+    screen.set_clip(None)                    # stop cutting things off
+    pygame.draw.rect(screen, WHITE, box, 1)  # thin white border
+
+
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                spinning = not spinning
+            if event.key == pygame.K_l:
+                use_light = not use_light
+            if event.key == pygame.K_c:
+                one_colour = not one_colour
+            if event.key == pygame.K_r:          # back to the start
+                cam_x = 0
+                cam_y = 0
+                cam_z = 0
+                angle_x = 0
+                angle_y = 0
+                angle_z = 0
+
+    # ---- NEW: walking. Keys you HOLD use get_pressed() -----------------
+    # (KEYDOWN above fires once per press; get_pressed() is True on
+    #  EVERY frame the key is held down, which is what walking needs.)
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_w]:
+        cam_z = (cam_z + MOVE_SPEED)      # forward = +z
+    if keys[pygame.K_s]:
+        cam_z = (cam_z - MOVE_SPEED)      # back    = -z
+    if keys[pygame.K_d]:
+        cam_x = (cam_x + MOVE_SPEED)      # right   = +x
+    if keys[pygame.K_a]:
+        cam_x = (cam_x - MOVE_SPEED)      # left    = -x
+    if keys[pygame.K_e]:
+        cam_y = (cam_y + MOVE_SPEED)      # up      = +y
+    if keys[pygame.K_q]:
+        cam_y = (cam_y - MOVE_SPEED)      # down    = -y
+
+    if spinning:
+        angle_x = keep_under_360( (angle_x + SPEED_X) )
+        angle_y = keep_under_360( (angle_y + SPEED_Y) )
+        angle_z = keep_under_360( (angle_z + SPEED_Z) )
+
+    screen.fill(BLACK)
+
+    # ---- spin -&gt; place -&gt; camera, for all 8 corners --------------------
+    # FOUR lists now, one for each kind of coordinates:
+    #   turned_points - SHAPE, spun   (for the light)
+    #   world_points  - WORLD         (for the mini-map)
+    #   camera_points - CAMERA        (for NEAR and the painter's sort)
+    #   screen_points - SCREEN        (for the clock test and drawing)
+    turned_points = []
+    world_points = []
+    camera_points = []
+    screen_points = []
+    for p in cube_points:
+        turned = rotate_all(p)                         # SHAPE, spun
+        turned_points.append(turned)
+        x, y, z = turned
+        world = ( (x + cube_x), (y + cube_y), (z + cube_z) )   # WORLD
+        world_points.append(world)
+        camera = to_camera(world)                      # CAMERA
+        camera_points.append(camera)
+        # Only project corners that are in front of you. A corner
+        # closer than NEAR gets None ("nothing") instead of a pixel.
+        if camera[2] &gt;= NEAR:
+            screen_points.append(project(camera))      # SCREEN
+        else:
+            screen_points.append(None)
+
+    # ---- Make a list of the faces we will paint ------------------------
+    faces_to_draw = []
+    for corners, colour in cube_faces:
+        # NEW: 0. skip the face if ANY corner is too close or behind you.
+        too_close = False
+        for corner_number in corners:
+            if camera_points[corner_number][2] &lt; NEAR:
+                too_close = True
+        if too_close:
+            continue
+
+        face_points = []
+        for corner_number in corners:
+            face_points.append(screen_points[corner_number])
+
+        # 1. The clock test (Lesson 3).
+        if not is_facing_you(face_points):
+            continue
+
+        # 2. How far away is it? CHANGED: CAMERA z, distance from YOU.
+        distance = average_z(corners, camera_points)
+
+        # 3. What colour, after the light? (Lesson 3)
+        if one_colour:
+            colour = CUBE_GREEN
+        if use_light:
+            pointer = face_pointer(corners, turned_points)
+            colour = shade_colour(colour, pointer)
+
+        faces_to_draw.append( (distance, face_points, colour) )
+
+    # ---- The painter's method: furthest first (Lesson 3) ---------------
+    faces_to_draw.sort(reverse=True)
+    for distance, face_points, colour in faces_to_draw:
+        pygame.draw.polygon(screen, colour, face_points)
+        pygame.draw.polygon(screen, BLACK, face_points, 2)
+
+    draw_map(world_points)
+
+    text = ("you are at (" + str(round(cam_x, 2)) + ", " +
+            str(round(cam_y, 2)) + ", " + str(round(cam_z, 2)) + ")")
+    screen.blit(font.render(text, True, PINK), (20, 20))
+    screen.blit(font.render("W A S D = walk,  Q / E = down / up", True, YELLOW), (20, 50))
+    screen.blit(font.render("SPACE = spin,  R = reset,  L = light,  C = colours", True, YELLOW), (20, 80))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Hold W until you pass the cube. Watch the front face vanish first
+#     (its corners go behind you), then the sides.
+#   * Walk round to the back with A / D and W. Which colour do you see?
+#     (Lesson 3: the back face is PURPLE.)
+#   * Change NEAR to 1. Walk at the cube. When does the front face vanish?
+#   * Set cube_position = (3, 0, 8). Where is the cube at the start?
+#     Find it on the mini-map first, then walk to it.
+# ----------------------------------------------------------------------
+</code></pre></details>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q4</span><span>You walk to (0, 0, 3.95). What do you see, and why?</span></p><details><summary>Show answer</summary><div class="ans"><p>Nothing. The front face's corners are at CAMERA z = <code>(4 - 3.95)</code> = 0.05, which is less than NEAR, so the front face is skipped. The four side faces each share two of those corners, so they are skipped too. That leaves the back face, which has its back to you, so the clock test hides it.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q5</span><span>Why not just use <code>NEAR = 0</code>, since it's z = 0 that crashes?</span></p><details><summary>Show answer</summary><div class="ans"><p>A z of 0.0001 would not crash, but a corner 1 unit to the side would land <code>((1 * 400) / 0.0001)</code> = 4,000,000 px away. Drawing a polygon that big is slow and useless. 0.1 throws those away while still letting you get very close to a wall.</p></div></details></div>
+</div>
+
+<h2>Part 4: Turning <span class="mins">10 MIN</span></h2>
+<p>Walking in straight lines along x and z is not much of a game. You need to turn. We store which way you face as one angle, in degrees.</p>
+<figure id="fig-4-4-1"><img src="images/m14_turn_angle.png" alt="WORLD from above with arrows from the camera: 0 faces +z, 30 a little left, 90 faces -x, -30 a little right, 180 faces -z." loading="lazy"><figcaption><span class="fignum">Fig 4.4.1</span>Positive <code>cam_turn</code> = turn LEFT, anticlockwise seen from above. That is the same direction <code>rotate_y</code> turns things in Lesson 2, which keeps the signs simple.</figcaption></figure>
+<pre><code>cam_turn = 0          # degrees. 0 = facing +z. Positive = turned left.
+TURN_SPEED = 1.5      # degrees per frame: (1.5 * 60) = 90 degrees a second</code></pre>
+<p><code>TURN_SPEED = 1.5</code> means a quarter turn takes 1 second and a full look round takes <code>(360 / 90)</code> = 4 seconds: quick enough to look about, slow enough to aim.</p>
+<h3>The world turns the opposite way</h3>
+<p>Turning works like walking. When you turn left, everything you see swings round to the right. So to draw what a turned camera sees, we keep you facing +z and turn the whole world by the <em>opposite</em> angle, with the <code>rotate_y</code> you already have.</p>
+<figure id="fig-4-4-2"><img src="images/m15_world_opposite.png" alt="A: the camera turns left 30 degrees. B: the camera stays facing +z and the cube is turned right 30 degrees around it. Both screens show the cube slid over to the right edge." loading="lazy"><figcaption><span class="fignum">Fig 4.4.2</span>Turning left 30 and the world turning right 30 (that is, by −30) give identical screens: the cube slides right.<span class="panels">Panels: <b>4.4.2a</b> (left) A. you turn left 30 · <b>4.4.2b</b> (middle) B. the world turns right 30 · <b>4.4.2c</b> (top right) what A shows · <b>4.4.2d</b> (bottom right) what B shows</span></figcaption></figure>
+<p>So <code>to_camera()</code> gets a second line:</p>
+<pre><code>def to_camera(world_point):
+    x, y, z = world_point
+    moved = ( (x - cam_x), (y - cam_y), (z - cam_z) )   # 1. subtract
+    turned = rotate_y(moved, (-cam_turn))               # 2. undo your turn
+    return turned</code></pre>
+<p>Try it on corner 5. First a big turn, a quarter turn to the left:</p>
+<figure id="fig-4-4-3"><img src="images/m16_turn_corner5_90.png" alt="Worked example: camera at (0,0,0) turned left 90. rotate_y of (1,1,4) by -90 gives CAMERA (4, 1, -1): 4 to the right and 1 behind." loading="lazy"><figcaption><span class="fignum">Fig 4.4.3</span>Facing −x, the cube is on your right-hand side. Corner 5 ends up 4 to your right and 1 behind you (z = −1), so it is not drawn.<span class="panels">Panels: <b>4.4.3a</b> (left) 1. WORLD: you turned 90 · <b>4.4.3b</b> (top right) 2. rotate_y by -90 · <b>4.4.3c</b> (bottom right) 3. CAMERA from above</span></figcaption></figure>
+<p>Now a smaller turn, worked bracket by bracket all the way to the screen:</p>
+<figure id="fig-4-4-4"><img src="images/m17_turn_corner5_30.png" alt="Worked example: camera at (0,0,0) turned left 30. rotate_y of (1,1,4) by -30 gives CAMERA (2.866, 1, 2.964), and project gives screen (786.8, 165.1), right at the edge of the window." loading="lazy"><figcaption><span class="fignum">Fig 4.4.4</span>Turning left only 30° swings corner 5 from screen x = 500 all the way to 786.8, just 13 px from the right edge. Small turns make big sideways jumps, which is why the arrow keys turn you smoothly, 1.5° a frame.<span class="panels">Panels: <b>4.4.4a</b> (left) 1. WORLD: you turned 30 · <b>4.4.4b</b> (top right) 2. rotate_y by -30 · <b>4.4.4c</b> (bottom middle) 3. CAMERA from above · <b>4.4.4d</b> (bottom right) SCREEN</span></figcaption></figure>
+<h3>Why subtract first, then turn?</h3>
+<p>You turn on the spot where you stand, not round the middle of the map. <code>rotate_y</code> always turns round (0, 0, 0), so we must first make <em>you</em> the (0, 0, 0) by subtracting, and only then turn.</p>
+<figure id="fig-4-4-5"><img src="images/m18_order.png" alt="Camera at (2,0,0) facing -x. Right order: subtract gives (-1,1,4), then turning gives (4,1,1), correct. Wrong order: turning first gives (4,1,-1), then subtracting gives (2,1,-1), which wrongly says the corner is behind you." loading="lazy"><figcaption><span class="fignum">Fig 4.4.5</span>Same numbers, two orders, two different answers. Only subtract-then-turn matches the picture: corner 5 is 1 ahead and 4 to your right.<span class="panels">Panels: <b>4.4.5a</b> (left) WORLD from above · <b>4.4.5b</b> (top right) RIGHT: subtract, then turn · <b>4.4.5c</b> (bottom right) WRONG: turn, then subtract</span></figcaption></figure>
+<h3>Lesson 3's tools, now that you can turn round</h3>
+<p>Now that you can stand anywhere and face any way, check that each of Lesson 3's tools uses the right kind of coordinates:</p>
+<figure id="fig-4-4-6"><img src="images/m19_lesson3_tools.png" alt="Three panels. Clock test: uses SCREEN points, no change. Painter's sort: from behind the cube the back face is nearer, CAMERA z says 5 versus 7 (right) while WORLD z says 6 versus 4 (wrong), so it must use CAMERA z. Light: uses turned SHAPE pointers, no change, the lamp belongs to the world." loading="lazy"><figcaption><span class="fignum">Fig 4.4.6</span>Only the painter's sort changes. It is about distance from you, so it needs CAMERA z. The light is about the world, so it stays as it was, and the top stays the brightest face from anywhere.<span class="panels">Panels: <b>4.4.6a</b> (left card) 1. clock test · <b>4.4.6b</b> (middle card) 2. painter&#x27;s sort · <b>4.4.6c</b> (right card) 3. light</span></figcaption></figure>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q6</span><span>Which way are you facing when <code>cam_turn = -90</code>?</span></p><details><summary>Show answer</summary><div class="ans"><p>Negative means turned right, so a quarter turn right from +z: you face +x.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q7</span><span>You stand at (0, 0, 0) with <code>cam_turn = -90</code>. Work out corner 5's CAMERA coordinates. Is it drawn?</span></p><details><summary>Show answer</summary><div class="ans"><p><code>rotate_y((1, 1, 4), 90)</code>, with cos_a = 0 and sin_a = 1. new_x = <code>(1 * 0) - (4 * 1)</code> = −4. new_z = <code>(1 * 1) + (4 * 0)</code> = 1. CAMERA (−4, 1, 1). z = 1 is in front, so it is not skipped, but screen x = <code>400 + ((-4 * 400) / 1)</code> = −1200, far off the left of the window. That's right: facing +x, the cube is on your left.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q8</span><span>In your own words, why must <code>to_camera()</code> subtract before it turns?</span></p><details><summary>Show answer</summary><div class="ans"><p><code>rotate_y</code> turns things round (0, 0, 0). We want the world to turn round <em>you</em>, so we first subtract your position to make you the (0, 0, 0), then turn.</p></div></details></div>
+</div>
+
+<h2>Part 5: Walk the way you face <span class="mins">4 MIN</span></h2>
+<p>If W still added to <code>cam_z</code>, then after turning round you would walk backwards. We need to know which way "forward" is right now. The neat trick: take the arrow that points forward at the start, (0, 0, 1), and turn it by the same angle you turned. Do the same with the "right" arrow, (1, 0, 0).</p>
+<figure id="fig-4-5-1"><img src="images/m20_walk_vectors.png" alt="Three views from above at cam_turn 0, 30 and 90 with pink forward and teal right arrows. At 0: forward (0,0,1), right (1,0,0). At 30: forward (-0.5,0,0.866), right (0.866,0,0.5). At 90: forward (-1,0,0), right (0,0,1)." loading="lazy"><figcaption><span class="fignum">Fig 4.5.1</span>Both arrows turn with you. They are always exactly 1 long, so how far you move depends only on <code>MOVE_SPEED</code>.<span class="panels">Panels: <b>4.5.1a</b> (left) cam_turn = 0 · <b>4.5.1b</b> (middle) cam_turn = 30 · <b>4.5.1c</b> (right) cam_turn = 90</span></figcaption></figure>
+<pre><code>forward_x, forward_y, forward_z = rotate_y((0, 0, 1), cam_turn)
+right_x, right_y, right_z = rotate_y((1, 0, 0), cam_turn)
+
+if keys[pygame.K_w]:                        # forward
+    cam_x = (cam_x + (forward_x * MOVE_SPEED))
+    cam_z = (cam_z + (forward_z * MOVE_SPEED))</code></pre>
+<p>Note this uses <code>cam_turn</code>, not <code>-cam_turn</code>: we are turning <em>your</em> arrow the way you turned, not undoing your turn on the world. <code>MOVE_SPEED = 0.05</code> means <code>(0.05 * 60)</code> = 3 units a second, so from the start you reach the cube's front face, 4 away, in <code>(4 / 3)</code> = 1.3 seconds.</p>
+<figure id="fig-4-5-2"><img src="images/m21_walk_step.png" alt="One second of W at cam_turn 30, seen from above. Each frame moves (-0.025, 0, 0.0433), so 60 frames move (-1.5, 0, 2.598), a distance of exactly 3." loading="lazy"><figcaption><span class="fignum">Fig 4.5.2</span>One frame moves you <code>(-0.5 * 0.05)</code> = −0.025 in x and <code>(0.866 * 0.05)</code> = 0.0433 in z. Sixty frames add up to 3 units, in the direction you face.</figcaption></figure>
+<h3>Run it: step 2</h3>
+<p>Run <code>step2_turn.py</code>. LEFT and RIGHT turn you; W, A, S and D now follow the way you face. The pink line on the mini-map shows your forward arrow.</p>
+<figure id="fig-4-5-3"><img src="images/run_step2_turn.png" alt="Output of step 2: you are at (0, 0, 10), facing 180, looking at the dark purple back face of the cube. The mini-map shows you at the top of the map, facing down toward the cube." loading="lazy"><figcaption><span class="fignum">Fig 4.5.3</span>Hold W for 200 frames (10 units, right past the cube), then LEFT for 120 frames (180°). You are at (0, 0, 10) looking back at the purple back face. It is dark because Lesson 3's lamp is on the front side.</figcaption></figure>
+<details class="full"><summary>Full code: <code>step2_turn.py</code> (about 500 lines)</summary><pre><code># ======================================================================
+# LESSON 4 - STEP 2: TURN, AND WALK THE WAY YOU FACE
+# ----------------------------------------------------------------------
+# Goal: turn left and right with the arrow keys, and make W walk the
+# way you are FACING (not just along +z), like in a real game.
+#
+# What is new since step 1:
+#
+#   1. cam_turn  (degrees, starts at 0 = facing +z)
+#        Positive = turn LEFT (anticlockwise seen from above), the same
+#        way rotate_y turns things. LEFT arrow adds, RIGHT arrow takes.
+#
+#   2. to_camera() gets a second line: after subtracting where you
+#      stand, it turns the world the OPPOSITE way to you:
+#
+#           rotate_y(point, (-cam_turn))
+#
+#      Turning left 30 looks exactly like the world turning right 30.
+#      ORDER MATTERS: subtract FIRST, then turn (lesson Part 4).
+#
+#   3. Two arrows that say where "forward" and "right" are now:
+#
+#           forward = rotate_y((0, 0, 1), cam_turn)
+#           right   = rotate_y((1, 0, 0), cam_turn)
+#
+#      W / S move along forward, A / D move along right.
+#      Example: cam_turn = 30 -&gt; forward = (-0.5, 0, 0.866)
+#
+# The recipe for one corner, every frame:
+#
+#   SHAPE -&gt; spin -&gt; + cube_position -&gt; - camera -&gt; undo turn -&gt; NEAR -&gt; project
+#   (cube_points)    (WORLD)                        (CAMERA)            (SCREEN)
+#
+# Controls:  LEFT / RIGHT = turn,   W / S = walk forward / back
+#            A / D = step left / right,   Q / E = go down / up
+#            SPACE = spin the cube on / off,   R = reset
+#            L = light on / off,   C = six colours / one colour
+# Run:  python step2_turn.py
+# ======================================================================
+
+import math
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Lesson 4, step 2 - turn and walk")
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+PINK = (255, 105, 200)        # (step 1) the colour we use for YOU (the camera)
+MAP_BACK = (25, 30, 36)       # (step 1) dark grey-blue behind the mini-map
+
+# ---- One colour for each face (from Lesson 3) -------------------------
+RED = (235, 80, 80)          # front
+PURPLE = (160, 100, 230)     # back
+BLUE = (70, 150, 255)        # left
+GREEN = (70, 210, 120)       # right
+GOLD = (245, 200, 60)        # top
+ORANGE = (245, 140, 50)      # bottom
+CUBE_GREEN = (70, 230, 120)  # one colour for the whole cube (C key)
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400
+
+# ---- The cube's 8 corners, in SHAPE coordinates (same as always) ------
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+
+# ---- The cube's 6 faces (from Lesson 3) -------------------------------
+# Each face lists its 4 corners CLOCKWISE as seen from OUTSIDE the cube.
+cube_faces = [
+    ((4, 5, 1, 0), RED),       # front  (all have z = -1)
+    ((6, 7, 3, 2), PURPLE),    # back   (all have z = +1)
+    ((7, 4, 0, 3), BLUE),      # left   (all have x = -1)
+    ((5, 6, 2, 1), GREEN),     # right  (all have x = +1)
+    ((7, 6, 5, 4), GOLD),      # top    (all have y = +1)
+    ((2, 3, 0, 1), ORANGE),    # bottom (all have y = -1)
+]
+
+# ---- (step 1) where the cube lives in the WORLD ----------------------------
+# Before, we added cube_distance to z and that was the whole story,
+# because you never moved. Now the cube gets a proper address on the
+# map, and YOU get one too (below).
+# (0, 0, 5): straight ahead of the starting spot, 5 away - the same 5
+# as Lessons 1 to 3, so the first frame looks exactly like before.
+cube_position = (0, 0, 5)
+cube_x, cube_y, cube_z = cube_position      # unpack the 3 numbers
+
+# ---- (step 1) where YOU are standing (the camera), in WORLD coordinates ---
+# Start at (0, 0, 0): the seat you sat in for Lessons 1 to 3.
+cam_x = 0
+cam_y = 0
+cam_z = 0
+
+# NEW: which way you are facing, in degrees. 0 = facing +z, straight
+# at the cube, like Lessons 1 to 3. Positive = turned LEFT.
+cam_turn = 0
+
+# How far you move in ONE frame (60 frames a second).
+#   (0.05 * 60) = 3 units a second.
+# From the start the cube's front face is 4 away, so you reach it in
+# (4 / 3) = 1.3 seconds: quick, but easy to stop in time.
+MOVE_SPEED = 0.05
+
+# NEW: how many degrees you turn in ONE frame.
+#   (1.5 * 60) = 90 degrees a second: a quarter turn takes 1 second
+#   and a full look round takes (360 / 90) = 4 seconds.
+TURN_SPEED = 1.5
+
+# (step 1) anything closer than this (in CAMERA z) is not drawn.
+# At z = 0.1 a point just 1 unit to the side lands
+# ((1 * 400) / 0.1) = 4000 px from the centre: ten half-windows away.
+# Nothing closer than that could ever be useful to draw.
+NEAR = 0.1
+
+# ---- The light (from Lesson 3, unchanged) -----------------------------
+# The lamp belongs to the WORLD (like the sun), so it does NOT move when
+# you walk. The top of the cube stays the brightest face from anywhere.
+LIGHT = (0.48, 0.6, -0.64)
+AMBIENT = 0.2
+
+# ---- The cube's own spin (from Lessons 2 and 2B) ----------------------
+# (step 1) the cube starts STILL, with all angles at 0, so corner 5 is at
+# WORLD (1, 1, 4) like in the lesson's worked examples. SPACE spins it.
+angle_x = 0
+angle_y = 0
+angle_z = 0
+SPEED_X = 0.5
+SPEED_Y = 1
+SPEED_Z = 0.25
+spinning = False       # (step 1) SPACE flips this
+use_light = True
+one_colour = False     # Step 1 default: six colours, so when you walk
+                       # round you can always tell WHICH side you see
+
+# ---- (step 1) the mini-map ------------------------------------------------
+# A 160 x 160 px box, 10 px in from the bottom-right corner:
+#   left = (800 - 10 - 160) = 630,   top = (600 - 10 - 160) = 430
+MAP_LEFT = 630
+MAP_TOP = 430
+MAP_SIZE = 160
+# World (0, 0, 0) goes at (MAP_CX, MAP_CY):
+#   across: the middle of the box,  (630 + 80) = 710
+#   down:   30 px above the bottom, (430 + 130) = 560
+# Why so low? The cube is at z = 5, which lands (5 * 10) = 50 px higher,
+# at y = 510: the exact middle of the box. You start at the bottom
+# looking up the map at it, just like the lesson's diagrams.
+MAP_CX = (MAP_LEFT + (MAP_SIZE / 2))    # (630 + 80) = 710
+MAP_CY = (MAP_TOP + 130)                # (430 + 130) = 560
+MAP_SCALE = 10                          # 10 px for every 1 world unit
+                                        # (the box shows 16 units across)
+
+
+# ---- The three turns (from Lesson 2B, unchanged) -----------------------
+def rotate_x(point_3d, angle_degrees):
+    """TIP one point around the x axis (+y swings toward +z)."""
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = x
+    new_y = (y * cos_a) - (z * sin_a)
+    new_z = (y * sin_a) + (z * cos_a)
+    return (new_x, new_y, new_z)
+
+
+def rotate_y(point_3d, angle_degrees):
+    """TURN one point around the y axis (+x swings toward +z)."""
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = (x * cos_a) - (z * sin_a)
+    new_y = y
+    new_z = (x * sin_a) + (z * cos_a)
+    return (new_x, new_y, new_z)
+
+
+def rotate_z(point_3d, angle_degrees):
+    """ROLL one point around the z axis (+x swings toward +y)."""
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = (x * cos_a) - (y * sin_a)
+    new_y = (x * sin_a) + (y * cos_a)
+    new_z = z
+    return (new_x, new_y, new_z)
+
+
+def rotate_all(point_3d):
+    """Spin the cube: tip, then turn, then roll (Lesson 2B's order)."""
+    p = rotate_x(point_3d, angle_x)
+    p = rotate_y(p, angle_y)
+    p = rotate_z(p, angle_z)
+    return p
+
+
+def to_camera(world_point):
+    """Turn one WORLD point into a CAMERA point (measured from YOU).
+
+    1. Subtract where you are standing (step 1).
+    2. NEW: turn the world the OPPOSITE way to the way you turned.
+
+    Worked example (lesson Part 4): you at (2, 0, 1), cam_turn = 30,
+    corner 5 at WORLD (1, 1, 4):
+        1. ((1 - 2), (1 - 0), (4 - 1))   = (-1, 1, 3)
+        2. rotate_y((-1, 1, 3), (-30))   = (0.634, 1, 3.098)
+    """
+    x, y, z = world_point
+    # 1. Subtract: now YOU are the centre (0, 0, 0).
+    moved = ( (x - cam_x), (y - cam_y), (z - cam_z) )
+    # 2. Undo your turn. Because step 1 already made YOU the centre,
+    #    the world swings round where you stand (not round the map's
+    #    centre). Swap these two lines and corners jump behind you!
+    turned = rotate_y(moved, (-cam_turn))
+    return turned
+
+
+def project(point_3d):
+    """Turn one 3D CAMERA point into a 2D SCREEN point (from Lesson 1).
+
+    Only ever call this with z &gt;= NEAR, so we never divide by 0.
+    """
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+def average_z(corners, camera_points):
+    """How far away is this face? (from Lesson 3)
+
+    CHANGED in step 1: we pass in CAMERA points, so z means "distance in
+    front of YOU", wherever you are standing. (WORLD z would give the
+    wrong answer as soon as you walk round behind the cube.)
+    """
+    total = 0
+    for corner_number in corners:
+        x, y, z = camera_points[corner_number]
+        total = (total + z)
+    return (total / len(corners))          # len(corners) is 4
+
+
+def is_facing_you(face_points):
+    """The clock test (from Lesson 3, unchanged): True if clockwise on
+    the SCREEN, which means the face is turned toward you."""
+    a_x, a_y = face_points[0]
+    b_x, b_y = face_points[1]
+    c_x, c_y = face_points[2]
+    arrow_a_x = (b_x - a_x)
+    arrow_a_y = (b_y - a_y)
+    arrow_b_x = (c_x - a_x)
+    arrow_b_y = (c_y - a_y)
+    cross = ( (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x) )
+    return (cross &gt; 0)
+
+
+def face_pointer(corners, turned_points):
+    """The arrow straight out of a face (from Lesson 3, unchanged).
+    Uses turned SHAPE points, so the light stays fixed in the world."""
+    total_x = 0
+    total_y = 0
+    total_z = 0
+    for corner_number in corners:
+        x, y, z = turned_points[corner_number]
+        total_x = (total_x + x)
+        total_y = (total_y + y)
+        total_z = (total_z + z)
+    count = len(corners)
+    return ( (total_x / count), (total_y / count), (total_z / count) )
+
+
+def dot(arrow_1, arrow_2):
+    """The dot product (from Lesson 3)."""
+    x1, y1, z1 = arrow_1
+    x2, y2, z2 = arrow_2
+    return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
+
+
+def shade_colour(colour, pointer):
+    """Brighter when the face points at the light (from Lesson 3)."""
+    brightness = dot(pointer, LIGHT)
+    if brightness &lt; 0:
+        brightness = 0
+    shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )
+    red, green, blue = colour
+    return ( round(red * shade), round(green * shade), round(blue * shade) )
+
+
+def keep_under_360(angle):
+    """360 degrees is the same as 0, so start again after a full turn."""
+    if angle &gt;= 360:
+        angle = (angle - 360)
+    return angle
+
+
+def to_map(x, z):
+    """(step 1) a WORLD (x, z) -&gt; a pixel on the mini-map.
+
+    Like project(), but with no dividing, because the map is flat.
+    +z goes UP the map, and screen y counts DOWN, so we SUBTRACT z.
+    Example: you at (2, 0, 1) -&gt; (710 + (2 * 10), 560 - (1 * 10))
+                               = (730, 550)
+    """
+    map_x = MAP_CX + (x * MAP_SCALE)
+    map_y = MAP_CY - (z * MAP_SCALE)
+    return (map_x, map_y)
+
+
+def draw_map(world_points):
+    """(step 1) draw the mini-map: the cube's outline and you, from above."""
+    box = pygame.Rect(MAP_LEFT, MAP_TOP, MAP_SIZE, MAP_SIZE)
+    pygame.draw.rect(screen, MAP_BACK, box)
+    # set_clip: anything we draw outside the box is cut off, so if you
+    # walk off the edge of the map your dot just disappears.
+    screen.set_clip(box)
+    # The cube from above = its 4 BOTTOM corners (0, 1, 2, 3), x and z only.
+    outline = []
+    for corner_number in (0, 1, 2, 3):
+        x, y, z = world_points[corner_number]
+        outline.append(to_map(x, z))
+    pygame.draw.polygon(screen, GREEN, outline, 2)
+    # You: a pink dot, with a short line showing the way you face.
+    # CHANGED: the line now follows your forward arrow.
+    forward_x, forward_y, forward_z = rotate_y((0, 0, 1), cam_turn)
+    you = to_map(cam_x, cam_z)
+    nose = to_map( (cam_x + (forward_x * 1.5)), (cam_z + (forward_z * 1.5)) )
+    pygame.draw.line(screen, PINK, you, nose, 2)
+    pygame.draw.circle(screen, PINK, you, 4)
+    screen.set_clip(None)                    # stop cutting things off
+    pygame.draw.rect(screen, WHITE, box, 1)  # thin white border
+
+
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                spinning = not spinning
+            if event.key == pygame.K_l:
+                use_light = not use_light
+            if event.key == pygame.K_c:
+                one_colour = not one_colour
+            if event.key == pygame.K_r:          # back to the start
+                cam_x = 0
+                cam_y = 0
+                cam_z = 0
+                cam_turn = 0
+                angle_x = 0
+                angle_y = 0
+                angle_z = 0
+
+    # ---- Keys you HOLD use get_pressed() (True on every held frame) ---
+    keys = pygame.key.get_pressed()
+
+    # ---- NEW: turning --------------------------------------------------
+    if keys[pygame.K_LEFT]:
+        cam_turn = (cam_turn + TURN_SPEED)    # left  = positive
+    if keys[pygame.K_RIGHT]:
+        cam_turn = (cam_turn - TURN_SPEED)    # right = negative
+
+    # ---- NEW: which way is "forward" and "right" right now? ------------
+    # Turn the two start arrows by the SAME angle you turned.
+    #   cam_turn 0:  forward (0, 0, 1)        right (1, 0, 0)
+    #   cam_turn 30: forward (-0.5, 0, 0.866) right (0.866, 0, 0.5)
+    # Both arrows are exactly 1 long, so MOVE_SPEED alone decides how
+    # far one step goes, whichever way you face.
+    forward_x, forward_y, forward_z = rotate_y((0, 0, 1), cam_turn)
+    right_x, right_y, right_z = rotate_y((1, 0, 0), cam_turn)
+
+    # ---- CHANGED: walking follows the arrows ---------------------------
+    if keys[pygame.K_w]:                       # forward
+        cam_x = (cam_x + (forward_x * MOVE_SPEED))
+        cam_z = (cam_z + (forward_z * MOVE_SPEED))
+    if keys[pygame.K_s]:                       # back = minus forward
+        cam_x = (cam_x - (forward_x * MOVE_SPEED))
+        cam_z = (cam_z - (forward_z * MOVE_SPEED))
+    if keys[pygame.K_d]:                       # step right
+        cam_x = (cam_x + (right_x * MOVE_SPEED))
+        cam_z = (cam_z + (right_z * MOVE_SPEED))
+    if keys[pygame.K_a]:                       # step left = minus right
+        cam_x = (cam_x - (right_x * MOVE_SPEED))
+        cam_z = (cam_z - (right_z * MOVE_SPEED))
+    # Up and down stay the same: straight along y.
+    if keys[pygame.K_e]:
+        cam_y = (cam_y + MOVE_SPEED)
+    if keys[pygame.K_q]:
+        cam_y = (cam_y - MOVE_SPEED)
+
+    if spinning:
+        angle_x = keep_under_360( (angle_x + SPEED_X) )
+        angle_y = keep_under_360( (angle_y + SPEED_Y) )
+        angle_z = keep_under_360( (angle_z + SPEED_Z) )
+
+    screen.fill(BLACK)
+
+    # ---- spin -&gt; place -&gt; camera, for all 8 corners --------------------
+    # FOUR lists now, one for each kind of coordinates:
+    #   turned_points - SHAPE, spun   (for the light)
+    #   world_points  - WORLD         (for the mini-map)
+    #   camera_points - CAMERA        (for NEAR and the painter's sort)
+    #   screen_points - SCREEN        (for the clock test and drawing)
+    turned_points = []
+    world_points = []
+    camera_points = []
+    screen_points = []
+    for p in cube_points:
+        turned = rotate_all(p)                         # SHAPE, spun
+        turned_points.append(turned)
+        x, y, z = turned
+        world = ( (x + cube_x), (y + cube_y), (z + cube_z) )   # WORLD
+        world_points.append(world)
+        camera = to_camera(world)                      # CAMERA
+        camera_points.append(camera)
+        # Only project corners that are in front of you. A corner
+        # closer than NEAR gets None ("nothing") instead of a pixel.
+        if camera[2] &gt;= NEAR:
+            screen_points.append(project(camera))      # SCREEN
+        else:
+            screen_points.append(None)
+
+    # ---- Make a list of the faces we will paint ------------------------
+    faces_to_draw = []
+    for corners, colour in cube_faces:
+        # (step 1) 0. skip the face if ANY corner is too close or behind you.
+        too_close = False
+        for corner_number in corners:
+            if camera_points[corner_number][2] &lt; NEAR:
+                too_close = True
+        if too_close:
+            continue
+
+        face_points = []
+        for corner_number in corners:
+            face_points.append(screen_points[corner_number])
+
+        # 1. The clock test (Lesson 3).
+        if not is_facing_you(face_points):
+            continue
+
+        # 2. How far away is it? CHANGED in step 1: CAMERA z, distance from YOU.
+        distance = average_z(corners, camera_points)
+
+        # 3. What colour, after the light? (Lesson 3)
+        if one_colour:
+            colour = CUBE_GREEN
+        if use_light:
+            pointer = face_pointer(corners, turned_points)
+            colour = shade_colour(colour, pointer)
+
+        faces_to_draw.append( (distance, face_points, colour) )
+
+    # ---- The painter's method: furthest first (Lesson 3) ---------------
+    faces_to_draw.sort(reverse=True)
+    for distance, face_points, colour in faces_to_draw:
+        pygame.draw.polygon(screen, colour, face_points)
+        pygame.draw.polygon(screen, BLACK, face_points, 2)
+
+    draw_map(world_points)
+
+    text = ("you are at (" + str(round(cam_x, 2)) + ", " +
+            str(round(cam_y, 2)) + ", " + str(round(cam_z, 2)) + ")")
+    text = (text + "   facing " + str(round(cam_turn, 1)))
+    screen.blit(font.render(text, True, PINK), (20, 20))
+    screen.blit(font.render("LEFT / RIGHT = turn,  W A S D = walk,  Q / E = down / up", True, YELLOW), (20, 50))
+    screen.blit(font.render("SPACE = spin,  R = reset,  L = light,  C = colours", True, YELLOW), (20, 80))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Walk all the way round the cube while keeping it in the middle of
+#     the screen: hold A (step left) and RIGHT (turn right) together.
+#   * Turn right round 90 (RIGHT for 1 second). Now press W. Which way
+#     does your dot move on the mini-map?
+#   * In to_camera(), swap the two steps (turn first, then subtract).
+#     Walk to one side and turn. What goes wrong? (Lesson Part 4.)
+#   * Set TURN_SPEED = 4. Is it easier or harder to aim at the cube?
+# ----------------------------------------------------------------------
+</code></pre></details>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q9</span><span>You turned left 90 (<code>cam_turn = 90</code>) at (0, 0, 0). You hold D for 1 second. Where are you?</span></p><details><summary>Show answer</summary><div class="ans"><p>right = <code>rotate_y((1, 0, 0), 90)</code> = (0, 0, 1). One second is 60 frames of <code>(1 * 0.05)</code> in z: 3 units. You are at (0, 0, 3). Facing −x, your right hand points at +z.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q10</span><span>How many frames of LEFT does it take to turn 30°, and how long is that?</span></p><details><summary>Show answer</summary><div class="ans"><p><code>(30 / 1.5)</code> = 20 frames, which is <code>(20 / 60)</code> = one third of a second.</p></div></details></div>
+</div>
+
+<h2>Part 6: Look up and down <span class="mins">5 MIN</span></h2>
+<p>The last piece is tilting your head. Lesson 2B called a turn round the x skewer a TIP, so we call this angle <code>cam_tip</code>. Nodding your head forward is a tip, and it makes you look down.</p>
+<figure id="fig-4-6-1"><img src="images/m22_tip_side.png" alt="WORLD from the side, z across and y up. Arrows from the camera: 0 level, +30 looking down, -30 looking up, and faint arrows at +60 and -60 marking the limits." loading="lazy"><figcaption><span class="fignum">Fig 4.6.1</span>Positive <code>cam_tip</code> = nod forward = look DOWN, the same way <code>rotate_x</code> tips things (+y swings toward +z). So the UP arrow key makes <code>cam_tip</code> smaller.</figcaption></figure>
+<p>Undoing it is the same trick a third time: tip the world the opposite way. Your head nods <em>after</em> your body has turned, so it is undone <em>after</em> the turn is undone: last on, first off.</p>
+<pre><code>def to_camera(world_point):
+    x, y, z = world_point
+    moved = ( (x - cam_x), (y - cam_y), (z - cam_z) )   # 1. subtract
+    turned = rotate_y(moved, (-cam_turn))               # 2. undo your turn
+    tipped = rotate_x(turned, (-cam_tip))               # 3. undo your tip
+    return tipped</code></pre>
+<figure id="fig-4-6-2"><img src="images/m23_tip_corner5.png" alt="Worked example: looking up 30, cam_tip = -30. rotate_x of (1,1,4) by 30 gives CAMERA (1, -1.134, 3.964), and screen (500.9, 414.4). Two screens compare level, with corner 5 at (500, 200), and looking up, with the cube near the bottom." loading="lazy"><figcaption><span class="fignum">Fig 4.6.2</span>Look up and the cube sinks down the screen: corner 5 moves from y = 200 to y = 414.4.<span class="panels">Panels: <b>4.6.2a</b> (bottom left) level (cam_tip 0) · <b>4.6.2b</b> (bottom right) looking up 30</span></figcaption></figure>
+<p>We keep <code>cam_tip</code> between −60 and 60 (<code>TIP_LIMIT = 60</code>). Walking ignores <code>cam_tip</code> on purpose, so looking at the floor doesn't walk you into it.</p>
+<h3>The whole recipe, one corner, one frame</h3>
+<figure id="fig-4-6-3"><img src="images/m24_full_chain.png" alt="A table following corner 5 through every step: SHAPE (1,1,-1), spin, WORLD (1,1,4), minus camera (2,0,1) gives (-1,1,3), undo turn 30 gives (0.634, 1, 3.098), undo tip 0, CAMERA check passes, SCREEN (481.9, 170.9)." loading="lazy"><figcaption><span class="fignum">Fig 4.6.3</span>Camera at (2, 0, 1), turned left 30, looking level. Every step is one you have now done by hand.<span class="panels">Panels: <b>4.6.3a</b> (top) the eight steps as a table · <b>4.6.3b</b> (bottom) the SCREEN</span></figcaption></figure>
+<p>Here are all the controls in the finished script, with the reason for each speed:</p>
+<figure id="fig-4-6-4"><img src="images/m25_keys_speeds.png" alt="Keyboard diagram: Q W E and A S D for walking, arrow keys for turning and looking, with a table of what each key changes and how fast." loading="lazy"><figcaption><span class="fignum">Fig 4.6.4</span>Every speed is a per-frame amount; times 60 gives the per-second amount.<span class="panels">Panels: <b>4.6.4a</b> (top left) walk keys · <b>4.6.4b</b> (top right) turn and look keys · <b>4.6.4c</b> (middle) the table of speeds</span></figcaption></figure>
+<h3>Run it: step 3</h3>
+<p>Run <code>step3_look_around.py</code>. Rise with E, then press DOWN to look down onto the gold top. Walk all the way round: hold A and RIGHT together to circle the cube while keeping it in front of you.</p>
+<figure id="fig-4-6-5"><img src="images/run_step3_look_around.png" alt="Output of step 3: you are at (1.99, 3.0, 1.07), turned 30 and tipped 45, looking down at the cube's gold top, red front and green right side." loading="lazy"><figcaption><span class="fignum">Fig 4.6.5</span>One second of E (up 3), 2/3 of a second of D, 1/3 of a second of W, then LEFT for 20 frames (30°) and DOWN for 30 frames (45°). The gold top is the brightest face, just as in Lesson 3.</figcaption></figure>
+<figure id="fig-4-6-6"><img src="images/m26_filmstrip.png" alt="Eight small screens taken while circling the cube 4.5 units from its centre and 2 units up: front red, front and green right, green right, right and purple back, purple back, back and blue left, blue left, left and red front." loading="lazy"><figcaption><span class="fignum">Fig 4.6.6</span>A walk round the cube, one stop every 45°. Lesson 3's six colours tell you which side you are on at a glance.<span class="panels">Panels: <b>4.6.6a</b> (top row 1st) cam_turn 0 · <b>4.6.6b</b> (top row 2nd) cam_turn 45 · <b>4.6.6c</b> (top row 3rd) cam_turn 90 · <b>4.6.6d</b> (top row 4th) cam_turn 135 · <b>4.6.6e</b> (bottom row 1st) cam_turn 180 · <b>4.6.6f</b> (bottom row 2nd) cam_turn 225 · <b>4.6.6g</b> (bottom row 3rd) cam_turn 270 · <b>4.6.6h</b> (bottom row 4th) cam_turn 315</span></figcaption></figure>
+<details class="full"><summary>Full code: <code>step3_look_around.py</code> (about 530 lines)</summary><pre><code># ======================================================================
+# LESSON 4 - STEP 3: LOOK UP AND DOWN (the finished camera)
+# ----------------------------------------------------------------------
+# Goal: the UP and DOWN arrows tilt your head, so you can look down onto
+# the top of the cube or up at it from underneath. This is the final
+# script of Lesson 4: a camera you can walk, turn and look with.
+#
+# What is new since step 2:
+#
+#   1. cam_tip  (degrees, starts at 0 = looking level)
+#        Positive = nod FORWARD = look DOWN, the same way rotate_x tips
+#        things (+y swings toward +z). UP arrow takes away, DOWN adds.
+#
+#   2. to_camera() gets a THIRD line, the same trick again:
+#
+#           rotate_x(point, (-cam_tip))
+#
+#      Your head tips AFTER your body has turned, so we undo the tip
+#      AFTER we undo the turn: subtract -&gt; undo turn -&gt; undo tip.
+#
+#   3. cam_tip is kept between -60 and 60. At 90 you would stare
+#      straight up or down and LEFT / RIGHT would start to feel like
+#      rolling, so we stop well short of that.
+#
+#   4. Walking ignores cam_tip on purpose: looking down at the floor
+#      does not make W walk you into it. (Most games work like this.)
+#
+# The recipe for one corner, every frame:
+#
+#   SHAPE -&gt; spin -&gt; + cube_position -&gt; - camera -&gt; undo turn -&gt; undo tip -&gt; NEAR -&gt; project
+#   (cube_points)    (WORLD)                                    (CAMERA)            (SCREEN)
+#
+# Controls:  LEFT / RIGHT = turn,   UP / DOWN = look up / down
+#            W / S = walk forward / back,   A / D = step left / right
+#            Q / E = go down / up
+#            SPACE = spin the cube on / off,   R = reset
+#            L = light on / off,   C = six colours / one colour
+# Run:  python step3_look_around.py
+# ======================================================================
+
+import math
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Lesson 4, step 3 - look around")
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+PINK = (255, 105, 200)        # (step 1) the colour we use for YOU (the camera)
+MAP_BACK = (25, 30, 36)       # (step 1) dark grey-blue behind the mini-map
+
+# ---- One colour for each face (from Lesson 3) -------------------------
+RED = (235, 80, 80)          # front
+PURPLE = (160, 100, 230)     # back
+BLUE = (70, 150, 255)        # left
+GREEN = (70, 210, 120)       # right
+GOLD = (245, 200, 60)        # top
+ORANGE = (245, 140, 50)      # bottom
+CUBE_GREEN = (70, 230, 120)  # one colour for the whole cube (C key)
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400
+
+# ---- The cube's 8 corners, in SHAPE coordinates (same as always) ------
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+
+# ---- The cube's 6 faces (from Lesson 3) -------------------------------
+# Each face lists its 4 corners CLOCKWISE as seen from OUTSIDE the cube.
+cube_faces = [
+    ((4, 5, 1, 0), RED),       # front  (all have z = -1)
+    ((6, 7, 3, 2), PURPLE),    # back   (all have z = +1)
+    ((7, 4, 0, 3), BLUE),      # left   (all have x = -1)
+    ((5, 6, 2, 1), GREEN),     # right  (all have x = +1)
+    ((7, 6, 5, 4), GOLD),      # top    (all have y = +1)
+    ((2, 3, 0, 1), ORANGE),    # bottom (all have y = -1)
+]
+
+# ---- (step 1) where the cube lives in the WORLD ----------------------------
+# Before, we added cube_distance to z and that was the whole story,
+# because you never moved. Now the cube gets a proper address on the
+# map, and YOU get one too (below).
+# (0, 0, 5): straight ahead of the starting spot, 5 away - the same 5
+# as Lessons 1 to 3, so the first frame looks exactly like before.
+cube_position = (0, 0, 5)
+cube_x, cube_y, cube_z = cube_position      # unpack the 3 numbers
+
+# ---- (step 1) where YOU are standing (the camera), in WORLD coordinates ---
+# Start at (0, 0, 0): the seat you sat in for Lessons 1 to 3.
+cam_x = 0
+cam_y = 0
+cam_z = 0
+
+# (step 2) which way you are facing, in degrees. 0 = facing +z, straight
+# at the cube, like Lessons 1 to 3. Positive = turned LEFT.
+cam_turn = 0
+
+# NEW: how far you are looking up or down, in degrees. 0 = level.
+# Positive = nod forward = look DOWN (the same way rotate_x tips).
+cam_tip = 0
+
+# NEW: the furthest you can look up or down. 60 lets you look down onto
+# the cube's top from close by, and stays safely short of 90 (straight
+# up / down), where turning left and right starts to feel like rolling.
+TIP_LIMIT = 60
+
+# How far you move in ONE frame (60 frames a second).
+#   (0.05 * 60) = 3 units a second.
+# From the start the cube's front face is 4 away, so you reach it in
+# (4 / 3) = 1.3 seconds: quick, but easy to stop in time.
+MOVE_SPEED = 0.05
+
+# (step 2) how many degrees you turn in ONE frame.
+#   (1.5 * 60) = 90 degrees a second: a quarter turn takes 1 second
+#   and a full look round takes (360 / 90) = 4 seconds.
+TURN_SPEED = 1.5
+
+# (step 1) anything closer than this (in CAMERA z) is not drawn.
+# At z = 0.1 a point just 1 unit to the side lands
+# ((1 * 400) / 0.1) = 4000 px from the centre: ten half-windows away.
+# Nothing closer than that could ever be useful to draw.
+NEAR = 0.1
+
+# ---- The light (from Lesson 3, unchanged) -----------------------------
+# The lamp belongs to the WORLD (like the sun), so it does NOT move when
+# you walk. The top of the cube stays the brightest face from anywhere.
+LIGHT = (0.48, 0.6, -0.64)
+AMBIENT = 0.2
+
+# ---- The cube's own spin (from Lessons 2 and 2B) ----------------------
+# (step 1) the cube starts STILL, with all angles at 0, so corner 5 is at
+# WORLD (1, 1, 4) like in the lesson's worked examples. SPACE spins it.
+angle_x = 0
+angle_y = 0
+angle_z = 0
+SPEED_X = 0.5
+SPEED_Y = 1
+SPEED_Z = 0.25
+spinning = False       # (step 1) SPACE flips this
+use_light = True
+one_colour = False     # Step 1 default: six colours, so when you walk
+                       # round you can always tell WHICH side you see
+
+# ---- (step 1) the mini-map ------------------------------------------------
+# A 160 x 160 px box, 10 px in from the bottom-right corner:
+#   left = (800 - 10 - 160) = 630,   top = (600 - 10 - 160) = 430
+MAP_LEFT = 630
+MAP_TOP = 430
+MAP_SIZE = 160
+# World (0, 0, 0) goes at (MAP_CX, MAP_CY):
+#   across: the middle of the box,  (630 + 80) = 710
+#   down:   30 px above the bottom, (430 + 130) = 560
+# Why so low? The cube is at z = 5, which lands (5 * 10) = 50 px higher,
+# at y = 510: the exact middle of the box. You start at the bottom
+# looking up the map at it, just like the lesson's diagrams.
+MAP_CX = (MAP_LEFT + (MAP_SIZE / 2))    # (630 + 80) = 710
+MAP_CY = (MAP_TOP + 130)                # (430 + 130) = 560
+MAP_SCALE = 10                          # 10 px for every 1 world unit
+                                        # (the box shows 16 units across)
+
+
+# ---- The three turns (from Lesson 2B, unchanged) -----------------------
+def rotate_x(point_3d, angle_degrees):
+    """TIP one point around the x axis (+y swings toward +z)."""
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = x
+    new_y = (y * cos_a) - (z * sin_a)
+    new_z = (y * sin_a) + (z * cos_a)
+    return (new_x, new_y, new_z)
+
+
+def rotate_y(point_3d, angle_degrees):
+    """TURN one point around the y axis (+x swings toward +z)."""
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = (x * cos_a) - (z * sin_a)
+    new_y = y
+    new_z = (x * sin_a) + (z * cos_a)
+    return (new_x, new_y, new_z)
+
+
+def rotate_z(point_3d, angle_degrees):
+    """ROLL one point around the z axis (+x swings toward +y)."""
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = (x * cos_a) - (y * sin_a)
+    new_y = (x * sin_a) + (y * cos_a)
+    new_z = z
+    return (new_x, new_y, new_z)
+
+
+def rotate_all(point_3d):
+    """Spin the cube: tip, then turn, then roll (Lesson 2B's order)."""
+    p = rotate_x(point_3d, angle_x)
+    p = rotate_y(p, angle_y)
+    p = rotate_z(p, angle_z)
+    return p
+
+
+def to_camera(world_point):
+    """Turn one WORLD point into a CAMERA point (measured from YOU).
+
+    1. Subtract where you are standing (step 1).
+    2. Undo your turn: turn the world the OPPOSITE way (step 2).
+    3. NEW: undo your tip: tip the world the OPPOSITE way.
+
+    Worked example (lesson Part 6): you at (2, 0, 1), cam_turn = 30,
+    cam_tip = 0, corner 5 at WORLD (1, 1, 4):
+        1. ((1 - 2), (1 - 0), (4 - 1))   = (-1, 1, 3)
+        2. rotate_y((-1, 1, 3), (-30))   = (0.634, 1, 3.098)
+        3. rotate_x(that, (-0))          = no change
+    """
+    x, y, z = world_point
+    # 1. Subtract: now YOU are the centre (0, 0, 0).
+    moved = ( (x - cam_x), (y - cam_y), (z - cam_z) )
+    # 2. Undo your turn. Because step 1 already made YOU the centre,
+    #    the world swings round where you stand (not round the map's
+    #    centre). Swap these two lines and corners jump behind you!
+    turned = rotate_y(moved, (-cam_turn))
+    # 3. NEW: undo your tip. The head nods AFTER the body turns, so it
+    #    is undone after the turn is undone (last on, first off).
+    tipped = rotate_x(turned, (-cam_tip))
+    return tipped
+
+
+def project(point_3d):
+    """Turn one 3D CAMERA point into a 2D SCREEN point (from Lesson 1).
+
+    Only ever call this with z &gt;= NEAR, so we never divide by 0.
+    """
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+def average_z(corners, camera_points):
+    """How far away is this face? (from Lesson 3)
+
+    CHANGED in step 1: we pass in CAMERA points, so z means "distance in
+    front of YOU", wherever you are standing. (WORLD z would give the
+    wrong answer as soon as you walk round behind the cube.)
+    """
+    total = 0
+    for corner_number in corners:
+        x, y, z = camera_points[corner_number]
+        total = (total + z)
+    return (total / len(corners))          # len(corners) is 4
+
+
+def is_facing_you(face_points):
+    """The clock test (from Lesson 3, unchanged): True if clockwise on
+    the SCREEN, which means the face is turned toward you."""
+    a_x, a_y = face_points[0]
+    b_x, b_y = face_points[1]
+    c_x, c_y = face_points[2]
+    arrow_a_x = (b_x - a_x)
+    arrow_a_y = (b_y - a_y)
+    arrow_b_x = (c_x - a_x)
+    arrow_b_y = (c_y - a_y)
+    cross = ( (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x) )
+    return (cross &gt; 0)
+
+
+def face_pointer(corners, turned_points):
+    """The arrow straight out of a face (from Lesson 3, unchanged).
+    Uses turned SHAPE points, so the light stays fixed in the world."""
+    total_x = 0
+    total_y = 0
+    total_z = 0
+    for corner_number in corners:
+        x, y, z = turned_points[corner_number]
+        total_x = (total_x + x)
+        total_y = (total_y + y)
+        total_z = (total_z + z)
+    count = len(corners)
+    return ( (total_x / count), (total_y / count), (total_z / count) )
+
+
+def dot(arrow_1, arrow_2):
+    """The dot product (from Lesson 3)."""
+    x1, y1, z1 = arrow_1
+    x2, y2, z2 = arrow_2
+    return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
+
+
+def shade_colour(colour, pointer):
+    """Brighter when the face points at the light (from Lesson 3)."""
+    brightness = dot(pointer, LIGHT)
+    if brightness &lt; 0:
+        brightness = 0
+    shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )
+    red, green, blue = colour
+    return ( round(red * shade), round(green * shade), round(blue * shade) )
+
+
+def keep_under_360(angle):
+    """360 degrees is the same as 0, so start again after a full turn."""
+    if angle &gt;= 360:
+        angle = (angle - 360)
+    return angle
+
+
+def to_map(x, z):
+    """(step 1) a WORLD (x, z) -&gt; a pixel on the mini-map.
+
+    Like project(), but with no dividing, because the map is flat.
+    +z goes UP the map, and screen y counts DOWN, so we SUBTRACT z.
+    Example: you at (2, 0, 1) -&gt; (710 + (2 * 10), 560 - (1 * 10))
+                               = (730, 550)
+    """
+    map_x = MAP_CX + (x * MAP_SCALE)
+    map_y = MAP_CY - (z * MAP_SCALE)
+    return (map_x, map_y)
+
+
+def draw_map(world_points):
+    """(step 1) draw the mini-map: the cube's outline and you, from above."""
+    box = pygame.Rect(MAP_LEFT, MAP_TOP, MAP_SIZE, MAP_SIZE)
+    pygame.draw.rect(screen, MAP_BACK, box)
+    # set_clip: anything we draw outside the box is cut off, so if you
+    # walk off the edge of the map your dot just disappears.
+    screen.set_clip(box)
+    # The cube from above = its 4 BOTTOM corners (0, 1, 2, 3), x and z only.
+    outline = []
+    for corner_number in (0, 1, 2, 3):
+        x, y, z = world_points[corner_number]
+        outline.append(to_map(x, z))
+    pygame.draw.polygon(screen, GREEN, outline, 2)
+    # You: a pink dot, with a short line showing the way you face.
+    # (step 2) the line follows your forward arrow.
+    forward_x, forward_y, forward_z = rotate_y((0, 0, 1), cam_turn)
+    you = to_map(cam_x, cam_z)
+    nose = to_map( (cam_x + (forward_x * 1.5)), (cam_z + (forward_z * 1.5)) )
+    pygame.draw.line(screen, PINK, you, nose, 2)
+    pygame.draw.circle(screen, PINK, you, 4)
+    screen.set_clip(None)                    # stop cutting things off
+    pygame.draw.rect(screen, WHITE, box, 1)  # thin white border
+
+
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                spinning = not spinning
+            if event.key == pygame.K_l:
+                use_light = not use_light
+            if event.key == pygame.K_c:
+                one_colour = not one_colour
+            if event.key == pygame.K_r:          # back to the start
+                cam_x = 0
+                cam_y = 0
+                cam_z = 0
+                cam_turn = 0
+                cam_tip = 0
+                angle_x = 0
+                angle_y = 0
+                angle_z = 0
+
+    # ---- Keys you HOLD use get_pressed() (True on every held frame) ---
+    keys = pygame.key.get_pressed()
+
+    # ---- (step 2) turning --------------------------------------------------
+    if keys[pygame.K_LEFT]:
+        cam_turn = (cam_turn + TURN_SPEED)    # left  = positive
+    if keys[pygame.K_RIGHT]:
+        cam_turn = (cam_turn - TURN_SPEED)    # right = negative
+
+    # ---- NEW: looking up and down --------------------------------------
+    if keys[pygame.K_UP]:
+        cam_tip = (cam_tip - TURN_SPEED)      # look up   = negative
+    if keys[pygame.K_DOWN]:
+        cam_tip = (cam_tip + TURN_SPEED)      # look down = positive
+    # Keep it between -TIP_LIMIT and +TIP_LIMIT (-60 and 60).
+    if cam_tip &gt; TIP_LIMIT:
+        cam_tip = TIP_LIMIT
+    if cam_tip &lt; (-TIP_LIMIT):
+        cam_tip = (-TIP_LIMIT)
+
+    # ---- (step 2) which way is "forward" and "right" right now? ------------
+    # Turn the two start arrows by the SAME angle you turned.
+    #   cam_turn 0:  forward (0, 0, 1)        right (1, 0, 0)
+    #   cam_turn 30: forward (-0.5, 0, 0.866) right (0.866, 0, 0.5)
+    # Both arrows are exactly 1 long, so MOVE_SPEED alone decides how
+    # far one step goes, whichever way you face.
+    # (cam_tip is NOT used here, so you always walk level.)
+    forward_x, forward_y, forward_z = rotate_y((0, 0, 1), cam_turn)
+    right_x, right_y, right_z = rotate_y((1, 0, 0), cam_turn)
+
+    # ---- (step 2) walking follows the arrows ---------------------------
+    if keys[pygame.K_w]:                       # forward
+        cam_x = (cam_x + (forward_x * MOVE_SPEED))
+        cam_z = (cam_z + (forward_z * MOVE_SPEED))
+    if keys[pygame.K_s]:                       # back = minus forward
+        cam_x = (cam_x - (forward_x * MOVE_SPEED))
+        cam_z = (cam_z - (forward_z * MOVE_SPEED))
+    if keys[pygame.K_d]:                       # step right
+        cam_x = (cam_x + (right_x * MOVE_SPEED))
+        cam_z = (cam_z + (right_z * MOVE_SPEED))
+    if keys[pygame.K_a]:                       # step left = minus right
+        cam_x = (cam_x - (right_x * MOVE_SPEED))
+        cam_z = (cam_z - (right_z * MOVE_SPEED))
+    # Up and down stay the same: straight along y.
+    if keys[pygame.K_e]:
+        cam_y = (cam_y + MOVE_SPEED)
+    if keys[pygame.K_q]:
+        cam_y = (cam_y - MOVE_SPEED)
+
+    if spinning:
+        angle_x = keep_under_360( (angle_x + SPEED_X) )
+        angle_y = keep_under_360( (angle_y + SPEED_Y) )
+        angle_z = keep_under_360( (angle_z + SPEED_Z) )
+
+    screen.fill(BLACK)
+
+    # ---- spin -&gt; place -&gt; camera, for all 8 corners --------------------
+    # FOUR lists now, one for each kind of coordinates:
+    #   turned_points - SHAPE, spun   (for the light)
+    #   world_points  - WORLD         (for the mini-map)
+    #   camera_points - CAMERA        (for NEAR and the painter's sort)
+    #   screen_points - SCREEN        (for the clock test and drawing)
+    turned_points = []
+    world_points = []
+    camera_points = []
+    screen_points = []
+    for p in cube_points:
+        turned = rotate_all(p)                         # SHAPE, spun
+        turned_points.append(turned)
+        x, y, z = turned
+        world = ( (x + cube_x), (y + cube_y), (z + cube_z) )   # WORLD
+        world_points.append(world)
+        camera = to_camera(world)                      # CAMERA
+        camera_points.append(camera)
+        # Only project corners that are in front of you. A corner
+        # closer than NEAR gets None ("nothing") instead of a pixel.
+        if camera[2] &gt;= NEAR:
+            screen_points.append(project(camera))      # SCREEN
+        else:
+            screen_points.append(None)
+
+    # ---- Make a list of the faces we will paint ------------------------
+    faces_to_draw = []
+    for corners, colour in cube_faces:
+        # (step 1) 0. skip the face if ANY corner is too close or behind you.
+        too_close = False
+        for corner_number in corners:
+            if camera_points[corner_number][2] &lt; NEAR:
+                too_close = True
+        if too_close:
+            continue
+
+        face_points = []
+        for corner_number in corners:
+            face_points.append(screen_points[corner_number])
+
+        # 1. The clock test (Lesson 3).
+        if not is_facing_you(face_points):
+            continue
+
+        # 2. How far away is it? CHANGED in step 1: CAMERA z, distance from YOU.
+        distance = average_z(corners, camera_points)
+
+        # 3. What colour, after the light? (Lesson 3)
+        if one_colour:
+            colour = CUBE_GREEN
+        if use_light:
+            pointer = face_pointer(corners, turned_points)
+            colour = shade_colour(colour, pointer)
+
+        faces_to_draw.append( (distance, face_points, colour) )
+
+    # ---- The painter's method: furthest first (Lesson 3) ---------------
+    faces_to_draw.sort(reverse=True)
+    for distance, face_points, colour in faces_to_draw:
+        pygame.draw.polygon(screen, colour, face_points)
+        pygame.draw.polygon(screen, BLACK, face_points, 2)
+
+    draw_map(world_points)
+
+    text = ("you are at (" + str(round(cam_x, 2)) + ", " +
+            str(round(cam_y, 2)) + ", " + str(round(cam_z, 2)) + ")")
+    text = (text + "   turn " + str(round(cam_turn, 1)) +
+            "   tip " + str(round(cam_tip, 1)))
+    screen.blit(font.render(text, True, PINK), (20, 20))
+    screen.blit(font.render("ARROWS = turn and look,  W A S D = walk,  Q / E = down / up", True, YELLOW), (20, 50))
+    screen.blit(font.render("SPACE = spin,  R = reset,  L = light,  C = colours", True, YELLOW), (20, 80))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Press E to rise about 3 units, then DOWN to look down onto the top
+#     of the cube. Is the top (GOLD) the brightest face? (Lesson 3.)
+#   * Set TIP_LIMIT = 89 and look right up. Now turn with LEFT / RIGHT.
+#     How does it feel?
+#   * In to_camera(), swap steps 2 and 3 (tip before turn). Look down a
+#     little, then turn. What happens to the cube?
+#   * Make W follow cam_tip too, so you fly where you look. Hint: make
+#     forward with rotate_x((0, 0, 1), cam_tip) first, then rotate_y it.
+# ----------------------------------------------------------------------
+</code></pre></details>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q11</span><span>Standing at (0, 0, 0) with <code>cam_turn = 0</code>, you look DOWN 30 (<code>cam_tip = 30</code>). Where does corner 5 go?</span></p><details><summary>Show answer</summary><div class="ans"><p><code>rotate_x((1, 1, 4), (-30))</code>: cos_a = 0.866, sin_a = −0.5. new_y = <code>(1 * 0.866) - (4 * -0.5)</code> = 0.866 + 2 = 2.866. new_z = <code>(1 * -0.5) + (4 * 0.866)</code> = −0.5 + 3.464 = 2.964. Screen y = <code>300 - ((2.866 * 400) / 2.964)</code> = 300 − 386.8 = −86.8: just off the top of the window. Look down and the cube rises out of view.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q12</span><span>Why is the tip undone after the turn, and not before?</span></p><details><summary>Show answer</summary><div class="ans"><p>You turn your body first and nod your head second. To undo a chain of moves you take them off in reverse order, like taking off shoes before socks would go wrong. So undo the turn, then undo the tip.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q13</span><span>You walk round behind the cube. Why does the top still look brighter than the back?</span></p><details><summary>Show answer</summary><div class="ans"><p>The light maths uses each face's pointing arrow from the turned SHAPE points and the fixed <code>LIGHT</code> arrow. Neither involves the camera, so where you stand doesn't change how lit a face is, just as walking round a table doesn't change where the sun is.</p></div></details></div>
+</div>
+
+<h2>Wrap up <span class="mins">1 MIN</span></h2>
+<ul>
+  <li>The computer can't move you. It moves the world the opposite way: subtract your position, undo your turn, undo your tip.</li>
+  <li>WORLD coordinates say where things are. CAMERA coordinates say where they are from you, and <code>project()</code> only understands CAMERA coordinates.</li>
+  <li>Anything closer than <code>NEAR = 0.1</code> (or behind you) is skipped, because z = 0 crashes and negative z draws ghosts.</li>
+  <li>Walk with arrows that turn with you: <code>forward = rotate_y((0, 0, 1), cam_turn)</code>.</li>
+</ul>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q14</span><span>Final check. You stand at (−1, 0, 2), turned right 30 (<code>cam_turn = -30</code>), looking level. Follow corner 5, WORLD (1, 1, 4), all the way to the screen.</span></p><details><summary>Show answer</summary><div class="ans"><p>1. Subtract: <code>((1 - -1), (1 - 0), (4 - 2))</code> = (2, 1, 2).</p><p>2. Undo the turn: <code>rotate_y((2, 1, 2), 30)</code>, cos_a = 0.866, sin_a = 0.5. new_x = <code>(2 * 0.866) - (2 * 0.5)</code> = 1.732 − 1 = 0.732. new_z = <code>(2 * 0.5) + (2 * 0.866)</code> = 1 + 1.732 = 2.732.</p><p>3. Undo the tip: 0, no change. CAMERA (0.732, 1, 2.732). z ≥ 0.1, so draw it.</p><p>4. Screen x = <code>400 + ((0.732 * 400) / 2.732)</code> = 400 + 107.2 = 507.2. Screen y = <code>300 - ((1 * 400) / 2.732)</code> = 300 − 146.4 = 153.6.</p></div></details></div>
+</div>
+<h3>Practice before Lesson 5</h3>
+<ul>
+  <li>Add a second cube at <code>cube_position = (4, 0, 9)</code>. You'll need a second list of world points, and both cubes' faces in one painter's sort.</li>
+  <li>Make the mini-map turn with you, so "up" on the map is always the way you face. Hint: use <code>to_camera()</code> on the map points too.</li>
+  <li>Stop the camera walking into the cube: before moving, check whether the new spot is inside x −1 to 1 and z 4 to 6.</li>
+</ul>
+<h3>Next time: Lesson 5, a world to walk in</h3>
+<p>One cube in empty space makes it hard to feel that you are moving. Next lesson adds a floor grid and many shapes placed around the world, each with its own <code>cube_position</code>, all going through today's <code>to_camera()</code>.</p>
+
+<h2>Files</h2>
+<p>Download the code for this lesson (right-click a file and choose <em>Save link as</em>):</p>
+<ul class="files">
+  <li><a href="code/step1_walk.py" download><code>code/step1_walk.py</code></a>: walk with W A S D and Q E, the NEAR check, and the mini-map</li>
+  <li><a href="code/step2_turn.py" download><code>code/step2_turn.py</code></a>: turn with LEFT and RIGHT, and walk the way you face</li>
+  <li><a href="code/step3_look_around.py" download><code>code/step3_look_around.py</code></a>: look up and down with UP and DOWN; the finished camera</li>
+  <li><code>images/</code>: every diagram on this page as a PNG</li>
+  <li><a href="../figures/">Figure index</a>: every figure and table in the course, with its number. Numbers read <code>Fig lesson.part.figure</code>, plus a letter for one panel of a picture (for example <code>Fig 3.4.2b</code>).</li>
+</ul>
+</main>
+</body>
+</html>

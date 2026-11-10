@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframe 3D Course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Chakra+Petch:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Same colours and fonts as the lesson pages, so the site feels like one book. */
+:root {
+  --bg:#f3f6f4; --paper:#ffffff; --fg:#17201b; --muted:#56635c; --line:#d5ded8;
+  --accent:#0d8a4a; --accent-soft:#e2f3e9;
+  --display:"Chakra Petch", "Trebuchet MS", sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; color-scheme:dark; } }
+:root[data-theme="dark"] {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; color-scheme:dark; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font-family:var(--body); font-size:17px; line-height:1.6;
+  padding:32px 16px 64px; }
+main { max-width:860px; margin:0 auto; display:flex; flex-direction:column; gap:20px; }
+h1,h2 { font-family:var(--display); line-height:1.2; margin:0; }
+h1 { font-size:clamp(30px,6vw,46px); }
+h2 { font-size:24px; margin-top:16px; }
+p { margin:0; }
+a { color:var(--accent); }
+.eyebrow { font-family:var(--mono); font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); }
+.lede { font-size:19px; color:var(--muted); max-width:68ch; }
+code { font-family:var(--mono); font-size:.85em; background:var(--accent-soft); padding:1px 5px; border-radius:4px; }
+img { width:100%; border-radius:8px; display:block; border:1px solid var(--line); }
+ol.lessons { list-style:none; padding:0; margin:0; display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:14px; }
+.card { background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:16px 18px; display:flex; flex-direction:column; gap:8px; }
+.card .go { font-family:var(--display); font-size:20px; font-weight:700; text-decoration:none; color:var(--fg); display:flex; flex-direction:column; }
+.card .go:hover { color:var(--accent); }
+.card .num { font-family:var(--mono); font-size:13px; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); }
+.card p { font-size:15px; color:var(--muted); }
+.card .code { font-size:13px; display:flex; flex-wrap:wrap; gap:4px; }
+.card .code code { font-size:12px; }
+ul.extras { margin:0; padding-left:20px; }
+footer { font-size:14px; color:var(--muted); border-top:1px solid var(--line); padding-top:16px; margin-top:16px; }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">A beginner course in Python and pygame-ce</p>
+  <h1>Wireframe 3D</h1>
+  <p class="lede">Eight short lessons that grow one small program, from a single line on the screen to a 3D game you can fly round. You only need basic Python. Every idea comes with pictures, worked numbers and fully commented code.</p>
+
+  <img src="course-map/course_map_1.png" alt="Course map: eight lessons on a road, Lesson 1 projection, 2 spinning, 2B tip roll and tumble, 3 solid faces, 4 moving the camera, 5 a small world, 6 matrices, 7 a mini game.">
+
+  <h2>The lessons</h2>
+  <ol class="lessons">
+<li class="card">
+  <a class="go" href="lesson1/"><span class="num">Lesson 1</span>From one line to a 3D cube</a>
+  <p>You will draw a line, then a shape made of points and edges, then a real 3D cube on a flat screen.</p>
+  <p class="code">Code: <a href="lesson1/code/step1_line.py" download><code>step1_line.py</code></a> <a href="lesson1/code/step2_polygon.py" download><code>step2_polygon.py</code></a> <a href="lesson1/code/step3_cube.py" download><code>step3_cube.py</code></a></p>
+</li>
+<li class="card">
+  <a class="go" href="lesson2/"><span class="num">Lesson 2</span>Making the cube spin</a>
+  <p>Lesson 1 ended with a cube that only faces you.</p>
+  <p class="code">Code: <a href="lesson2/code/step1_sin_cos.py" download><code>step1_sin_cos.py</code></a> <a href="lesson2/code/step2_turn_cube.py" download><code>step2_turn_cube.py</code></a> <a href="lesson2/code/step3_spin_cube.py" download><code>step3_spin_cube.py</code></a></p>
+</li>
+<li class="card">
+  <a class="go" href="lesson2b/"><span class="num">Lesson 2B</span>Tip, roll and tumble</a>
+  <p>Lesson 2 turned the cube around one skewer, the upright y axis.</p>
+  <p class="code">Code: <a href="lesson2b/code/step1_tip_cube.py" download><code>step1_tip_cube.py</code></a> <a href="lesson2b/code/step2_roll_cube.py" download><code>step2_roll_cube.py</code></a> <a href="lesson2b/code/step3_tumble_cube.py" download><code>step3_tumble_cube.py</code></a></p>
+</li>
+<li class="card">
+  <a class="go" href="lesson3/"><span class="num">Lesson 3</span>Solid faces</a>
+  <p>So far the cube has been made of wire: 12 lines with nothing between them.</p>
+  <p class="code">Code: <a href="lesson3/code/step1_fill_faces.py" download><code>step1_fill_faces.py</code></a> <a href="lesson3/code/step2_painter.py" download><code>step2_painter.py</code></a> <a href="lesson3/code/step3_hide_back_faces.py" download><code>step3_hide_back_faces.py</code></a> <a href="lesson3/code/step4_lit_cube.py" download><code>step4_lit_cube.py</code></a></p>
+</li>
+<li class="card">
+  <a class="go" href="lesson4/"><span class="num">Lesson 4</span>Moving the camera</a>
+  <p>Until now the cube did all the moving and you sat still.</p>
+  <p class="code">Code: <a href="lesson4/code/step1_walk.py" download><code>step1_walk.py</code></a> <a href="lesson4/code/step2_turn.py" download><code>step2_turn.py</code></a> <a href="lesson4/code/step3_look_around.py" download><code>step3_look_around.py</code></a></p>
+</li>
+<li class="card">
+  <a class="go" href="lesson5/"><span class="num">Lesson 5</span>A small world</a>
+  <p>One cube in empty space makes it hard to feel that you are moving.</p>
+  <p class="code">Code: <a href="lesson5/code/step1_two_shapes.py" download><code>step1_two_shapes.py</code></a> <a href="lesson5/code/step2_size_and_spin.py" download><code>step2_size_and_spin.py</code></a> <a href="lesson5/code/step3_small_world.py" download><code>step3_small_world.py</code></a></p>
+</li>
+<li class="card">
+  <a class="go" href="lesson6/"><span class="num">Lesson 6</span>Matrices</a>
+  <p>Since Lesson 2 every turn has been its own little formula: tip, turn, roll, then undo your turn and undo your tip.</p>
+  <p class="code">Code: <a href="lesson6/code/step1_matrix_by_hand.py" download><code>step1_matrix_by_hand.py</code></a> <a href="lesson6/code/step2_spin_matrix.py" download><code>step2_spin_matrix.py</code></a> <a href="lesson6/code/step3_camera_matrix.py" download><code>step3_camera_matrix.py</code></a></p>
+</li>
+<li class="card">
+  <a class="go" href="lesson7/"><span class="num">Lesson 7</span>A mini game: Cube Hunt</a>
+  <p>Six lessons built a 3D world you can fly round.</p>
+  <p class="code">Code: <a href="lesson7/code/step1_cube_field.py" download><code>step1_cube_field.py</code></a> <a href="lesson7/code/step2_collect.py" download><code>step2_collect.py</code></a> <a href="lesson7/code/step3_cube_hunt.py" download><code>step3_cube_hunt.py</code></a></p>
+</li>
+  </ol>
+
+  <h2>Also</h2>
+  <ul class="extras">
+    <li><a href="figures/">Figure index</a>: every figure and table in the course, by number.</li>
+    <li>To run the code you need Python 3 and pygame-ce: <code>pip install pygame-ce</code>. Each lesson's last script is the next lesson's starting point.</li>
+  </ul>
+
+  <footer>Source files: <a href="https://github.com/FrogMort-33/Tutorial">github.com/FrogMort-33/Tutorial</a></footer>
+</main>
+</body>
+</html>

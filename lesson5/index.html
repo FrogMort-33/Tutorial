@@ -1,0 +1,2015 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframe 3D, Lesson 5</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Chakra+Petch:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one readable column, like a lab notebook; diagrams and code break out slightly wider. */
+:root {
+  --bg:#f3f6f4; --paper:#ffffff; --fg:#17201b; --muted:#56635c; --line:#d5ded8;
+  --accent:#0d8a4a; --accent-soft:#e2f3e9; --code-bg:#121815; --code-fg:#d9f5e3; --warn:#9a6a00;
+  --display:"Chakra Petch", "Trebuchet MS", sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; --code-bg:#0a0e0c; --code-fg:#d9f5e3; --warn:#e6b84a; color-scheme:dark; } }
+:root[data-theme="dark"] {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; --code-bg:#0a0e0c; --code-fg:#d9f5e3; --warn:#e6b84a; color-scheme:dark; }
+body { background:var(--bg); color:var(--fg); font-family:var(--body); font-size:17px; line-height:1.6;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:32px 64px; }
+main { max-width:780px; margin:0 auto; display:flex; flex-direction:column; gap:20px; }
+h1,h2,h3 { font-family:var(--display); text-wrap:balance; line-height:1.2; margin:0; }
+h1 { font-size:clamp(30px,6vw,44px); }
+h2 { font-size:26px; margin-top:28px; padding-top:20px; border-top:2px solid var(--line); display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; }
+h2 .mins { font-family:var(--mono); font-size:14px; color:var(--accent); font-weight:600; letter-spacing:.04em; }
+h3 { font-size:20px; margin-top:12px; }
+p { margin:0; max-width:68ch; }
+.eyebrow { font-family:var(--mono); font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); }
+.lede { font-size:19px; color:var(--muted); }
+code { font-family:var(--mono); font-size:.88em; background:var(--accent-soft); padding:1px 5px; border-radius:4px; }
+pre { margin:0; background:var(--code-bg); color:var(--code-fg); padding:16px 18px; border-radius:8px; overflow-x:auto; font-size:14px; line-height:1.5; }
+pre code { background:none; padding:0; font-size:inherit; color:inherit; }
+figure { margin:0; display:flex; flex-direction:column; gap:8px; }
+figure img { width:100%; border-radius:8px; display:block; border:1px solid var(--line); }
+figcaption { font-size:14px; color:var(--muted); }
+table { border-collapse:collapse; width:100%; font-size:15px; }
+.tablewrap { overflow-x:auto; }
+th,td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+td.t { font-family:var(--mono); white-space:nowrap; color:var(--accent); font-variant-numeric:tabular-nums; }
+ul,ol { margin:0; padding-left:22px; max-width:68ch; }
+li+li { margin-top:4px; }
+.key { background:var(--accent-soft); border-left:4px solid var(--accent); padding:14px 18px; border-radius:0 8px 8px 0; display:flex; flex-direction:column; gap:6px; }
+.key strong { font-family:var(--display); }
+.q { background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:14px 18px; display:flex; flex-direction:column; gap:8px; }
+.qq { font-weight:700; display:flex; gap:10px; }
+.qn { font-family:var(--mono); color:var(--accent); flex:none; }
+details summary { cursor:pointer; color:var(--accent); font-weight:700; }
+details summary:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.ans { padding-top:8px; color:var(--fg); display:flex; flex-direction:column; gap:8px; }
+details.full { border:1px dashed var(--line); border-radius:8px; padding:10px 14px; }
+details.full[open] summary { margin-bottom:10px; }
+.check { display:flex; flex-direction:column; gap:12px; }
+.files li code { white-space:nowrap; }
+.key a { color:var(--accent); font-weight:700; }
+
+.fignum { font-family:var(--mono); font-weight:600; color:var(--accent); margin-right:6px; white-space:nowrap; }
+.panels { display:block; margin-top:4px; }
+.panels b { font-family:var(--mono); color:var(--fg); font-weight:600; }
+.tabcap { font-size:14px; color:var(--muted); margin-bottom:-12px; }
+figure, .tabcap { scroll-margin-top:16px; }
+</style>
+
+</head>
+<body>
+<main>
+<nav style="font-family:var(--mono, monospace);font-size:14px;"><a style="color:var(--accent)" href="../">&larr; All lessons</a> &middot; <a style="color:var(--accent)" href="../figures/">Figure index</a></nav>
+
+<header style="display:flex;flex-direction:column;gap:12px">
+  <span class="eyebrow">Wireframe 3D course · Lesson 5 · about 55 minutes</span>
+  <h1>A small world</h1>
+  <p class="lede">One cube in empty space makes it hard to feel that you are moving. Today the world fills up: a floor to stand on, a new shape (the pyramid), and seven things placed around you, each with its own place, its own size and its own spin. The trick is to stop writing "the cube" in the code and start writing "every thing in a list".</p>
+</header>
+
+<!-- COURSE MAP: the course-map thread may replace this section with its shared version -->
+<section id="course-map" style="display:flex;flex-direction:column;gap:12px">
+<h2>Where this fits</h2>
+<figure id="fig-5-0-1"><img src="images/course_map.png" alt="Course map of 8 lessons as a road: Lessons 1, 2, 2B, 3 and 4 done, Lesson 5 A small world highlighted as today, then Lesson 6 Matrices and Lesson 7 A mini game." loading="lazy"><figcaption><span class="fignum">Fig 5.0.1</span>One program that grows a little each lesson. You are on Lesson 5.</figcaption></figure>
+<div class="key">
+  <p><strong>Before: Lesson 4, Moving the camera.</strong> You learned <code>to_camera()</code>: subtract where you stand, undo your turn, undo your tip. You walked round one cube.</p>
+  <p><strong>Today: Lesson 5, A small world.</strong> Many shapes from a list, each with its own position, size and spin, all sorted together, standing on a floor grid.</p>
+  <p><strong>Next: Lesson 6, Matrices.</strong> Today's separate tip, turn and roll steps get packed into one 3 × 3 grid of numbers, the way real 3D engines do it.</p>
+</div>
+</section>
+
+<h2>Lesson plan</h2>
+<p><strong>Who it's for:</strong> someone who finished Lesson 4 and can run <code>step3_look_around.py</code>. You need <code>to_camera()</code> and <code>NEAR</code> (Lesson 4), the three turns (Lessons 2 and 2B), the clock test, painter's sort and light (Lesson 3), and Python dictionaries (the Python lists course). <strong>Needs:</strong> Python 3 and <code>pip install pygame-ce</code>, as before.</p>
+<p><strong>By the end, the learner can:</strong></p>
+<ol>
+  <li>Describe a new shape as points and faces, and list each face's corners clockwise from outside.</li>
+  <li>Work out a sloping face's pointer by hand, and explain why Lesson 3's averaging trick fails for a pyramid.</li>
+  <li>Tell a MODEL (a shape) from a THING (one shape placed in the world), and read values out of the dictionaries.</li>
+  <li>Explain, with a picture, why the faces of all things must go into one list and one sort.</li>
+  <li>Take one corner through size → spin → place → camera → screen by hand.</li>
+  <li>Draw a floor grid in short pieces, and say why it is drawn first.</li>
+</ol>
+<p class="tabcap" id="fig-5-0-2"><span class="fignum">Table 5.0.2</span>Lesson plan: time, part and what happens</p>
+<div class="tablewrap"><table>
+<tr><th>Time</th><th>Part</th><th>What happens</th></tr>
+<tr><td class="t">0–3</td><td>Recap</td><td>Lesson 4's camera, and today's recipe with its new steps.</td></tr>
+<tr><td class="t">3–11</td><td>1. A second shape</td><td>The pyramid's 5 corners and 5 faces. Lesson 3's tools on a triangle. Q1–Q2.</td></tr>
+<tr><td class="t">11–19</td><td>2. Pointers in the face list</td><td>Why averaging fails, the slope worked by hand, what it does to the colour. Q3–Q4.</td></tr>
+<tr><td class="t">19–26</td><td>3. Models and things</td><td>Dictionaries, the <code>things</code> list, <code>to_world()</code>, the pyramid's tip by hand. Q5.</td></tr>
+<tr><td class="t">26–32</td><td>4. One list, one sort</td><td><code>add_faces_of()</code>, and what goes wrong with a sort per thing. Run <code>step1_two_shapes.py</code>. Q6.</td></tr>
+<tr><td class="t">32–44</td><td>5. Size and spin</td><td><code>size</code>, the order size → spin → place, standing on the floor, each thing's own speeds, the light. Run <code>step2_size_and_spin.py</code>. Q7–Q9.</td></tr>
+<tr><td class="t">44–53</td><td>6. The floor</td><td><code>FLOOR_Y</code>, pieces, where the rows land, floor first, the mini-map, the whole recipe. Run <code>step3_small_world.py</code>. Q10–Q11.</td></tr>
+<tr><td class="t">53–55</td><td>Wrap up</td><td>Final check Q12. Preview of Lesson 6.</td></tr>
+</table></div>
+
+<h2>Recap: the recipe so far <span class="mins">3 MIN</span></h2>
+<p>Lesson 4 ended with a camera you could walk, turn and tip. Every frame each of the cube's 8 corners went SHAPE → spin → + <code>cube_position</code> → WORLD → <code>to_camera()</code> → NEAR check → <code>project()</code> → SCREEN. There was exactly one cube, so its spin angles and position lived in plain variables.</p>
+<p>Today the same recipe runs once for <em>every thing</em> in a list, and three pink boxes are new: a size step, a spin and position that belong to each thing, and one shared list of faces. The floor is drawn before all of it.</p>
+<figure id="fig-5-0-3"><img src="images/w01_pipeline.png" alt="Flow chart: inside a pink loop 'for thing in things', SHAPE, times size, spin, plus position, WORLD, to_camera, NEAR check, one shared list. After the loop: floor grid drawn first, sort all faces, project, SCREEN. New boxes are outlined pink." loading="lazy"><figcaption><span class="fignum">Fig 5.0.3</span>Grey boxes are Lessons 1 to 4. Pink boxes are new today. Each one gets its own part below, with diagrams, before we use it.<span class="panels">Panels: <b>5.0.3a</b> (top box) for every thing (SHAPE to faces_to_draw) · <b>5.0.3b</b> (bottom row) floor grid, sort, project, SCREEN</span></figcaption></figure>
+
+<h2>Part 1: A second shape, the pyramid <span class="mins">8 MIN</span></h2>
+<p>So far every shape has been a cube. A pyramid is the simplest new shape: a square base with a single point on top. Like the cube, it is described in SHAPE coordinates, measured from its own centre (0, 0, 0), with x right, y up and z away.</p>
+<figure id="fig-5-1-1"><img src="images/w02_pyramid_points.png" alt="3D view of the pyramid inside a dashed cube outline, with axes plus and minus x, y and z through the centre (0,0,0). Corners 0 to 3 are the base at y = -1, corner 4 the tip at (0, 1, 0). A table lists all five." loading="lazy"><figcaption><span class="fignum">Fig 5.1.1</span>SHAPE coordinates. The four base corners are the cube's four bottom corners with the same numbers, and the tip is straight above the centre at the cube's top height. So a pyramid of size 1 is exactly as wide, deep and tall as a cube of size 1.</figcaption></figure>
+<pre><code>pyramid_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    ( 0,  1,  0),   # 4  the tip
+]</code></pre>
+<p>Its faces follow Lesson 3's rule: list each face's corners <strong>clockwise as seen from outside</strong>. Four faces are triangles, so they list 3 corners; the base is a square and lists 4.</p>
+<figure id="fig-5-1-2"><img src="images/w03_pyramid_faces.png" alt="Five panels. Front slope seen from the front: tip 4, then right corner 1, then left corner 0. Right slope from the right: 4, 2, 1. Back slope from the back: 4, 3, 2. Left slope from the left: 4, 0, 3. Base from below: 2, 3, 0, 1. Arrows show each walk is clockwise." loading="lazy"><figcaption><span class="fignum">Fig 5.1.2</span>Stand outside each face and walk tip → the corner on your right → the corner on your left: clockwise every time. The colours match the cube's (red = front, green = right, and so on), so the same colour always means the same direction.<span class="panels">Panels: <b>5.1.2a</b> (1st) front slope · <b>5.1.2b</b> (2nd) right slope · <b>5.1.2c</b> (3rd) back slope · <b>5.1.2d</b> (4th) left slope · <b>5.1.2e</b> (5th) base · <b>5.1.2f</b> (bottom) the pyramid_faces list</span></figcaption></figure>
+<p>Do Lesson 3's tools need changing for triangles? Let's test them on a real face with real numbers, before trusting them.</p>
+<figure id="fig-5-1-3"><img src="images/w04_triangle_tools.png" alt="The pyramid's front slope on screen at (275,250), (314.3,357.1), (200,357.1). Clock test: arrow A (39.3, 107.1), arrow B (-75, 107.1), cross 12245, greater than 0 so facing. average_z: (8 + 7 + 7) / 3 = 7.333." loading="lazy"><figcaption><span class="fignum">Fig 5.1.3</span>The clock test only ever looked at the first three corners, and <code>average_z()</code> divides by <code>len(corners)</code>. Lesson 3 wrote both for any number of corners, so a triangle needs no new code at all.<span class="panels">Panels: <b>5.1.3a</b> (left) the front slope on the SCREEN · <b>5.1.3b</b> (right top) 1. clock test · <b>5.1.3c</b> (right middle) 2. average_z</span></figcaption></figure>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q1</span><span>A pyramid of size 1 sits at position (3, 0, 6). You stand at the start, (0, 0, 0), looking straight ahead. Where does its tip land on the screen?</span></p><details><summary>Show answer</summary><div class="ans"><p>WORLD: <code>((0 + 3), (1 + 0), (0 + 6))</code> = (3, 1, 6). You are at the start, so CAMERA is the same. Screen x = <code>400 + ((3 * 400) / 6)</code> = 400 + 200 = 600. Screen y = <code>300 - ((1 * 400) / 6)</code> = 300 − 66.7 = 233.3.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q2</span><span>Why is the pyramid's base listed as (2, 3, 0, 1), exactly like the cube's bottom face?</span></p><details><summary>Show answer</summary><div class="ans"><p>The base uses the same four corner numbers in the same places as the cube's bottom, and it is seen from the same side (from below). So the same clockwise walk works for both.</p></div></details></div>
+</div>
+
+<h2>Part 2: Each face carries its own pointer <span class="mins">8 MIN</span></h2>
+<p>Lesson 3's light needed each face's <em>pointer</em>: an arrow 1 unit long, sticking straight out of the face. We made it by averaging the face's corners. That was a cube-only trick, and on a pyramid it goes badly wrong:</p>
+<figure id="fig-5-2-1"><img src="images/w05_average_fails.png" alt="Side view of the pyramid in SHAPE coordinates, z across and y up. The average of the front slope's corners is (0, -0.333, -0.667), an arrow from the centre pointing down and forward. The true pointer (0, 0.447, -0.894) points up and forward out of the slope." loading="lazy"><figcaption><span class="fignum">Fig 5.2.1</span>SHAPE coordinates, seen from the left side. The pink average arrow points DOWN, but the slope faces UP. A cube's centre is level with the middle of every face, so its averages happened to work.</figcaption></figure>
+<p>So today each face simply carries its pointer as a third item in the face list. For the pyramid's slopes we work it out once, by hand:</p>
+<figure id="fig-5-2-2"><img src="images/w06_slope_pointer.png" alt="Side view: the front slope rises 2 for every 1 across. A quarter turn gives an arrow 2 out and 1 up. Its length is sqrt(5) = 2.236; dividing gives 0.894 out and 0.447 up, so the pointer is (0, 0.447, -0.894)." loading="lazy"><figcaption><span class="fignum">Fig 5.2.2</span>Three steps: read the slope (1 across, 2 up), turn it a quarter (2 out, 1 up), then shrink it to 1 long by dividing both by √5 = 2.236.</figcaption></figure>
+<pre><code># each face is now (corners, colour, pointer)
+cube_faces = [
+    ((4, 5, 1, 0), RED,    ( 0,  0, -1)),   # front
+    ((6, 7, 3, 2), PURPLE, ( 0,  0,  1)),   # back
+    ((7, 4, 0, 3), BLUE,   (-1,  0,  0)),   # left
+    ((5, 6, 2, 1), GREEN,  ( 1,  0,  0)),   # right
+    ((7, 6, 5, 4), GOLD,   ( 0,  1,  0)),   # top
+    ((2, 3, 0, 1), ORANGE, ( 0, -1,  0)),   # bottom
+]
+pyramid_faces = [
+    ((4, 1, 0),    RED,    ( 0,     0.447, -0.894)),   # front slope
+    ((4, 3, 2),    PURPLE, ( 0,     0.447,  0.894)),   # back slope
+    ((4, 0, 3),    BLUE,   (-0.894, 0.447,  0)),       # left slope
+    ((4, 2, 1),    GREEN,  ( 0.894, 0.447,  0)),       # right slope
+    ((2, 3, 0, 1), ORANGE, ( 0,    -1,      0)),       # base
+]</code></pre>
+<p>Does it matter? Here is the front slope's colour both ways, with Lesson 3's light:</p>
+<figure id="fig-5-2-3"><img src="images/w07_pointer_light.png" alt="Two rows. Wrong: average pointer gives brightness 0.227, shade 0.381, colour (90, 31, 31), a dark red swatch. Right: true pointer gives brightness 0.840, shade 0.872, colour (205, 70, 70), a bright red swatch." loading="lazy"><figcaption><span class="fignum">Fig 5.2.3</span>The slope leans back toward the lamp, so it should be one of the brightest faces in the world. The wrong arrow makes it nearly as dark as a face in shadow: 90 instead of 205 for red.<span class="panels">Panels: <b>5.2.3a</b> (top) Lesson 3&#x27;s average (wrong) · <b>5.2.3b</b> (bottom) today&#x27;s pointer from the face list (right)</span></figcaption></figure>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q3</span><span>Work out the colour of the pyramid's GREEN (70, 210, 120) right slope, pointer (0.894, 0.447, 0), with the light on.</span></p><details><summary>Show answer</summary><div class="ans"><p>brightness = <code>((0.894 * 0.48) + (0.447 * 0.6) + (0 * -0.64))</code> = 0.429 + 0.268 + 0 = 0.697. shade = <code>(0.2 + (0.8 * 0.697))</code> = 0.758. Colour = (<code>round(70 * 0.758)</code>, <code>round(210 * 0.758)</code>, <code>round(120 * 0.758)</code>) = (53, 159, 91).</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q4</span><span>The base's pointer is (0, −1, 0). Why is the base always drawn at exactly the AMBIENT brightness when you see it?</span></p><details><summary>Show answer</summary><div class="ans"><p>brightness = <code>((0 * 0.48) + (-1 * 0.6) + (0 * -0.64))</code> = −0.6. Negative means it faces away from the lamp, so <code>shade_colour()</code> sets it to 0, and shade = <code>(0.2 + (0.8 * 0))</code> = 0.2: only the ambient light.</p></div></details></div>
+</div>
+
+<h2>Part 3: Models and things <span class="mins">7 MIN</span></h2>
+<p>We want two cubes and a pyramid. Copying the cube's 8 corners for every cube would get out of hand fast, so we split the idea in two. A <strong>model</strong> is a shape: its points and faces. A <strong>thing</strong> is one model placed somewhere in the world. Both are Python dictionaries.</p>
+<figure id="fig-5-3-1"><img src="images/w08_model_thing.png" alt="Two model cards, cube_model and pyramid_model, each a dictionary with points and faces. Three thing cards below, each with model, position and colour, with arrows: things 0 and 2 point at cube_model, thing 1 at pyramid_model." loading="lazy"><figcaption><span class="fignum">Fig 5.3.1</span>Two cubes share one <code>cube_model</code>. A hundred cubes would still need only one model: each thing just says which model it uses and where it is.<span class="panels">Panels: <b>5.3.1a</b> (top row) the two models · <b>5.3.1b</b> (middle row) the three things</span></figcaption></figure>
+<pre><code>cube_model = {"points": cube_points, "faces": cube_faces}
+pyramid_model = {"points": pyramid_points, "faces": pyramid_faces}
+
+things = [
+    {"model": cube_model,    "position": (0, 0, 5),    "colour": CUBE_GREEN},
+    {"model": pyramid_model, "position": (-2.5, 0, 8), "colour": SUN_GOLD},
+    {"model": cube_model,    "position": (4, 0, 9),    "colour": SKY_BLUE},
+]</code></pre>
+<p>Here is where the three positions put them, and why each was chosen:</p>
+<figure id="fig-5-3-2"><img src="images/w09_world_map.png" alt="WORLD from above with x and z axes, plus and minus ends labelled. You at (0,0,0) with dashed view lines. The green cube at (0,0,5), the gold pyramid at (-2.5,0,8) behind it to the left, and a blue cube at (4,0,9)." loading="lazy"><figcaption><span class="fignum">Fig 5.3.2</span>WORLD coordinates from above. The old cube stays put, so every number from Lessons 1 to 4 still works. The pyramid sits behind it so that the two overlap on screen and the sort has real work to do.<span class="panels">Panels: <b>5.3.2a</b> (left) the world map from above · <b>5.3.2b</b> (right) the three things&#x27; notes</span></figcaption></figure>
+<p>A thing's SHAPE corner becomes a WORLD corner by adding that thing's position: the same "+ <code>cube_position</code>" as Lesson 4, but now each thing brings its own. We give it a name, <code>to_world()</code>, because Part 5 will add more steps to it.</p>
+<pre><code>def to_world(shape_point, thing):
+    x, y, z = shape_point
+    pos_x, pos_y, pos_z = thing["position"]
+    return ( (x + pos_x), (y + pos_y), (z + pos_z) )</code></pre>
+<figure id="fig-5-3-3"><img src="images/w10_pyramid_tip_worked.png" alt="Six steps: SHAPE tip (0,1,0), plus position gives WORLD (-2.5, 1, 8), to_camera gives no change at the start, screen x = 400 + ((-2.5 * 400) / 8) = 275, screen y = 300 - ((1 * 400) / 8) = 250. A screenshot marks the tip at (275, 250)." loading="lazy"><figcaption><span class="fignum">Fig 5.3.3</span>The pyramid's tip, all the way from SHAPE to SCREEN. It lands at exactly (275, 250), which is why the pyramid was put at (−2.5, 0, 8).<span class="panels">Panels: <b>5.3.3a</b> (left) the six steps · <b>5.3.3b</b> (right) step 1&#x27;s first frame</span></figcaption></figure>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q5</span><span><code>thing = things[2]</code>. What is <code>thing["model"]["points"][5]</code>, and where is that corner in WORLD coordinates?</span></p><details><summary>Show answer</summary><div class="ans"><p><code>things[2]</code> is the blue cube, so its model is <code>cube_model</code> and point 5 is the cube's corner 5, SHAPE (1, 1, −1). WORLD = <code>((1 + 4), (1 + 0), (-1 + 9))</code> = (5, 1, 8).</p></div></details></div>
+</div>
+
+<h2>Part 4: One list, one sort <span class="mins">6 MIN</span></h2>
+<p>Lesson 4's face loop (NEAR check, clock test, <code>average_z</code>, light) moves into a function, <code>add_faces_of(thing, faces_to_draw)</code>. The main loop calls it once for each thing, and every call adds to the <em>same</em> list. Only after all things are done do we sort and paint.</p>
+<pre><code>faces_to_draw = []                       # ONE list for every thing
+for thing in things:
+    add_faces_of(thing, faces_to_draw)   # adds this thing's faces
+
+faces_to_draw.sort(reverse=True)         # ONE sort, furthest first
+for distance, face_points, colour in faces_to_draw:
+    pygame.draw.polygon(screen, colour, face_points)
+    pygame.draw.polygon(screen, BLACK, face_points, 2)</code></pre>
+<figure id="fig-5-4-1"><img src="images/w11_one_list.png" alt="You at (3,0,1) turned left 20. Faces added per thing: cube front 3.845 and right 4.443, pyramid front 7.832 and right 8.231, cube 2 front 6.236. One list, sorted: pyramid right, pyramid front, cube 2 front, cube right, cube front." loading="lazy"><figcaption><span class="fignum">Fig 5.4.1</span>Every face that passes the clock test, with its average CAMERA z. Sorted together, the pyramid (about 8 away) is painted first and the near cube (about 4) last, on top.<span class="panels">Panels: <b>5.4.1a</b> (top) each thing adds its faces to one list · <b>5.4.1b</b> (bottom) painted in this order</span></figcaption></figure>
+<p>Why not let each thing sort its own faces? Because then whole things get painted in <em>list</em> order, not distance order:</p>
+<figure id="fig-5-4-2"><img src="images/w12_wrong_order.png" alt="Two screenshots from the same spot. Left, one sort: the pyramid is hidden behind the near cube. Right, a sort per thing: the pyramid is painted on top of the nearer cube's front and side." loading="lazy"><figcaption><span class="fignum">Fig 5.4.2</span>Same frame, two ways. On the right the pyramid (8 away) is drawn after the cube (4 away) only because it comes later in the list, so it appears in front of a cube that is really in front of it.<span class="panels">Panels: <b>5.4.2a</b> (left) ONE list, ONE sort (right) · <b>5.4.2b</b> (right) a sort per thing (wrong) · <b>5.4.2c</b> (bottom) the wrong order of painting</span></figcaption></figure>
+<h3>Run it: step 1</h3>
+<p>Run <code>step1_two_shapes.py</code>. Nothing spins yet; walk round the three things with Lesson 4's keys and watch the pyramid slide behind the cube and out again.</p>
+<figure id="fig-5-4-3"><img src="images/run_step1_two_shapes.png" alt="Output of step 1 from (-1.5, 2, 0) looking down 15: the bright red pyramid front slope on the left, the green-topped near cube in the middle, the second cube behind it to the right, and the mini-map." loading="lazy"><figcaption><span class="fignum">Fig 5.4.3</span>Half a second of A, 2/3 of a second of E, then DOWN for 10 frames: you are at (−1.5, 2, 0), looking down 15. Notice the pyramid's front slope (pointer leaning toward the lamp) is brighter than the cube's front.</figcaption></figure>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q6</span><span>You move the pyramid to the start of the <code>things</code> list. Does the picture change?</span></p><details><summary>Show answer</summary><div class="ans"><p>No. All faces go into one list and are sorted by distance, so the order of the <code>things</code> list never matters. (With a sort per thing, it would: that is exactly the bug in Fig 5.4.2b above.)</p></div></details></div>
+</div>
+
+<h2>Part 5: Each thing's own size and spin <span class="mins">12 MIN</span></h2>
+<p>A world where every shape is the same size and nothing moves looks like a shop window. So each thing gets three more keys: <code>"size"</code>, <code>"angles"</code> and <code>"speeds"</code>.</p>
+<h3>size</h3>
+<figure id="fig-5-5-1"><img src="images/w13_size.png" alt="Left: SHAPE squares for size 0.5, 1 and 2 round the centre, corner 5 at (0.5,0.5), (1,1), (2,2). Right: three screens, each cube's front face 4 away, measured 100, 200 and 400 pixels wide." loading="lazy"><figcaption><span class="fignum">Fig 5.5.1</span>Multiply every SHAPE number by <code>size</code>. Put each front face 4 away and the widths are 100, 200 and 400 px: double the size, double the width.<span class="panels">Panels: <b>5.5.1a</b> (left) SHAPE from the front: corner 5 at three sizes · <b>5.5.1b</b> (right 1st) size 0.5: 100 px · <b>5.5.1c</b> (right 2nd) size 1: 200 px · <b>5.5.1d</b> (right 3rd) size 2: 400 px</span></figcaption></figure>
+<h3>Size and spin before the position</h3>
+<p>Lesson 2 taught "rotate before adding distance". Size follows the same rule, and Fig 5.5.2 shows why:</p>
+<figure id="fig-5-5-2"><img src="images/w14_size_order.png" alt="WORLD from above. The big cube, size 2 at (4,1,9), drawn correctly round its centre with corner 5 at (6,3,7). Done the wrong way, placed then sized, its centre jumps to (8,2,18), twice as far from you." loading="lazy"><figcaption><span class="fignum">Fig 5.5.2</span>Size multiplies distances from (0, 0, 0). Before placing, that is the thing's own centre, so it grows in place. After placing, it is your starting spot, so the thing flies away too.<span class="panels">Panels: <b>5.5.2a</b> (left) WORLD from above: right and wrong centres · <b>5.5.2b</b> (top right) RIGHT: size, spin, then place · <b>5.5.2c</b> (middle right) WRONG: place first, then size</span></figcaption></figure>
+<pre><code>def to_world(shape_point, thing):
+    x, y, z = shape_point
+    size = thing["size"]
+    sized = ( (x * size), (y * size), (z * size) )      # 1. size
+    spun = rotate_all(sized, thing["angles"])            # 2. spin
+    pos_x, pos_y, pos_z = thing["position"]
+    sx, sy, sz = spun
+    return ( (sx + pos_x), (sy + pos_y), (sz + pos_z) )  # 3. place</code></pre>
+<h3>Standing on the floor</h3>
+<p>There is no floor yet (that's Part 6), but we already decide where it will be: at y = −1, the bottom of the old cube. A bigger thing has its bottom further below its centre, so its centre must be lifted:</p>
+<figure id="fig-5-5-3"><img src="images/w15_on_the_floor.png" alt="WORLD from the side with the floor at y = -1. Squares of size 0.5, 1 and 2 sit on it with centres at y = -0.5, 0 and 1, each labelled (-1 + size)." loading="lazy"><figcaption><span class="fignum">Fig 5.5.3</span>Centre y = <code>(FLOOR_Y + size)</code> = <code>(-1 + size)</code>. Size 2 → 1, size 0.5 → −0.5.</figcaption></figure>
+<h3>Each thing's own spin</h3>
+<p>Lesson 4 had one set of angles for its one cube. Now <code>rotate_all()</code> takes the angles as a parameter, and each frame every thing adds its own speeds to its own angles:</p>
+<pre><code>def rotate_all(point_3d, angles):
+    p = rotate_x(point_3d, angles[0])   # tip
+    p = rotate_y(p, angles[1])          # turn
+    p = rotate_z(p, angles[2])          # roll
+    return p
+
+# in the main loop, every frame:
+for thing in things:
+    angles = thing["angles"]
+    speeds = thing["speeds"]
+    angles[0] = keep_under_360( (angles[0] + speeds[0]) )
+    angles[1] = keep_under_360( (angles[1] + speeds[1]) )
+    angles[2] = keep_under_360( (angles[2] + speeds[2]) )</code></pre>
+<figure id="fig-5-5-4"><img src="images/w16_own_spin.png" alt="Table of the seven things with speeds, degrees per second and time for one full turn, and why each was chosen: old cube still, pyramid 6 s, big cube 12 s, small cube 2 s, floating cube tumbling, big pyramid -0.5 the other way, pyramid behind 3 s." loading="lazy"><figcaption><span class="fignum">Fig 5.5.4</span>Every speed is degrees per frame; times 60 gives degrees per second. Things on the floor only turn, because tipping or rolling would swing their corners through the floor.</figcaption></figure>
+<p>Now take one corner through the new <code>to_world()</code> by hand, at two moments:</p>
+<figure id="fig-5-5-5"><img src="images/w17_to_world_worked.png" alt="The small cube's corner 5, size 0.5 at (2, -0.5, 4). Frame 0: sized (0.5,0.5,-0.5), world (2.5,0,3.5), screen (685.7,300). Frame 30, turned 90: spun (0.5,0.5,0.5), world (2.5,0,4.5), screen (622.2,300)." loading="lazy"><figcaption><span class="fignum">Fig 5.5.5</span>After 30 frames at 3 per frame the small cube has turned 90, so corner 5 swings from its front-right to its back-right and lands 63.5 px closer to the middle.<span class="panels">Panels: <b>5.5.5a</b> (left) frame 0 (turn 0) · <b>5.5.5b</b> (right) frame 30 (turn 90)</span></figcaption></figure>
+<h3>The light, now that things spin</h3>
+<figure id="fig-5-5-6"><img src="images/w18_pointer_spin.png" alt="Left: the gold pyramid's front pointer turned 90 becomes (0.894, 0.447, 0), the right slope's pointer. Right: sizing the big cube's top pointer to (0,2,0) gives brightness 1.2, shade 1.16 and colour (284,232,70), and pygame stops with ValueError." loading="lazy"><figcaption><span class="fignum">Fig 5.5.6</span>The pointer must turn with its face, so we spin it with the thing's angles. It must stay 1 long, so we never multiply it by size.<span class="panels">Panels: <b>5.5.6a</b> (left) SPIN it · <b>5.5.6b</b> (right) do NOT size it</span></figcaption></figure>
+<h3>Run it: step 2</h3>
+<p>Run <code>step2_size_and_spin.py</code>. Five things now: the old cube (still), the pyramid (turning), a big cube, a small cube and a cube floating 2.5 up, tumbling. SPACE pauses all the spinning at once.</p>
+<figure id="fig-5-5-7"><img src="images/run_step2_size_and_spin.png" alt="Output of step 2 after 1.5 seconds: you are at (0, 1, 0) looking down 15. The pyramid has turned 90 so its blue left slope faces you; the big blue cube behind; the small cube turned on the right; the floating cube tumbling at the top." loading="lazy"><figcaption><span class="fignum">Fig 5.5.7</span>After 90 frames (1.5 seconds) with E for 20 frames and DOWN for 10. The pyramid has turned (90 × 1) = 90, so its blue left slope now faces you.</figcaption></figure>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q7</span><span>You add a cube of size 3 that stands on the floor. What is its centre y? If its front face is 6 away from you, how wide is it on screen?</span></p><details><summary>Show answer</summary><div class="ans"><p>Centre y = <code>(-1 + 3)</code> = 2. It is <code>(2 * 3)</code> = 6 units wide, so on screen <code>((6 * 400) / 6)</code> = 400 px.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q8</span><span>The small cube (size 0.5, position (2, −0.5, 4), speed 3) after 15 frames. Where is its corner 5 in WORLD, and on screen from the start?</span></p><details><summary>Show answer</summary><div class="ans"><p>Turn = <code>(15 * 3)</code> = 45, so cos_a = sin_a = 0.707. Sized: (0.5, 0.5, −0.5). Spun: x = <code>((0.5 * 0.707) - (-0.5 * 0.707))</code> = 0.707, z = <code>((0.5 * 0.707) + (-0.5 * 0.707))</code> = 0. WORLD = <code>((0.707 + 2), (0.5 + -0.5), (0 + 4))</code> = (2.707, 0, 4). Screen x = <code>400 + ((2.707 * 400) / 4)</code> = 670.7, y = 300.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q9</span><span>The big pyramid's turn speed is −0.5. What is its turn angle after 1 frame, and after 2?</span></p><details><summary>Show answer</summary><div class="ans"><p>Frame 1: <code>(0 + -0.5)</code> = −0.5, below 0, so <code>keep_under_360</code> adds 360: 359.5. Frame 2: <code>(359.5 + -0.5)</code> = 359. It counts down round the circle: it turns clockwise seen from above.</p></div></details></div>
+</div>
+
+<h2>Part 6: A floor to stand on <span class="mins">9 MIN</span></h2>
+<p>With nothing under them, the shapes seem to float in space and it's hard to judge how far away they are. A floor grid fixes both. It is just lines, at height <code>FLOOR_Y</code>, covering exactly the area the mini-map shows.</p>
+<figure id="fig-5-6-1"><img src="images/w19_floor_grid.png" alt="WORLD from above: green grid lines from x -8 to 8 and z -3 to 13 inside the mini-map's white box, one 1-unit piece highlighted from (2,-1,4) to (2,-1,5). Notes give FLOOR_Y = -1, the grid limits and the count of 544 pieces." loading="lazy"><figcaption><span class="fignum">Fig 5.6.1</span>WORLD coordinates from above. Each line is cut into pieces 1 unit long: 17 lines each way × 16 pieces = 544 pieces a frame.</figcaption></figure>
+<pre><code>FLOOR_Y = -1
+GRID_LEFT = -8
+GRID_RIGHT = 8
+GRID_NEAR = -3
+GRID_FAR = 13
+
+def draw_floor():
+    for x in range(GRID_LEFT, (GRID_RIGHT + 1)):         # lines running away
+        for z in range(GRID_NEAR, GRID_FAR):
+            draw_floor_piece( (x, FLOOR_Y, z), (x, FLOOR_Y, (z + 1)) )
+    for z in range(GRID_NEAR, (GRID_FAR + 1)):           # lines running across
+        for x in range(GRID_LEFT, GRID_RIGHT):
+            draw_floor_piece( (x, FLOOR_Y, z), ((x + 1), FLOOR_Y, z) )
+
+def draw_floor_piece(world_start, world_end):
+    start = to_camera(world_start)
+    end = to_camera(world_end)
+    if (start[2] &lt; NEAR) or (end[2] &lt; NEAR):
+        return                                           # behind you: skip it
+    pygame.draw.line(screen, GRID_COLOUR, project(start), project(end), 1)</code></pre>
+<p>Why pieces, and not one long line from z = −3 to 13? Lesson 4's rule says skip anything with an end behind you:</p>
+<figure id="fig-5-6-2"><img src="images/w20_floor_pieces.png" alt="Two screens from (0,0,0) looking down 25. Whole lines: every line running away is skipped because it starts at z = -3, behind you, leaving only cross lines. Pieces: the full grid is drawn except the pieces behind you." loading="lazy"><figcaption><span class="fignum">Fig 5.6.2</span>Every long line running away starts behind you, so all 17 would vanish. With 1-unit pieces, only the pieces behind you are skipped.<span class="panels">Panels: <b>5.6.2a</b> (left) whole lines · <b>5.6.2b</b> (right) 1-unit pieces</span></figcaption></figure>
+<p>Where do the rows land? The floor is 1 below your eye, so its CAMERA y is −1, and the rows follow the projection rule from Lesson 1:</p>
+<figure id="fig-5-6-3"><img src="images/w21_floor_rows.png" alt="A screenshot of the floor with the horizon at y = 300, and rows marked: z = 2 at y 500, z = 4 at 400, z = 8 at 350, z = 13 at 330.8. Formula screen_y = 300 + (400 / z)." loading="lazy"><figcaption><span class="fignum">Fig 5.6.3</span><code>screen_y = 300 - ((-1 * 400) / z)</code> = <code>300 + (400 / z)</code>. Double the distance, half the gap below the horizon. That squashing is what makes a floor look like it stretches away.</figcaption></figure>
+<p>The floor must be painted before any face: it's the painter's rule again, and the floor is behind everything that stands on it.</p>
+<figure id="fig-5-6-4"><img src="images/w22_floor_first.png" alt="Two screenshots of the full world from (0, 1.5, 0). Floor first: shapes solid on the grid. Floor last: grid lines drawn across the shapes as if they were glass." loading="lazy"><figcaption><span class="fignum">Fig 5.6.4</span>Floor painted first (left) and last (right). The code calls <code>draw_floor()</code> straight after <code>screen.fill(BLACK)</code>.<span class="panels">Panels: <b>5.6.4a</b> (left) floor first, then faces (right) · <b>5.6.4b</b> (right) faces first, then floor (wrong)</span></figcaption></figure>
+<p>The mini-map now loops over every thing, and draws each one's base in its own colour:</p>
+<figure id="fig-5-6-5"><img src="images/w23_minimap.png" alt="The mini-map enlarged: seven coloured squares for the seven things, the big cube twice as wide as the old cube, the pyramid behind you at the bottom, and your pink dot." loading="lazy"><figcaption><span class="fignum">Fig 5.6.5</span>Corners 0, 1, 2, 3 are the bottom corners of both models, so one loop draws every base. The squares use <code>to_world()</code>, so size and spin show up too.</figcaption></figure>
+<h3>The whole recipe, one corner, one frame</h3>
+<figure id="fig-5-6-6"><img src="images/w24_full_chain.png" alt="A table following the big cube's corner 5 through every step: SHAPE (1,1,-1), size 2, spin 30, plus position gives WORLD (6.732, 3, 8.268), minus camera (2,0,1), undo turn -20 gives CAMERA (1.961, 3, 8.448), NEAR check passes, SCREEN (492.8, 158.0)." loading="lazy"><figcaption><span class="fignum">Fig 5.6.6</span>The big cube after 60 frames (turned 30), seen from (2, 0, 1) turned right 20. Every step is one you have now done by hand.</figcaption></figure>
+<h3>Run it: step 3</h3>
+<p>Run <code>step3_small_world.py</code>. Seven things now, including two you can't see at the start: a big pyramid far to the left and a pyramid right behind you (hold LEFT for 2 seconds to turn round). Press C to swap between one colour per thing and face colours, and G to hide the floor.</p>
+<figure id="fig-5-6-7"><img src="images/run_step3_small_world.png" alt="Output of step 3 from (-1.5, 1.5, 0), turned right 15 and looking down 18: the teal and gold pyramids, the green cube, the small coral cube and the big blue cube on the green floor grid, the floating lilac cube above, and the mini-map with seven shapes." loading="lazy"><figcaption><span class="fignum">Fig 5.6.7</span>Half a second of E, half a second of A, then RIGHT for 10 frames and DOWN for 12: a small world on a floor.</figcaption></figure>
+<figure id="fig-5-6-8"><img src="images/w25_filmstrip.png" alt="Eight small screens taken from 8 stops round a circle 7 units from (0,0,6), eye 1.5 up, each looking at the middle of the world." loading="lazy"><figcaption><span class="fignum">Fig 5.6.8</span>A walk round the world, one stop every 45°. Notice how the floor lines turn with you, and how far-away things always end up behind near ones.<span class="panels">Panels: <b>5.6.8a</b> (top row 1st) turn 0 · <b>5.6.8b</b> (top row 2nd) turn 45 · <b>5.6.8c</b> (top row 3rd) turn 90 · <b>5.6.8d</b> (top row 4th) turn 135 · <b>5.6.8e</b> (bottom row 1st) turn 180 · <b>5.6.8f</b> (bottom row 2nd) turn 225 · <b>5.6.8g</b> (bottom row 3rd) turn 270 · <b>5.6.8h</b> (bottom row 4th) turn 315</span></figcaption></figure>
+<p class="tabcap" id="fig-5-6-9"><span class="fignum">Table 5.6.9</span>The keys, what they do, and their speeds</p>
+<div class="tablewrap"><table>
+<tr><th>Key</th><th>What it does</th><th>Speed and why</th></tr>
+<tr><td class="t">W A S D</td><td>Walk forward, left, back, right</td><td><code>MOVE_SPEED</code> 0.05 a frame = 3 units a second (Lesson 4)</td></tr>
+<tr><td class="t">Q / E</td><td>Down / up</td><td>Same speed. Going below the floor is allowed, but looks odd (see Practice)</td></tr>
+<tr><td class="t">ARROWS</td><td>Turn and look up / down</td><td><code>TURN_SPEED</code> 1.5 a frame = 90° a second (Lesson 4)</td></tr>
+<tr><td class="t">SPACE</td><td>Pause all spinning</td><td>Stops every thing at once, to check numbers</td></tr>
+<tr><td class="t">C</td><td>One colour per thing / face colours</td><td>One colour tells THINGS apart; face colours tell SIDES apart</td></tr>
+<tr><td class="t">G</td><td>Floor grid on / off</td><td>So you can see how much the floor helps you judge distance</td></tr>
+<tr><td class="t">L</td><td>Light on / off</td><td>Lesson 3</td></tr>
+<tr><td class="t">R</td><td>Reset</td><td>Back to (0, 0, 0) and every thing back to angle 0</td></tr>
+</table></div>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q10</span><span>You stand at the start, looking level. Where does the floor row at z = 5 land on the screen? Then you press E for 20 frames (up 1). Where is it now?</span></p><details><summary>Show answer</summary><div class="ans"><p>At the start the floor is 1 below your eye: <code>300 + (400 / 5)</code> = 380. After E for 20 frames, <code>cam_y</code> = <code>(20 * 0.05)</code> = 1, so the floor is 2 below: <code>300 - ((-2 * 400) / 5)</code> = 300 + 160 = 460. Higher eye, floor further down the screen.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q11</span><span>The floor is drawn first. The mini-map is drawn last. Why the opposite ends?</span></p><details><summary>Show answer</summary><div class="ans"><p>The floor is part of the world, behind everything standing on it, so the painter's rule paints it first. The mini-map isn't in the world at all: it is a panel stuck on your screen, so it must go on top of everything, last.</p></div></details></div>
+</div>
+
+<h2>Wrap up <span class="mins">2 MIN</span></h2>
+<ul>
+  <li>A <strong>model</strong> is a shape (points and faces). A <strong>thing</strong> is a model placed in the world with its own position, size, angles, speeds and colour. The world is a list of things.</li>
+  <li>A new shape needs its corners, its faces clockwise from outside, and a pointer for every face. Lesson 3's clock test and <code>average_z</code> work for any number of corners.</li>
+  <li>Each corner goes size → spin → place (<code>to_world()</code>), then camera → NEAR → project, exactly as before.</li>
+  <li>All faces of all things go in one list and one sort. The floor is drawn first, in 1-unit pieces.</li>
+</ul>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q12</span><span>Final check. The floating cube (size 0.5, position (−1.5, 2.5, 9)) at frame 0, all angles 0. You stand at the start. Follow its corner 5 from SHAPE to SCREEN.</span></p><details><summary>Show answer</summary><div class="ans"><p>1. Size: <code>((1 * 0.5), (1 * 0.5), (-1 * 0.5))</code> = (0.5, 0.5, −0.5).</p><p>2. Spin: angles 0, no change.</p><p>3. Place: <code>((0.5 + -1.5), (0.5 + 2.5), (-0.5 + 9))</code> = (−1, 3, 8.5). That is WORLD.</p><p>4. Camera: you are at the start, so CAMERA (−1, 3, 8.5). z ≥ 0.1, so draw it.</p><p>5. Screen x = <code>400 + ((-1 * 400) / 8.5)</code> = 400 − 47.1 = 352.9. Screen y = <code>300 - ((3 * 400) / 8.5)</code> = 300 − 141.2 = 158.8.</p></div></details></div>
+</div>
+<h3>Practice before Lesson 6</h3>
+<ul>
+  <li>Add an eighth thing: a size 3 pyramid at (0, 2, 12). Check it stands on the floor.</li>
+  <li>Stop yourself sinking through the floor: after the Q key, if <code>cam_y</code> is below <code>(FLOOR_Y + 0.2)</code>, set it back to <code>(FLOOR_Y + 0.2)</code>.</li>
+  <li>Make a new model, a wedge (a cube cut in half from corner to corner): its points, its faces clockwise from outside, and a pointer for each face.</li>
+</ul>
+<h3>Next time: Lesson 6, Matrices</h3>
+<p>Every corner of every thing now goes through up to five turns a frame: the thing's tip, turn and roll, then your turn and tip undone. Lesson 6 packs each set of turns into one 3 × 3 grid of numbers, a <em>matrix</em>, so a whole chain of turns becomes a single step. It's how real 3D engines do it, and it makes today's code shorter and faster.</p>
+
+<h2>Full code</h2>
+<details class="full"><summary>Full code: <code>step1_two_shapes.py</code></summary><pre><code># ======================================================================
+# LESSON 5 - STEP 1: TWO KINDS OF SHAPE, MANY THINGS
+# ----------------------------------------------------------------------
+# Goal: a cube AND a pyramid AND a second cube, all in one world, all
+# drawn with Lesson 4's camera, with every face in the right order.
+#
+# What is new since Lesson 4 (step3_look_around.py):
+#
+#   1. A second shape, the PYRAMID: 5 corners and 5 faces (four
+#      triangles and a square base).
+#
+#   2. Each face now carries its own POINTER (the arrow straight out
+#      of it) as a third item: (corners, colour, pointer). Lesson 3's
+#      trick of averaging the corners only works for a cube.
+#
+#   3. A MODEL keeps a shape's points and faces together in one
+#      dictionary: {"points": ..., "faces": ...}.
+#
+#   4. A THING is one shape placed in the world: a dictionary with a
+#      model, a position and a colour. All the things live in one list
+#      called things.
+#
+#   5. Lesson 4's face loop moves into a function, add_faces_of(), that
+#      runs once for EACH thing. Every thing adds its faces to ONE
+#      shared list, so the painter's sort sorts ALL of them together.
+#
+# The recipe for one corner of one thing, every frame:
+#
+#   SHAPE -&gt; + position -&gt; - camera -&gt; undo turn -&gt; undo tip -&gt; NEAR -&gt; project
+#   (model points)  (WORLD)                         (CAMERA)            (SCREEN)
+#
+# Controls:  LEFT / RIGHT = turn,   UP / DOWN = look up / down
+#            W / S = walk forward / back,   A / D = step left / right
+#            Q / E = go down / up
+#            R = reset,   L = light on / off,   C = one colour per thing
+# Run:  python step1_two_shapes.py
+# ======================================================================
+
+import math
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Lesson 5, step 1 - two shapes")
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+PINK = (255, 105, 200)        # the colour we use for YOU (the camera)
+MAP_BACK = (25, 30, 36)       # dark grey-blue behind the mini-map
+
+# ---- One colour for each face direction (from Lesson 3) ---------------
+RED = (235, 80, 80)          # faces pointing to the front (-z)
+PURPLE = (160, 100, 230)     # faces pointing to the back  (+z)
+BLUE = (70, 150, 255)        # faces pointing left         (-x)
+GREEN = (70, 210, 120)       # faces pointing right        (+x)
+GOLD = (245, 200, 60)        # faces pointing up           (+y)
+ORANGE = (245, 140, 50)      # faces pointing down         (-y)
+
+# ---- One colour for each THING (C key) --------------------------------
+CUBE_GREEN = (70, 230, 120)
+SKY_BLUE = (90, 170, 255)
+SUN_GOLD = (250, 200, 70)
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400
+
+
+# ======================================================================
+# MODELS: the shape of a thing, in SHAPE coordinates (its own centre)
+# ======================================================================
+
+# ---- The cube's 8 corners (same as every lesson) ----------------------
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+
+# ---- The cube's 6 faces -----------------------------------------------
+# NEW: each face is now THREE things:
+#   (corners clockwise from outside,  colour,  pointer)
+# The pointer is the arrow straight out of the face, 1 unit long.
+# For a cube it is easy: the front face points to -z, so (0, 0, -1).
+cube_faces = [
+    ((4, 5, 1, 0), RED,    ( 0,  0, -1)),   # front
+    ((6, 7, 3, 2), PURPLE, ( 0,  0,  1)),   # back
+    ((7, 4, 0, 3), BLUE,   (-1,  0,  0)),   # left
+    ((5, 6, 2, 1), GREEN,  ( 1,  0,  0)),   # right
+    ((7, 6, 5, 4), GOLD,   ( 0,  1,  0)),   # top
+    ((2, 3, 0, 1), ORANGE, ( 0, -1,  0)),   # bottom
+]
+
+# ---- NEW: the pyramid's 5 corners ------------------------------------
+# Corners 0 to 3 are EXACTLY the cube's 4 bottom corners, with the same
+# numbers. Corner 4 is the tip, straight above the centre, at the
+# height of the cube's top (y = 1). So a pyramid is the same height and
+# width as a cube: 2 units each way.
+pyramid_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    ( 0,  1,  0),   # 4  the tip
+]
+
+# ---- NEW: the pyramid's 5 faces --------------------------------------
+# Four TRIANGLES (3 corners each) and one square base (4 corners).
+# Still clockwise as seen from outside. Each triangle starts at the tip.
+# The sloping pointers were worked out in the lesson (Part 2):
+#   the slope rises 2 for every 1 across, so the arrow out of it is
+#   (2 out, 1 up), shrunk to 1 unit long: divide by 2.236 (the square
+#   root of ((2 * 2) + (1 * 1)) = 5)  -&gt;  (0.894 out, 0.447 up).
+pyramid_faces = [
+    ((4, 1, 0),    RED,    ( 0,     0.447, -0.894)),   # front slope
+    ((4, 3, 2),    PURPLE, ( 0,     0.447,  0.894)),   # back slope
+    ((4, 0, 3),    BLUE,   (-0.894, 0.447,  0)),       # left slope
+    ((4, 2, 1),    GREEN,  ( 0.894, 0.447,  0)),       # right slope
+    ((2, 3, 0, 1), ORANGE, ( 0,    -1,      0)),       # base (bottom)
+]
+
+# ---- NEW: a MODEL = a shape's points and faces, kept together --------
+cube_model = {"points": cube_points, "faces": cube_faces}
+pyramid_model = {"points": pyramid_points, "faces": pyramid_faces}
+
+
+# ======================================================================
+# THE WORLD
+# ======================================================================
+
+# ---- NEW: THINGS: every shape in the world, in one list ----------------
+# Each thing is a dictionary (from the Python lists course):
+#   "model"    - which shape (cube_model or pyramid_model)
+#   "position" - where its centre is, in WORLD coordinates
+#   "colour"   - its one colour when you press C
+# (Step 2 adds a size and a spin to each thing.)
+#
+# The list order does NOT matter: all faces are sorted together later.
+things = [
+    # The old cube, in its old place: corner 5 is at WORLD (1, 1, 4)
+    # like in every lesson so far.
+    {"model": cube_model, "position": (0, 0, 5), "colour": CUBE_GREEN},
+
+    # A pyramid behind it and to the left. Its tip is at WORLD
+    # (-2.5, 1, 8), which lands on the screen at exactly (275, 250).
+    {"model": pyramid_model, "position": (-2.5, 0, 8), "colour": SUN_GOLD},
+
+    # Lesson 4's practice cube: a second cube at (4, 0, 9).
+    {"model": cube_model, "position": (4, 0, 9), "colour": SKY_BLUE},
+]
+
+# ---- Where YOU are (from Lesson 4, unchanged) ------------------------
+cam_x = 0
+cam_y = 0
+cam_z = 0
+cam_turn = 0        # degrees, positive = turned LEFT
+cam_tip = 0         # degrees, positive = looking DOWN
+TIP_LIMIT = 60
+MOVE_SPEED = 0.05   # (0.05 * 60) = 3 units a second
+TURN_SPEED = 1.5    # (1.5 * 60) = 90 degrees a second
+NEAR = 0.1          # closer than this (CAMERA z) is not drawn
+
+# ---- The light (from Lesson 3, unchanged) -----------------------------
+LIGHT = (0.48, 0.6, -0.64)
+AMBIENT = 0.2
+
+use_light = True
+one_colour = False     # face colours, so you can watch each face turn
+
+# ---- The mini-map (from Lesson 4, unchanged) --------------------------
+MAP_LEFT = 630
+MAP_TOP = 430
+MAP_SIZE = 160
+MAP_CX = (MAP_LEFT + (MAP_SIZE / 2))    # (630 + 80) = 710
+MAP_CY = (MAP_TOP + 130)                # (430 + 130) = 560
+MAP_SCALE = 10                          # 10 px for every 1 world unit
+
+
+# ======================================================================
+# FUNCTIONS
+# ======================================================================
+
+# ---- The three turns (from Lesson 2B, unchanged) -----------------------
+def rotate_x(point_3d, angle_degrees):
+    """TIP one point around the x axis (+y swings toward +z)."""
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = x
+    new_y = (y * cos_a) - (z * sin_a)
+    new_z = (y * sin_a) + (z * cos_a)
+    return (new_x, new_y, new_z)
+
+
+def rotate_y(point_3d, angle_degrees):
+    """TURN one point around the y axis (+x swings toward +z)."""
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = (x * cos_a) - (z * sin_a)
+    new_y = y
+    new_z = (x * sin_a) + (z * cos_a)
+    return (new_x, new_y, new_z)
+
+
+# (rotate_z and rotate_all are not needed in step 1: the things stand
+#  still. Step 2 brings them back, so each thing can spin.)
+
+
+def to_world(shape_point, thing):
+    """NEW: one SHAPE point of a thing -&gt; a WORLD point.
+
+    Just add the thing's position, the same "+ cube_position" as in
+    Lesson 4. Now each thing brings its OWN position.
+
+    Worked example (lesson Part 3): the pyramid's tip is SHAPE (0, 1, 0)
+    and the pyramid's position is (-2.5, 0, 8):
+        ((0 + -2.5), (1 + 0), (0 + 8)) = (-2.5, 1, 8)
+    """
+    x, y, z = shape_point
+    pos_x, pos_y, pos_z = thing["position"]
+    return ( (x + pos_x), (y + pos_y), (z + pos_z) )
+
+
+def to_camera(world_point):
+    """One WORLD point -&gt; one CAMERA point (from Lesson 4, unchanged).
+    Subtract where you stand, undo your turn, undo your tip."""
+    x, y, z = world_point
+    moved = ( (x - cam_x), (y - cam_y), (z - cam_z) )
+    turned = rotate_y(moved, (-cam_turn))
+    tipped = rotate_x(turned, (-cam_tip))
+    return tipped
+
+
+def project(point_3d):
+    """One CAMERA point -&gt; one SCREEN point (from Lesson 1).
+    Only ever call this with z &gt;= NEAR, so we never divide by 0."""
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+def average_z(corners, camera_points):
+    """How far away is this face? (from Lesson 3, uses CAMERA points).
+
+    It divides by len(corners), so it works for a triangle (3 corners)
+    just as well as for a square (4). Nothing to change!
+    """
+    total = 0
+    for corner_number in corners:
+        x, y, z = camera_points[corner_number]
+        total = (total + z)
+    return (total / len(corners))
+
+
+def is_facing_you(face_points):
+    """The clock test (from Lesson 3, unchanged). It only looks at the
+    first 3 corners, so it works for triangles too."""
+    a_x, a_y = face_points[0]
+    b_x, b_y = face_points[1]
+    c_x, c_y = face_points[2]
+    arrow_a_x = (b_x - a_x)
+    arrow_a_y = (b_y - a_y)
+    arrow_b_x = (c_x - a_x)
+    arrow_b_y = (c_y - a_y)
+    cross = ( (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x) )
+    return (cross &gt; 0)
+
+
+def dot(arrow_1, arrow_2):
+    """The dot product (from Lesson 3)."""
+    x1, y1, z1 = arrow_1
+    x2, y2, z2 = arrow_2
+    return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
+
+
+def shade_colour(colour, pointer):
+    """Brighter when the face points at the light (from Lesson 3)."""
+    brightness = dot(pointer, LIGHT)
+    if brightness &lt; 0:
+        brightness = 0
+    shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )
+    red, green, blue = colour
+    return ( round(red * shade), round(green * shade), round(blue * shade) )
+
+
+def add_faces_of(thing, faces_to_draw):
+    """NEW: work out every face of ONE thing and add the ones we
+    should paint to the shared list faces_to_draw.
+
+    This is Lesson 4's face loop, moved into a function so we can run
+    it once for EACH thing. Every thing adds to the SAME list, so the
+    painter's sort later sees all faces of all things together.
+    """
+    model = thing["model"]
+
+    # ---- place -&gt; camera, for every corner of this thing ------------
+    camera_points = []
+    screen_points = []
+    for p in model["points"]:
+        world = to_world(p, thing)                     # WORLD
+        camera = to_camera(world)                      # CAMERA
+        camera_points.append(camera)
+        if camera[2] &gt;= NEAR:
+            screen_points.append(project(camera))      # SCREEN
+        else:
+            screen_points.append(None)
+
+    for corners, face_colour, pointer in model["faces"]:
+        # 0. skip the face if ANY corner is too close or behind you.
+        too_close = False
+        for corner_number in corners:
+            if camera_points[corner_number][2] &lt; NEAR:
+                too_close = True
+        if too_close:
+            continue
+
+        face_points = []
+        for corner_number in corners:
+            face_points.append(screen_points[corner_number])
+
+        # 1. The clock test (Lesson 3).
+        if not is_facing_you(face_points):
+            continue
+
+        # 2. How far away is it? (CAMERA z, Lesson 4)
+        distance = average_z(corners, camera_points)
+
+        # 3. What colour?
+        colour = face_colour
+        if one_colour:
+            colour = thing["colour"]
+        if use_light:
+            # NEW: the pointer now comes from the face list, so it
+            # works for the pyramid's slopes too (Lesson 3's averaging
+            # trick only worked for the cube). The things stand still
+            # in step 1, so the pointer needs no turning yet.
+            colour = shade_colour(colour, pointer)
+
+        faces_to_draw.append( (distance, face_points, colour) )
+
+
+def to_map(x, z):
+    """A WORLD (x, z) -&gt; a pixel on the mini-map (from Lesson 4)."""
+    map_x = MAP_CX + (x * MAP_SCALE)
+    map_y = MAP_CY - (z * MAP_SCALE)
+    return (map_x, map_y)
+
+
+def draw_map():
+    """Draw the mini-map: every thing's base and you, from above.
+
+    NEW: a loop over ALL things. Corners 0, 1, 2, 3 are the bottom
+    corners of BOTH models (that is why the pyramid's base uses the
+    cube's numbers), so the same 4 numbers work for every thing.
+    """
+    box = pygame.Rect(MAP_LEFT, MAP_TOP, MAP_SIZE, MAP_SIZE)
+    pygame.draw.rect(screen, MAP_BACK, box)
+    screen.set_clip(box)
+    for thing in things:
+        outline = []
+        for corner_number in (0, 1, 2, 3):
+            corner = thing["model"]["points"][corner_number]
+            x, y, z = to_world(corner, thing)
+            outline.append(to_map(x, z))
+        pygame.draw.polygon(screen, thing["colour"], outline, 2)
+    forward_x, forward_y, forward_z = rotate_y((0, 0, 1), cam_turn)
+    you = to_map(cam_x, cam_z)
+    nose = to_map( (cam_x + (forward_x * 1.5)), (cam_z + (forward_z * 1.5)) )
+    pygame.draw.line(screen, PINK, you, nose, 2)
+    pygame.draw.circle(screen, PINK, you, 4)
+    screen.set_clip(None)
+    pygame.draw.rect(screen, WHITE, box, 1)
+
+
+# ======================================================================
+# THE MAIN LOOP
+# ======================================================================
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_l:
+                use_light = not use_light
+            if event.key == pygame.K_c:
+                one_colour = not one_colour
+            if event.key == pygame.K_r:          # back to the start
+                cam_x = 0
+                cam_y = 0
+                cam_z = 0
+                cam_turn = 0
+                cam_tip = 0
+
+    # ---- Keys you HOLD (from Lesson 4, unchanged) ---------------------
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        cam_turn = (cam_turn + TURN_SPEED)
+    if keys[pygame.K_RIGHT]:
+        cam_turn = (cam_turn - TURN_SPEED)
+    if keys[pygame.K_UP]:
+        cam_tip = (cam_tip - TURN_SPEED)
+    if keys[pygame.K_DOWN]:
+        cam_tip = (cam_tip + TURN_SPEED)
+    if cam_tip &gt; TIP_LIMIT:
+        cam_tip = TIP_LIMIT
+    if cam_tip &lt; (-TIP_LIMIT):
+        cam_tip = (-TIP_LIMIT)
+
+    forward_x, forward_y, forward_z = rotate_y((0, 0, 1), cam_turn)
+    right_x, right_y, right_z = rotate_y((1, 0, 0), cam_turn)
+    if keys[pygame.K_w]:
+        cam_x = (cam_x + (forward_x * MOVE_SPEED))
+        cam_z = (cam_z + (forward_z * MOVE_SPEED))
+    if keys[pygame.K_s]:
+        cam_x = (cam_x - (forward_x * MOVE_SPEED))
+        cam_z = (cam_z - (forward_z * MOVE_SPEED))
+    if keys[pygame.K_d]:
+        cam_x = (cam_x + (right_x * MOVE_SPEED))
+        cam_z = (cam_z + (right_z * MOVE_SPEED))
+    if keys[pygame.K_a]:
+        cam_x = (cam_x - (right_x * MOVE_SPEED))
+        cam_z = (cam_z - (right_z * MOVE_SPEED))
+    if keys[pygame.K_e]:
+        cam_y = (cam_y + MOVE_SPEED)
+    if keys[pygame.K_q]:
+        cam_y = (cam_y - MOVE_SPEED)
+
+    screen.fill(BLACK)
+
+    # ---- NEW: ONE list for the faces of EVERY thing --------------------
+    faces_to_draw = []
+    for thing in things:
+        add_faces_of(thing, faces_to_draw)
+
+    # ---- The painter's method: furthest first, ALL faces together ----
+    faces_to_draw.sort(reverse=True)
+    for distance, face_points, colour in faces_to_draw:
+        pygame.draw.polygon(screen, colour, face_points)
+        pygame.draw.polygon(screen, BLACK, face_points, 2)
+
+    draw_map()
+
+    text = ("you are at (" + str(round(cam_x, 2)) + ", " +
+            str(round(cam_y, 2)) + ", " + str(round(cam_z, 2)) + ")")
+    text = (text + "   turn " + str(round(cam_turn, 1)) +
+            "   tip " + str(round(cam_tip, 1)))
+    screen.blit(font.render(text, True, PINK), (20, 20))
+    screen.blit(font.render("ARROWS = turn and look,  W A S D = walk,  Q / E = down / up", True, YELLOW), (20, 50))
+    screen.blit(font.render("R = reset,  L = light,  C = colours", True, YELLOW), (20, 80))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Move the pyramid to (0, 0, 9), straight behind the cube. Can you
+#     still see its tip over the top of the cube? Walk up (E) to check.
+#   * Add a fourth thing: another pyramid at (3, 0, 6).
+#   * In the main loop, give EACH thing its own faces_to_draw list and
+#     sort and paint each list separately. Walk to (-3, 0, 2). What
+#     goes wrong? (The lesson's Part 4 shows the answer.)
+#   * Change the pyramid's front pointer to (0, 0, -1) (as if it were a
+#     cube face). Is the front slope brighter or darker than before?
+# ----------------------------------------------------------------------</code></pre></details>
+<details class="full"><summary>Full code: <code>step2_size_and_spin.py</code></summary><pre><code># ======================================================================
+# LESSON 5 - STEP 2: EVERY THING GETS ITS OWN SIZE AND SPIN
+# ----------------------------------------------------------------------
+# Goal: five shapes, each with its OWN size and its OWN spin speed:
+# a big cube, a small cube, a floating cube that tumbles, and more.
+#
+# What is new since step 1:
+#
+#   1. Three more keys in every thing's dictionary:
+#        "size"   - 1 = normal, 2 = twice as big, 0.5 = half
+#        "angles" - its spin right now, [tip, turn, roll] in degrees
+#        "speeds" - degrees it spins each frame, (tip, turn, roll)
+#
+#   2. to_world() grows from ONE step to THREE:
+#        size (multiply)  -&gt;  spin (rotate_all)  -&gt;  place (add position)
+#      Size and spin happen round the thing's OWN centre, so they must
+#      come BEFORE we add the position. (The lesson shows what goes
+#      wrong if you place first.)
+#
+#   3. rotate_all() now takes the angles as a parameter, because each
+#      thing has its own.
+#
+#   4. The light: each face's pointer is spun by the same angles, but
+#      NOT sized, so it stays exactly 1 long.
+#
+#   5. keep_under_360() also handles NEGATIVE angles (for things that
+#      spin the other way).
+#
+# The recipe for one corner of one thing, every frame:
+#
+#   SHAPE -&gt; * size -&gt; spin -&gt; + position -&gt; - camera -&gt; undo turn -&gt; undo tip -&gt; NEAR -&gt; project
+#   (model points)            (WORLD)                                 (CAMERA)           (SCREEN)
+#
+# Controls:  LEFT / RIGHT = turn,   UP / DOWN = look up / down
+#            W / S = walk forward / back,   A / D = step left / right
+#            Q / E = go down / up
+#            SPACE = pause the spinning,   R = reset
+#            L = light on / off,   C = one colour per thing / face colours
+# Run:  python step2_size_and_spin.py
+# ======================================================================
+
+import math
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Lesson 5, step 2 - size and spin")
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+PINK = (255, 105, 200)        # the colour we use for YOU (the camera)
+MAP_BACK = (25, 30, 36)       # dark grey-blue behind the mini-map
+
+# ---- One colour for each face direction (from Lesson 3) ---------------
+RED = (235, 80, 80)          # faces pointing to the front (-z)
+PURPLE = (160, 100, 230)     # faces pointing to the back  (+z)
+BLUE = (70, 150, 255)        # faces pointing left         (-x)
+GREEN = (70, 210, 120)       # faces pointing right        (+x)
+GOLD = (245, 200, 60)        # faces pointing up           (+y)
+ORANGE = (245, 140, 50)      # faces pointing down         (-y)
+
+# ---- One colour for each THING (C key) --------------------------------
+CUBE_GREEN = (70, 230, 120)
+SKY_BLUE = (90, 170, 255)
+SUN_GOLD = (250, 200, 70)
+CORAL = (250, 120, 100)
+LILAC = (190, 140, 255)
+TEAL = (60, 210, 200)
+ROSE = (255, 110, 170)
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400
+
+
+# ======================================================================
+# MODELS: the shape of a thing, in SHAPE coordinates (its own centre)
+# ======================================================================
+
+# ---- The cube's 8 corners (same as every lesson) ----------------------
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+
+# ---- The cube's 6 faces -----------------------------------------------
+# (step 1) each face is now THREE things:
+#   (corners clockwise from outside,  colour,  pointer)
+# The pointer is the arrow straight out of the face, 1 unit long.
+# For a cube it is easy: the front face points to -z, so (0, 0, -1).
+cube_faces = [
+    ((4, 5, 1, 0), RED,    ( 0,  0, -1)),   # front
+    ((6, 7, 3, 2), PURPLE, ( 0,  0,  1)),   # back
+    ((7, 4, 0, 3), BLUE,   (-1,  0,  0)),   # left
+    ((5, 6, 2, 1), GREEN,  ( 1,  0,  0)),   # right
+    ((7, 6, 5, 4), GOLD,   ( 0,  1,  0)),   # top
+    ((2, 3, 0, 1), ORANGE, ( 0, -1,  0)),   # bottom
+]
+
+# ---- (step 1) the pyramid's 5 corners ------------------------------------
+# Corners 0 to 3 are EXACTLY the cube's 4 bottom corners, with the same
+# numbers. Corner 4 is the tip, straight above the centre, at the
+# height of the cube's top (y = 1). So a pyramid is the same height and
+# width as a cube: 2 units each way.
+pyramid_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    ( 0,  1,  0),   # 4  the tip
+]
+
+# ---- (step 1) the pyramid's 5 faces --------------------------------------
+# Four TRIANGLES (3 corners each) and one square base (4 corners).
+# Still clockwise as seen from outside. Each triangle starts at the tip.
+# The sloping pointers were worked out in the lesson (Part 2):
+#   the slope rises 2 for every 1 across, so the arrow out of it is
+#   (2 out, 1 up), shrunk to 1 unit long: divide by 2.236 (the square
+#   root of ((2 * 2) + (1 * 1)) = 5)  -&gt;  (0.894 out, 0.447 up).
+pyramid_faces = [
+    ((4, 1, 0),    RED,    ( 0,     0.447, -0.894)),   # front slope
+    ((4, 3, 2),    PURPLE, ( 0,     0.447,  0.894)),   # back slope
+    ((4, 0, 3),    BLUE,   (-0.894, 0.447,  0)),       # left slope
+    ((4, 2, 1),    GREEN,  ( 0.894, 0.447,  0)),       # right slope
+    ((2, 3, 0, 1), ORANGE, ( 0,    -1,      0)),       # base (bottom)
+]
+
+# ---- (step 1) a MODEL = a shape's points and faces, kept together --------
+cube_model = {"points": cube_points, "faces": cube_faces}
+pyramid_model = {"points": pyramid_points, "faces": pyramid_faces}
+
+
+# ======================================================================
+# THE WORLD
+# ======================================================================
+
+# ---- (step 1) THINGS: every shape in the world, in one list --------------
+# Each thing is a dictionary (from the Python lists course):
+#   "model"    - which shape (cube_model or pyramid_model)
+#   "position" - where its centre is, in WORLD coordinates
+#   "size"     - NEW: 1 = normal, 2 = twice as big, 0.5 = half
+#   "angles"   - NEW: its spin right now: [tip, turn, roll] in degrees
+#   "speeds"   - NEW: how many degrees it spins each frame (tip, turn, roll)
+#   "colour"   - its one colour when you press C
+#
+# There is no floor yet (step 3), but we already place every thing as
+# if it stands on one at y = -1, the bottom of the old cube. A thing of
+# size s has its bottom s below its centre, so its centre y = (-1 + s):
+#   size 1   -&gt; y = (-1 + 1)   = 0
+#   size 2   -&gt; y = (-1 + 2)   = 1
+#   size 0.5 -&gt; y = (-1 + 0.5) = -0.5
+#
+# The list order does NOT matter: all faces are sorted together later.
+things = [
+    # The old cube, in its old place, standing still: corner 5 is at
+    # WORLD (1, 1, 4) like in every lesson so far.
+    {"model": cube_model, "position": (0, 0, 5), "size": 1,
+     "angles": [0, 0, 0], "speeds": (0, 0, 0), "colour": CUBE_GREEN},
+
+    # (step 1) a pyramid behind it and to the left. Its tip is at WORLD
+    # (-2.5, 1, 8), which lands on the screen at exactly (275, 250).
+    {"model": pyramid_model, "position": (-2.5, 0, 8), "size": 1,
+     "angles": [0, 0, 0], "speeds": (0, 1, 0), "colour": SUN_GOLD},
+
+    # NEW: a BIG cube, size 2, standing at y = -1 (centre y = 1). Turns
+    # slowly: 0.5 a frame = 30 a second = one turn in 12 seconds.
+    {"model": cube_model, "position": (4, 1, 9), "size": 2,
+     "angles": [0, 0, 0], "speeds": (0, 0.5, 0), "colour": SKY_BLUE},
+
+    # NEW: a SMALL cube, size 0.5, standing at y = -1 (centre -0.5), just to
+    # the right of the old cube. Turns fast: 3 a frame = one turn in 2 s.
+    {"model": cube_model, "position": (2, -0.5, 4), "size": 0.5,
+     "angles": [0, 0, 0], "speeds": (0, 3, 0), "colour": CORAL},
+
+    # NEW: a cube floating up high, tumbling with Lesson 2B's speeds.
+    # It stands on nothing, so it can tip and roll freely.
+    {"model": cube_model, "position": (-1.5, 2.5, 9), "size": 0.5,
+     "angles": [0, 0, 0], "speeds": (0.5, 1, 0.25), "colour": LILAC},
+]
+
+# ---- Where YOU are (from Lesson 4, unchanged) ------------------------
+cam_x = 0
+cam_y = 0
+cam_z = 0
+cam_turn = 0        # degrees, positive = turned LEFT
+cam_tip = 0         # degrees, positive = looking DOWN
+TIP_LIMIT = 60
+MOVE_SPEED = 0.05   # (0.05 * 60) = 3 units a second
+TURN_SPEED = 1.5    # (1.5 * 60) = 90 degrees a second
+NEAR = 0.1          # closer than this (CAMERA z) is not drawn
+
+# ---- The light (from Lesson 3, unchanged) -----------------------------
+LIGHT = (0.48, 0.6, -0.64)
+AMBIENT = 0.2
+
+spinning = True        # NEW: SPACE pauses every thing's spin
+use_light = True
+one_colour = False     # face colours, so you can watch each face turn
+
+# ---- The mini-map (from Lesson 4, unchanged) --------------------------
+MAP_LEFT = 630
+MAP_TOP = 430
+MAP_SIZE = 160
+MAP_CX = (MAP_LEFT + (MAP_SIZE / 2))    # (630 + 80) = 710
+MAP_CY = (MAP_TOP + 130)                # (430 + 130) = 560
+MAP_SCALE = 10                          # 10 px for every 1 world unit
+
+
+# ======================================================================
+# FUNCTIONS
+# ======================================================================
+
+# ---- The three turns (from Lesson 2B, unchanged) -----------------------
+def rotate_x(point_3d, angle_degrees):
+    """TIP one point around the x axis (+y swings toward +z)."""
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = x
+    new_y = (y * cos_a) - (z * sin_a)
+    new_z = (y * sin_a) + (z * cos_a)
+    return (new_x, new_y, new_z)
+
+
+def rotate_y(point_3d, angle_degrees):
+    """TURN one point around the y axis (+x swings toward +z)."""
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = (x * cos_a) - (z * sin_a)
+    new_y = y
+    new_z = (x * sin_a) + (z * cos_a)
+    return (new_x, new_y, new_z)
+
+
+def rotate_z(point_3d, angle_degrees):
+    """ROLL one point around the z axis (+x swings toward +y)."""
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = (x * cos_a) - (y * sin_a)
+    new_y = (x * sin_a) + (y * cos_a)
+    new_z = z
+    return (new_x, new_y, new_z)
+
+
+def rotate_all(point_3d, angles):
+    """Spin one point: tip, then turn, then roll (Lesson 2B's order).
+
+    CHANGED: the angles come IN as a list [tip, turn, roll],
+    because every thing now has its OWN angles. Before, there was only
+    one cube, so the angles could live in global variables.
+    """
+    p = rotate_x(point_3d, angles[0])
+    p = rotate_y(p, angles[1])
+    p = rotate_z(p, angles[2])
+    return p
+
+
+def to_world(shape_point, thing):
+    """NEW: one SHAPE point of a thing -&gt; a WORLD point.
+
+    1. size:  multiply by the thing's size (grow or shrink round its
+              own centre).
+    2. spin:  turn it by the thing's own angles.
+    3. place: add the thing's position.
+
+    Worked example (lesson Part 5): the small cube, size 0.5, still,
+    at (2, -0.5, 4). Its corner 5 is SHAPE (1, 1, -1):
+        1. ((1 * 0.5), (1 * 0.5), (-1 * 0.5)) = (0.5, 0.5, -0.5)
+        2. angles 0                           = no change
+        3. ((0.5 + 2), (0.5 + -0.5), (-0.5 + 4)) = (2.5, 0, 3.5)
+    """
+    x, y, z = shape_point
+    size = thing["size"]
+    sized = ( (x * size), (y * size), (z * size) )         # 1. size
+    spun = rotate_all(sized, thing["angles"])               # 2. spin
+    pos_x, pos_y, pos_z = thing["position"]
+    sx, sy, sz = spun
+    return ( (sx + pos_x), (sy + pos_y), (sz + pos_z) )     # 3. place
+
+
+def to_camera(world_point):
+    """One WORLD point -&gt; one CAMERA point (from Lesson 4, unchanged).
+    Subtract where you stand, undo your turn, undo your tip."""
+    x, y, z = world_point
+    moved = ( (x - cam_x), (y - cam_y), (z - cam_z) )
+    turned = rotate_y(moved, (-cam_turn))
+    tipped = rotate_x(turned, (-cam_tip))
+    return tipped
+
+
+def project(point_3d):
+    """One CAMERA point -&gt; one SCREEN point (from Lesson 1).
+    Only ever call this with z &gt;= NEAR, so we never divide by 0."""
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+def average_z(corners, camera_points):
+    """How far away is this face? (from Lesson 3, uses CAMERA points).
+
+    It divides by len(corners), so it works for a triangle (3 corners)
+    just as well as for a square (4). Nothing to change!
+    """
+    total = 0
+    for corner_number in corners:
+        x, y, z = camera_points[corner_number]
+        total = (total + z)
+    return (total / len(corners))
+
+
+def is_facing_you(face_points):
+    """The clock test (from Lesson 3, unchanged). It only looks at the
+    first 3 corners, so it works for triangles too."""
+    a_x, a_y = face_points[0]
+    b_x, b_y = face_points[1]
+    c_x, c_y = face_points[2]
+    arrow_a_x = (b_x - a_x)
+    arrow_a_y = (b_y - a_y)
+    arrow_b_x = (c_x - a_x)
+    arrow_b_y = (c_y - a_y)
+    cross = ( (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x) )
+    return (cross &gt; 0)
+
+
+def dot(arrow_1, arrow_2):
+    """The dot product (from Lesson 3)."""
+    x1, y1, z1 = arrow_1
+    x2, y2, z2 = arrow_2
+    return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
+
+
+def shade_colour(colour, pointer):
+    """Brighter when the face points at the light (from Lesson 3)."""
+    brightness = dot(pointer, LIGHT)
+    if brightness &lt; 0:
+        brightness = 0
+    shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )
+    red, green, blue = colour
+    return ( round(red * shade), round(green * shade), round(blue * shade) )
+
+
+def keep_under_360(angle):
+    """Keep an angle between 0 and 360.
+    CHANGED: a NEGATIVE speed (the big pyramid) counts DOWN,
+    so we also add 360 when it drops below 0."""
+    if angle &gt;= 360:
+        angle = (angle - 360)
+    if angle &lt; 0:
+        angle = (angle + 360)
+    return angle
+
+
+def add_faces_of(thing, faces_to_draw):
+    """(step 1) work out every face of ONE thing and add the ones we
+    should paint to the shared list faces_to_draw.
+
+    This is Lesson 4's face loop, moved into a function so we can run
+    it once for EACH thing. Every thing adds to the SAME list, so the
+    painter's sort later sees all faces of all things together.
+    """
+    model = thing["model"]
+
+    # ---- spin -&gt; place -&gt; camera, for every corner of this thing ----
+    camera_points = []
+    screen_points = []
+    for p in model["points"]:
+        world = to_world(p, thing)                     # WORLD
+        camera = to_camera(world)                      # CAMERA
+        camera_points.append(camera)
+        if camera[2] &gt;= NEAR:
+            screen_points.append(project(camera))      # SCREEN
+        else:
+            screen_points.append(None)
+
+    for corners, face_colour, pointer in model["faces"]:
+        # 0. skip the face if ANY corner is too close or behind you.
+        too_close = False
+        for corner_number in corners:
+            if camera_points[corner_number][2] &lt; NEAR:
+                too_close = True
+        if too_close:
+            continue
+
+        face_points = []
+        for corner_number in corners:
+            face_points.append(screen_points[corner_number])
+
+        # 1. The clock test (Lesson 3).
+        if not is_facing_you(face_points):
+            continue
+
+        # 2. How far away is it? (CAMERA z, Lesson 4)
+        distance = average_z(corners, camera_points)
+
+        # 3. What colour?
+        colour = face_colour
+        if one_colour:
+            colour = thing["colour"]
+        if use_light:
+            # NEW: the pointer must spin WITH the thing, so we turn
+            # it by the same angles. We do NOT multiply it by the size:
+            # a bigger face still points the same way, and the arrow
+            # must stay exactly 1 long for the light maths.
+            spun_pointer = rotate_all(pointer, thing["angles"])
+            colour = shade_colour(colour, spun_pointer)
+
+        faces_to_draw.append( (distance, face_points, colour) )
+
+
+def to_map(x, z):
+    """A WORLD (x, z) -&gt; a pixel on the mini-map (from Lesson 4)."""
+    map_x = MAP_CX + (x * MAP_SCALE)
+    map_y = MAP_CY - (z * MAP_SCALE)
+    return (map_x, map_y)
+
+
+def draw_map():
+    """Draw the mini-map: every thing's base and you, from above.
+
+    (step 1) a loop over ALL things. Corners 0, 1, 2, 3 are the bottom
+    corners of BOTH models (that is why the pyramid's base uses the
+    cube's numbers), so the same 4 numbers work for every thing.
+    """
+    box = pygame.Rect(MAP_LEFT, MAP_TOP, MAP_SIZE, MAP_SIZE)
+    pygame.draw.rect(screen, MAP_BACK, box)
+    screen.set_clip(box)
+    for thing in things:
+        outline = []
+        for corner_number in (0, 1, 2, 3):
+            corner = thing["model"]["points"][corner_number]
+            x, y, z = to_world(corner, thing)
+            outline.append(to_map(x, z))
+        pygame.draw.polygon(screen, thing["colour"], outline, 2)
+    forward_x, forward_y, forward_z = rotate_y((0, 0, 1), cam_turn)
+    you = to_map(cam_x, cam_z)
+    nose = to_map( (cam_x + (forward_x * 1.5)), (cam_z + (forward_z * 1.5)) )
+    pygame.draw.line(screen, PINK, you, nose, 2)
+    pygame.draw.circle(screen, PINK, you, 4)
+    screen.set_clip(None)
+    pygame.draw.rect(screen, WHITE, box, 1)
+
+
+# ======================================================================
+# THE MAIN LOOP
+# ======================================================================
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                spinning = not spinning
+            if event.key == pygame.K_l:
+                use_light = not use_light
+            if event.key == pygame.K_c:
+                one_colour = not one_colour
+            if event.key == pygame.K_r:          # back to the start
+                cam_x = 0
+                cam_y = 0
+                cam_z = 0
+                cam_turn = 0
+                cam_tip = 0
+                for thing in things:
+                    thing["angles"] = [0, 0, 0]
+
+    # ---- Keys you HOLD (from Lesson 4, unchanged) ---------------------
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        cam_turn = (cam_turn + TURN_SPEED)
+    if keys[pygame.K_RIGHT]:
+        cam_turn = (cam_turn - TURN_SPEED)
+    if keys[pygame.K_UP]:
+        cam_tip = (cam_tip - TURN_SPEED)
+    if keys[pygame.K_DOWN]:
+        cam_tip = (cam_tip + TURN_SPEED)
+    if cam_tip &gt; TIP_LIMIT:
+        cam_tip = TIP_LIMIT
+    if cam_tip &lt; (-TIP_LIMIT):
+        cam_tip = (-TIP_LIMIT)
+
+    forward_x, forward_y, forward_z = rotate_y((0, 0, 1), cam_turn)
+    right_x, right_y, right_z = rotate_y((1, 0, 0), cam_turn)
+    if keys[pygame.K_w]:
+        cam_x = (cam_x + (forward_x * MOVE_SPEED))
+        cam_z = (cam_z + (forward_z * MOVE_SPEED))
+    if keys[pygame.K_s]:
+        cam_x = (cam_x - (forward_x * MOVE_SPEED))
+        cam_z = (cam_z - (forward_z * MOVE_SPEED))
+    if keys[pygame.K_d]:
+        cam_x = (cam_x + (right_x * MOVE_SPEED))
+        cam_z = (cam_z + (right_z * MOVE_SPEED))
+    if keys[pygame.K_a]:
+        cam_x = (cam_x - (right_x * MOVE_SPEED))
+        cam_z = (cam_z - (right_z * MOVE_SPEED))
+    if keys[pygame.K_e]:
+        cam_y = (cam_y + MOVE_SPEED)
+    if keys[pygame.K_q]:
+        cam_y = (cam_y - MOVE_SPEED)
+
+    # ---- NEW: every thing spins at its OWN speeds --------------------
+    if spinning:
+        for thing in things:
+            angles = thing["angles"]
+            speeds = thing["speeds"]
+            angles[0] = keep_under_360( (angles[0] + speeds[0]) )   # tip
+            angles[1] = keep_under_360( (angles[1] + speeds[1]) )   # turn
+            angles[2] = keep_under_360( (angles[2] + speeds[2]) )   # roll
+
+    screen.fill(BLACK)
+
+    # ---- (step 1) ONE list for the faces of EVERY thing --------------------
+    faces_to_draw = []
+    for thing in things:
+        add_faces_of(thing, faces_to_draw)
+
+    # ---- The painter's method: furthest first, ALL faces together ----
+    faces_to_draw.sort(reverse=True)
+    for distance, face_points, colour in faces_to_draw:
+        pygame.draw.polygon(screen, colour, face_points)
+        pygame.draw.polygon(screen, BLACK, face_points, 2)
+
+    draw_map()
+
+    text = ("you are at (" + str(round(cam_x, 2)) + ", " +
+            str(round(cam_y, 2)) + ", " + str(round(cam_z, 2)) + ")")
+    text = (text + "   turn " + str(round(cam_turn, 1)) +
+            "   tip " + str(round(cam_tip, 1)))
+    screen.blit(font.render(text, True, PINK), (20, 20))
+    screen.blit(font.render("ARROWS = turn and look,  W A S D = walk,  Q / E = down / up", True, YELLOW), (20, 50))
+    screen.blit(font.render("SPACE = pause,  R = reset,  L = light,  C = colours", True, YELLOW), (20, 80))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Make the big cube size 3. Where must its centre y go so it still
+#     stands at y = -1?  (-1 + 3) = 2.
+#   * Give the old cube "speeds": (0, 1, 0) so it turns like Lesson 2.
+#   * In to_world(), add the position FIRST and then size it. Watch the
+#     big cube jump away to (8, 2, 18). Why?
+#   * Size the pointer too (multiply it by size) and look at the big
+#     cube's top. Is it brighter than it should be? (Lesson 3: the
+#     arrow must be 1 long.)
+# ----------------------------------------------------------------------</code></pre></details>
+<details class="full"><summary>Full code: <code>step3_small_world.py</code> (the finished script)</summary><pre><code># ======================================================================
+# LESSON 5 - STEP 3: A SMALL WORLD (the finished script of Lesson 5)
+# ----------------------------------------------------------------------
+# Goal: a floor to stand on and SEVEN shapes placed around it, each with
+# its own place, size and spin. Walk round them with Lesson 4's camera.
+#
+# What is new since step 2:
+#
+#   1. A FLOOR GRID at FLOOR_Y = -1 (the height of the old cube's
+#      bottom). It is just lines: x = -8 to 8 and z = -3 to 13, exactly
+#      the area the mini-map shows. Each line is cut into pieces 1 unit
+#      long, so a piece behind you can be skipped without losing the
+#      whole line (the same NEAR idea as Lesson 4).
+#
+#   2. The floor is drawn FIRST, before any face. Everything stands ON
+#      the floor, so everything must be painted on TOP of it.
+#
+#   3. Seven things in the list instead of five, including one BEHIND
+#      you at the start (turn round to find it).
+#
+#   4. The mini-map draws every thing's base, in that thing's colour.
+#
+# The recipe for one corner of one thing, every frame:
+#
+#   SHAPE -&gt; * size -&gt; spin -&gt; + position -&gt; - camera -&gt; undo turn -&gt; undo tip -&gt; NEAR -&gt; project
+#   (model points)            (WORLD)                                 (CAMERA)           (SCREEN)
+#
+# Controls:  LEFT / RIGHT = turn,   UP / DOWN = look up / down
+#            W / S = walk forward / back,   A / D = step left / right
+#            Q / E = go down / up
+#            SPACE = pause the spinning,   R = reset
+#            L = light on / off,   C = one colour per thing / face colours
+#            G = floor grid on / off
+# Run:  python step3_small_world.py
+# ======================================================================
+
+import math
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Lesson 5, step 3 - a small world")
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+PINK = (255, 105, 200)        # the colour we use for YOU (the camera)
+MAP_BACK = (25, 30, 36)       # dark grey-blue behind the mini-map
+GRID_COLOUR = (40, 90, 70)    # NEW: dim green for the floor lines.
+                              # Dim on purpose: the floor is background,
+                              # so it must not shout louder than the shapes.
+
+# ---- One colour for each face direction (from Lesson 3) ---------------
+RED = (235, 80, 80)          # faces pointing to the front (-z)
+PURPLE = (160, 100, 230)     # faces pointing to the back  (+z)
+BLUE = (70, 150, 255)        # faces pointing left         (-x)
+GREEN = (70, 210, 120)       # faces pointing right        (+x)
+GOLD = (245, 200, 60)        # faces pointing up           (+y)
+ORANGE = (245, 140, 50)      # faces pointing down         (-y)
+
+# ---- One colour for each THING (C key) --------------------------------
+CUBE_GREEN = (70, 230, 120)
+SKY_BLUE = (90, 170, 255)
+SUN_GOLD = (250, 200, 70)
+CORAL = (250, 120, 100)
+LILAC = (190, 140, 255)
+TEAL = (60, 210, 200)
+ROSE = (255, 110, 170)
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400
+
+
+# ======================================================================
+# MODELS: the shape of a thing, in SHAPE coordinates (its own centre)
+# ======================================================================
+
+# ---- The cube's 8 corners (same as every lesson) ----------------------
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+
+# ---- The cube's 6 faces -----------------------------------------------
+# (step 1) each face is now THREE things:
+#   (corners clockwise from outside,  colour,  pointer)
+# The pointer is the arrow straight out of the face, 1 unit long.
+# For a cube it is easy: the front face points to -z, so (0, 0, -1).
+cube_faces = [
+    ((4, 5, 1, 0), RED,    ( 0,  0, -1)),   # front
+    ((6, 7, 3, 2), PURPLE, ( 0,  0,  1)),   # back
+    ((7, 4, 0, 3), BLUE,   (-1,  0,  0)),   # left
+    ((5, 6, 2, 1), GREEN,  ( 1,  0,  0)),   # right
+    ((7, 6, 5, 4), GOLD,   ( 0,  1,  0)),   # top
+    ((2, 3, 0, 1), ORANGE, ( 0, -1,  0)),   # bottom
+]
+
+# ---- (step 1) the pyramid's 5 corners ------------------------------------
+# Corners 0 to 3 are EXACTLY the cube's 4 bottom corners, with the same
+# numbers. Corner 4 is the tip, straight above the centre, at the
+# height of the cube's top (y = 1). So a pyramid is the same height and
+# width as a cube: 2 units each way.
+pyramid_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    ( 0,  1,  0),   # 4  the tip
+]
+
+# ---- (step 1) the pyramid's 5 faces --------------------------------------
+# Four TRIANGLES (3 corners each) and one square base (4 corners).
+# Still clockwise as seen from outside. Each triangle starts at the tip.
+# The sloping pointers were worked out in the lesson (Part 2):
+#   the slope rises 2 for every 1 across, so the arrow out of it is
+#   (2 out, 1 up), shrunk to 1 unit long: divide by 2.236 (the square
+#   root of ((2 * 2) + (1 * 1)) = 5)  -&gt;  (0.894 out, 0.447 up).
+pyramid_faces = [
+    ((4, 1, 0),    RED,    ( 0,     0.447, -0.894)),   # front slope
+    ((4, 3, 2),    PURPLE, ( 0,     0.447,  0.894)),   # back slope
+    ((4, 0, 3),    BLUE,   (-0.894, 0.447,  0)),       # left slope
+    ((4, 2, 1),    GREEN,  ( 0.894, 0.447,  0)),       # right slope
+    ((2, 3, 0, 1), ORANGE, ( 0,    -1,      0)),       # base (bottom)
+]
+
+# ---- (step 1) a MODEL = a shape's points and faces, kept together --------
+cube_model = {"points": cube_points, "faces": cube_faces}
+pyramid_model = {"points": pyramid_points, "faces": pyramid_faces}
+
+
+# ======================================================================
+# THE WORLD
+# ======================================================================
+
+# ---- NEW: the floor ------------------------------------------------------
+# FLOOR_Y = -1: the bottom of the old cube (centre y 0, half-height 1).
+# Your eye starts at y = 0, so you stand 1 unit above the floor.
+FLOOR_Y = -1
+# The grid covers exactly what the mini-map shows (see MAP_ below):
+#   x from -8 to 8   (16 units across)
+#   z from -3 to 13  (16 units deep, starting a little behind you)
+GRID_LEFT = -8
+GRID_RIGHT = 8
+GRID_NEAR = -3
+GRID_FAR = 13
+
+# ---- (step 1) THINGS: every shape in the world, in one list --------------
+# Each thing is a dictionary (from the Python lists course):
+#   "model"    - which shape (cube_model or pyramid_model)
+#   "position" - where its centre is, in WORLD coordinates
+#   "size"     - (step 2) 1 = normal, 2 = twice as big, 0.5 = half
+#   "angles"   - (step 2) its spin right now: [tip, turn, roll] in degrees
+#   "speeds"   - (step 2) how many degrees it spins each frame (tip, turn, roll)
+#   "colour"   - its one colour when you press C
+#
+# A thing SITS ON THE FLOOR when its centre y = (FLOOR_Y + size):
+#   size 1   -&gt; y = (-1 + 1)   = 0
+#   size 2   -&gt; y = (-1 + 2)   = 1
+#   size 0.5 -&gt; y = (-1 + 0.5) = -0.5
+#
+# The list order does NOT matter: all faces are sorted together later.
+things = [
+    # The old cube, in its old place, standing still: corner 5 is at
+    # WORLD (1, 1, 4) like in every lesson so far.
+    {"model": cube_model, "position": (0, 0, 5), "size": 1,
+     "angles": [0, 0, 0], "speeds": (0, 0, 0), "colour": CUBE_GREEN},
+
+    # (step 1) a pyramid behind it and to the left. Its tip is at WORLD
+    # (-2.5, 1, 8), which lands on the screen at exactly (275, 250).
+    {"model": pyramid_model, "position": (-2.5, 0, 8), "size": 1,
+     "angles": [0, 0, 0], "speeds": (0, 1, 0), "colour": SUN_GOLD},
+
+    # (step 2) a BIG cube, size 2, sitting on the floor (y = 1). Turns
+    # slowly: 0.5 a frame = 30 a second = one turn in 12 seconds.
+    {"model": cube_model, "position": (4, 1, 9), "size": 2,
+     "angles": [0, 0, 0], "speeds": (0, 0.5, 0), "colour": SKY_BLUE},
+
+    # (step 2) a SMALL cube, size 0.5, on the floor (y = -0.5), just to
+    # the right of the old cube. Turns fast: 3 a frame = one turn in 2 s.
+    {"model": cube_model, "position": (2, -0.5, 4), "size": 0.5,
+     "angles": [0, 0, 0], "speeds": (0, 3, 0), "colour": CORAL},
+
+    # (step 2) a cube floating up high, tumbling with Lesson 2B's speeds.
+    # It is off the floor, so it can tip and roll without hitting it.
+    {"model": cube_model, "position": (-1.5, 2.5, 9), "size": 0.5,
+     "angles": [0, 0, 0], "speeds": (0.5, 1, 0.25), "colour": LILAC},
+
+    # NEW: a big pyramid far away on the left, turning the OTHER way
+    # (a negative speed turns clockwise seen from above).
+    {"model": pyramid_model, "position": (-6, 1, 11), "size": 2,
+     "angles": [0, 0, 0], "speeds": (0, -0.5, 0), "colour": TEAL},
+
+    # NEW: a pyramid BEHIND you at the start (z = -2). Turn round to
+    # find it: hold LEFT for 2 seconds (180 degrees).
+    {"model": pyramid_model, "position": (0, 0, -2), "size": 1,
+     "angles": [0, 0, 0], "speeds": (0, 2, 0), "colour": ROSE},
+]
+
+# ---- Where YOU are (from Lesson 4, unchanged) ------------------------
+cam_x = 0
+cam_y = 0
+cam_z = 0
+cam_turn = 0        # degrees, positive = turned LEFT
+cam_tip = 0         # degrees, positive = looking DOWN
+TIP_LIMIT = 60
+MOVE_SPEED = 0.05   # (0.05 * 60) = 3 units a second
+TURN_SPEED = 1.5    # (1.5 * 60) = 90 degrees a second
+NEAR = 0.1          # closer than this (CAMERA z) is not drawn
+
+# ---- The light (from Lesson 3, unchanged) -----------------------------
+LIGHT = (0.48, 0.6, -0.64)
+AMBIENT = 0.2
+
+spinning = True        # (step 2) SPACE pauses every thing's spin
+use_light = True
+one_colour = True      # NEW: default one colour per thing: in a world
+                       # full of shapes, it tells the THINGS apart
+show_grid = True       # NEW: G turns the floor grid off and on
+
+# ---- The mini-map (from Lesson 4, unchanged) --------------------------
+MAP_LEFT = 630
+MAP_TOP = 430
+MAP_SIZE = 160
+MAP_CX = (MAP_LEFT + (MAP_SIZE / 2))    # (630 + 80) = 710
+MAP_CY = (MAP_TOP + 130)                # (430 + 130) = 560
+MAP_SCALE = 10                          # 10 px for every 1 world unit
+
+
+# ======================================================================
+# FUNCTIONS
+# ======================================================================
+
+# ---- The three turns (from Lesson 2B, unchanged) -----------------------
+def rotate_x(point_3d, angle_degrees):
+    """TIP one point around the x axis (+y swings toward +z)."""
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = x
+    new_y = (y * cos_a) - (z * sin_a)
+    new_z = (y * sin_a) + (z * cos_a)
+    return (new_x, new_y, new_z)
+
+
+def rotate_y(point_3d, angle_degrees):
+    """TURN one point around the y axis (+x swings toward +z)."""
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = (x * cos_a) - (z * sin_a)
+    new_y = y
+    new_z = (x * sin_a) + (z * cos_a)
+    return (new_x, new_y, new_z)
+
+
+def rotate_z(point_3d, angle_degrees):
+    """ROLL one point around the z axis (+x swings toward +y)."""
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = (x * cos_a) - (y * sin_a)
+    new_y = (x * sin_a) + (y * cos_a)
+    new_z = z
+    return (new_x, new_y, new_z)
+
+
+def rotate_all(point_3d, angles):
+    """Spin one point: tip, then turn, then roll (Lesson 2B's order).
+
+    (step 2) CHANGED: the angles come IN as a list [tip, turn, roll],
+    because every thing now has its OWN angles. Before, there was only
+    one cube, so the angles could live in global variables.
+    """
+    p = rotate_x(point_3d, angles[0])
+    p = rotate_y(p, angles[1])
+    p = rotate_z(p, angles[2])
+    return p
+
+
+def to_world(shape_point, thing):
+    """(step 2) one SHAPE point of a thing -&gt; a WORLD point.
+
+    1. size:  multiply by the thing's size (grow or shrink round its
+              own centre).
+    2. spin:  turn it by the thing's own angles.
+    3. place: add the thing's position.
+
+    Worked example (lesson Part 5): the small cube, size 0.5, still,
+    at (2, -0.5, 4). Its corner 5 is SHAPE (1, 1, -1):
+        1. ((1 * 0.5), (1 * 0.5), (-1 * 0.5)) = (0.5, 0.5, -0.5)
+        2. angles 0                           = no change
+        3. ((0.5 + 2), (0.5 + -0.5), (-0.5 + 4)) = (2.5, 0, 3.5)
+    """
+    x, y, z = shape_point
+    size = thing["size"]
+    sized = ( (x * size), (y * size), (z * size) )         # 1. size
+    spun = rotate_all(sized, thing["angles"])               # 2. spin
+    pos_x, pos_y, pos_z = thing["position"]
+    sx, sy, sz = spun
+    return ( (sx + pos_x), (sy + pos_y), (sz + pos_z) )     # 3. place
+
+
+def to_camera(world_point):
+    """One WORLD point -&gt; one CAMERA point (from Lesson 4, unchanged).
+    Subtract where you stand, undo your turn, undo your tip."""
+    x, y, z = world_point
+    moved = ( (x - cam_x), (y - cam_y), (z - cam_z) )
+    turned = rotate_y(moved, (-cam_turn))
+    tipped = rotate_x(turned, (-cam_tip))
+    return tipped
+
+
+def project(point_3d):
+    """One CAMERA point -&gt; one SCREEN point (from Lesson 1).
+    Only ever call this with z &gt;= NEAR, so we never divide by 0."""
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+def average_z(corners, camera_points):
+    """How far away is this face? (from Lesson 3, uses CAMERA points).
+
+    It divides by len(corners), so it works for a triangle (3 corners)
+    just as well as for a square (4). Nothing to change!
+    """
+    total = 0
+    for corner_number in corners:
+        x, y, z = camera_points[corner_number]
+        total = (total + z)
+    return (total / len(corners))
+
+
+def is_facing_you(face_points):
+    """The clock test (from Lesson 3, unchanged). It only looks at the
+    first 3 corners, so it works for triangles too."""
+    a_x, a_y = face_points[0]
+    b_x, b_y = face_points[1]
+    c_x, c_y = face_points[2]
+    arrow_a_x = (b_x - a_x)
+    arrow_a_y = (b_y - a_y)
+    arrow_b_x = (c_x - a_x)
+    arrow_b_y = (c_y - a_y)
+    cross = ( (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x) )
+    return (cross &gt; 0)
+
+
+def dot(arrow_1, arrow_2):
+    """The dot product (from Lesson 3)."""
+    x1, y1, z1 = arrow_1
+    x2, y2, z2 = arrow_2
+    return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
+
+
+def shade_colour(colour, pointer):
+    """Brighter when the face points at the light (from Lesson 3)."""
+    brightness = dot(pointer, LIGHT)
+    if brightness &lt; 0:
+        brightness = 0
+    shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )
+    red, green, blue = colour
+    return ( round(red * shade), round(green * shade), round(blue * shade) )
+
+
+def keep_under_360(angle):
+    """Keep an angle between 0 and 360.
+    (step 2) CHANGED: a NEGATIVE speed (the big pyramid) counts DOWN,
+    so we also add 360 when it drops below 0."""
+    if angle &gt;= 360:
+        angle = (angle - 360)
+    if angle &lt; 0:
+        angle = (angle + 360)
+    return angle
+
+
+def add_faces_of(thing, faces_to_draw):
+    """(step 1) work out every face of ONE thing and add the ones we
+    should paint to the shared list faces_to_draw.
+
+    This is Lesson 4's face loop, moved into a function so we can run
+    it once for EACH thing. Every thing adds to the SAME list, so the
+    painter's sort later sees all faces of all things together.
+    """
+    model = thing["model"]
+
+    # ---- spin -&gt; place -&gt; camera, for every corner of this thing ----
+    camera_points = []
+    screen_points = []
+    for p in model["points"]:
+        world = to_world(p, thing)                     # WORLD
+        camera = to_camera(world)                      # CAMERA
+        camera_points.append(camera)
+        if camera[2] &gt;= NEAR:
+            screen_points.append(project(camera))      # SCREEN
+        else:
+            screen_points.append(None)
+
+    for corners, face_colour, pointer in model["faces"]:
+        # 0. skip the face if ANY corner is too close or behind you.
+        too_close = False
+        for corner_number in corners:
+            if camera_points[corner_number][2] &lt; NEAR:
+                too_close = True
+        if too_close:
+            continue
+
+        face_points = []
+        for corner_number in corners:
+            face_points.append(screen_points[corner_number])
+
+        # 1. The clock test (Lesson 3).
+        if not is_facing_you(face_points):
+            continue
+
+        # 2. How far away is it? (CAMERA z, Lesson 4)
+        distance = average_z(corners, camera_points)
+
+        # 3. What colour?
+        colour = face_colour
+        if one_colour:
+            colour = thing["colour"]
+        if use_light:
+            # (step 2) the pointer must spin WITH the thing, so we turn
+            # it by the same angles. We do NOT multiply it by the size:
+            # a bigger face still points the same way, and the arrow
+            # must stay exactly 1 long for the light maths.
+            spun_pointer = rotate_all(pointer, thing["angles"])
+            colour = shade_colour(colour, spun_pointer)
+
+        faces_to_draw.append( (distance, face_points, colour) )
+
+
+def draw_floor():
+    """NEW: draw the floor grid at y = FLOOR_Y, in 1-unit pieces.
+
+    Two sets of lines:
+      * lines running AWAY from you (fixed x, z changes)
+      * lines running ACROSS        (fixed z, x changes)
+    Each line is cut into pieces 1 unit long. A piece is drawn only if
+    BOTH its ends are in front of you (CAMERA z &gt;= NEAR). A short piece
+    means only a short gap at your feet, not a missing line.
+    """
+    # Lines running away: x = -8, -7, ... 8.  range() stops BEFORE the
+    # end number, so we add 1 to include 8 itself.
+    for x in range(GRID_LEFT, (GRID_RIGHT + 1)):
+        for z in range(GRID_NEAR, GRID_FAR):
+            draw_floor_piece( (x, FLOOR_Y, z), (x, FLOOR_Y, (z + 1)) )
+    # Lines running across: z = -3, -2, ... 13.
+    for z in range(GRID_NEAR, (GRID_FAR + 1)):
+        for x in range(GRID_LEFT, GRID_RIGHT):
+            draw_floor_piece( (x, FLOOR_Y, z), ((x + 1), FLOOR_Y, z) )
+
+
+def draw_floor_piece(world_start, world_end):
+    """NEW: one 1-unit piece of floor line, WORLD -&gt; CAMERA -&gt; SCREEN."""
+    start = to_camera(world_start)
+    end = to_camera(world_end)
+    if (start[2] &lt; NEAR) or (end[2] &lt; NEAR):
+        return                                   # behind you: skip it
+    pygame.draw.line(screen, GRID_COLOUR, project(start), project(end), 1)
+
+
+def to_map(x, z):
+    """A WORLD (x, z) -&gt; a pixel on the mini-map (from Lesson 4)."""
+    map_x = MAP_CX + (x * MAP_SCALE)
+    map_y = MAP_CY - (z * MAP_SCALE)
+    return (map_x, map_y)
+
+
+def draw_map():
+    """Draw the mini-map: every thing's base and you, from above.
+
+    NEW: a loop over ALL things. Corners 0, 1, 2, 3 are the bottom
+    corners of BOTH models (that is why the pyramid's base uses the
+    cube's numbers), so the same 4 numbers work for every thing.
+    """
+    box = pygame.Rect(MAP_LEFT, MAP_TOP, MAP_SIZE, MAP_SIZE)
+    pygame.draw.rect(screen, MAP_BACK, box)
+    screen.set_clip(box)
+    for thing in things:
+        outline = []
+        for corner_number in (0, 1, 2, 3):
+            corner = thing["model"]["points"][corner_number]
+            x, y, z = to_world(corner, thing)
+            outline.append(to_map(x, z))
+        pygame.draw.polygon(screen, thing["colour"], outline, 2)
+    forward_x, forward_y, forward_z = rotate_y((0, 0, 1), cam_turn)
+    you = to_map(cam_x, cam_z)
+    nose = to_map( (cam_x + (forward_x * 1.5)), (cam_z + (forward_z * 1.5)) )
+    pygame.draw.line(screen, PINK, you, nose, 2)
+    pygame.draw.circle(screen, PINK, you, 4)
+    screen.set_clip(None)
+    pygame.draw.rect(screen, WHITE, box, 1)
+
+
+# ======================================================================
+# THE MAIN LOOP
+# ======================================================================
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                spinning = not spinning
+            if event.key == pygame.K_l:
+                use_light = not use_light
+            if event.key == pygame.K_c:
+                one_colour = not one_colour
+            if event.key == pygame.K_g:
+                show_grid = not show_grid
+            if event.key == pygame.K_r:          # back to the start
+                cam_x = 0
+                cam_y = 0
+                cam_z = 0
+                cam_turn = 0
+                cam_tip = 0
+                for thing in things:
+                    thing["angles"] = [0, 0, 0]
+
+    # ---- Keys you HOLD (from Lesson 4, unchanged) ---------------------
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        cam_turn = (cam_turn + TURN_SPEED)
+    if keys[pygame.K_RIGHT]:
+        cam_turn = (cam_turn - TURN_SPEED)
+    if keys[pygame.K_UP]:
+        cam_tip = (cam_tip - TURN_SPEED)
+    if keys[pygame.K_DOWN]:
+        cam_tip = (cam_tip + TURN_SPEED)
+    if cam_tip &gt; TIP_LIMIT:
+        cam_tip = TIP_LIMIT
+    if cam_tip &lt; (-TIP_LIMIT):
+        cam_tip = (-TIP_LIMIT)
+
+    forward_x, forward_y, forward_z = rotate_y((0, 0, 1), cam_turn)
+    right_x, right_y, right_z = rotate_y((1, 0, 0), cam_turn)
+    if keys[pygame.K_w]:
+        cam_x = (cam_x + (forward_x * MOVE_SPEED))
+        cam_z = (cam_z + (forward_z * MOVE_SPEED))
+    if keys[pygame.K_s]:
+        cam_x = (cam_x - (forward_x * MOVE_SPEED))
+        cam_z = (cam_z - (forward_z * MOVE_SPEED))
+    if keys[pygame.K_d]:
+        cam_x = (cam_x + (right_x * MOVE_SPEED))
+        cam_z = (cam_z + (right_z * MOVE_SPEED))
+    if keys[pygame.K_a]:
+        cam_x = (cam_x - (right_x * MOVE_SPEED))
+        cam_z = (cam_z - (right_z * MOVE_SPEED))
+    if keys[pygame.K_e]:
+        cam_y = (cam_y + MOVE_SPEED)
+    if keys[pygame.K_q]:
+        cam_y = (cam_y - MOVE_SPEED)
+
+    # ---- (step 2) every thing spins at its OWN speeds --------------------
+    if spinning:
+        for thing in things:
+            angles = thing["angles"]
+            speeds = thing["speeds"]
+            angles[0] = keep_under_360( (angles[0] + speeds[0]) )   # tip
+            angles[1] = keep_under_360( (angles[1] + speeds[1]) )   # turn
+            angles[2] = keep_under_360( (angles[2] + speeds[2]) )   # roll
+
+    screen.fill(BLACK)
+
+    # ---- NEW: the floor first, so every shape is painted on top of it -
+    if show_grid:
+        draw_floor()
+
+    # ---- (step 1) ONE list for the faces of EVERY thing --------------------
+    faces_to_draw = []
+    for thing in things:
+        add_faces_of(thing, faces_to_draw)
+
+    # ---- The painter's method: furthest first, ALL faces together ----
+    faces_to_draw.sort(reverse=True)
+    for distance, face_points, colour in faces_to_draw:
+        pygame.draw.polygon(screen, colour, face_points)
+        pygame.draw.polygon(screen, BLACK, face_points, 2)
+
+    draw_map()
+
+    text = ("you are at (" + str(round(cam_x, 2)) + ", " +
+            str(round(cam_y, 2)) + ", " + str(round(cam_z, 2)) + ")")
+    text = (text + "   turn " + str(round(cam_turn, 1)) +
+            "   tip " + str(round(cam_tip, 1)))
+    screen.blit(font.render(text, True, PINK), (20, 20))
+    screen.blit(font.render("ARROWS = turn and look,  W A S D = walk,  Q / E = down / up", True, YELLOW), (20, 50))
+    screen.blit(font.render("SPACE = pause,  R = reset,  L = light,  C = colours,  G = grid", True, YELLOW), (20, 80))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Add an eighth thing: a size 3 pyramid at (0, 2, 12). Check it
+#     sits on the floor: (FLOOR_Y + size) = (-1 + 3) = 2.
+#   * Give the old cube "speeds": (0, 1, 0) so it turns like Lesson 2.
+#   * Make the floor bigger: GRID_LEFT = -20, GRID_RIGHT = 20. Does the
+#     program slow down? (Count the pieces: it is 4 times as many lines,
+#     each twice as long.)
+#   * Stop yourself sinking through the floor: after the Q key, if
+#     cam_y is below (FLOOR_Y + 0.2), set it back to (FLOOR_Y + 0.2).
+#   * Make a new model: a "wedge" (a cube cut in half from corner to
+#     corner). You need its points, its faces clockwise from outside,
+#     and a pointer for each face.
+# ----------------------------------------------------------------------</code></pre></details>
+
+<h2>Files</h2>
+<p>Download the code for this lesson (right-click a file and choose <em>Save link as</em>):</p>
+<ul class="files">
+  <li><a href="code/step1_two_shapes.py" download><code>code/step1_two_shapes.py</code></a>: the pyramid, pointers in the face list, models, things and one shared sort</li>
+  <li><a href="code/step2_size_and_spin.py" download><code>code/step2_size_and_spin.py</code></a>: every thing gets its own size and spin; <code>to_world()</code> does size → spin → place</li>
+  <li><a href="code/step3_small_world.py" download><code>code/step3_small_world.py</code></a>: the floor grid, seven things and the full mini-map; the finished script</li>
+  <li><code>images/</code>: every diagram on this page as a PNG</li>
+  <li><a href="../figures/">Figure index</a>: every figure and table in the course, with its number. Numbers read <code>Fig lesson.part.figure</code>, plus a letter for one panel of a picture (for example <code>Fig 3.4.2b</code>).</li>
+</ul>
+</main>
+</body>
+</html>

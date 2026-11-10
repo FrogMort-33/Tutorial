@@ -1,0 +1,2202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframe 3D, Lesson 7</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Chakra+Petch:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one readable column, like a lab notebook; diagrams and code break out slightly wider. */
+:root {
+  --bg:#f3f6f4; --paper:#ffffff; --fg:#17201b; --muted:#56635c; --line:#d5ded8;
+  --accent:#0d8a4a; --accent-soft:#e2f3e9; --code-bg:#121815; --code-fg:#d9f5e3; --warn:#9a6a00;
+  --display:"Chakra Petch", "Trebuchet MS", sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; --code-bg:#0a0e0c; --code-fg:#d9f5e3; --warn:#e6b84a; color-scheme:dark; } }
+:root[data-theme="dark"] {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; --code-bg:#0a0e0c; --code-fg:#d9f5e3; --warn:#e6b84a; color-scheme:dark; }
+body { background:var(--bg); color:var(--fg); font-family:var(--body); font-size:17px; line-height:1.6;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:32px 64px; }
+main { max-width:780px; margin:0 auto; display:flex; flex-direction:column; gap:20px; }
+h1,h2,h3 { font-family:var(--display); text-wrap:balance; line-height:1.2; margin:0; }
+h1 { font-size:clamp(30px,6vw,44px); }
+h2 { font-size:26px; margin-top:28px; padding-top:20px; border-top:2px solid var(--line); display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; }
+h2 .mins { font-family:var(--mono); font-size:14px; color:var(--accent); font-weight:600; letter-spacing:.04em; }
+h3 { font-size:20px; margin-top:12px; }
+p { margin:0; max-width:68ch; }
+.eyebrow { font-family:var(--mono); font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); }
+.lede { font-size:19px; color:var(--muted); }
+code { font-family:var(--mono); font-size:.88em; background:var(--accent-soft); padding:1px 5px; border-radius:4px; }
+pre { margin:0; background:var(--code-bg); color:var(--code-fg); padding:16px 18px; border-radius:8px; overflow-x:auto; font-size:14px; line-height:1.5; }
+pre code { background:none; padding:0; font-size:inherit; color:inherit; }
+figure { margin:0; display:flex; flex-direction:column; gap:8px; }
+figure img { width:100%; border-radius:8px; display:block; border:1px solid var(--line); }
+figcaption { font-size:14px; color:var(--muted); }
+table { border-collapse:collapse; width:100%; font-size:15px; }
+.tablewrap { overflow-x:auto; }
+th,td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+td.t { font-family:var(--mono); white-space:nowrap; color:var(--accent); font-variant-numeric:tabular-nums; }
+ul,ol { margin:0; padding-left:22px; max-width:68ch; }
+li+li { margin-top:4px; }
+.key { background:var(--accent-soft); border-left:4px solid var(--accent); padding:14px 18px; border-radius:0 8px 8px 0; display:flex; flex-direction:column; gap:6px; }
+.key strong { font-family:var(--display); }
+.q { background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:14px 18px; display:flex; flex-direction:column; gap:8px; }
+.qq { font-weight:700; display:flex; gap:10px; }
+.qn { font-family:var(--mono); color:var(--accent); flex:none; }
+details summary { cursor:pointer; color:var(--accent); font-weight:700; }
+details summary:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.ans { padding-top:8px; color:var(--fg); display:flex; flex-direction:column; gap:8px; }
+details.full { border:1px dashed var(--line); border-radius:8px; padding:10px 14px; }
+details.full[open] summary { margin-bottom:10px; }
+.check { display:flex; flex-direction:column; gap:12px; }
+.files li code { white-space:nowrap; }
+.key a { color:var(--accent); font-weight:700; }
+
+.fignum { font-family:var(--mono); font-weight:600; color:var(--accent); margin-right:6px; white-space:nowrap; }
+.panels { display:block; margin-top:4px; }
+.panels b { font-family:var(--mono); color:var(--fg); font-weight:600; }
+.tabcap { font-size:14px; color:var(--muted); margin-bottom:-12px; }
+figure, .tabcap { scroll-margin-top:16px; }
+</style>
+
+</head>
+<body>
+<main>
+<nav style="font-family:var(--mono, monospace);font-size:14px;"><a style="color:var(--accent)" href="../">&larr; All lessons</a> &middot; <a style="color:var(--accent)" href="../figures/">Figure index</a></nav>
+
+<header style="display:flex;flex-direction:column;gap:12px">
+  <span class="eyebrow">Wireframe 3D course · Lesson 7 · about 55 minutes</span>
+  <h1>A mini game: Cube Hunt</h1>
+  <p class="lede">Six lessons built a 3D world you can fly round. Today it becomes a game. Eight gold cubes float over a big floor; touch one and you score a point, and it jumps somewhere new. You have 60 seconds. The only new maths is one rule for "how far apart are two points?", and the rest is a score, a clock and a few <code>if</code>s.</p>
+</header>
+
+<figure id="fig-7-0-1"><img src="images/course_map.png" alt="Course map: eight lessons on a road from Lesson 1 to a mini game. Lesson 7, A mini game, is highlighted as you are here; Lessons 1 to 6 are done." loading="lazy"><figcaption><span class="fignum">Fig 7.0.1</span>The course map. Coloured cards are done or today; darker cards are still to come. Every lesson adds one idea to the same small program, and today is the last card.</figcaption></figure>
+<div class="key">
+  <strong>Where this lesson fits</strong>
+  <p><strong>Before:</strong> <a href="../lesson6/">Lesson 6</a> turned every spin and the camera into matrices, with a floor and many shapes from Lesson 5.<br><strong>Today:</strong> a distance check, a score and a timer turn that world into a cube-collecting game.<br><strong>Next:</strong> you have a finished game! The wrap-up has ideas to keep going on your own.</p>
+  <p>This is the finale. Nothing from Lessons 1 to 6 changes: the whole 3D pipeline stays exactly as you built it, and today's code sits around it.</p>
+</div>
+
+<h2>Lesson plan</h2>
+<p><strong>Who it's for:</strong> someone who finished Lesson 6 and can run <code>step3_camera_matrix.py</code>. You need <code>project()</code> (Lesson 1), the turn rules (Lessons 2 and 2B), faces and light (Lesson 3), the camera and <code>NEAR</code> (Lesson 4), the <code>things</code> list with <code>"size"</code> and <code>"position"</code> (Lesson 5) and <code>combine()</code> and <code>column()</code> (Lesson 6). <strong>Needs:</strong> Python 3 and <code>pip install pygame-ce</code>, as before.</p>
+<p><strong>By the end, the learner can:</strong></p>
+<ol>
+  <li>Work out the distance between two 3D points by hand, and explain it as Pythagoras done twice.</li>
+  <li>Explain why a cube is collected at <code>COLLECT_RADIUS = 1.0</code>, in pixels on the screen.</li>
+  <li>Use <code>random.uniform</code> and a <code>while</code> loop to pick a new spot that is not too close.</li>
+  <li>Make W fly the way you look, using <code>combine()</code> and <code>column()</code> from Lesson 6.</li>
+  <li>Count down a clock in frames, show it in seconds, and switch between playing and TIME UP with one True/False.</li>
+</ol>
+<p class="tabcap" id="fig-7-0-2"><span class="fignum">Table 7.0.2</span>Lesson plan: time, part and what happens</p>
+<div class="tablewrap"><table>
+<tr><th>Time</th><th>Part</th><th>What happens</th></tr>
+<tr><td class="t">0–3</td><td>Recap</td><td>Where Lesson 6 left the program, and the plan for today.</td></tr>
+<tr><td class="t">3–12</td><td>1. The game and its field</td><td>The rules, one frame of the game, the field, the gold cubes and the bigger mini-map. Q1–Q2.</td></tr>
+<tr><td class="t">12–25</td><td>2. How far away?</td><td>Distance on a line, squares and square roots, Pythagoras flat and in 3D, the nearest cube, the HUD. Run <code>step1_cube_field.py</code>. Q3–Q5.</td></tr>
+<tr><td class="t">25–31</td><td>3. Collecting</td><td>The touch bubble, and why 1.0. Q6.</td></tr>
+<tr><td class="t">31–38</td><td>4. A new spot</td><td><code>random.uniform</code>, and never too close. Run <code>step2_collect.py</code>. Q7–Q8.</td></tr>
+<tr><td class="t">38–46</td><td>5. Fly where you look</td><td>Tip then turn, column 2, walls, ground and ceiling. Q9–Q10.</td></tr>
+<tr><td class="t">46–52</td><td>6. The clock and TIME UP</td><td>Frames to seconds, <code>math.ceil</code>, <code>game_over</code>, play again. Run <code>step3_cube_hunt.py</code>. Q11.</td></tr>
+<tr><td class="t">52–55</td><td>Wrap up</td><td>The whole course in one frame, final check Q12, and where to go next.</td></tr>
+</table></div>
+
+<h2>Recap: where Lesson 6 left us <span class="mins">3 MIN</span></h2>
+<p>Lesson 6's last script draws a floor and seven shapes, each a <em>thing</em> in Lesson 5's <code>things</code> list with its own <code>"size"</code>, <code>"position"</code> and spinning <code>"angles"</code>. Every turn is a 3 × 3 matrix: <code>spin_matrix()</code> for each thing, and one <code>camera_matrix</code> for you. Every frame, every corner goes SHAPE → size → spin → + position (WORLD) → − you, × camera_matrix (CAMERA) → NEAR check → <code>project()</code> (SCREEN).</p>
+<p>Today we keep all of that. We swap the seven shapes for eight gold cubes and add the game around the outside. Here is what the finished game looks like, so you know where we are heading:</p>
+<figure id="fig-7-0-3"><img src="images/g23_filmstrip.png" alt="Six real screenshots of the finished game: the start with three gold cubes visible, flying up at cube 0, score 1 after touching it, turning to cube 1, score 2, and the TIME UP screen." loading="lazy"><figcaption><span class="fignum">Fig 7.0.3</span>Six moments from one game of <code>step3_cube_hunt.py</code>, the script you will have at the end. Watch the score (top left), the clock (top right) and the mini-map (bottom right).<span class="panels">Panels: <b>7.0.3a</b> (top row 1st) 0.0 s: start · <b>7.0.3b</b> (top row 2nd) 1.5 s: flying up at it · <b>7.0.3c</b> (top row 3rd) 2.2 s: touched, score 1 · <b>7.0.3d</b> (bottom row 1st) 5.0 s: turned · <b>7.0.3e</b> (bottom row 2nd) 5.5 s: score 2 · <b>7.0.3f</b> (bottom row 3rd) 60 s: TIME UP</span></figcaption></figure>
+
+<h2>Part 1: The game and its field <span class="mins">9 MIN</span></h2>
+<p>Every game starts with its rules. Ours fit in four lines:</p>
+<figure id="fig-7-1-1"><img src="images/g02_game_rules.png" alt="A mock game screen with gold cubes, score 3, best 7, nearest cube 2.4, time 42 and a mini-map, beside the four rules and a list of what is new in each part." loading="lazy"><figcaption><span class="fignum">Fig 7.1.1</span>The rules, and which part of today's lesson builds each new piece. "Touch" will get an exact meaning, with numbers, in Part 3.<span class="panels">Panels: <b>7.1.1a</b> (left) the game window · <b>7.1.1b</b> (top right) the rules · <b>7.1.1c</b> (bottom right) what is new today</span></figcaption></figure>
+<p>A game is still the same <code>while</code> loop as every lesson. It just does a few more jobs each time round:</p>
+<figure id="fig-7-1-2"><img src="images/g03_game_loop.png" alt="Flow chart of one frame: read keys, move the camera, check every cube, collected?, tick the clock, draw the world, draw score time and map, then back to the top. Pink boxes are new." loading="lazy"><figcaption><span class="fignum">Fig 7.1.2</span>One frame, 60 times a second. Step 6, drawing the world, is all of Lessons 1 to 6 and does not change at all.</figcaption></figure>
+
+<h3>The playing field</h3>
+<p>The game needs room. Lesson 5's floor was 16 units across; today's field is bigger, and has an edge you can't fly past. Here it is from above, with the 8 places the cubes start:</p>
+<figure id="fig-7-1-3"><img src="images/g04_field_map.png" alt="WORLD from above, x across and z up, 1 square per unit. A red square at 12 marks the walls, a gold dashed square at 10 marks the field. Eight gold cubes are labelled with their positions; you are a pink dot at the centre (0,0,0) facing +z." loading="lazy"><figcaption><span class="fignum">Fig 7.1.3</span>WORLD coordinates seen from above. The centre (0, 0, 0) is where you start, facing +z up the page. Cube 0 at (3, 1, 5) is our worked example all lesson.</figcaption></figure>
+<pre><code>FIELD = 10      # new cubes appear with x and z from -10 to 10
+WALL = 12       # you can't fly further than 12 from the centre
+
+START_SPOTS = [
+    (3, 1, 5),      # 0  ahead and to the right: the first one you see
+    (-2, 0, 8),     # 1
+    (0, 0, 10),     # 2  straight ahead, at the far edge
+    (-6, 1, 3),     # 3
+    (6, 0, -2),     # 4  behind you, to the right
+    (-4, 2, -7),    # 5  behind you, up high
+    (8, 0, 7),      # 6
+    (2, 1, -9),     # 7  far behind you
+]</code></pre>
+<p>The start spots are the same every game, so you can learn a good route. Only the cubes that appear <em>after</em> a collect are random (Part 4).</p>
+
+<h3>The gold cubes</h3>
+<p>Each cube is one of Lesson 5's things, with <code>"size"</code> 0.5. Lesson 1's cube is 2 units wide, so these are 1 unit wide:</p>
+<figure id="fig-7-1-4"><img src="images/g05_pickup_size.png" alt="SHAPE coordinates from the front: the grey 2-unit Lesson 1 cube and a gold 1-unit cube inside it. Corner 5 moves from (1,1,-1) to (0.5,0.5,-0.5). Below, a 1-unit face 5, 10 and 20 away is 80, 40 and 20 px wide." loading="lazy"><figcaption><span class="fignum">Fig 7.1.4</span>SHAPE coordinates: the centre (0, 0, 0) is the cube's own middle. <code>to_world()</code> multiplies every corner by the size first, then spins and places it, exactly as in Lesson 5.<span class="panels">Panels: <b>7.1.4a</b> (left) the pickup cube in SHAPE coordinates · <b>7.1.4b</b> (bottom 1st) face 5 away: 80 px · <b>7.1.4c</b> (bottom 2nd) face 10 away: 40 px · <b>7.1.4d</b> (bottom 3rd) face 20 away: 20 px</span></figcaption></figure>
+<pre><code>PICKUP_SIZE = 0.5
+
+def make_pickups():
+    pickups = []
+    for spot in START_SPOTS:
+        pickups.append({"model": cube_model, "position": spot,
+                        "size": PICKUP_SIZE, "angles": [0, 0, 0],
+                        "speeds": (0.5, 1, 0), "colour": SUN_GOLD})
+    return pickups
+
+things = make_pickups()      # Lesson 5's list: now 8 gold cubes</code></pre>
+<p>The speeds make each cube turn 1 degree a frame (a full turn every 6 seconds) and tip a little, so it glints as the light catches different faces. A spinning thing is easier to spot than a still one.</p>
+
+<h3>A bigger mini-map</h3>
+<p>Lesson 4's mini-map used 10 px for every unit. The walls are 24 units across, so that would need 240 px: too big for the 160 px box. We shrink the scale and move the WORLD centre to the middle of the box:</p>
+<figure id="fig-7-1-5"><img src="images/g06_minimap.png" alt="Left: WORLD from above with the red walls 24 units across and cube 0 at (3,1,5). Right: the 160 by 160 px map box in SCREEN pixels with the wall square 144 px across, you at (710,510) and cube 0 at (728,480)." loading="lazy"><figcaption><span class="fignum">Fig 7.1.5</span>Same picture, two sizes. <code>to_map()</code> is unchanged from Lesson 4: <code>map_x = MAP_CX + (x * MAP_SCALE)</code>, <code>map_y = MAP_CY - (z * MAP_SCALE)</code>.<span class="panels">Panels: <b>7.1.5a</b> (left) WORLD from above · <b>7.1.5b</b> (right) the 160 x 160 px map box in SCREEN pixels</span></figcaption></figure>
+<pre><code>MAP_CX = (MAP_LEFT + (MAP_SIZE / 2))    # (630 + 80) = 710
+MAP_CY = (MAP_TOP + (MAP_SIZE / 2))     # (430 + 80) = 510
+MAP_SCALE = 6                           # (24 * 6) = 144 px for the walls</code></pre>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q1</span><span>Where on the mini-map is cube 6, at WORLD (8, 0, 7)?</span></p><details><summary>Show answer</summary><div class="ans"><p>map_x = <code>710 + (8 * 6)</code> = 710 + 48 = 758. map_y = <code>510 - (7 * 6)</code> = 510 − 42 = 468. So (758, 468): right of you and up the map, as on the field diagram, Fig 7.1.3.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q2</span><span>A gold cube's front face is 8 away, straight ahead. How wide is it on the screen?</span></p><details><summary>Show answer</summary><div class="ans"><p>The face is 1 unit wide, so <code>((1 * 400) / 8)</code> = 50 px.</p></div></details></div>
+</div>
+
+<h2>Part 2: How far away? <span class="mins">13 MIN</span></h2>
+<p>To know whether you have touched a cube, the program needs one number: how far your eye is from the cube's centre. That is today's only new maths, so we build it slowly: first on a line, then on a flat map, then in 3D.</p>
+<h3>On one line</h3>
+<figure id="fig-7-2-1"><img src="images/g07_distance_line.png" alt="Two number lines. You at 2 and a cube at 7: (7 - 2) = 5, 5 units away. You at 2 and a cube at -1: (-1 - 2) = -3, but it is 3 away, not -3." loading="lazy"><figcaption><span class="fignum">Fig 7.2.1</span>WORLD x only. Subtracting gives the gap, but its sign only tells you which side the cube is on. A distance is never negative.<span class="panels">Panels: <b>7.2.1a</b> (top line) cube at 7, you at 2 · <b>7.2.1b</b> (bottom line) cube at -1, you at 2</span></figcaption></figure>
+<h3>Squares and square roots</h3>
+<p>The trick to get rid of the minus sign is to times the number by itself. That is called <em>squaring</em>, because it gives the area of a square. Python's <code>math.sqrt</code> (square root) goes back the other way:</p>
+<figure id="fig-7-2-2"><img src="images/g08_square_root.png" alt="Five coloured squares with sides 1 to 5 and areas 1, 4, 9, 16 and 25, each labelled with its square and square root. A box shows (3 * 3) = 9, math.sqrt(9) = 3 and ((-3) * (-3)) = 9." loading="lazy"><figcaption><span class="fignum">Fig 7.2.2</span>Side → area is squaring; area → side is the square root. Minus times minus is plus, so <code>math.sqrt((-3) * (-3))</code> = <code>math.sqrt(9)</code> = 3.<span class="panels">Panels: <b>7.2.2a</b> (1st square) side 1 · <b>7.2.2b</b> (2nd) side 2 · <b>7.2.2c</b> (3rd) side 3 · <b>7.2.2d</b> (4th) side 4 · <b>7.2.2e</b> (5th) side 5</span></figcaption></figure>
+<h3>On a flat map: Pythagoras</h3>
+<p>From above, the gap between you and a cube has an x part and a z part. They make the two short sides of a right-angled triangle, and the distance is the long side:</p>
+<figure id="fig-7-2-3"><img src="images/g09_flat_distance.png" alt="WORLD from above: you at (1,3), a cube at (4,7). The x gap 3 has a blue 3 by 3 square (9), the z gap 4 has an orange 4 by 4 square (16). The pink long side is 5 because 9 + 16 = 25 and the square root of 25 is 5." loading="lazy"><figcaption><span class="fignum">Fig 7.2.3</span>WORLD from above, 1 grid square = 1 unit. Count the squares inside each coloured box: 9 and 16. Together 25, which is a 5 × 5 square, so the pink line is 5 long.</figcaption></figure>
+<h3>In 3D: Pythagoras twice</h3>
+<p>Now add height. Do the flat sum first, then stand that flat line up and do it again with the height gap:</p>
+<figure id="fig-7-2-4"><img src="images/g10_distance_3d.png" alt="Step 1 from above: you at (1,0,3) and cube 0 at (3,1,5), dx 2 and dz 2, flat squared 8, flat 2.828. Step 2 from the side: flat 2.828 across, dy 1 up, distance squared 9, distance 3. Bottom: the one-line formula." loading="lazy"><figcaption><span class="fignum">Fig 7.2.4</span>Worked example in WORLD coordinates: you at (1, 0, 3), cube 0 at (3, 1, 5). The flat line's square (8) goes straight into step 2, so we never need its square root. All three gaps go in one sum.<span class="panels">Panels: <b>7.2.4a</b> (left) Step 1: from above · <b>7.2.4b</b> (right) Step 2: stand the flat line up</span></figcaption></figure>
+<pre><code>def distance_3d(point_a, point_b):
+    ax, ay, az = point_a
+    bx, by, bz = point_b
+    dx = (bx - ax)
+    dy = (by - ay)
+    dz = (bz - az)
+    return math.sqrt( (dx * dx) + (dy * dy) + (dz * dz) )</code></pre>
+<p><code>dx</code>, <code>dy</code> and <code>dz</code> are just short names for "the gap in x", "the gap in y" and "the gap in z" (the d is for difference). Which point you subtract from which doesn't matter, because squaring wipes out the sign.</p>
+<h3>The nearest cube</h3>
+<p>The screen shows the distance to the <em>nearest</em> cube, so you can tell when you are getting close. To find it, check every cube and keep the smallest distance seen so far:</p>
+<figure id="fig-7-2-5"><img src="images/g11_nearest.png" alt="A table of the 8 cubes with their positions, sums of squares and distances from (0,0,0): 5.92, 8.25, 10, 6.78, 6.32, 8.31, 10.63 and 9.27, with bars. The nearest-so-far column stays 5.92 after cube 0." loading="lazy"><figcaption><span class="fignum">Fig 7.2.5</span>You at the start, WORLD (0, 0, 0). Cube 0 wins at 5.92, and the HUD shows <code>round(5.916, 1)</code> = 5.9.</figcaption></figure>
+<h3>The HUD</h3>
+<p>The words on top of the picture are called the HUD (heads-up display, from aeroplane cockpits). They are drawn last, in SCREEN pixels:</p>
+<figure id="fig-7-2-6"><img src="images/g12_hud.png" alt="The 800 by 600 window with teal dots where each piece of text starts: score at (20,20), nearest cube at (20,50), time at (680,20), the mini-map box at (630,430) and the key help at (20,570). Beside it, the code that draws one line of text." loading="lazy"><figcaption><span class="fignum">Fig 7.2.6</span>SCREEN coordinates: (0, 0) is the top-left corner, x goes right and y goes <em>down</em>. Each <code>blit</code> puts the top-left corner of its words at the pixel given.</figcaption></figure>
+<h3>Run it: step 1</h3>
+<p>Run <code>step1_cube_field.py</code>. You walk as in Lesson 6. Walk towards cube 0 and watch "nearest cube" count down. You can't collect anything yet.</p>
+<figure id="fig-7-2-7"><img src="images/run_step1_cube_field.png" alt="Output of step 1 after one second of W: two gold cubes ahead over the green floor grid, nearest cube 3.7, and the mini-map with the red wall square and 8 gold squares." loading="lazy"><figcaption><span class="fignum">Fig 7.2.7</span>After 1 second of W you are at (0, 0, 3). Cube 0 is now just off the right of the window: <code>distance_3d((0, 0, 3), (3, 1, 5))</code> = <code>math.sqrt(9 + 1 + 4)</code> = 3.74, shown as 3.7.</figcaption></figure>
+<details class="full"><summary>Full code: <code>step1_cube_field.py</code> (about 560 lines)</summary><pre><code># ======================================================================
+# LESSON 7 - STEP 1: A FIELD OF GOLD CUBES
+# ----------------------------------------------------------------------
+# Goal: set up the playing field. Eight small gold cubes float over a
+# big floor, and the screen tells you how far away the nearest one is.
+#
+# This starts from Lesson 6's finished script (step3_camera_matrix.py).
+#
+# What is new since Lesson 6:
+#
+#   1. things = make_pickups()  (lesson Part 1)
+#        Lesson 5's list of things now holds 8 gold cubes, size 0.5
+#        (1 unit wide), at the 8 spots in START_SPOTS.
+#
+#   2. A bigger world  (lesson Part 1)
+#        FIELD = 10 (where cubes can be), WALL = 12 (the edge of the
+#        world). The floor grid now covers -12 to 12 both ways, and the
+#        mini-map is resized to show all of it (MAP_SCALE = 6).
+#
+#   3. distance_3d(point_a, point_b)  (lesson Part 2)
+#        How far apart two points are, in WORLD units:
+#            math.sqrt( (dx * dx) + (dy * dy) + (dz * dz) )
+#        The HUD shows the distance to the NEAREST cube.
+#
+# Walk up to cube 0 and watch "nearest cube" count down. (You can't
+# collect it yet: that is step 2.)
+#
+# Controls:  LEFT / RIGHT = turn,   UP / DOWN = look up / down
+#            W / S = walk forward / back,   A / D = step left / right
+#            Q / E = go down / up,   R = reset
+#            G = floor grid on / off,   L = light on / off
+# Run:  python step1_cube_field.py
+# ======================================================================
+
+import math
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Lesson 7, step 1 - a field of gold cubes")
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+PINK = (255, 105, 200)        # the colour we use for YOU (the camera)
+MAP_BACK = (25, 30, 36)       # dark grey-blue behind the mini-map
+GRID_COLOUR = (40, 90, 70)    # (Lesson 5) dim green for the floor lines
+WALL_RED = (235, 80, 80)      # NEW: the wall square on the mini-map
+SUN_GOLD = (250, 200, 70)     # NEW: the colour of every pickup cube
+
+# ---- One colour for each face direction (from Lesson 3) ---------------
+RED = (235, 80, 80)          # front (-z)
+PURPLE = (160, 100, 230)     # back  (+z)
+BLUE = (70, 150, 255)        # left  (-x)
+GREEN = (70, 210, 120)       # right (+x)
+GOLD = (245, 200, 60)        # top   (+y)
+ORANGE = (245, 140, 50)      # bottom (-y)
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400
+
+
+# ======================================================================
+# MODELS (from Lesson 5, unchanged)
+# ======================================================================
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+# (corners clockwise from outside,  colour,  pointer)
+cube_faces = [
+    ((4, 5, 1, 0), RED,    ( 0,  0, -1)),   # front
+    ((6, 7, 3, 2), PURPLE, ( 0,  0,  1)),   # back
+    ((7, 4, 0, 3), BLUE,   (-1,  0,  0)),   # left
+    ((5, 6, 2, 1), GREEN,  ( 1,  0,  0)),   # right
+    ((7, 6, 5, 4), GOLD,   ( 0,  1,  0)),   # top
+    ((2, 3, 0, 1), ORANGE, ( 0, -1,  0)),   # bottom
+]
+cube_model = {"points": cube_points, "faces": cube_faces}
+
+
+# ======================================================================
+# THE PLAYING FIELD (lesson Part 1)
+# ======================================================================
+
+# ---- NEW: the sizes of the field ------------------------------------
+# FIELD = 10: new cubes appear with x and z from -10 to 10, a 20 x 20
+#   square. You fly 3 units a second, so edge to edge is
+#   (20 / 3) = 6.7 seconds: some flying, but never boring.
+# WALL = 12: you can't fly further than 12 from the centre, 2 more than
+#   FIELD, so you can always fly round a cube at the edge.
+FIELD = 10
+WALL = 12
+
+# ---- NEW: the floor (from Lesson 5), now as big as the walls --------
+FLOOR_Y = -1
+GRID_LEFT = (-WALL)       # -12
+GRID_RIGHT = WALL         # 12
+GRID_NEAR = (-WALL)       # -12
+GRID_FAR = WALL           # 12
+
+# ---- NEW: the pickups ------------------------------------------------
+# PICKUP_SIZE = 0.5: Lesson 5's "size", so each cube is 1 unit wide
+#   (its corners are at -0.5 and 0.5). A 1-unit face 5 away is
+#   ((1 * 400) / 5) = 80 px wide; 20 away it is 20 px (lesson Part 1).
+PICKUP_SIZE = 0.5
+
+# NEW: the 8 spots the cubes start at, in WORLD coordinates.
+# The same every game, so you can learn a good route. Cube 0 at
+# (3, 1, 5) is the lesson's worked example.
+START_SPOTS = [
+    (3, 1, 5),      # 0  ahead and to the right: the first one you see
+    (-2, 0, 8),     # 1
+    (0, 0, 10),     # 2  straight ahead, at the far edge
+    (-6, 1, 3),     # 3
+    (6, 0, -2),     # 4  behind you, to the right
+    (-4, 2, -7),    # 5  behind you, up high
+    (8, 0, 7),      # 6
+    (2, 1, -9),     # 7  far behind you
+]
+
+
+def make_pickups():
+    """NEW: build a fresh list of 8 pickup THINGS (Lesson 5's
+    dictionaries), one at each START_SPOTS position.
+
+    Each one is a small gold cube (size 0.5) that spins slowly so it
+    catches your eye: 1 degree a frame of turn = one turn in 6 seconds,
+    and 0.5 of tip so it wobbles a little too.
+    """
+    pickups = []
+    for spot in START_SPOTS:
+        pickups.append({"model": cube_model, "position": spot,
+                        "size": PICKUP_SIZE, "angles": [0, 0, 0],
+                        "speeds": (0.5, 1, 0), "colour": SUN_GOLD})
+    return pickups
+
+
+# NEW: "things" is Lesson 5's list of everything in the world.
+# In the game, the world is just the 8 gold cubes.
+things = make_pickups()
+
+# ---- Where YOU are (from Lesson 4) ------------------------------------
+cam_x = 0
+cam_y = 0
+cam_z = 0
+cam_turn = 0        # degrees, positive = turned LEFT
+cam_tip = 0         # degrees, positive = looking DOWN
+TIP_LIMIT = 60
+MOVE_SPEED = 0.05   # (0.05 * 60) = 3 units a second
+TURN_SPEED = 1.5    # (1.5 * 60) = 90 degrees a second
+NEAR = 0.1          # closer than this (CAMERA z) is not drawn
+
+# ---- The light (from Lesson 3, unchanged) -----------------------------
+LIGHT = (0.48, 0.6, -0.64)
+AMBIENT = 0.2
+use_light = True
+show_grid = True
+
+
+# ---- The mini-map (lesson Part 1: resized for the whole field) ---------
+MAP_LEFT = 630
+MAP_TOP = 430
+MAP_SIZE = 160
+# NEW: the WORLD centre now sits in the MIDDLE of the box, because
+# the field goes the same distance every way (-12 to 12).
+MAP_CX = (MAP_LEFT + (MAP_SIZE / 2))    # (630 + 80) = 710
+MAP_CY = (MAP_TOP + (MAP_SIZE / 2))     # (430 + 80) = 510
+# NEW: 6 px per unit: the walls are 24 units across, and
+# (24 * 6) = 144 px fits the 160 px box with 8 px to spare.
+MAP_SCALE = 6
+
+
+# ======================================================================
+# MATRIX TOOLS (from Lesson 6, unchanged)
+# ======================================================================
+
+def matrix_times_point(matrix, point_3d):
+    """Put one point through a matrix: each ROW dotted with the point."""
+    row_0, row_1, row_2 = matrix
+    new_x = dot(row_0, point_3d)
+    new_y = dot(row_1, point_3d)
+    new_z = dot(row_2, point_3d)
+    return (new_x, new_y, new_z)
+
+
+def tip_matrix(angle_degrees):
+    """Lesson 2B's TIP as a grid. x is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (1, 0,     0         ),
+        (0, cos_a, (-sin_a)  ),
+        (0, sin_a, cos_a     ),
+    )
+
+
+def turn_matrix(angle_degrees):
+    """Lesson 2's TURN as a grid. y is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, 0, (-sin_a)),
+        (0,     1, 0       ),
+        (sin_a, 0, cos_a   ),
+    )
+
+
+def roll_matrix(angle_degrees):
+    """Lesson 2B's ROLL as a grid. z is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, (-sin_a), 0),
+        (sin_a, cos_a,    0),
+        (0,     0,        1),
+    )
+
+
+def column(matrix, column_number):
+    """One COLUMN of a matrix = where that axis arrow lands."""
+    row_0, row_1, row_2 = matrix
+    return (row_0[column_number], row_1[column_number], row_2[column_number])
+
+
+def combine(first, second):
+    """ONE matrix that does 'first', then 'second' (Lesson 6)."""
+    new_col_0 = matrix_times_point(second, column(first, 0))
+    new_col_1 = matrix_times_point(second, column(first, 1))
+    new_col_2 = matrix_times_point(second, column(first, 2))
+    return (
+        (new_col_0[0], new_col_1[0], new_col_2[0]),
+        (new_col_0[1], new_col_1[1], new_col_2[1]),
+        (new_col_0[2], new_col_1[2], new_col_2[2]),
+    )
+
+
+def spin_matrix(angles):
+    """A thing's whole spin as ONE matrix: tip, then turn, then roll."""
+    tip_then_turn = combine(tip_matrix(angles[0]), turn_matrix(angles[1]))
+    return combine(tip_then_turn, roll_matrix(angles[2]))
+
+
+# ======================================================================
+# THE 3D PIPELINE (Lessons 1 to 6, unchanged)
+# ======================================================================
+
+def to_world(shape_point, thing):
+    """(Lesson 5) SHAPE -&gt; WORLD: size, then spin, then place."""
+    x, y, z = shape_point
+    size = thing["size"]
+    sized = ( (x * size), (y * size), (z * size) )
+    spun = matrix_times_point(thing["matrix"], sized)
+    pos_x, pos_y, pos_z = thing["position"]
+    sx, sy, sz = spun
+    return ( (sx + pos_x), (sy + pos_y), (sz + pos_z) )
+
+
+def to_camera(world_point):
+    """(Lessons 4 and 6) WORLD -&gt; CAMERA: subtract you, then camera_matrix."""
+    x, y, z = world_point
+    moved = ( (x - cam_x), (y - cam_y), (z - cam_z) )
+    return matrix_times_point(camera_matrix, moved)
+
+
+def project(point_3d):
+    """(Lesson 1) CAMERA -&gt; SCREEN. Only call it with z &gt;= NEAR."""
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+def average_z(corners, camera_points):
+    """(Lesson 3) how far away is this face? Uses CAMERA z."""
+    total = 0
+    for corner_number in corners:
+        x, y, z = camera_points[corner_number]
+        total = (total + z)
+    return (total / len(corners))
+
+
+def is_facing_you(face_points):
+    """(Lesson 3) the clock test: True if clockwise on the screen."""
+    a_x, a_y = face_points[0]
+    b_x, b_y = face_points[1]
+    c_x, c_y = face_points[2]
+    arrow_a_x = (b_x - a_x)
+    arrow_a_y = (b_y - a_y)
+    arrow_b_x = (c_x - a_x)
+    arrow_b_y = (c_y - a_y)
+    cross = ( (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x) )
+    return (cross &gt; 0)
+
+
+def dot(arrow_1, arrow_2):
+    """(Lesson 3) the dot product."""
+    x1, y1, z1 = arrow_1
+    x2, y2, z2 = arrow_2
+    return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
+
+
+def shade_colour(colour, pointer):
+    """(Lesson 3) brighter when the face points at the light."""
+    brightness = dot(pointer, LIGHT)
+    if brightness &lt; 0:
+        brightness = 0
+    shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )
+    red, green, blue = colour
+    return ( round(red * shade), round(green * shade), round(blue * shade) )
+
+
+def keep_under_360(angle):
+    """Keep an angle between 0 and 360."""
+    if angle &gt;= 360:
+        angle = (angle - 360)
+    if angle &lt; 0:
+        angle = (angle + 360)
+    return angle
+
+
+def add_faces_of(thing, faces_to_draw):
+    """(Lesson 5) work out every face of ONE thing and add the ones to
+    paint to the shared list (unchanged from Lesson 6)."""
+    model = thing["model"]
+    camera_points = []
+    screen_points = []
+    for p in model["points"]:
+        world = to_world(p, thing)                     # WORLD
+        camera = to_camera(world)                      # CAMERA
+        camera_points.append(camera)
+        if camera[2] &gt;= NEAR:
+            screen_points.append(project(camera))      # SCREEN
+        else:
+            screen_points.append(None)
+
+    for corners, face_colour, pointer in model["faces"]:
+        too_close = False
+        for corner_number in corners:
+            if camera_points[corner_number][2] &lt; NEAR:
+                too_close = True
+        if too_close:
+            continue
+        face_points = []
+        for corner_number in corners:
+            face_points.append(screen_points[corner_number])
+        if not is_facing_you(face_points):
+            continue
+        distance = average_z(corners, camera_points)
+        colour = thing["colour"]
+        if use_light:
+            spun_pointer = matrix_times_point(thing["matrix"], pointer)
+            colour = shade_colour(colour, spun_pointer)
+        faces_to_draw.append( (distance, face_points, colour) )
+
+
+def draw_floor():
+    """(Lesson 5) the floor grid, in 1-unit pieces (now -12 to 12)."""
+    for x in range(GRID_LEFT, (GRID_RIGHT + 1)):
+        for z in range(GRID_NEAR, GRID_FAR):
+            draw_floor_piece( (x, FLOOR_Y, z), (x, FLOOR_Y, (z + 1)) )
+    for z in range(GRID_NEAR, (GRID_FAR + 1)):
+        for x in range(GRID_LEFT, GRID_RIGHT):
+            draw_floor_piece( (x, FLOOR_Y, z), ((x + 1), FLOOR_Y, z) )
+
+
+def draw_floor_piece(world_start, world_end):
+    """(Lesson 5) one 1-unit piece of floor line."""
+    start = to_camera(world_start)
+    end = to_camera(world_end)
+    if (start[2] &lt; NEAR) or (end[2] &lt; NEAR):
+        return
+    pygame.draw.line(screen, GRID_COLOUR, project(start), project(end), 1)
+
+
+# ======================================================================
+# THE GAME TOOLS (Lesson 7)
+# ======================================================================
+
+def distance_3d(point_a, point_b):
+    """NEW: how far apart are two WORLD points? (lesson Part 2)
+
+    Subtract, square each part, add them up, square-root the total:
+    Pythagoras done twice, in one line.
+
+    Worked example (lesson Part 2): you at (1, 0, 3), cube 0 at (3, 1, 5)
+        dx = (3 - 1) = 2,  dy = (1 - 0) = 1,  dz = (5 - 3) = 2
+        math.sqrt( (2 * 2) + (1 * 1) + (2 * 2) ) = math.sqrt(9) = 3
+    """
+    ax, ay, az = point_a
+    bx, by, bz = point_b
+    dx = (bx - ax)
+    dy = (by - ay)
+    dz = (bz - az)
+    return math.sqrt( (dx * dx) + (dy * dy) + (dz * dz) )
+
+
+def to_map(x, z):
+    """A WORLD (x, z) -&gt; a pixel on the mini-map (from Lesson 4)."""
+    map_x = MAP_CX + (x * MAP_SCALE)
+    map_y = MAP_CY - (z * MAP_SCALE)
+    return (map_x, map_y)
+
+
+def draw_map():
+    """The mini-map: the wall square, every cube, and you, from above."""
+    box = pygame.Rect(MAP_LEFT, MAP_TOP, MAP_SIZE, MAP_SIZE)
+    pygame.draw.rect(screen, MAP_BACK, box)
+    screen.set_clip(box)
+    # NEW: the walls: from map (-12, 12) to map (12, -12)
+    wall_left, wall_top = to_map((-WALL), WALL)          # (638, 438)
+    wall_size = ( (2 * WALL) * MAP_SCALE )                # (24 * 6) = 144
+    pygame.draw.rect(screen, WALL_RED,
+                     pygame.Rect(wall_left, wall_top, wall_size, wall_size), 1)
+    # Each cube's 4 bottom corners (from Lesson 5): a small gold square.
+    for thing in things:
+        outline = []
+        for corner_number in (0, 1, 2, 3):
+            corner = thing["model"]["points"][corner_number]
+            x, y, z = to_world(corner, thing)
+            outline.append(to_map(x, z))
+        pygame.draw.polygon(screen, thing["colour"], outline, 2)
+    # You: pink dot and a line the way your BODY faces.
+    forward_x, forward_y, forward_z = column(turn_matrix(cam_turn), 2)
+    you = to_map(cam_x, cam_z)
+    nose = to_map( (cam_x + (forward_x * 1.5)), (cam_z + (forward_z * 1.5)) )
+    pygame.draw.line(screen, PINK, you, nose, 2)
+    pygame.draw.circle(screen, PINK, you, 4)
+    screen.set_clip(None)
+    pygame.draw.rect(screen, WHITE, box, 1)
+
+
+# ======================================================================
+# THE MAIN LOOP
+# ======================================================================
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_l:
+                use_light = not use_light
+            if event.key == pygame.K_g:
+                show_grid = not show_grid
+            if event.key == pygame.K_r:          # back to the start
+                cam_x = 0
+                cam_y = 0
+                cam_z = 0
+                cam_turn = 0
+                cam_tip = 0
+                things = make_pickups()
+
+    keys = pygame.key.get_pressed()
+
+    # ---- Turning and looking (from Lesson 4, unchanged) ----------
+    if keys[pygame.K_LEFT]:
+        cam_turn = (cam_turn + TURN_SPEED)
+    if keys[pygame.K_RIGHT]:
+        cam_turn = (cam_turn - TURN_SPEED)
+    if keys[pygame.K_UP]:
+        cam_tip = (cam_tip - TURN_SPEED)
+    if keys[pygame.K_DOWN]:
+        cam_tip = (cam_tip + TURN_SPEED)
+    if cam_tip &gt; TIP_LIMIT:
+        cam_tip = TIP_LIMIT
+    if cam_tip &lt; (-TIP_LIMIT):
+        cam_tip = (-TIP_LIMIT)
+
+    # ---- Walking (from Lesson 6, unchanged): forward and right are
+    # columns of your turn matrix, so you walk level.
+    body_turn = turn_matrix(cam_turn)
+    forward_x, forward_y, forward_z = column(body_turn, 2)
+    right_x, right_y, right_z = column(body_turn, 0)
+    if keys[pygame.K_w]:
+        cam_x = (cam_x + (forward_x * MOVE_SPEED))
+        cam_z = (cam_z + (forward_z * MOVE_SPEED))
+    if keys[pygame.K_s]:
+        cam_x = (cam_x - (forward_x * MOVE_SPEED))
+        cam_z = (cam_z - (forward_z * MOVE_SPEED))
+    if keys[pygame.K_d]:
+        cam_x = (cam_x + (right_x * MOVE_SPEED))
+        cam_z = (cam_z + (right_z * MOVE_SPEED))
+    if keys[pygame.K_a]:
+        cam_x = (cam_x - (right_x * MOVE_SPEED))
+        cam_z = (cam_z - (right_z * MOVE_SPEED))
+    if keys[pygame.K_e]:
+        cam_y = (cam_y + MOVE_SPEED)
+    if keys[pygame.K_q]:
+        cam_y = (cam_y - MOVE_SPEED)
+
+    # ---- Every pickup spins (Lesson 5) ---------------------------------
+    for thing in things:
+        angles = thing["angles"]
+        speeds = thing["speeds"]
+        angles[0] = keep_under_360( (angles[0] + speeds[0]) )
+        angles[1] = keep_under_360( (angles[1] + speeds[1]) )
+        angles[2] = keep_under_360( (angles[2] + speeds[2]) )
+        thing["matrix"] = spin_matrix(angles)
+
+    # ---- The camera's matrix, once a frame (Lesson 6) ------------------
+    camera_matrix = combine(turn_matrix(-cam_turn), tip_matrix(-cam_tip))
+
+    # ==================================================================
+    # DRAW: the world first, then the HUD on top (lesson Part 2)
+    # ==================================================================
+    screen.fill(BLACK)
+    if show_grid:
+        draw_floor()
+    faces_to_draw = []
+    for thing in things:
+        add_faces_of(thing, faces_to_draw)
+    faces_to_draw.sort(reverse=True)
+    for distance, face_points, colour in faces_to_draw:
+        pygame.draw.polygon(screen, colour, face_points)
+        pygame.draw.polygon(screen, BLACK, face_points, 2)
+
+    draw_map()
+
+    # ---- NEW: how far is the nearest cube? -------------------------
+    # Start with a huge number, then keep the smallest distance found.
+    nearest = 1000
+    for thing in things:
+        d = distance_3d((cam_x, cam_y, cam_z), thing["position"])
+        if d &lt; nearest:
+            nearest = d
+
+    # ---- The HUD: words drawn LAST, so no cube can hide them -----------
+    # str() turns a number into letters so + can join it to words.
+    text = ("nearest cube " + str(round(nearest, 1)))
+    screen.blit(font.render(text, True, PINK), (20, 20))
+    screen.blit(font.render("ARROWS turn and look,  W A S D walk,  Q / E down / up,  R reset",
+                            True, YELLOW), (20, 570))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Add a 9th spot to START_SPOTS. Where does it show on the mini-map?
+#   * Change PICKUP_SIZE to 1 (Lesson 1's cube size). How much harder is
+#     it to see the floor behind them?
+#   * Print distance_3d((1, 0, 3), (3, 1, 5)). Do you get the lesson's 3?
+#   * Make "nearest cube" turn GREEN when it is under 2.
+# ----------------------------------------------------------------------
+</code></pre></details>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q3</span><span>How far is cube 3, at (−6, 1, 3), from the start (0, 0, 0)?</span></p><details><summary>Show answer</summary><div class="ans"><p><code>math.sqrt( (-6 * -6) + (1 * 1) + (3 * 3) )</code> = <code>math.sqrt(36 + 1 + 9)</code> = <code>math.sqrt(46)</code> = 6.78.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q4</span><span>You are at (2, 0, 6). How far is cube 1, at (−2, 0, 8)?</span></p><details><summary>Show answer</summary><div class="ans"><p>dx = <code>(-2 - 2)</code> = −4, dy = 0, dz = <code>(8 - 6)</code> = 2. <code>math.sqrt( (-4 * -4) + (0 * 0) + (2 * 2) )</code> = <code>math.sqrt(16 + 0 + 4)</code> = <code>math.sqrt(20)</code> = 4.47.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q5</span><span>In Q4, dx was −4. Why didn't we have to remove the minus sign before squaring?</span></p><details><summary>Show answer</summary><div class="ans"><p>Squaring removes it for us: <code>(-4 * -4)</code> = 16, the same as <code>(4 * 4)</code>.</p></div></details></div>
+</div>
+
+<h2>Part 3: Collecting <span class="mins">6 MIN</span></h2>
+<p>Now "touch" can have an exact meaning: you touch a cube when your eye is within <code>COLLECT_RADIUS</code> of its centre. Picture a bubble round each cube:</p>
+<figure id="fig-7-3-1"><img src="images/g13_collect_bubble.png" alt="WORLD from above, zoomed in on cube 0. A gold circle of radius 1 surrounds the 1-unit cube. Spot A (distance 0.943) and B (exactly 1.0) are inside; C (1.5) and D (1.789) are outside. A box shows each sum." loading="lazy"><figcaption><span class="fignum">Fig 7.3.1</span>WORLD from above, 1 grid square = 0.5 unit. The test is <code>&lt;=</code>, so B, exactly on the edge, counts. A is lower than the cube and still inside: the bubble is really a ball.</figcaption></figure>
+<p>Why 1.0 and not some other number? Look at what the cube looks like at the moment it is collected:</p>
+<figure id="fig-7-3-2"><img src="images/g14_radius_choice.png" alt="Three cases. Radius 2.0: the face is 1.5 away and 267 px wide, still looking far off. Radius 1.0: the face is 0.5 away and 800 px wide, filling the window. Radius 0.5: the face is 0 away, inside NEAR, so nothing is drawn." loading="lazy"><figcaption><span class="fignum">Fig 7.3.2</span>Top: WORLD from above, you pink, the cube gold. Bottom: the 800 × 600 window at half size. At 1.0 the face fills the whole window width, so the collect happens exactly when it looks like you have touched it.<span class="panels">Panels: <b>7.3.2a</b> (left column) COLLECT_RADIUS 2.0 · <b>7.3.2b</b> (middle column) COLLECT_RADIUS 1.0 · <b>7.3.2c</b> (right column) COLLECT_RADIUS 0.5</span></figcaption></figure>
+<pre><code>COLLECT_RADIUS = 1.0
+
+you = (cam_x, cam_y, cam_z)
+for thing in things:
+    if distance_3d(you, thing["position"]) &lt;= COLLECT_RADIUS:
+        score = (score + 1)
+        thing["position"] = new_pickup_spot()     # Part 4</code></pre>
+<p>Notice that we never remove the cube from the list. The same cube just moves, so there are always exactly 8 to find.</p>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q6</span><span>You are at (3, 1.6, 5.5). Do you collect cube 0, at (3, 1, 5)?</span></p><details><summary>Show answer</summary><div class="ans"><p>dx = 0, dy = <code>(1 - 1.6)</code> = −0.6, dz = <code>(5 - 5.5)</code> = −0.5. <code>math.sqrt( (0 * 0) + (-0.6 * -0.6) + (-0.5 * -0.5) )</code> = <code>math.sqrt(0 + 0.36 + 0.25)</code> = <code>math.sqrt(0.61)</code> = 0.781. That is 1.0 or less, so yes.</p></div></details></div>
+</div>
+
+<h2>Part 4: A new spot <span class="mins">7 MIN</span></h2>
+<p>A collected cube needs somewhere new to go. If we used a fixed list, you would learn the whole route. Python's <code>random</code> module picks a fresh number every time:</p>
+<figure id="fig-7-4-1"><img src="images/g15_random_uniform.png" alt="A number line from -10 to 10 with five random picks marked: -7.3, -0.42, 2.05, 4.6 and 9.81. Boxes show five calls and their answers, and the three calls that make one new spot." loading="lazy"><figcaption><span class="fignum">Fig 7.4.1</span><code>random.uniform(low, high)</code> gives any number from low to high, decimals included, and a different one every call. Put <code>import random</code> at the top of the script.</figcaption></figure>
+<p>There is one problem: the new spot might be right next to you, and you would score again straight away without flying anywhere. So we check the new spot's distance from you, and if it is too close we pick again:</p>
+<figure id="fig-7-4-2"><img src="images/g16_spawn_rule.png" alt="WORLD from above. You are at (3,0.5,4.2) inside a red circle of radius 5. Try 1 at (5.1,0.4,6.9) is 3.42 away, inside the circle, and rejected. Try 2 at (-7.3,1.2,4.6) is 10.33 away and kept." loading="lazy"><figcaption><span class="fignum">Fig 7.4.2</span>You have just collected cube 0. The red circle is everything closer than <code>MIN_SPAWN_DISTANCE = 5</code>. The <code>while</code> loop keeps trying until a spot lands outside it.</figcaption></figure>
+<pre><code>MIN_SPAWN_DISTANCE = 5
+PICKUP_LOW = 0          # cube centres float from your eye height...
+PICKUP_HIGH = 2         # ...to 2 above it
+
+def new_pickup_spot():
+    you = (cam_x, cam_y, cam_z)
+    while True:
+        new_x = random.uniform((-FIELD), FIELD)
+        new_y = random.uniform(PICKUP_LOW, PICKUP_HIGH)
+        new_z = random.uniform((-FIELD), FIELD)
+        spot = (new_x, new_y, new_z)
+        if distance_3d(you, spot) &gt;= MIN_SPAWN_DISTANCE:
+            return spot</code></pre>
+<p><code>while True:</code> means "repeat for ever". It is safe here because <code>return</code> jumps straight out of the function as soon as a good spot turns up, and about 4 tries in 5 are good first time.</p>
+<h3>Run it: step 2</h3>
+<p>Run <code>step2_collect.py</code>. You still walk level, so for a cube above your eye, press E to rise to it. Walk into cube 0 and watch it vanish and reappear on the mini-map.</p>
+<figure id="fig-7-4-3"><img src="images/run_step2_collect.png" alt="Output of step 2: score 1, nearest cube 5.2, gold cubes over the floor grid, and the mini-map with cube 0 moved to a new spot." loading="lazy"><figcaption><span class="fignum">Fig 7.4.3</span>Turned right, rose 1 unit with E and walked into cube 0: score 1. Cube 0 has jumped to a random spot at least 5 away; the nearest cube is now 5.2 away.</figcaption></figure>
+<details class="full"><summary>Full code: <code>step2_collect.py</code> (about 610 lines)</summary><pre><code># ======================================================================
+# LESSON 7 - STEP 2: COLLECT THE CUBES
+# ----------------------------------------------------------------------
+# Goal: walk into a gold cube to collect it. Your score goes up by 1
+# and the cube jumps to a new random spot somewhere else.
+#
+# What is new since step 1:
+#
+#   1. COLLECT_RADIUS = 1.0  (lesson Part 3)
+#        Each frame, for every cube: if distance_3d(you, its centre)
+#        is 1.0 or less, you have touched it.
+#            score = (score + 1)
+#
+#   2. new_pickup_spot()  (lesson Part 4)
+#        Three calls to random.uniform make a new spot:
+#            x and z from -10 to 10 (FIELD),  y from 0 to 2
+#        If the spot is closer than MIN_SPAWN_DISTANCE (5) to you,
+#        it simply picks again.
+#
+#   3. The score is shown in the top-left corner.
+#
+# You still WALK level (Lesson 6). Look up at a high cube and press E
+# to rise up to it. Step 3 lets you fly where you look.
+#
+# Controls:  LEFT / RIGHT = turn,   UP / DOWN = look up / down
+#            W / S = walk forward / back,   A / D = step left / right
+#            Q / E = go down / up,   R = reset
+#            G = floor grid on / off,   L = light on / off
+# Run:  python step2_collect.py
+# ======================================================================
+
+import math
+import random                 # NEW: for random.uniform
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Lesson 7, step 2 - collect the cubes")
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+PINK = (255, 105, 200)        # the colour we use for YOU (the camera)
+MAP_BACK = (25, 30, 36)       # dark grey-blue behind the mini-map
+GRID_COLOUR = (40, 90, 70)    # (Lesson 5) dim green for the floor lines
+WALL_RED = (235, 80, 80)      # (step 1) the wall square on the mini-map
+SUN_GOLD = (250, 200, 70)     # (step 1) the colour of every pickup cube
+
+# ---- One colour for each face direction (from Lesson 3) ---------------
+RED = (235, 80, 80)          # front (-z)
+PURPLE = (160, 100, 230)     # back  (+z)
+BLUE = (70, 150, 255)        # left  (-x)
+GREEN = (70, 210, 120)       # right (+x)
+GOLD = (245, 200, 60)        # top   (+y)
+ORANGE = (245, 140, 50)      # bottom (-y)
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400
+
+
+# ======================================================================
+# MODELS (from Lesson 5, unchanged)
+# ======================================================================
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+# (corners clockwise from outside,  colour,  pointer)
+cube_faces = [
+    ((4, 5, 1, 0), RED,    ( 0,  0, -1)),   # front
+    ((6, 7, 3, 2), PURPLE, ( 0,  0,  1)),   # back
+    ((7, 4, 0, 3), BLUE,   (-1,  0,  0)),   # left
+    ((5, 6, 2, 1), GREEN,  ( 1,  0,  0)),   # right
+    ((7, 6, 5, 4), GOLD,   ( 0,  1,  0)),   # top
+    ((2, 3, 0, 1), ORANGE, ( 0, -1,  0)),   # bottom
+]
+cube_model = {"points": cube_points, "faces": cube_faces}
+
+
+# ======================================================================
+# THE PLAYING FIELD (lesson Part 1)
+# ======================================================================
+
+# ---- (step 1) the sizes of the field ------------------------------------
+# FIELD = 10: new cubes appear with x and z from -10 to 10, a 20 x 20
+#   square. You fly 3 units a second, so edge to edge is
+#   (20 / 3) = 6.7 seconds: some flying, but never boring.
+# WALL = 12: you can't fly further than 12 from the centre, 2 more than
+#   FIELD, so you can always fly round a cube at the edge.
+FIELD = 10
+WALL = 12
+
+# ---- (step 1) the floor (from Lesson 5), now as big as the walls --------
+FLOOR_Y = -1
+GRID_LEFT = (-WALL)       # -12
+GRID_RIGHT = WALL         # 12
+GRID_NEAR = (-WALL)       # -12
+GRID_FAR = WALL           # 12
+
+# ---- (step 1) the pickups ------------------------------------------------
+# PICKUP_SIZE = 0.5: Lesson 5's "size", so each cube is 1 unit wide
+#   (its corners are at -0.5 and 0.5). A 1-unit face 5 away is
+#   ((1 * 400) / 5) = 80 px wide; 20 away it is 20 px (lesson Part 1).
+PICKUP_SIZE = 0.5
+
+# NEW: cube heights: their centres float from y = 0 to y = 2.
+#   0 is your eye height at the start; the lowest cube's bottom is then
+#   at (0 - 0.5) = -0.5, half a unit above the floor (FLOOR_Y = -1).
+PICKUP_LOW = 0
+PICKUP_HIGH = 2
+
+# (step 1) the 8 spots the cubes start at, in WORLD coordinates.
+# The same every game, so you can learn a good route. Cube 0 at
+# (3, 1, 5) is the lesson's worked example.
+START_SPOTS = [
+    (3, 1, 5),      # 0  ahead and to the right: the first one you see
+    (-2, 0, 8),     # 1
+    (0, 0, 10),     # 2  straight ahead, at the far edge
+    (-6, 1, 3),     # 3
+    (6, 0, -2),     # 4  behind you, to the right
+    (-4, 2, -7),    # 5  behind you, up high
+    (8, 0, 7),      # 6
+    (2, 1, -9),     # 7  far behind you
+]
+
+# NEW: COLLECT_RADIUS = 1.0: you collect a cube when your eye is
+#   1 unit or less from its CENTRE. Its faces are 0.5 from the centre,
+#   so your nose is then 0.5 from a face, which fills the window:
+#   ((1 * 400) / 0.5) = 800 px wide (lesson Part 3).
+COLLECT_RADIUS = 1.0
+
+# NEW: MIN_SPAWN_DISTANCE = 5: a new cube never appears closer than
+#   5 to you, so it is at least (5 / 3) = 1.7 seconds of flying away.
+MIN_SPAWN_DISTANCE = 5
+
+
+def make_pickups():
+    """(step 1) build a fresh list of 8 pickup THINGS (Lesson 5's
+    dictionaries), one at each START_SPOTS position.
+
+    Each one is a small gold cube (size 0.5) that spins slowly so it
+    catches your eye: 1 degree a frame of turn = one turn in 6 seconds,
+    and 0.5 of tip so it wobbles a little too.
+    """
+    pickups = []
+    for spot in START_SPOTS:
+        pickups.append({"model": cube_model, "position": spot,
+                        "size": PICKUP_SIZE, "angles": [0, 0, 0],
+                        "speeds": (0.5, 1, 0), "colour": SUN_GOLD})
+    return pickups
+
+
+# (step 1) "things" is Lesson 5's list of everything in the world.
+# In the game, the world is just the 8 gold cubes.
+things = make_pickups()
+
+# ---- Where YOU are (from Lesson 4) ------------------------------------
+cam_x = 0
+cam_y = 0
+cam_z = 0
+cam_turn = 0        # degrees, positive = turned LEFT
+cam_tip = 0         # degrees, positive = looking DOWN
+TIP_LIMIT = 60
+MOVE_SPEED = 0.05   # (0.05 * 60) = 3 units a second
+TURN_SPEED = 1.5    # (1.5 * 60) = 90 degrees a second
+NEAR = 0.1          # closer than this (CAMERA z) is not drawn
+
+# ---- The light (from Lesson 3, unchanged) -----------------------------
+LIGHT = (0.48, 0.6, -0.64)
+AMBIENT = 0.2
+use_light = True
+show_grid = True
+
+# ---- NEW: the score ---------------------------------------------------
+score = 0
+
+# ---- The mini-map (lesson Part 1: resized for the whole field) ---------
+MAP_LEFT = 630
+MAP_TOP = 430
+MAP_SIZE = 160
+# (step 1) the WORLD centre now sits in the MIDDLE of the box, because
+# the field goes the same distance every way (-12 to 12).
+MAP_CX = (MAP_LEFT + (MAP_SIZE / 2))    # (630 + 80) = 710
+MAP_CY = (MAP_TOP + (MAP_SIZE / 2))     # (430 + 80) = 510
+# (step 1) 6 px per unit: the walls are 24 units across, and
+# (24 * 6) = 144 px fits the 160 px box with 8 px to spare.
+MAP_SCALE = 6
+
+
+# ======================================================================
+# MATRIX TOOLS (from Lesson 6, unchanged)
+# ======================================================================
+
+def matrix_times_point(matrix, point_3d):
+    """Put one point through a matrix: each ROW dotted with the point."""
+    row_0, row_1, row_2 = matrix
+    new_x = dot(row_0, point_3d)
+    new_y = dot(row_1, point_3d)
+    new_z = dot(row_2, point_3d)
+    return (new_x, new_y, new_z)
+
+
+def tip_matrix(angle_degrees):
+    """Lesson 2B's TIP as a grid. x is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (1, 0,     0         ),
+        (0, cos_a, (-sin_a)  ),
+        (0, sin_a, cos_a     ),
+    )
+
+
+def turn_matrix(angle_degrees):
+    """Lesson 2's TURN as a grid. y is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, 0, (-sin_a)),
+        (0,     1, 0       ),
+        (sin_a, 0, cos_a   ),
+    )
+
+
+def roll_matrix(angle_degrees):
+    """Lesson 2B's ROLL as a grid. z is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, (-sin_a), 0),
+        (sin_a, cos_a,    0),
+        (0,     0,        1),
+    )
+
+
+def column(matrix, column_number):
+    """One COLUMN of a matrix = where that axis arrow lands."""
+    row_0, row_1, row_2 = matrix
+    return (row_0[column_number], row_1[column_number], row_2[column_number])
+
+
+def combine(first, second):
+    """ONE matrix that does 'first', then 'second' (Lesson 6)."""
+    new_col_0 = matrix_times_point(second, column(first, 0))
+    new_col_1 = matrix_times_point(second, column(first, 1))
+    new_col_2 = matrix_times_point(second, column(first, 2))
+    return (
+        (new_col_0[0], new_col_1[0], new_col_2[0]),
+        (new_col_0[1], new_col_1[1], new_col_2[1]),
+        (new_col_0[2], new_col_1[2], new_col_2[2]),
+    )
+
+
+def spin_matrix(angles):
+    """A thing's whole spin as ONE matrix: tip, then turn, then roll."""
+    tip_then_turn = combine(tip_matrix(angles[0]), turn_matrix(angles[1]))
+    return combine(tip_then_turn, roll_matrix(angles[2]))
+
+
+# ======================================================================
+# THE 3D PIPELINE (Lessons 1 to 6, unchanged)
+# ======================================================================
+
+def to_world(shape_point, thing):
+    """(Lesson 5) SHAPE -&gt; WORLD: size, then spin, then place."""
+    x, y, z = shape_point
+    size = thing["size"]
+    sized = ( (x * size), (y * size), (z * size) )
+    spun = matrix_times_point(thing["matrix"], sized)
+    pos_x, pos_y, pos_z = thing["position"]
+    sx, sy, sz = spun
+    return ( (sx + pos_x), (sy + pos_y), (sz + pos_z) )
+
+
+def to_camera(world_point):
+    """(Lessons 4 and 6) WORLD -&gt; CAMERA: subtract you, then camera_matrix."""
+    x, y, z = world_point
+    moved = ( (x - cam_x), (y - cam_y), (z - cam_z) )
+    return matrix_times_point(camera_matrix, moved)
+
+
+def project(point_3d):
+    """(Lesson 1) CAMERA -&gt; SCREEN. Only call it with z &gt;= NEAR."""
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+def average_z(corners, camera_points):
+    """(Lesson 3) how far away is this face? Uses CAMERA z."""
+    total = 0
+    for corner_number in corners:
+        x, y, z = camera_points[corner_number]
+        total = (total + z)
+    return (total / len(corners))
+
+
+def is_facing_you(face_points):
+    """(Lesson 3) the clock test: True if clockwise on the screen."""
+    a_x, a_y = face_points[0]
+    b_x, b_y = face_points[1]
+    c_x, c_y = face_points[2]
+    arrow_a_x = (b_x - a_x)
+    arrow_a_y = (b_y - a_y)
+    arrow_b_x = (c_x - a_x)
+    arrow_b_y = (c_y - a_y)
+    cross = ( (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x) )
+    return (cross &gt; 0)
+
+
+def dot(arrow_1, arrow_2):
+    """(Lesson 3) the dot product."""
+    x1, y1, z1 = arrow_1
+    x2, y2, z2 = arrow_2
+    return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
+
+
+def shade_colour(colour, pointer):
+    """(Lesson 3) brighter when the face points at the light."""
+    brightness = dot(pointer, LIGHT)
+    if brightness &lt; 0:
+        brightness = 0
+    shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )
+    red, green, blue = colour
+    return ( round(red * shade), round(green * shade), round(blue * shade) )
+
+
+def keep_under_360(angle):
+    """Keep an angle between 0 and 360."""
+    if angle &gt;= 360:
+        angle = (angle - 360)
+    if angle &lt; 0:
+        angle = (angle + 360)
+    return angle
+
+
+def add_faces_of(thing, faces_to_draw):
+    """(Lesson 5) work out every face of ONE thing and add the ones to
+    paint to the shared list (unchanged from Lesson 6)."""
+    model = thing["model"]
+    camera_points = []
+    screen_points = []
+    for p in model["points"]:
+        world = to_world(p, thing)                     # WORLD
+        camera = to_camera(world)                      # CAMERA
+        camera_points.append(camera)
+        if camera[2] &gt;= NEAR:
+            screen_points.append(project(camera))      # SCREEN
+        else:
+            screen_points.append(None)
+
+    for corners, face_colour, pointer in model["faces"]:
+        too_close = False
+        for corner_number in corners:
+            if camera_points[corner_number][2] &lt; NEAR:
+                too_close = True
+        if too_close:
+            continue
+        face_points = []
+        for corner_number in corners:
+            face_points.append(screen_points[corner_number])
+        if not is_facing_you(face_points):
+            continue
+        distance = average_z(corners, camera_points)
+        colour = thing["colour"]
+        if use_light:
+            spun_pointer = matrix_times_point(thing["matrix"], pointer)
+            colour = shade_colour(colour, spun_pointer)
+        faces_to_draw.append( (distance, face_points, colour) )
+
+
+def draw_floor():
+    """(Lesson 5) the floor grid, in 1-unit pieces (now -12 to 12)."""
+    for x in range(GRID_LEFT, (GRID_RIGHT + 1)):
+        for z in range(GRID_NEAR, GRID_FAR):
+            draw_floor_piece( (x, FLOOR_Y, z), (x, FLOOR_Y, (z + 1)) )
+    for z in range(GRID_NEAR, (GRID_FAR + 1)):
+        for x in range(GRID_LEFT, GRID_RIGHT):
+            draw_floor_piece( (x, FLOOR_Y, z), ((x + 1), FLOOR_Y, z) )
+
+
+def draw_floor_piece(world_start, world_end):
+    """(Lesson 5) one 1-unit piece of floor line."""
+    start = to_camera(world_start)
+    end = to_camera(world_end)
+    if (start[2] &lt; NEAR) or (end[2] &lt; NEAR):
+        return
+    pygame.draw.line(screen, GRID_COLOUR, project(start), project(end), 1)
+
+
+# ======================================================================
+# THE GAME TOOLS (Lesson 7)
+# ======================================================================
+
+def distance_3d(point_a, point_b):
+    """(step 1) how far apart are two WORLD points? (lesson Part 2)
+
+    Subtract, square each part, add them up, square-root the total:
+    Pythagoras done twice, in one line.
+
+    Worked example (lesson Part 2): you at (1, 0, 3), cube 0 at (3, 1, 5)
+        dx = (3 - 1) = 2,  dy = (1 - 0) = 1,  dz = (5 - 3) = 2
+        math.sqrt( (2 * 2) + (1 * 1) + (2 * 2) ) = math.sqrt(9) = 3
+    """
+    ax, ay, az = point_a
+    bx, by, bz = point_b
+    dx = (bx - ax)
+    dy = (by - ay)
+    dz = (bz - az)
+    return math.sqrt( (dx * dx) + (dy * dy) + (dz * dz) )
+
+
+def new_pickup_spot():
+    """NEW: a random WORLD spot for a cube, at least
+    MIN_SPAWN_DISTANCE from you (lesson Part 4).
+
+    "while True" repeats for ever, until "return" jumps out. Usually the
+    first try is far enough; about 1 try in 5 is too close and we
+    simply pick again.
+    """
+    you = (cam_x, cam_y, cam_z)
+    while True:
+        new_x = random.uniform((-FIELD), FIELD)
+        new_y = random.uniform(PICKUP_LOW, PICKUP_HIGH)
+        new_z = random.uniform((-FIELD), FIELD)
+        spot = (new_x, new_y, new_z)
+        if distance_3d(you, spot) &gt;= MIN_SPAWN_DISTANCE:
+            return spot
+
+
+def to_map(x, z):
+    """A WORLD (x, z) -&gt; a pixel on the mini-map (from Lesson 4)."""
+    map_x = MAP_CX + (x * MAP_SCALE)
+    map_y = MAP_CY - (z * MAP_SCALE)
+    return (map_x, map_y)
+
+
+def draw_map():
+    """The mini-map: the wall square, every cube, and you, from above."""
+    box = pygame.Rect(MAP_LEFT, MAP_TOP, MAP_SIZE, MAP_SIZE)
+    pygame.draw.rect(screen, MAP_BACK, box)
+    screen.set_clip(box)
+    # (step 1) the walls: from map (-12, 12) to map (12, -12)
+    wall_left, wall_top = to_map((-WALL), WALL)          # (638, 438)
+    wall_size = ( (2 * WALL) * MAP_SCALE )                # (24 * 6) = 144
+    pygame.draw.rect(screen, WALL_RED,
+                     pygame.Rect(wall_left, wall_top, wall_size, wall_size), 1)
+    # Each cube's 4 bottom corners (from Lesson 5): a small gold square.
+    for thing in things:
+        outline = []
+        for corner_number in (0, 1, 2, 3):
+            corner = thing["model"]["points"][corner_number]
+            x, y, z = to_world(corner, thing)
+            outline.append(to_map(x, z))
+        pygame.draw.polygon(screen, thing["colour"], outline, 2)
+    # You: pink dot and a line the way your BODY faces.
+    forward_x, forward_y, forward_z = column(turn_matrix(cam_turn), 2)
+    you = to_map(cam_x, cam_z)
+    nose = to_map( (cam_x + (forward_x * 1.5)), (cam_z + (forward_z * 1.5)) )
+    pygame.draw.line(screen, PINK, you, nose, 2)
+    pygame.draw.circle(screen, PINK, you, 4)
+    screen.set_clip(None)
+    pygame.draw.rect(screen, WHITE, box, 1)
+
+
+# ======================================================================
+# THE MAIN LOOP
+# ======================================================================
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_l:
+                use_light = not use_light
+            if event.key == pygame.K_g:
+                show_grid = not show_grid
+            if event.key == pygame.K_r:          # back to the start
+                cam_x = 0
+                cam_y = 0
+                cam_z = 0
+                cam_turn = 0
+                cam_tip = 0
+                things = make_pickups()
+                score = 0
+
+    keys = pygame.key.get_pressed()
+
+    # ---- Turning and looking (from Lesson 4, unchanged) ----------
+    if keys[pygame.K_LEFT]:
+        cam_turn = (cam_turn + TURN_SPEED)
+    if keys[pygame.K_RIGHT]:
+        cam_turn = (cam_turn - TURN_SPEED)
+    if keys[pygame.K_UP]:
+        cam_tip = (cam_tip - TURN_SPEED)
+    if keys[pygame.K_DOWN]:
+        cam_tip = (cam_tip + TURN_SPEED)
+    if cam_tip &gt; TIP_LIMIT:
+        cam_tip = TIP_LIMIT
+    if cam_tip &lt; (-TIP_LIMIT):
+        cam_tip = (-TIP_LIMIT)
+
+    # ---- Walking (from Lesson 6, unchanged): forward and right are
+    # columns of your turn matrix, so you walk level.
+    body_turn = turn_matrix(cam_turn)
+    forward_x, forward_y, forward_z = column(body_turn, 2)
+    right_x, right_y, right_z = column(body_turn, 0)
+    if keys[pygame.K_w]:
+        cam_x = (cam_x + (forward_x * MOVE_SPEED))
+        cam_z = (cam_z + (forward_z * MOVE_SPEED))
+    if keys[pygame.K_s]:
+        cam_x = (cam_x - (forward_x * MOVE_SPEED))
+        cam_z = (cam_z - (forward_z * MOVE_SPEED))
+    if keys[pygame.K_d]:
+        cam_x = (cam_x + (right_x * MOVE_SPEED))
+        cam_z = (cam_z + (right_z * MOVE_SPEED))
+    if keys[pygame.K_a]:
+        cam_x = (cam_x - (right_x * MOVE_SPEED))
+        cam_z = (cam_z - (right_z * MOVE_SPEED))
+    if keys[pygame.K_e]:
+        cam_y = (cam_y + MOVE_SPEED)
+    if keys[pygame.K_q]:
+        cam_y = (cam_y - MOVE_SPEED)
+
+    # ---- NEW: collect any cube you are touching (lesson Part 3) ---
+    you = (cam_x, cam_y, cam_z)
+    for thing in things:
+        if distance_3d(you, thing["position"]) &lt;= COLLECT_RADIUS:
+            score = (score + 1)
+            # NEW: the same cube jumps to a new spot (Part 4):
+            # there are always exactly 8 cubes to find.
+            thing["position"] = new_pickup_spot()
+
+    # ---- Every pickup spins (Lesson 5) ---------------------------------
+    for thing in things:
+        angles = thing["angles"]
+        speeds = thing["speeds"]
+        angles[0] = keep_under_360( (angles[0] + speeds[0]) )
+        angles[1] = keep_under_360( (angles[1] + speeds[1]) )
+        angles[2] = keep_under_360( (angles[2] + speeds[2]) )
+        thing["matrix"] = spin_matrix(angles)
+
+    # ---- The camera's matrix, once a frame (Lesson 6) ------------------
+    camera_matrix = combine(turn_matrix(-cam_turn), tip_matrix(-cam_tip))
+
+    # ==================================================================
+    # DRAW: the world first, then the HUD on top (lesson Part 2)
+    # ==================================================================
+    screen.fill(BLACK)
+    if show_grid:
+        draw_floor()
+    faces_to_draw = []
+    for thing in things:
+        add_faces_of(thing, faces_to_draw)
+    faces_to_draw.sort(reverse=True)
+    for distance, face_points, colour in faces_to_draw:
+        pygame.draw.polygon(screen, colour, face_points)
+        pygame.draw.polygon(screen, BLACK, face_points, 2)
+
+    draw_map()
+
+    # ---- (step 1) how far is the nearest cube? -------------------------
+    # Start with a huge number, then keep the smallest distance found.
+    nearest = 1000
+    for thing in things:
+        d = distance_3d((cam_x, cam_y, cam_z), thing["position"])
+        if d &lt; nearest:
+            nearest = d
+
+    # ---- The HUD: words drawn LAST, so no cube can hide them -----------
+    # str() turns a number into letters so + can join it to words.
+    text = ("score " + str(score))                         # NEW
+    screen.blit(font.render(text, True, SUN_GOLD), (20, 20))
+    text = ("nearest cube " + str(round(nearest, 1)))
+    screen.blit(font.render(text, True, PINK), (20, 50))
+    screen.blit(font.render("ARROWS turn and look,  W A S D walk,  Q / E down / up,  R reset",
+                            True, YELLOW), (20, 570))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Set MIN_SPAWN_DISTANCE = 0 and print each new spot. How often
+#     does a cube land right next to you?
+#   * Set COLLECT_RADIUS = 3. Does collecting still feel like touching?
+#   * Count how many tries new_pickup_spot() needs: add a counter in
+#     the while loop and print it before "return".
+#   * Make each new cube a random size from 0.3 to 0.7. Should the
+#     COLLECT_RADIUS change with the size?
+# ----------------------------------------------------------------------
+</code></pre></details>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q7</span><span>You are at (0, 0, 0) and <code>random.uniform</code> gives the spot (2, 1, 3). Is it kept?</span></p><details><summary>Show answer</summary><div class="ans"><p><code>math.sqrt( (2 * 2) + (1 * 1) + (3 * 3) )</code> = <code>math.sqrt(14)</code> = 3.74. That is less than 5, so no: the loop goes round and picks again.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q8</span><span>Why is the y range 0 to 2 and not, say, −5 to 5?</span></p><details><summary>Show answer</summary><div class="ans"><p>The floor is at y = −1, so a cube centre below −0.5 would sink into it. And cubes far above you would be out of sight unless you looked up. 0 to 2 keeps every cube between your starting eye height and 2 above it.</p></div></details></div>
+</div>
+
+<h2>Part 5: Fly where you look <span class="mins">8 MIN</span></h2>
+<p>With cubes at different heights, walking level and pressing E is slow. In a flying game, W should take you the way you are <em>looking</em>, up or down too. Lesson 6 built the forward arrow from your turn only. Now we tip it first:</p>
+<figure id="fig-7-5-1"><img src="images/g17_fly_forward.png" alt="Side view, z across and y up: the level arrow (0,0,1), a green arrow tipped up 30 degrees to (0,0.5,0.866), and a red arrow tipped down to (0,-0.5,0.866). Boxes compare the walking and flying code and work through one second of W." loading="lazy"><figcaption><span class="fignum">Fig 7.5.1</span>CAMERA arrows from the side; each is exactly 1 long. Column 2 of a matrix is where the +z arrow lands (Lesson 6), so it is the way you face.</figcaption></figure>
+<p>When you are also turned, the order matters, just as in Lesson 4: the head nods inside a body that has turned. So tip first, then turn:</p>
+<figure id="fig-7-5-2"><img src="images/g18_fly_chain.png" alt="Left, from the side: column 2 of tip_matrix(-30) is (0,0.5,0.866). Right, WORLD from above: turn_matrix(90) swings it to (-0.866,0.5,0), pointing left. Below, the row-by-row working." loading="lazy"><figcaption><span class="fignum">Fig 7.5.2</span>Looking up 30 and turned left 90: W flies you left and up at once, like a plane climbing in a turn.<span class="panels">Panels: <b>7.5.2a</b> (left) 1. column 2 of tip_matrix(-30) · <b>7.5.2b</b> (right) 2. then turn_matrix(90)</span></figcaption></figure>
+<pre><code>look = combine(tip_matrix(cam_tip), turn_matrix(cam_turn))
+forward_x, forward_y, forward_z = column(look, 2)
+right_x, right_y, right_z = column(turn_matrix(cam_turn), 0)   # stays level
+
+if keys[pygame.K_w]:
+    cam_x = (cam_x + (forward_x * MOVE_SPEED))
+    cam_y = (cam_y + (forward_y * MOVE_SPEED))    # NEW: y moves too
+    cam_z = (cam_z + (forward_z * MOVE_SPEED))</code></pre>
+<p>The right arrow still comes from your turn only, so A and D slide you sideways without climbing.</p>
+<h3>Walls, ground and ceiling</h3>
+<p>Now you can fly anywhere, including through the floor and off into the dark. After moving, each frame, we push any number that has gone too far back onto its limit:</p>
+<figure id="fig-7-5-3"><img src="images/g19_walls.png" alt="A number line for cam_x from -12 to 12 with the red WALL box and the gold FIELD box inside it. A point at 12.04 is pushed back to 12. Boxes show the if-statements and why 12, -0.5 and 4 were chosen." loading="lazy"><figcaption><span class="fignum">Fig 7.5.3</span>WORLD x. The same two <code>if</code>s are used for <code>cam_z</code> (WALL) and <code>cam_y</code> (GROUND = −0.5, CEILING = 4), just like <code>TIP_LIMIT</code> in Lesson 4.</figcaption></figure>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q9</span><span>From (0, 0, 0) you look DOWN 30 (<code>cam_tip = 30</code>, <code>cam_turn = 0</code>) and hold W for 1 second. Where do you end up?</span></p><details><summary>Show answer</summary><div class="ans"><p>Forward = column 2 of <code>tip_matrix(30)</code> = <code>(0, (-sin_a), cos_a)</code> = (0, −0.5, 0.866). In 60 frames: y = <code>(-0.5 * 0.05 * 60)</code> = −1.5 and z = <code>(0.866 * 0.05 * 60)</code> = 2.598. But y can't go below GROUND: y drops 0.025 a frame, so after 20 frames it reaches −0.5 and stops there. You end at (0, −0.5, 2.598), skimming the floor.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q10</span><span>Looking up 30 and turned RIGHT 90 (<code>cam_turn = -90</code>), which way does W fly you?</span></p><details><summary>Show answer</summary><div class="ans"><p><code>turn_matrix(-90)</code> has rows (0, 0, 1), (0, 1, 0) and (−1, 0, 0). Dot each with (0, 0.5, 0.866): x = <code>(0 * 0) + (0 * 0.5) + (1 * 0.866)</code> = 0.866, y = 0.5, z = <code>(-1 * 0) + (0 * 0.5) + (0 * 0.866)</code> = 0. Forward = (0.866, 0.5, 0): right (+x) and up.</p></div></details></div>
+</div>
+
+<h2>Part 6: The clock and TIME UP <span class="mins">6 MIN</span></h2>
+<p>A game needs an end. The loop already runs 60 frames a second (<code>clock.tick(60)</code>), so the simplest clock just counts frames:</p>
+<figure id="fig-7-6-1"><img src="images/g20_timer.png" alt="A bar from 0 to 3600 frames (0 to 60 s), 70 percent full at 2520 frames, which shows 42. Boxes show the clock code and a table of frames_left, divided by 60, rounded up, and what is shown, down to 0 = TIME UP." loading="lazy"><figcaption><span class="fignum">Fig 7.6.1</span><code>math.ceil</code> rounds <em>up</em>: 59.983 shows as 60, and 0.017 as 1. The screen never says 0 while you can still move.</figcaption></figure>
+<pre><code>GAME_SECONDS = 60
+frames_left = (GAME_SECONDS * 60)      # (60 * 60) = 3600
+
+# every frame while playing:
+frames_left = (frames_left - 1)
+if frames_left &lt;= 0:
+    frames_left = 0
+    game_over = True
+    if score &gt; best_score:
+        best_score = score
+
+# on the HUD:
+seconds = math.ceil(frames_left / 60)</code></pre>
+<p>When the clock hits 0 the game must stop: no moving, no collecting. One True/False variable, <code>game_over</code>, switches the whole program between two jobs:</p>
+<figure id="fig-7-6-2"><img src="images/g21_game_states.png" alt="Two boxes. PLAYING (game_over False): keys move you, cubes are collected, the clock ticks, the world is drawn. TIME UP (game_over True): keys do nothing but R, the world is still drawn with TIME UP on top. Arrows: frames_left hits 0, and R pressed." loading="lazy"><figcaption><span class="fignum">Fig 7.6.2</span>All the moving, collecting and clock code sits inside <code>if not game_over:</code>. The drawing sits outside it, so the world stays on screen behind the TIME UP words.<span class="panels">Panels: <b>7.6.2a</b> (left) PLAYING · <b>7.6.2b</b> (right) TIME UP</span></figcaption></figure>
+<p>"TIME UP" is centred by measuring the words: <code>words.get_width()</code> is how many pixels wide they came out, so <code>left = (CENTRE_X - (words.get_width() / 2))</code> puts their middle on the screen's middle.</p>
+<h3>Run it: step 3, the finished game</h3>
+<p>Run <code>step3_cube_hunt.py</code> and play! Then press R and try to beat your best.</p>
+<figure id="fig-7-6-3"><img src="images/run_step3_cube_hunt.png" alt="Output of step 3 after 1.5 seconds: flying up toward a large tumbling gold cube, nearest cube 2.8, time 59, the floor grid tilted because you are looking up." loading="lazy"><figcaption><span class="fignum">Fig 7.6.3</span>1.5 seconds in: turned right and looking up, W flies you straight at cube 0. The floor grid tilts because you are looking up at the cube.</figcaption></figure>
+<details class="full"><summary>Full code: <code>step3_cube_hunt.py</code> (about 700 lines)</summary><pre><code># ======================================================================
+# LESSON 7 - STEP 3: CUBE HUNT (the finished game)
+# ----------------------------------------------------------------------
+# Goal: a real game. Fly round the field, touch as many gold cubes as
+# you can in 60 seconds, then try to beat your best score.
+#
+# This is the LAST script of the course. It is Lesson 6's finished
+# script (step3_camera_matrix.py) plus the game parts from Lesson 7.
+#
+# What is new since step 2:
+#
+#   1. FLY WHERE YOU LOOK (lesson Part 5)
+#        Lesson 6 walked level: forward = column 2 of turn_matrix.
+#        Now the forward arrow is made from your tip AND your turn:
+#            look    = combine(tip_matrix(cam_tip), turn_matrix(cam_turn))
+#            forward = column(look, 2)
+#        Look up 30 degrees and W climbs: forward = (0, 0.5, 0.866).
+#
+#   2. WALLS, GROUND AND CEILING (lesson Part 5)
+#        After moving, any number past its limit is put back ON it:
+#            cam_x and cam_z stay between -12 and 12  (WALL)
+#            cam_y stays between -0.5 and 4           (GROUND, CEILING)
+#
+#   3. THE CLOCK (lesson Part 6)
+#        frames_left starts at (60 * 60) = 3600 and loses 1 a frame.
+#        The screen shows math.ceil(frames_left / 60) seconds.
+#
+#   4. GAME OVER AND PLAY AGAIN (lesson Part 6)
+#        game_over = True when the clock hits 0. Nothing moves, the
+#        big "TIME UP" shows, and R starts a new game.
+#        best_score remembers your best until you close the window.
+#
+# The game, every frame:
+#
+#   keys -&gt; fly -&gt; walls -&gt; collect? (distance &lt;= 1) -&gt; clock -&gt; draw world -&gt; HUD
+#
+# Controls:  LEFT / RIGHT = turn,   UP / DOWN = look up / down
+#            W / S = fly forward / back (the way you LOOK)
+#            A / D = slide left / right,   Q / E = straight down / up
+#            R = play again (after TIME UP)
+#            G = floor grid on / off,   L = light on / off
+# Run:  python step3_cube_hunt.py
+# ======================================================================
+
+import math
+import random                 # (step 2) for random.uniform
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Lesson 7, step 3 - Cube Hunt")
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+big_font = pygame.font.SysFont(None, 96)    # NEW: for "TIME UP"
+
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+PINK = (255, 105, 200)        # the colour we use for YOU (the camera)
+MAP_BACK = (25, 30, 36)       # dark grey-blue behind the mini-map
+GRID_COLOUR = (40, 90, 70)    # (Lesson 5) dim green for the floor lines
+WALL_RED = (235, 80, 80)      # (step 1) the wall square on the mini-map
+SUN_GOLD = (250, 200, 70)     # (step 1) the colour of every pickup cube
+
+# ---- One colour for each face direction (from Lesson 3) ---------------
+RED = (235, 80, 80)          # front (-z)
+PURPLE = (160, 100, 230)     # back  (+z)
+BLUE = (70, 150, 255)        # left  (-x)
+GREEN = (70, 210, 120)       # right (+x)
+GOLD = (245, 200, 60)        # top   (+y)
+ORANGE = (245, 140, 50)      # bottom (-y)
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400
+
+
+# ======================================================================
+# MODELS (from Lesson 5, unchanged)
+# ======================================================================
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+# (corners clockwise from outside,  colour,  pointer)
+cube_faces = [
+    ((4, 5, 1, 0), RED,    ( 0,  0, -1)),   # front
+    ((6, 7, 3, 2), PURPLE, ( 0,  0,  1)),   # back
+    ((7, 4, 0, 3), BLUE,   (-1,  0,  0)),   # left
+    ((5, 6, 2, 1), GREEN,  ( 1,  0,  0)),   # right
+    ((7, 6, 5, 4), GOLD,   ( 0,  1,  0)),   # top
+    ((2, 3, 0, 1), ORANGE, ( 0, -1,  0)),   # bottom
+]
+cube_model = {"points": cube_points, "faces": cube_faces}
+
+
+# ======================================================================
+# THE PLAYING FIELD (lesson Part 1)
+# ======================================================================
+
+# ---- (step 1) the sizes of the field ------------------------------------
+# FIELD = 10: new cubes appear with x and z from -10 to 10, a 20 x 20
+#   square. You fly 3 units a second, so edge to edge is
+#   (20 / 3) = 6.7 seconds: some flying, but never boring.
+# WALL = 12: you can't fly further than 12 from the centre, 2 more than
+#   FIELD, so you can always fly round a cube at the edge.
+FIELD = 10
+WALL = 12
+
+# ---- (step 1) the floor (from Lesson 5), now as big as the walls --------
+FLOOR_Y = -1
+GRID_LEFT = (-WALL)       # -12
+GRID_RIGHT = WALL         # 12
+GRID_NEAR = (-WALL)       # -12
+GRID_FAR = WALL           # 12
+
+# ---- (step 1) the pickups ------------------------------------------------
+# PICKUP_SIZE = 0.5: Lesson 5's "size", so each cube is 1 unit wide
+#   (its corners are at -0.5 and 0.5). A 1-unit face 5 away is
+#   ((1 * 400) / 5) = 80 px wide; 20 away it is 20 px (lesson Part 1).
+PICKUP_SIZE = 0.5
+
+# (step 2) cube heights: their centres float from y = 0 to y = 2.
+#   0 is your eye height at the start; the lowest cube's bottom is then
+#   at (0 - 0.5) = -0.5, half a unit above the floor (FLOOR_Y = -1).
+PICKUP_LOW = 0
+PICKUP_HIGH = 2
+
+# (step 1) the 8 spots the cubes start at, in WORLD coordinates.
+# The same every game, so you can learn a good route. Cube 0 at
+# (3, 1, 5) is the lesson's worked example.
+START_SPOTS = [
+    (3, 1, 5),      # 0  ahead and to the right: the first one you see
+    (-2, 0, 8),     # 1
+    (0, 0, 10),     # 2  straight ahead, at the far edge
+    (-6, 1, 3),     # 3
+    (6, 0, -2),     # 4  behind you, to the right
+    (-4, 2, -7),    # 5  behind you, up high
+    (8, 0, 7),      # 6
+    (2, 1, -9),     # 7  far behind you
+]
+
+# (step 2) COLLECT_RADIUS = 1.0: you collect a cube when your eye is
+#   1 unit or less from its CENTRE. Its faces are 0.5 from the centre,
+#   so your nose is then 0.5 from a face, which fills the window:
+#   ((1 * 400) / 0.5) = 800 px wide (lesson Part 3).
+COLLECT_RADIUS = 1.0
+
+# (step 2) MIN_SPAWN_DISTANCE = 5: a new cube never appears closer than
+#   5 to you, so it is at least (5 / 3) = 1.7 seconds of flying away.
+MIN_SPAWN_DISTANCE = 5
+
+# ---- NEW: how high and low you can fly (lesson Part 5) -----------------
+# GROUND = -0.5: your eye stays half a unit above the floor (y = -1).
+# CEILING = 4: two more than PICKUP_HIGH, so you can look down on every
+#   cube but never fly off where none could be.
+GROUND = (FLOOR_Y + 0.5)     # (-1 + 0.5) = -0.5
+CEILING = 4
+
+# ---- NEW: the clock (lesson Part 6) -------------------------------------
+# 60 seconds: at 3 units a second that is (3 * 60) = 180 units of
+# flying, enough for a good handful of cubes, short enough to retry.
+GAME_SECONDS = 60
+
+
+def make_pickups():
+    """(step 1) build a fresh list of 8 pickup THINGS (Lesson 5's
+    dictionaries), one at each START_SPOTS position.
+
+    Each one is a small gold cube (size 0.5) that spins slowly so it
+    catches your eye: 1 degree a frame of turn = one turn in 6 seconds,
+    and 0.5 of tip so it wobbles a little too.
+    """
+    pickups = []
+    for spot in START_SPOTS:
+        pickups.append({"model": cube_model, "position": spot,
+                        "size": PICKUP_SIZE, "angles": [0, 0, 0],
+                        "speeds": (0.5, 1, 0), "colour": SUN_GOLD})
+    return pickups
+
+
+# (step 1) "things" is Lesson 5's list of everything in the world.
+# In the game, the world is just the 8 gold cubes.
+things = make_pickups()
+
+# ---- Where YOU are (from Lesson 4) ------------------------------------
+cam_x = 0
+cam_y = 0
+cam_z = 0
+cam_turn = 0        # degrees, positive = turned LEFT
+cam_tip = 0         # degrees, positive = looking DOWN
+TIP_LIMIT = 60
+MOVE_SPEED = 0.05   # (0.05 * 60) = 3 units a second
+TURN_SPEED = 1.5    # (1.5 * 60) = 90 degrees a second
+NEAR = 0.1          # closer than this (CAMERA z) is not drawn
+
+# ---- The light (from Lesson 3, unchanged) -----------------------------
+LIGHT = (0.48, 0.6, -0.64)
+AMBIENT = 0.2
+use_light = True
+show_grid = True
+
+# ---- (step 2) the score ------------------------------------------------
+score = 0
+# ---- NEW: the clock and the game's two states (lesson Part 6) ----------
+best_score = 0                         # NOT reset by R
+frames_left = (GAME_SECONDS * 60)      # (60 * 60) = 3600
+game_over = False                      # False = PLAYING, True = TIME UP
+
+# ---- The mini-map (lesson Part 1: resized for the whole field) ---------
+MAP_LEFT = 630
+MAP_TOP = 430
+MAP_SIZE = 160
+# (step 1) the WORLD centre now sits in the MIDDLE of the box, because
+# the field goes the same distance every way (-12 to 12).
+MAP_CX = (MAP_LEFT + (MAP_SIZE / 2))    # (630 + 80) = 710
+MAP_CY = (MAP_TOP + (MAP_SIZE / 2))     # (430 + 80) = 510
+# (step 1) 6 px per unit: the walls are 24 units across, and
+# (24 * 6) = 144 px fits the 160 px box with 8 px to spare.
+MAP_SCALE = 6
+
+
+# ======================================================================
+# MATRIX TOOLS (from Lesson 6, unchanged)
+# ======================================================================
+
+def matrix_times_point(matrix, point_3d):
+    """Put one point through a matrix: each ROW dotted with the point."""
+    row_0, row_1, row_2 = matrix
+    new_x = dot(row_0, point_3d)
+    new_y = dot(row_1, point_3d)
+    new_z = dot(row_2, point_3d)
+    return (new_x, new_y, new_z)
+
+
+def tip_matrix(angle_degrees):
+    """Lesson 2B's TIP as a grid. x is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (1, 0,     0         ),
+        (0, cos_a, (-sin_a)  ),
+        (0, sin_a, cos_a     ),
+    )
+
+
+def turn_matrix(angle_degrees):
+    """Lesson 2's TURN as a grid. y is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, 0, (-sin_a)),
+        (0,     1, 0       ),
+        (sin_a, 0, cos_a   ),
+    )
+
+
+def roll_matrix(angle_degrees):
+    """Lesson 2B's ROLL as a grid. z is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, (-sin_a), 0),
+        (sin_a, cos_a,    0),
+        (0,     0,        1),
+    )
+
+
+def column(matrix, column_number):
+    """One COLUMN of a matrix = where that axis arrow lands."""
+    row_0, row_1, row_2 = matrix
+    return (row_0[column_number], row_1[column_number], row_2[column_number])
+
+
+def combine(first, second):
+    """ONE matrix that does 'first', then 'second' (Lesson 6)."""
+    new_col_0 = matrix_times_point(second, column(first, 0))
+    new_col_1 = matrix_times_point(second, column(first, 1))
+    new_col_2 = matrix_times_point(second, column(first, 2))
+    return (
+        (new_col_0[0], new_col_1[0], new_col_2[0]),
+        (new_col_0[1], new_col_1[1], new_col_2[1]),
+        (new_col_0[2], new_col_1[2], new_col_2[2]),
+    )
+
+
+def spin_matrix(angles):
+    """A thing's whole spin as ONE matrix: tip, then turn, then roll."""
+    tip_then_turn = combine(tip_matrix(angles[0]), turn_matrix(angles[1]))
+    return combine(tip_then_turn, roll_matrix(angles[2]))
+
+
+# ======================================================================
+# THE 3D PIPELINE (Lessons 1 to 6, unchanged)
+# ======================================================================
+
+def to_world(shape_point, thing):
+    """(Lesson 5) SHAPE -&gt; WORLD: size, then spin, then place."""
+    x, y, z = shape_point
+    size = thing["size"]
+    sized = ( (x * size), (y * size), (z * size) )
+    spun = matrix_times_point(thing["matrix"], sized)
+    pos_x, pos_y, pos_z = thing["position"]
+    sx, sy, sz = spun
+    return ( (sx + pos_x), (sy + pos_y), (sz + pos_z) )
+
+
+def to_camera(world_point):
+    """(Lessons 4 and 6) WORLD -&gt; CAMERA: subtract you, then camera_matrix."""
+    x, y, z = world_point
+    moved = ( (x - cam_x), (y - cam_y), (z - cam_z) )
+    return matrix_times_point(camera_matrix, moved)
+
+
+def project(point_3d):
+    """(Lesson 1) CAMERA -&gt; SCREEN. Only call it with z &gt;= NEAR."""
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+def average_z(corners, camera_points):
+    """(Lesson 3) how far away is this face? Uses CAMERA z."""
+    total = 0
+    for corner_number in corners:
+        x, y, z = camera_points[corner_number]
+        total = (total + z)
+    return (total / len(corners))
+
+
+def is_facing_you(face_points):
+    """(Lesson 3) the clock test: True if clockwise on the screen."""
+    a_x, a_y = face_points[0]
+    b_x, b_y = face_points[1]
+    c_x, c_y = face_points[2]
+    arrow_a_x = (b_x - a_x)
+    arrow_a_y = (b_y - a_y)
+    arrow_b_x = (c_x - a_x)
+    arrow_b_y = (c_y - a_y)
+    cross = ( (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x) )
+    return (cross &gt; 0)
+
+
+def dot(arrow_1, arrow_2):
+    """(Lesson 3) the dot product."""
+    x1, y1, z1 = arrow_1
+    x2, y2, z2 = arrow_2
+    return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
+
+
+def shade_colour(colour, pointer):
+    """(Lesson 3) brighter when the face points at the light."""
+    brightness = dot(pointer, LIGHT)
+    if brightness &lt; 0:
+        brightness = 0
+    shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )
+    red, green, blue = colour
+    return ( round(red * shade), round(green * shade), round(blue * shade) )
+
+
+def keep_under_360(angle):
+    """Keep an angle between 0 and 360."""
+    if angle &gt;= 360:
+        angle = (angle - 360)
+    if angle &lt; 0:
+        angle = (angle + 360)
+    return angle
+
+
+def add_faces_of(thing, faces_to_draw):
+    """(Lesson 5) work out every face of ONE thing and add the ones to
+    paint to the shared list (unchanged from Lesson 6)."""
+    model = thing["model"]
+    camera_points = []
+    screen_points = []
+    for p in model["points"]:
+        world = to_world(p, thing)                     # WORLD
+        camera = to_camera(world)                      # CAMERA
+        camera_points.append(camera)
+        if camera[2] &gt;= NEAR:
+            screen_points.append(project(camera))      # SCREEN
+        else:
+            screen_points.append(None)
+
+    for corners, face_colour, pointer in model["faces"]:
+        too_close = False
+        for corner_number in corners:
+            if camera_points[corner_number][2] &lt; NEAR:
+                too_close = True
+        if too_close:
+            continue
+        face_points = []
+        for corner_number in corners:
+            face_points.append(screen_points[corner_number])
+        if not is_facing_you(face_points):
+            continue
+        distance = average_z(corners, camera_points)
+        colour = thing["colour"]
+        if use_light:
+            spun_pointer = matrix_times_point(thing["matrix"], pointer)
+            colour = shade_colour(colour, spun_pointer)
+        faces_to_draw.append( (distance, face_points, colour) )
+
+
+def draw_floor():
+    """(Lesson 5) the floor grid, in 1-unit pieces (now -12 to 12)."""
+    for x in range(GRID_LEFT, (GRID_RIGHT + 1)):
+        for z in range(GRID_NEAR, GRID_FAR):
+            draw_floor_piece( (x, FLOOR_Y, z), (x, FLOOR_Y, (z + 1)) )
+    for z in range(GRID_NEAR, (GRID_FAR + 1)):
+        for x in range(GRID_LEFT, GRID_RIGHT):
+            draw_floor_piece( (x, FLOOR_Y, z), ((x + 1), FLOOR_Y, z) )
+
+
+def draw_floor_piece(world_start, world_end):
+    """(Lesson 5) one 1-unit piece of floor line."""
+    start = to_camera(world_start)
+    end = to_camera(world_end)
+    if (start[2] &lt; NEAR) or (end[2] &lt; NEAR):
+        return
+    pygame.draw.line(screen, GRID_COLOUR, project(start), project(end), 1)
+
+
+# ======================================================================
+# THE GAME TOOLS (Lesson 7)
+# ======================================================================
+
+def distance_3d(point_a, point_b):
+    """(step 1) how far apart are two WORLD points? (lesson Part 2)
+
+    Subtract, square each part, add them up, square-root the total:
+    Pythagoras done twice, in one line.
+
+    Worked example (lesson Part 2): you at (1, 0, 3), cube 0 at (3, 1, 5)
+        dx = (3 - 1) = 2,  dy = (1 - 0) = 1,  dz = (5 - 3) = 2
+        math.sqrt( (2 * 2) + (1 * 1) + (2 * 2) ) = math.sqrt(9) = 3
+    """
+    ax, ay, az = point_a
+    bx, by, bz = point_b
+    dx = (bx - ax)
+    dy = (by - ay)
+    dz = (bz - az)
+    return math.sqrt( (dx * dx) + (dy * dy) + (dz * dz) )
+
+
+def new_pickup_spot():
+    """(step 2) a random WORLD spot for a cube, at least
+    MIN_SPAWN_DISTANCE from you (lesson Part 4).
+
+    "while True" repeats for ever, until "return" jumps out. Usually the
+    first try is far enough; about 1 try in 5 is too close and we
+    simply pick again.
+    """
+    you = (cam_x, cam_y, cam_z)
+    while True:
+        new_x = random.uniform((-FIELD), FIELD)
+        new_y = random.uniform(PICKUP_LOW, PICKUP_HIGH)
+        new_z = random.uniform((-FIELD), FIELD)
+        spot = (new_x, new_y, new_z)
+        if distance_3d(you, spot) &gt;= MIN_SPAWN_DISTANCE:
+            return spot
+
+
+def to_map(x, z):
+    """A WORLD (x, z) -&gt; a pixel on the mini-map (from Lesson 4)."""
+    map_x = MAP_CX + (x * MAP_SCALE)
+    map_y = MAP_CY - (z * MAP_SCALE)
+    return (map_x, map_y)
+
+
+def draw_map():
+    """The mini-map: the wall square, every cube, and you, from above."""
+    box = pygame.Rect(MAP_LEFT, MAP_TOP, MAP_SIZE, MAP_SIZE)
+    pygame.draw.rect(screen, MAP_BACK, box)
+    screen.set_clip(box)
+    # (step 1) the walls: from map (-12, 12) to map (12, -12)
+    wall_left, wall_top = to_map((-WALL), WALL)          # (638, 438)
+    wall_size = ( (2 * WALL) * MAP_SCALE )                # (24 * 6) = 144
+    pygame.draw.rect(screen, WALL_RED,
+                     pygame.Rect(wall_left, wall_top, wall_size, wall_size), 1)
+    # Each cube's 4 bottom corners (from Lesson 5): a small gold square.
+    for thing in things:
+        outline = []
+        for corner_number in (0, 1, 2, 3):
+            corner = thing["model"]["points"][corner_number]
+            x, y, z = to_world(corner, thing)
+            outline.append(to_map(x, z))
+        pygame.draw.polygon(screen, thing["colour"], outline, 2)
+    # You: pink dot and a line the way your BODY faces.
+    forward_x, forward_y, forward_z = column(turn_matrix(cam_turn), 2)
+    you = to_map(cam_x, cam_z)
+    nose = to_map( (cam_x + (forward_x * 1.5)), (cam_z + (forward_z * 1.5)) )
+    pygame.draw.line(screen, PINK, you, nose, 2)
+    pygame.draw.circle(screen, PINK, you, 4)
+    screen.set_clip(None)
+    pygame.draw.rect(screen, WHITE, box, 1)
+
+
+# ======================================================================
+# THE MAIN LOOP
+# ======================================================================
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_l:
+                use_light = not use_light
+            if event.key == pygame.K_g:
+                show_grid = not show_grid
+            # NEW: R only works after TIME UP, so you can't restart by
+            # accident in the middle of a good game.
+            if (event.key == pygame.K_r) and game_over:
+                # Every game number back to its start value...
+                cam_x = 0
+                cam_y = 0
+                cam_z = 0
+                cam_turn = 0
+                cam_tip = 0
+                things = make_pickups()
+                score = 0
+                frames_left = (GAME_SECONDS * 60)
+                game_over = False
+                # ...but NOT best_score: it remembers your best.
+
+    # ==================================================================
+    # PLAYING: everything in this "if" stops when game_over is True.
+    # ==================================================================
+    if not game_over:
+        keys = pygame.key.get_pressed()
+
+        # ---- Turning and looking (from Lesson 4, unchanged) ----------
+        if keys[pygame.K_LEFT]:
+            cam_turn = (cam_turn + TURN_SPEED)
+        if keys[pygame.K_RIGHT]:
+            cam_turn = (cam_turn - TURN_SPEED)
+        if keys[pygame.K_UP]:
+            cam_tip = (cam_tip - TURN_SPEED)
+        if keys[pygame.K_DOWN]:
+            cam_tip = (cam_tip + TURN_SPEED)
+        if cam_tip &gt; TIP_LIMIT:
+            cam_tip = TIP_LIMIT
+        if cam_tip &lt; (-TIP_LIMIT):
+            cam_tip = (-TIP_LIMIT)
+
+        # ---- NEW: fly where you LOOK (lesson Part 5) -----------------
+        # Build the arrow the way your head points: tip first (the head
+        # nods), then turn (the body turns), and read off column 2,
+        # where the +z arrow lands (Lesson 6).
+        #   cam_tip -30, cam_turn 0:   forward = (0, 0.5, 0.866)   climbing
+        #   cam_tip -30, cam_turn 90:  forward = (-0.866, 0.5, 0)  left + up
+        # Right stays level (from your body only), so A and D slide
+        # sideways without climbing.
+        look = combine(tip_matrix(cam_tip), turn_matrix(cam_turn))
+        forward_x, forward_y, forward_z = column(look, 2)
+        right_x, right_y, right_z = column(turn_matrix(cam_turn), 0)
+        if keys[pygame.K_w]:
+            cam_x = (cam_x + (forward_x * MOVE_SPEED))
+            cam_y = (cam_y + (forward_y * MOVE_SPEED))   # NEW: y too
+            cam_z = (cam_z + (forward_z * MOVE_SPEED))
+        if keys[pygame.K_s]:
+            cam_x = (cam_x - (forward_x * MOVE_SPEED))
+            cam_y = (cam_y - (forward_y * MOVE_SPEED))   # NEW: y too
+            cam_z = (cam_z - (forward_z * MOVE_SPEED))
+        if keys[pygame.K_d]:
+            cam_x = (cam_x + (right_x * MOVE_SPEED))
+            cam_z = (cam_z + (right_z * MOVE_SPEED))
+        if keys[pygame.K_a]:
+            cam_x = (cam_x - (right_x * MOVE_SPEED))
+            cam_z = (cam_z - (right_z * MOVE_SPEED))
+        if keys[pygame.K_e]:
+            cam_y = (cam_y + MOVE_SPEED)
+        if keys[pygame.K_q]:
+            cam_y = (cam_y - MOVE_SPEED)
+
+        # ---- NEW: walls, ground and ceiling (lesson Part 5) ----------
+        # Past a limit? Put it back ON the limit. You slide along the
+        # wall instead of going through it.
+        if cam_x &gt; WALL:
+            cam_x = WALL
+        if cam_x &lt; (-WALL):
+            cam_x = (-WALL)
+        if cam_z &gt; WALL:
+            cam_z = WALL
+        if cam_z &lt; (-WALL):
+            cam_z = (-WALL)
+        if cam_y &gt; CEILING:
+            cam_y = CEILING
+        if cam_y &lt; GROUND:
+            cam_y = GROUND
+
+        # ---- (step 2) collect any cube you are touching (Part 3) -----
+        you = (cam_x, cam_y, cam_z)
+        for thing in things:
+            if distance_3d(you, thing["position"]) &lt;= COLLECT_RADIUS:
+                score = (score + 1)
+                # (step 2) the same cube jumps to a new spot (Part 4):
+                # there are always exactly 8 cubes to find.
+                thing["position"] = new_pickup_spot()
+
+        # ---- NEW: tick the clock (lesson Part 6) ---------------------
+        frames_left = (frames_left - 1)
+        if frames_left &lt;= 0:
+            frames_left = 0
+            game_over = True
+            if score &gt; best_score:
+                best_score = score
+
+    # ---- Every pickup spins (Lesson 5), even after TIME UP -------------
+    for thing in things:
+        angles = thing["angles"]
+        speeds = thing["speeds"]
+        angles[0] = keep_under_360( (angles[0] + speeds[0]) )
+        angles[1] = keep_under_360( (angles[1] + speeds[1]) )
+        angles[2] = keep_under_360( (angles[2] + speeds[2]) )
+        thing["matrix"] = spin_matrix(angles)
+
+    # ---- The camera's matrix, once a frame (Lesson 6) ------------------
+    camera_matrix = combine(turn_matrix(-cam_turn), tip_matrix(-cam_tip))
+
+    # ==================================================================
+    # DRAW: the world first, then the HUD on top (lesson Part 2)
+    # ==================================================================
+    screen.fill(BLACK)
+    if show_grid:
+        draw_floor()
+    faces_to_draw = []
+    for thing in things:
+        add_faces_of(thing, faces_to_draw)
+    faces_to_draw.sort(reverse=True)
+    for distance, face_points, colour in faces_to_draw:
+        pygame.draw.polygon(screen, colour, face_points)
+        pygame.draw.polygon(screen, BLACK, face_points, 2)
+
+    draw_map()
+
+    # ---- (step 1) how far is the nearest cube? -------------------------
+    # Start with a huge number, then keep the smallest distance found.
+    nearest = 1000
+    for thing in things:
+        d = distance_3d((cam_x, cam_y, cam_z), thing["position"])
+        if d &lt; nearest:
+            nearest = d
+
+    # ---- The HUD: words drawn LAST, so no cube can hide them -----------
+    # str() turns a number into letters so + can join it to words.
+    text = ("score " + str(score) + "   best " + str(best_score))
+    screen.blit(font.render(text, True, SUN_GOLD), (20, 20))
+    text = ("nearest cube " + str(round(nearest, 1)))
+    screen.blit(font.render(text, True, PINK), (20, 50))
+    # NEW: math.ceil rounds UP, so the clock never shows 0 while you
+    # can still play: 59.98 seconds left shows as 60.
+    seconds = math.ceil(frames_left / 60)
+    screen.blit(font.render("time " + str(seconds), True, WHITE), (680, 20))
+    screen.blit(font.render("ARROWS look,  W / S fly,  A / D slide,  Q / E down / up",
+                            True, YELLOW), (20, 570))
+
+    # ---- NEW: TIME UP on top of everything -------------------------
+    if game_over:
+        words = big_font.render("TIME UP", True, WHITE)
+        # Centre it: half its width to the left of the screen's middle.
+        # get_width() is how many pixels wide the words came out.
+        left = (CENTRE_X - (words.get_width() / 2))
+        screen.blit(words, (left, 200))
+        words = font.render("score " + str(score) + "   best " + str(best_score) +
+                            "      press R to play again", True, YELLOW)
+        left = (CENTRE_X - (words.get_width() / 2))
+        screen.blit(words, (left, 290))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Make it harder: COLLECT_RADIUS = 0.75, or GAME_SECONDS = 30.
+#   * Make a "+1" float up from the middle of the screen for half a
+#     second after each collect. Hint: a variable that counts down
+#     from 30 frames, set to 30 when you score.
+#   * Put Lesson 5's pyramid_model back as scenery (copy its points
+#     and faces from Lesson 6), and add a few pyramids to things with
+#     a "pickup": False key. Only collect things whose "pickup" is True.
+#   * Add a red cube that takes 5 seconds OFF the clock if you touch it.
+#   * Show an arrow on the HUD pointing at the nearest cube. Hint:
+#     to_camera() its position, then look at the sign of its x.
+# ----------------------------------------------------------------------
+</code></pre></details>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q11</span><span>What does the clock show when <code>frames_left</code> is 61? And at 60?</span></p><details><summary>Show answer</summary><div class="ans"><p><code>math.ceil(61 / 60)</code> = <code>math.ceil(1.017)</code> = 2. <code>math.ceil(60 / 60)</code> = <code>math.ceil(1.0)</code> = 1. So "2" changes to "1" exactly one second before the end.</p></div></details></div>
+</div>
+
+<h2>Wrap up <span class="mins">3 MIN</span></h2>
+<p>Here is every frame of Cube Hunt, coloured by the lesson that taught each step. Today only added the orange boxes; everything else is the 3D engine you built over six lessons.</p>
+<figure id="fig-7-w-1"><img src="images/g22_whole_course.png" alt="A column of boxes for one frame, each labelled with the lesson that taught it: L7 keys and flying, L7 collecting, L7 clock, L5 things, L6 matrices, L4 camera and NEAR, L1 project, L3 faces and light, L1 drawing, L7 HUD." loading="lazy"><figcaption><span class="fignum">Fig 7.W.1</span>One frame of the finished game. L1 = Lesson 1, and so on.</figcaption></figure>
+<ul>
+  <li>Distance between two points: subtract, square each gap, add, square-root. <code>math.sqrt( (dx * dx) + (dy * dy) + (dz * dz) )</code>.</li>
+  <li>A cube is collected when that distance is <code>COLLECT_RADIUS = 1.0</code> or less: the moment its face fills the window.</li>
+  <li><code>random.uniform</code> in a <code>while</code> loop picks new spots, and never closer than 5.</li>
+  <li>Fly where you look: <code>column(combine(tip_matrix(cam_tip), turn_matrix(cam_turn)), 2)</code>.</li>
+  <li>The clock counts frames; <code>game_over</code> switches between playing and TIME UP.</li>
+</ul>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q12</span><span>Final check, using the whole course. You are at (1, 0, 3), turned right 45 (<code>cam_turn = -45</code>), looking level. Cube 0 is at (3, 1, 5) with all its spin angles at 0. Is it collected? Then follow its corner 5, SHAPE (1, 1, −1), all the way to the screen.</span></p><details><summary>Show answer</summary><div class="ans"><p>Collected? <code>distance_3d((1, 0, 3), (3, 1, 5))</code> = 3 (Part 2). 3 is more than 1, so no.</p><p>1. Size (Lesson 5): <code>((1 * 0.5), (1 * 0.5), (-1 * 0.5))</code> = (0.5, 0.5, −0.5).</p><p>2. Spin (Lesson 6): angles all 0, so the spin matrix changes nothing.</p><p>3. Place (Lesson 5): <code>((0.5 + 3), (0.5 + 1), (-0.5 + 5))</code> = WORLD (3.5, 1.5, 4.5).</p><p>4. Subtract you (Lesson 4): <code>((3.5 - 1), (1.5 - 0), (4.5 - 3))</code> = (2.5, 1.5, 1.5).</p><p>5. camera_matrix (Lesson 6) = <code>turn_matrix(45)</code>, rows (0.707, 0, −0.707), (0, 1, 0), (0.707, 0, 0.707). x = <code>(0.707 * 2.5) + (0 * 1.5) + (-0.707 * 1.5)</code> = 0.707. y = 1.5. z = <code>(0.707 * 2.5) + (0 * 1.5) + (0.707 * 1.5)</code> = 2.828. CAMERA (0.707, 1.5, 2.828), and z ≥ 0.1, so draw it.</p><p>6. Project (Lesson 1): screen x = <code>400 + ((0.707 * 400) / 2.828)</code> = 400 + 100 = 500. Screen y = <code>300 - ((1.5 * 400) / 2.828)</code> = 300 − 212.1 = 87.9.</p></div></details></div>
+</div>
+<h3>You finished the course</h3>
+<p>From one line on a black window in Lesson 1 to a 3D game you can play. Every piece of it is code you can read and explain. Some ideas to keep going (the scripts' TRY THIS boxes have more):</p>
+<ul>
+  <li>Make it harder: <code>COLLECT_RADIUS = 0.75</code>, <code>GAME_SECONDS = 30</code>, or cubes that drift slowly through the air.</li>
+  <li>Add a red cube that takes 5 seconds <em>off</em> the clock if you touch it.</li>
+  <li>Bring back Lesson 5's pyramids as scenery, with a <code>"pickup": False</code> key so they can't be collected.</li>
+  <li>Show a "+1" that floats up for half a second after each collect.</li>
+  <li>Add an arrow on the HUD that points to the nearest cube: <code>to_camera()</code> its position and look at the sign of its x.</li>
+</ul>
+
+<h2>Files</h2>
+<p>Download the code for this lesson (right-click a file and choose <em>Save link as</em>):</p>
+<ul class="files">
+  <li><a href="code/step1_cube_field.py" download><code>code/step1_cube_field.py</code></a>: 8 gold cubes over a bigger floor, <code>distance_3d</code> and the nearest cube on the HUD</li>
+  <li><a href="code/step2_collect.py" download><code>code/step2_collect.py</code></a>: collect within 1.0, the score, and random new spots at least 5 away</li>
+  <li><a href="code/step3_cube_hunt.py" download><code>code/step3_cube_hunt.py</code></a>: fly where you look, walls, the 60 second clock, TIME UP and play again; the finished game</li>
+  <li><code>images/</code>: every diagram on this page as a PNG</li>
+  <li><a href="../figures/">Figure index</a>: every figure and table in the course, with its number. Numbers read <code>Fig lesson.part.figure</code>, plus a letter for one panel of a picture (for example <code>Fig 3.4.2b</code>).</li>
+</ul>
+</main>
+</body>
+</html>

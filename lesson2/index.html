@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframe 3D, Lesson 2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Chakra+Petch:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one readable column, like a lab notebook; diagrams and code break out slightly wider. */
+:root {
+  --bg:#f3f6f4; --paper:#ffffff; --fg:#17201b; --muted:#56635c; --line:#d5ded8;
+  --accent:#0d8a4a; --accent-soft:#e2f3e9; --code-bg:#121815; --code-fg:#d9f5e3; --warn:#9a6a00;
+  --display:"Chakra Petch", "Trebuchet MS", sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; --code-bg:#0a0e0c; --code-fg:#d9f5e3; --warn:#e6b84a; color-scheme:dark; } }
+:root[data-theme="dark"] {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; --code-bg:#0a0e0c; --code-fg:#d9f5e3; --warn:#e6b84a; color-scheme:dark; }
+body { background:var(--bg); color:var(--fg); font-family:var(--body); font-size:17px; line-height:1.6;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:32px 64px; }
+main { max-width:780px; margin:0 auto; display:flex; flex-direction:column; gap:20px; }
+h1,h2,h3 { font-family:var(--display); text-wrap:balance; line-height:1.2; margin:0; }
+h1 { font-size:clamp(30px,6vw,44px); }
+h2 { font-size:26px; margin-top:28px; padding-top:20px; border-top:2px solid var(--line); display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; }
+h2 .mins { font-family:var(--mono); font-size:14px; color:var(--accent); font-weight:600; letter-spacing:.04em; }
+h3 { font-size:20px; margin-top:12px; }
+p { margin:0; max-width:68ch; }
+.eyebrow { font-family:var(--mono); font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); }
+.lede { font-size:19px; color:var(--muted); }
+code { font-family:var(--mono); font-size:.88em; background:var(--accent-soft); padding:1px 5px; border-radius:4px; }
+pre { margin:0; background:var(--code-bg); color:var(--code-fg); padding:16px 18px; border-radius:8px; overflow-x:auto; font-size:14px; line-height:1.5; }
+pre code { background:none; padding:0; font-size:inherit; color:inherit; }
+figure { margin:0; display:flex; flex-direction:column; gap:8px; }
+figure img { width:100%; border-radius:8px; display:block; border:1px solid var(--line); }
+figcaption { font-size:14px; color:var(--muted); }
+table { border-collapse:collapse; width:100%; font-size:15px; }
+.tablewrap { overflow-x:auto; }
+th,td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+td.t { font-family:var(--mono); white-space:nowrap; color:var(--accent); font-variant-numeric:tabular-nums; }
+ul,ol { margin:0; padding-left:22px; max-width:68ch; }
+li+li { margin-top:4px; }
+.key { background:var(--accent-soft); border-left:4px solid var(--accent); padding:14px 18px; border-radius:0 8px 8px 0; display:flex; flex-direction:column; gap:6px; }
+.key strong { font-family:var(--display); }
+.q { background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:14px 18px; display:flex; flex-direction:column; gap:8px; }
+.qq { font-weight:700; display:flex; gap:10px; }
+.qn { font-family:var(--mono); color:var(--accent); flex:none; }
+details summary { cursor:pointer; color:var(--accent); font-weight:700; }
+details summary:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.ans { padding-top:8px; color:var(--fg); display:flex; flex-direction:column; gap:8px; }
+details.full { border:1px dashed var(--line); border-radius:8px; padding:10px 14px; }
+details.full[open] summary { margin-bottom:10px; }
+.check { display:flex; flex-direction:column; gap:12px; }
+.files li code { white-space:nowrap; }
+.key a { color:var(--accent); font-weight:700; }
+
+.fignum { font-family:var(--mono); font-weight:600; color:var(--accent); margin-right:6px; white-space:nowrap; }
+.panels { display:block; margin-top:4px; }
+.panels b { font-family:var(--mono); color:var(--fg); font-weight:600; }
+.tabcap { font-size:14px; color:var(--muted); margin-bottom:-12px; }
+figure, .tabcap { scroll-margin-top:16px; }
+</style>
+
+</head>
+<body>
+<main>
+<nav style="font-family:var(--mono, monospace);font-size:14px;"><a style="color:var(--accent)" href="../">&larr; All lessons</a> &middot; <a style="color:var(--accent)" href="../figures/">Figure index</a></nav>
+
+<header style="display:flex;flex-direction:column;gap:12px">
+  <span class="eyebrow">Wireframe 3D course · Lesson 2 · about 47 minutes</span>
+  <h1>Making the cube spin</h1>
+  <p class="lede">Lesson 1 ended with a cube that only faces you. Today we turn it around its own up-down line, using two new tools called sin and cos, and then redraw it 60 times a second so it spins. We go slowly: one corner at a time, with every number worked out.</p>
+</header>
+
+<figure id="fig-2-0-1"><img src="images/course_map.png" alt="Course map: eight lessons on a road from Lesson 1 to a mini game. Lesson 2 is highlighted as you are here; Lesson 1 is done." loading="lazy"><figcaption><span class="fignum">Fig 2.0.1</span>The course map. Coloured cards are done or today; darker cards are still to come. Every lesson adds one idea to the same small program.</figcaption></figure>
+<div class="key">
+  <strong>Where this lesson fits</strong>
+  <p><strong>Before:</strong> <a href="../lesson1/">Lesson 1</a> drew a still wire cube.<br><strong>Today:</strong> the cube turns around one skewer, the upright y axis, using sin and cos.<br><strong>Next:</strong> <a href="../lesson2b/">Lesson 2B, Tip, roll and tumble</a> uses today's rule for the other two skewers.</p>
+  <p>Today's <code>rotate_y()</code> is used in every later lesson. In Lesson 4 the same function turns the whole world when you turn your head.</p>
+</div>
+
+<h2>Lesson plan</h2>
+<p><strong>Who it's for:</strong> someone who finished Lesson 1 and can run <code>step3_cube.py</code>. No maths beyond times, divide, plus and minus is assumed. <strong>Needs:</strong> Python 3 and <code>pip install pygame-ce</code>, as before.</p>
+<p><strong>By the end, the learner can:</strong></p>
+<ol>
+  <li>Say what "turning around the y axis" means, and which of x, y and z change.</li>
+  <li>Measure a turn in degrees, and convert it to radians with <code>math.radians()</code>.</li>
+  <li>Read cos and sin off a circle of radius 1 as "how far across" and "how far away".</li>
+  <li>Use the rotation rule to turn one corner by hand, bracket by bracket.</li>
+  <li>Explain why we rotate <em>before</em> moving the cube away, and run a program where the cube spins by itself.</li>
+</ol>
+<p class="tabcap" id="fig-2-0-2"><span class="fignum">Table 2.0.2</span>Lesson plan: time, part and what happens</p>
+<div class="tablewrap"><table>
+<tr><th>Time</th><th>Part</th><th>What happens</th></tr>
+<tr><td class="t">0–3</td><td>Recap</td><td>Lesson 1's recipe, and the one new step we add at the front.</td></tr>
+<tr><td class="t">3–9</td><td>1. The spit</td><td>Turning around the y axis. Look down from above, so only x and z are left. Q1–Q2.</td></tr>
+<tr><td class="t">9–14</td><td>2. Angles</td><td>Degrees, which way is positive, and radians for Python. Q3–Q4.</td></tr>
+<tr><td class="t">14–22</td><td>3. sin and cos</td><td>The circle of radius 1. Six worked angles. Run <code>step1_sin_cos.py</code>. Q5–Q6.</td></tr>
+<tr><td class="t">22–33</td><td>4. The rotation rule</td><td>Two easy cases, then any corner. Turn corner 5 by 90° and by 30° by hand. Q7–Q9.</td></tr>
+<tr><td class="t">33–40</td><td>5. The whole cube</td><td>Corner 5 through all three coordinate systems, then all 8 corners. Why the order matters. Run <code>step2_turn_cube.py</code>. Q10–Q11.</td></tr>
+<tr><td class="t">40–45</td><td>6. Spinning</td><td>SPEED, frames, and starting again past 360°. Run <code>step3_spin_cube.py</code>. Q12–Q13.</td></tr>
+<tr><td class="t">45–47</td><td>Wrap up</td><td>The ideas from today. Final check Q14. Preview of Lesson 2B.</td></tr>
+</table></div>
+
+<h2>Recap: one new step <span class="mins">3 MIN</span></h2>
+<p>In Lesson 1 every corner of the cube went through the same three steps, every frame: start in <strong>SHAPE</strong> coordinates (measured from the cube's own centre), add <code>cube_distance</code> to get <strong>WORLD</strong> coordinates (measured from you), then <code>project()</code> to get <strong>SCREEN</strong> pixels.</p>
+<p>Today we add exactly one step, at the very front: turn the corner while it is still in SHAPE coordinates. Nothing else in Lesson 1's code changes.</p>
+<figure id="fig-2-0-3"><img src="images/r01_pipeline.png" alt="Lesson 1's pipeline (shape, world, screen, draw) and Lesson 2's pipeline with a new rotate_y step at the front" loading="lazy"><figcaption><span class="fignum">Fig 2.0.3</span>Corner 5 is the example all the way through. The numbers in the new box are worked out by hand in Part 4.<span class="panels">Panels: <b>2.0.3a</b> (top row) Lesson 1&#x27;s recipe · <b>2.0.3b</b> (bottom row) Lesson 2&#x27;s recipe with the new rotate_y() step</span></figcaption></figure>
+
+<h2>Part 1: Turning around the y axis <span class="mins">6 MIN</span></h2>
+<p>Push a skewer straight down through the middle of the cube, from top to bottom, and twirl it. That skewer is the <strong>y axis</strong>, and the cube turns "around the y axis". It is the turn a person makes looking left and right, or a door on its hinges.</p>
+<figure id="fig-2-1-1"><img src="images/r02_spit.png" alt="The cube in shape coordinates with the y axis drawn as a thick yellow spit through its centre, with a curved arrow showing the turn" loading="lazy"><figcaption><span class="fignum">Fig 2.1.1</span>SHAPE coordinates: the centre of the cube is (0, 0, 0), so the spit goes right through the middle. The corners are numbered as in Lesson 1; corner 5 (top-right-front) is yellow.</figcaption></figure>
+<p>The key fact: when the cube turns on the spit, <strong>no corner goes up or down</strong>. The top four corners stay at y = +1 and the bottom four stay at y = -1. Only x (left and right) and z (near and far) change.</p>
+<p>That gives us a trick. If y never changes, we can ignore it by looking down on the cube from straight above. From up there the cube is just a square, and the y axis points straight up at your eye.</p>
+<figure id="fig-2-1-2"><img src="images/r03_top_down.png" alt="Left: the cube seen from the side with an eye above. Right: the same cube from above, a square with corners labelled 4 (0 under it), 5 (1 under it), 6 and 7" loading="lazy"><figcaption><span class="fignum">Fig 2.1.2</span>The view from above. Most diagrams in this lesson use it, so take a moment to match each corner of the square with the cube on the left.<span class="panels">Panels: <b>2.1.2a</b> (left) 1. the cube from the side · <b>2.1.2b</b> (right) 2. the same cube from above</span></figcaption></figure>
+<div class="key"><strong>Reading the "from above" diagrams</strong><p>+x is to the right and +z (away from you) is up the page. You sit toward -z, at the bottom of the page. The yellow ring with a dot in the middle is the y axis seen end-on. All of these are SHAPE coordinates, so the centre of the cube is (0, 0, 0).</p></div>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q1</span>The cube turns around the y axis. Which of x, y and z can change for a corner, and which can't?</p><details><summary>Show answer</summary><div class="ans">x and z can change, y can't. The spit is upright, so every corner slides round in a flat circle at the same height. The top corners stay at y = +1 and the bottom corners stay at y = -1.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q2</span>Looking down from above, which corner is hidden exactly underneath corner 5?</p><details><summary>Show answer</summary><div class="ans">Corner 1, (1, -1, -1). It has the same x and z as corner 5, (1, 1, -1), and only its y is different.</div></details></div>
+</div>
+
+<h2>Part 2: Angles <span class="mins">5 MIN</span></h2>
+<p>We need a number that says how far the cube has turned. That number is an <strong>angle</strong>, and in our code it is called <code>angle_degrees</code>.</p>
+<figure id="fig-2-2-1"><img src="images/r04_angles.png" alt="Top-down axes with a dashed circle; angles 0, 30, 45, 90, 180 and 270 degrees marked, starting from +x and going anticlockwise" loading="lazy"><figcaption><span class="fignum">Fig 2.2.1</span>0° points along +x. Positive angles go anticlockwise when seen from above, so 90° points along +z, away from you.</figcaption></figure>
+<p>We start with <code>angle_degrees = 0</code>, which is the cube exactly as in Lesson 1. We chose degrees because they are easy to picture: 90 is a quarter turn and 360 is a full turn.</p>
+<p>There is one catch. Python's <code>math.sin()</code> and <code>math.cos()</code> don't take degrees. They take <strong>radians</strong>, another way of measuring the same angle. We keep thinking in degrees and let Python convert at the last moment with <code>math.radians()</code>.</p>
+<figure id="fig-2-2-2"><img src="images/r05_radians.png" alt="A circle with degrees and radians labelled at 0, 30, 90, 180 and 270, a purple wedge showing one radian, and the conversion worked out for 30 degrees" loading="lazy"><figcaption><span class="fignum">Fig 2.2.2</span>You never type radians yourself. <code>math.radians(30)</code> gives 0.5236, and that is the only place radians appear in our code.</figcaption></figure>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q3</span>How many degrees is a half turn? After a turn of 90°, which way is the point that started on +x pointing?</p><details><summary>Show answer</summary><div class="ans">A half turn is 180°. After 90° (anticlockwise from above) the +x point has swung round to +z, pointing away from you.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q4</span>Work out <code>math.radians(180)</code> by hand, using the formula on the diagram (Fig 2.2.2).</p><details><summary>Show answer</summary><div class="ans"><pre><code>radians = (180 * (3.14159 / 180))
+        = (180 * 0.017453)
+        = 3.14159</code></pre>A half turn is pi radians, about 3.142. It matches the 180° label on Fig 2.2.2.</div></details></div>
+</div>
+
+<h2>Part 3: sin and cos <span class="mins">8 MIN</span></h2>
+<p>Here is the whole idea of sin and cos in one picture, Fig 2.3.1. Draw a circle with a radius of exactly 1 around the centre. Put a point on the right-hand edge, at (1, 0). Turn it by some angle. Where does it land?</p>
+<figure id="fig-2-3-1"><img src="images/r06_unit_circle.png" alt="A circle of radius 1 seen from above. A point turned 30 degrees sits at (0.866, 0.5); a blue line shows across = cos(30) = 0.866 and an orange line shows away = sin(30) = 0.5" loading="lazy"><figcaption><span class="fignum">Fig 2.3.1</span>cos is how far ACROSS (x) the turned point is, and sin is how far AWAY (z). Blue is always across and orange is always away in this lesson.</figcaption></figure>
+<p>We use a radius of 1 on purpose. With radius 1, cos and sin <em>are</em> the two distances, with no extra sums. In Fig 2.3.1, 1 unit is drawn 420 pixels long, so the blue line is (0.866 * 420) = 364 px and the orange line is (0.5 * 420) = 210 px.</p>
+<p>Here are six more angles. Look at each one and check that the blue length matches cos and the orange length matches sin.</p>
+<figure id="fig-2-3-2"><img src="images/r07_six_angles.png" alt="Six small circles for 0, 30, 45, 90, 150 and 270 degrees, each with its cos and sin values" loading="lazy"><figcaption><span class="fignum">Fig 2.3.2</span>At 150° the point is left of centre, so cos is negative (-0.866). At 270° it is toward you, so sin is negative (-1). The signs look after themselves.<span class="panels">Panels: <b>2.3.2a</b> (top left) 0° · <b>2.3.2b</b> (top middle) 30° · <b>2.3.2c</b> (top right) 45° · <b>2.3.2d</b> (bottom left) 90° · <b>2.3.2e</b> (bottom middle) 150° · <b>2.3.2f</b> (bottom right) 270°</span></figcaption></figure>
+<p>If you walk the point all the way round and plot cos and sin as you go, you get two smooth waves. This is why a spinning corner glides instead of jumping.</p>
+<figure id="fig-2-3-3"><img src="images/r08_waves.png" alt="Graph of cos and sin from 0 to 360 degrees; both stay between -1 and +1, with the 30 degree values 0.866 and 0.5 marked" loading="lazy"><figcaption><span class="fignum">Fig 2.3.3</span>Both waves stay between -1 and +1. sin is the same shape as cos, just 90° later.</figcaption></figure>
+<p>Now check the numbers with Python. <code>step1_sin_cos.py</code> opens no window; it just prints. PART A prints the table for the angles in the diagrams (Fig 2.3.2).</p>
+<pre><code>for angle_degrees in [0, 30, 45, 60, 90, 180, 270, 360]:
+    angle_radians = math.radians(angle_degrees)   # degrees -&gt; radians
+    cos_a = math.cos(angle_radians)               # how far ACROSS
+    sin_a = math.sin(angle_radians)               # how far AWAY</code></pre>
+<figure id="fig-2-3-4"><img src="images/run_step1_sin_cos.png" alt="Printed output of step1_sin_cos.py: a table of cos and sin, then corner 5 turned by 0, 30, 45 and 90 degrees step by step" loading="lazy"><figcaption><span class="fignum">Fig 2.3.4</span>What step1_sin_cos.py prints. PART C, at the bottom, is the subject of Part 4.</figcaption></figure>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q5</span>cos(60°) = 0.5 and sin(60°) = 0.866. Where does the point (1, 0) land after turning 60°? Compare it with 30°.</p><details><summary>Show answer</summary><div class="ans">At (0.5, 0.866). It is the 30° answer with the two numbers swapped: 60° is as far past 45° as 30° is short of it, so the across and away distances trade places.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q6</span>What are cos(180°) and sin(180°)? Where does (1, 0) land?</p><details><summary>Show answer</summary><div class="ans">cos(180°) = -1 and sin(180°) = 0, so the point lands at (-1, 0): exactly opposite where it started, on the left.</div></details></div>
+</div>
+
+<h2>Part 4: The rotation rule <span class="mins">11 MIN</span></h2>
+<p>A cube corner doesn't usually sit neatly on the +x line, so we build up to it in three steps: a point on +x, a point on +z, then any point made of both.</p>
+<h3>4.1 Easy case 1: a point on +x</h3>
+<figure id="fig-2-4-1"><img src="images/r09_turn_x_point.png" alt="Point A at (1, 0) turned 30 degrees lands at (0.866, 0.5), and turned 90 degrees lands at (0, 1)" loading="lazy"><figcaption><span class="fignum">Fig 2.4.1</span>This is just Part 3 again. A point 1 step along +x lands at (cos, sin).</figcaption></figure>
+<h3>4.2 Easy case 2: a point on +z</h3>
+<figure id="fig-2-4-2"><img src="images/r10_turn_z_point.png" alt="Point B at (0, 1) turned 30 degrees lands at (-0.5, 0.866), moving to the left" loading="lazy"><figcaption><span class="fignum">Fig 2.4.2</span>A point that starts away from you swings to the LEFT when it turns anticlockwise. Left is -x, so its new x is minus sin.</figcaption></figure>
+<h3>4.3 Any corner: add the two cases together</h3>
+<p>Any corner, seen from above, is "x steps across, then z steps away". Corner 5 is x = 1 (one step right) and z = -1 (one step toward you). Turn each step on its own, using the two easy cases, then add them up.</p>
+<figure id="fig-2-4-3"><img src="images/r11_combine.png" alt="Corner 5 drawn as a blue x step plus an orange z step; after a 30 degree turn both steps have turned and they add to (1.366, -0.366)" loading="lazy"><figcaption><span class="fignum">Fig 2.4.3</span>The blue arrow is the x step, the orange arrow is the z step. Turn both by 30°, put them end to end, and you arrive at the turned corner.<span class="panels">Panels: <b>2.4.3a</b> (left) before: corner 5 seen from above · <b>2.4.3b</b> (right) after: both steps turned 30°</span></figcaption></figure>
+<p>Written as code, that "turn both and add" becomes the rotation rule. Each bracket is one share of one step:</p>
+<figure id="fig-2-4-4"><img src="images/r12_formula.png" alt="The rotation rule with each bracket colour coded and labelled: new_x = (x * cos_a) - (z * sin_a), new_y = y, new_z = (x * sin_a) + (z * cos_a)" loading="lazy"><figcaption><span class="fignum">Fig 2.4.4</span>Blue brackets come from the x step (case 1) and orange brackets from the z step (case 2). The red minus is the "swings left" from case 2.</figcaption></figure>
+<p>In <code>step2_turn_cube.py</code> and <code>step3_spin_cube.py</code> the rule lives in its own function:</p>
+<pre><code>def rotate_y(point_3d, angle_degrees):
+    x, y, z = point_3d
+
+    # Python's sin and cos need RADIANS, so convert first.
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+
+    new_x = (x * cos_a) - (z * sin_a)
+    new_y = y                              # up/down never changes
+    new_z = (x * sin_a) + (z * cos_a)
+
+    return (new_x, new_y, new_z)</code></pre>
+<h3>4.4 Worked example 1: corner 5, a quarter turn</h3>
+<p>90° is a good first test because cos and sin are just 0 and 1, so the answer is easy to check against the picture (Fig 2.4.5).</p>
+<figure id="fig-2-4-5"><img src="images/r13_corner5_90.png" alt="Top-down view: corner 5 at (1, -1) turns 90 degrees and lands at (1, 1), where corner 6 was" loading="lazy"><figcaption><span class="fignum">Fig 2.4.5</span>After a quarter turn, corner 5 sits where corner 6 started. The cube is the same shape, just turned.</figcaption></figure>
+<h3>4.5 Worked example 2: corner 5, turned 30°</h3>
+<figure id="fig-2-4-6"><img src="images/r14_corner5_30.png" alt="Top-down view: corner 5 at (1, -1) turns 30 degrees and lands at (1.366, -0.366), with the steps worked inside-out and a distance check" loading="lazy"><figcaption><span class="fignum">Fig 2.4.6</span>The distance check is a good habit: turning never changes how far a corner is from the centre (here 1.414).</figcaption></figure>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q7</span>Turn corner 6, (1, 1, 1), by 90°. Where does it land, and whose place is that?</p><details><summary>Show answer</summary><div class="ans"><pre><code>cos(90°) = 0, sin(90°) = 1
+new_x = (1 * 0) - (1 * 1) = (0) - (1) = -1
+new_y = 1
+new_z = (1 * 1) + (1 * 0) = (1) + (0) =  1</code></pre>(-1, 1, 1) is where corner 7 started. A quarter turn moves every corner one place round.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q8</span>Turn corner 5, (1, 1, -1), by 180°. Where does it land?</p><details><summary>Show answer</summary><div class="ans"><pre><code>cos(180°) = -1, sin(180°) = 0
+new_x = (1 * -1) - (-1 * 0) = (-1) - (0) = -1
+new_y = 1
+new_z = (1 * 0) + (-1 * -1) = (0) + (1)  =  1</code></pre>(-1, 1, 1), corner 7's place: the opposite corner of the top square, as a half turn should give.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q9</span>Someone types a plus instead of the minus in <code>new_x</code>. What happens to corner 5 at 45° (cos = sin = 0.707)?</p><details><summary>Show answer</summary><div class="ans"><pre><code>new_x = (1 * 0.707) + (-1 * 0.707) = (0.707) + (-0.707) = 0
+new_z = (1 * 0.707) + (-1 * 0.707) = (0.707) + (-0.707) = 0</code></pre>Corner 5 lands at (0, 1, 0), right on the spit. Its distance from the centre dropped from 1.414 to 0, so the cube squashes flat. A real turn never changes that distance, which is how you can spot the mistake. Try it in step2_turn_cube.py.</div></details></div>
+</div>
+
+<h2>Part 5: The whole cube <span class="mins">7 MIN</span></h2>
+<p>Now put the new step in front of Lesson 1's recipe and follow corner 5 all the way to the screen, at 30°.</p>
+<figure id="fig-2-5-1"><img src="images/r15_corner5_pipeline.png" alt="Corner 5 in four panels: shape (1, 1, -1), turned (1.366, 1, -0.366), world (1.366, 1, 4.634), screen (517.9, 213.7), with all sums shown" loading="lazy"><figcaption><span class="fignum">Fig 2.5.1</span>Unturned, corner 5 landed at (500, 200) in Lesson 1. Turned 30°, it lands at (517.9, 213.7).<span class="panels">Panels: <b>2.5.1a</b> (first) 1. SHAPE · <b>2.5.1b</b> (second) 2. SHAPE turned · <b>2.5.1c</b> (third) 3. WORLD · <b>2.5.1d</b> (fourth) 4. SCREEN</span></figcaption></figure>
+<p>The program does exactly this for all 8 corners, every frame:</p>
+<figure id="fig-2-5-2"><img src="images/r16_all_corners_30.png" alt="Table of all 8 corners at 30 degrees in shape, turned, world and screen coordinates, next to the drawn cube with numbered corners" loading="lazy"><figcaption><span class="fignum">Fig 2.5.2</span>The left-front edge (corners 0 and 4) is now the nearest, so it is drawn the tallest: 220 px against 173 px for edge 1–5.<span class="panels">Panels: <b>2.5.2a</b> (left) the table of all 8 corners · <b>2.5.2b</b> (right) the cube on SCREEN, zoomed in</span></figcaption></figure>
+<h3>5.1 Why rotate before moving?</h3>
+<p><code>rotate_y()</code> always turns around (0, 0, 0). In SHAPE coordinates, (0, 0, 0) is the middle of the cube, so the cube spins on the spot. In WORLD coordinates, (0, 0, 0) is <em>you</em>, so turning there swings the whole cube round you.</p>
+<figure id="fig-2-5-3"><img src="images/r17_wrong_order.png" alt="Two top-down world views: rotating first keeps the centre at (0, 0, 5); moving first then rotating swings the centre to (-2.5, 0, 4.33)" loading="lazy"><figcaption><span class="fignum">Fig 2.5.3</span>Same 30° turn, different order. The wrong order moves the cube 2.5 units to the left.<span class="panels">Panels: <b>2.5.3a</b> (left) RIGHT order: rotate_y then (z + 5) · <b>2.5.3b</b> (right) WRONG order: (z + 5) then rotate_y</span></figcaption></figure>
+<p>In the code, the order is three lines inside the corner loop:</p>
+<pre><code>for p in cube_points:
+    # 1. ROTATE around the cube's own centre   (SHAPE coordinates)
+    turned = rotate_y(p, angle_degrees)
+
+    # 2. MOVE it away from us                   (WORLD coordinates)
+    x, y, z = turned
+    moved = (x, y, (z + cube_distance))
+
+    # 3. PROJECT it onto the screen             (SCREEN pixels)
+    screen_points.append(project(moved))</code></pre>
+<p>Run <code>step2_turn_cube.py</code>. Hold RIGHT to turn the cube and LEFT to turn it back. The little map in the corner shows the same turn from above, like the diagrams, with corner 5 in yellow.</p>
+<figure id="fig-2-5-4"><img src="images/run_step2_turn_cube.png" alt="Output of step 2: the cube turned 30 degrees with corner 5 marked in yellow, and a small top-down map in the bottom-left corner" loading="lazy"><figcaption><span class="fignum">Fig 2.5.4</span>What you should see after holding RIGHT for half a second (30 frames, so 30°). Corner 5 is at (518, 214), as worked out above.</figcaption></figure>
+<details class="full"><summary>Full code: <code>step2_turn_cube.py</code> (about 200 lines)</summary><pre><code># ======================================================================
+# LESSON 2 - STEP 2: TURN THE CUBE BY HAND
+# ----------------------------------------------------------------------
+# Goal: the cube from Lesson 1, but now LEFT / RIGHT arrows turn it
+# around its y axis (the up-down line through its middle).
+#
+# What is new since Lesson 1 (everything else is the same):
+#
+#   1. import math                  - for sin, cos and radians
+#   2. angle_degrees                - how far the cube has turned
+#   3. rotate_y(point, angle)       - turns ONE point around the y axis
+#   4. the corner loop now does:    rotate -&gt; move away -&gt; project
+#   5. a small &quot;map from above&quot; in the bottom-left corner, so you can
+#      see the same turning from the top, like the lesson diagrams.
+#
+# THE ORDER MATTERS:
+#   rotate first (in SHAPE coordinates, around the cube&#x27;s own centre),
+#   THEN add cube_distance (WORLD coordinates),
+#   THEN project (SCREEN pixels).
+#   If you moved first and rotated second, the cube would swing round
+#   YOU instead of spinning on the spot.
+#
+# Controls:  LEFT / RIGHT = turn the cube,  UP / DOWN = push away / pull closer
+#            R = reset the angle to 0
+# Run:  python step2_turn_cube.py
+# ======================================================================
+
+import math
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption(&quot;Lesson 2, step 2 - turn the cube&quot;)
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+
+BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
+YELLOW = (255, 255, 0)
+GREY = (90, 90, 90)
+BLUE = (90, 170, 255)
+ORANGE = (255, 160, 60)
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400                       # the lens zoom from Lesson 1
+
+# ---- The cube, in SHAPE coordinates (same as Lesson 1) ---------------
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+cube_edges = [
+    (0, 1), (1, 2), (2, 3), (3, 0),   # bottom square
+    (4, 5), (5, 6), (6, 7), (7, 4),   # top square
+    (0, 4), (1, 5), (2, 6), (3, 7),   # upright edges
+]
+
+cube_distance = 5      # how far away the cube&#x27;s centre is (world z)
+
+# ---- NEW: how far the cube has turned --------------------------------
+# Measured in DEGREES, because degrees are easy to picture:
+#   0 = facing you as in Lesson 1, 90 = quarter turn, 360 = full turn.
+angle_degrees = 0
+
+# How many degrees one frame of holding an arrow key turns the cube.
+# 1 degree x 60 frames per second = 60 degrees per second,
+# so holding the key for 6 seconds makes one full turn (360).
+TURN_STEP = 1
+
+
+def rotate_y(point_3d, angle_degrees):
+    &quot;&quot;&quot;Turn one (x, y, z) point around the y axis.
+
+    The point must be in SHAPE coordinates (from the shape&#x27;s own centre).
+    Seen from above, a positive angle turns it ANTICLOCKWISE.
+    &quot;&quot;&quot;
+    x, y, z = point_3d
+
+    # Python&#x27;s sin and cos need RADIANS, so convert first.
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+
+    new_x = (x * cos_a) - (z * sin_a)
+    new_y = y                              # up/down never changes
+    new_z = (x * sin_a) + (z * cos_a)
+
+    return (new_x, new_y, new_z)
+
+
+def project(point_3d):
+    &quot;&quot;&quot;Turn one 3D WORLD point into a 2D SCREEN point (from Lesson 1).&quot;&quot;&quot;
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+# ---- The little map from above (bottom-left corner) ------------------
+# It shows the cube seen from ABOVE, in SHAPE coordinates:
+#   +x to the right, +z UP the map (away from you), centre (0, 0).
+# Each shape unit is drawn MAP_SCALE pixels long.
+MAP_X = 100            # map centre on the screen, in pixels
+MAP_Y = 490
+MAP_SCALE = 30         # 1 shape unit = 30 pixels, so the cube is 60 px wide
+
+
+def to_map(x, z):
+    &quot;&quot;&quot;Shape (x, z) -&gt; pixel position on the little map.&quot;&quot;&quot;
+    map_x = MAP_X + (x * MAP_SCALE)
+    map_y = MAP_Y - (z * MAP_SCALE)      # minus: +z goes UP the map
+    return (map_x, map_y)
+
+
+def draw_map(turned_points):
+    # The axes: x (blue) across, z (orange) up the map.
+    pygame.draw.line(screen, BLUE, to_map(-2.5, 0), to_map(2.5, 0), 1)
+    pygame.draw.line(screen, ORANGE, to_map(0, -2.5), to_map(0, 2.5), 1)
+    screen.blit(font.render(&quot;+x&quot;, True, BLUE), to_map(2.6, 0.3))
+    screen.blit(font.render(&quot;+z&quot;, True, ORANGE), to_map(0.2, 3.2))
+    # From above, the top square hides the bottom one, so we only need
+    # the 4 top corners (numbers 4, 5, 6, 7) and the 4 top edges.
+    for a, b in [(4, 5), (5, 6), (6, 7), (7, 4)]:
+        xa, ya, za = turned_points[a]
+        xb, yb, zb = turned_points[b]
+        pygame.draw.line(screen, GREEN, to_map(xa, za), to_map(xb, zb), 2)
+    # Corner 5 gets a yellow dot, so you can follow it round.
+    x5, y5, z5 = turned_points[5]
+    pygame.draw.circle(screen, YELLOW, to_map(x5, z5), 5)
+    screen.blit(font.render(&quot;map from above&quot;, True, GREY), (MAP_X - 70, MAP_Y + 85))
+
+
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    keys = pygame.key.get_pressed()
+    # ---- NEW: LEFT / RIGHT change the angle --------------------------
+    if keys[pygame.K_RIGHT]:
+        angle_degrees = (angle_degrees + TURN_STEP)
+    if keys[pygame.K_LEFT]:
+        angle_degrees = (angle_degrees - TURN_STEP)
+    if keys[pygame.K_r]:
+        angle_degrees = 0
+    # Keep the angle between 0 and 359, so the number on screen stays
+    # readable. 360 degrees is the same as 0 (a full turn).
+    if angle_degrees &gt;= 360:
+        angle_degrees = (angle_degrees - 360)
+    if angle_degrees &lt; 0:
+        angle_degrees = (angle_degrees + 360)
+
+    # ---- UP / DOWN still move the cube, as in Lesson 1 ---------------
+    if keys[pygame.K_UP]:
+        cube_distance = (cube_distance + 0.05)
+    if keys[pygame.K_DOWN]:
+        cube_distance = (cube_distance - 0.05)
+    if cube_distance &lt; 3:              # corners reach 1.414 from the centre
+        cube_distance = 3              # when turned, so keep z well above 0
+
+    screen.fill(BLACK)
+
+    # ---- Work out where every corner goes ----------------------------
+    turned_points = []      # SHAPE coordinates after turning (for the map)
+    screen_points = []      # SCREEN pixels (for the cube)
+    for p in cube_points:
+        # 1. ROTATE around the cube&#x27;s own centre   (SHAPE coordinates)
+        turned = rotate_y(p, angle_degrees)
+        turned_points.append(turned)
+
+        # 2. MOVE it away from us                   (WORLD coordinates)
+        x, y, z = turned
+        moved = (x, y, (z + cube_distance))
+
+        # 3. PROJECT it onto the screen             (SCREEN pixels)
+        screen_points.append(project(moved))
+
+    # ---- Draw the edges (exactly as in Lesson 1) ---------------------
+    for a, b in cube_edges:
+        pygame.draw.line(screen, GREEN, screen_points[a], screen_points[b], 2)
+
+    # Corner 5 gets a yellow dot here too.
+    pygame.draw.circle(screen, YELLOW, screen_points[5], 5)
+
+    draw_map(turned_points)
+
+    text = &quot;angle = &quot; + str(angle_degrees) + &quot; degrees   (LEFT / RIGHT,  R = reset)&quot;
+    screen.blit(font.render(text, True, YELLOW), (20, 20))
+    text2 = &quot;distance = &quot; + str(round(cube_distance, 1)) + &quot;   (UP / DOWN)&quot;
+    screen.blit(font.render(text2, True, YELLOW), (20, 50))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Turn to exactly 90 degrees. Corner 5 (yellow) is now where which
+#     corner was at the start? Check with the lesson&#x27;s 90-degree diagram.
+#   * Change TURN_STEP to 5. How long does a full turn take now?
+#   * In rotate_y, change the minus in new_x to a plus. Turn the cube.
+#     What goes wrong? (Change it back afterwards!)
+#   * Swap steps 1 and 2: move first, rotate second. What happens?
+# ----------------------------------------------------------------------</code></pre></details>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q10</span>Follow corner 4, (-1, 1, -1), at 30° all the way to the screen. Check your answer against the table in Fig 2.5.2a.</p><details><summary>Show answer</summary><div class="ans"><pre><code>turn:    new_x = (-1 * 0.866) - (-1 * 0.5) = (-0.866) - (-0.5) = -0.366
+         new_z = (-1 * 0.5) + (-1 * 0.866) = (-0.5) + (-0.866) = -1.366
+move:    z = (-1.366 + 5) = 3.634
+project: sx = 400 + ( (-0.366 * 400) / 3.634 ) = 400 + (-40.3) = 359.7
+         sy = 300 - ( (1 * 400) / 3.634 )      = 300 - 110.1   = 189.9</code></pre>(359.7, 189.9), the same as row 4 of the table in Fig 2.5.2a.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q11</span>In Lesson 1 the cube could come as close as distance 2. In Lesson 2 the limit is 3. Why might a turning cube need more room?</p><details><summary>Show answer</summary><div class="ans">When the cube turns, a corner can swing round to 1.414 in front of the centre (at 45°), not just 1. At distance 2 that corner would be only (2 - 1.414) = 0.586 away, so dividing by such a small z makes it fly toward the edge of the screen. At 3 it stays at least (3 - 1.414) = 1.586 away.</div></details></div>
+</div>
+
+<h2>Part 6: Spinning by itself <span class="mins">5 MIN</span></h2>
+<p>The main loop already redraws the cube 60 times a second. To make it spin, we add a little to the angle every time round the loop. The amount added each frame is <code>SPEED</code>.</p>
+<figure id="fig-2-6-1"><img src="images/r18_speed.png" alt="Frames 0, 1, 2, 3, 30 and 60 with angles 0, 1, 2, 3, 30 and 60 degrees; bars comparing SPEED 0.5, 1 and 3; and how the angle starts again after 360" loading="lazy"><figcaption><span class="fignum">Fig 2.6.1</span>We chose SPEED = 1: (1 * 60) = 60° a second, so one full turn takes (360 / 60) = 6 seconds.<span class="panels">Panels: <b>2.6.1a</b> (top) one frame per loop (frame 0 to frame 60) · <b>2.6.1b</b> (middle) the same sum at SPEED 0.5, 1 and 3</span></figcaption></figure>
+<pre><code>SPEED = 1              # degrees added EVERY FRAME (60 frames a second)
+
+    # inside the main loop:
+    if not paused:
+        angle_degrees = (angle_degrees + SPEED)
+    if angle_degrees &gt;= 360:                    # a full turn is the same
+        angle_degrees = (angle_degrees - 360)   # as no turn: start again</code></pre>
+<figure id="fig-2-6-2"><img src="images/r19_filmstrip.png" alt="Seven frames of the spinning cube at 0, 15, 30, 45, 60, 75 and 90 degrees, with corner 5 marked and its screen x position" loading="lazy"><figcaption><span class="fignum">Fig 2.6.2</span>Real frames from the program, drawn with the same sums. At 90° the cube faces you again, but corner 5 is now at the back.<span class="panels">Panels: <b>2.6.2a</b> (1st frame) 0° · <b>2.6.2b</b> (2nd) 15° · <b>2.6.2c</b> (3rd) 30° · <b>2.6.2d</b> (4th) 45° · <b>2.6.2e</b> (5th) 60° · <b>2.6.2f</b> (6th) 75° · <b>2.6.2g</b> (7th) 90°</span></figcaption></figure>
+<div class="key"><strong>Never change cube_points</strong><p>Each frame we turn the <em>original</em> corners by the <em>total</em> angle so far. If we saved the turned corners and turned them again next frame, tiny rounding errors (like 0.8660254 being stored as 0.866025403784) would pile up over thousands of frames and the cube would slowly warp. Keeping the original corners means frame 10,000 is as exact as frame 1.</p></div>
+<p>Run <code>step3_spin_cube.py</code>. SPACE pauses and unpauses, UP and DOWN still change the distance.</p>
+<figure id="fig-2-6-3"><img src="images/run_step3_spin_cube.png" alt="Output of step 3: the cube turned 30 degrees with the angle and SPEED shown at the top" loading="lazy"><figcaption><span class="fignum">Fig 2.6.3</span>What you should see half a second after starting: frame 30, so angle 30.</figcaption></figure>
+<details class="full"><summary>Full code: <code>step3_spin_cube.py</code> (about 150 lines)</summary><pre><code># ======================================================================
+# LESSON 2 - STEP 3: THE SPINNING CUBE
+# ----------------------------------------------------------------------
+# Goal: the cube turns BY ITSELF, a little more every frame.
+#
+# The one new idea:
+#
+#     every frame:   angle_degrees = (angle_degrees + SPEED)
+#
+#   The main loop runs 60 times a second (clock.tick(60)). Each time,
+#   the angle grows by SPEED degrees and we redraw the cube at the new
+#   angle. 60 slightly-turned pictures a second look like smooth spinning
+#   - exactly like the frames of a cartoon.
+#
+#   SPEED = 1 degree per frame
+#     -&gt; (1 * 60) = 60 degrees per second
+#     -&gt; (360 / 60) = 6 seconds for one full turn: slow and easy to watch.
+#
+# IMPORTANT: we never change cube_points. Every frame we turn the
+# ORIGINAL corners by the TOTAL angle so far. (If we kept turning the
+# already-turned corners, tiny rounding errors would pile up and the
+# cube would slowly warp out of shape.)
+#
+# Controls:  SPACE = pause / unpause,  UP / DOWN = push away / pull closer
+# Run:  python step3_spin_cube.py
+# ======================================================================
+
+import math
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption(&quot;Lesson 2, step 3 - the spinning cube&quot;)
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+
+BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
+YELLOW = (255, 255, 0)
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400
+
+# ---- The cube, in SHAPE coordinates (same as Lesson 1) ---------------
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+cube_edges = [
+    (0, 1), (1, 2), (2, 3), (3, 0),   # bottom square
+    (4, 5), (5, 6), (6, 7), (7, 4),   # top square
+    (0, 4), (1, 5), (2, 6), (3, 7),   # upright edges
+]
+
+cube_distance = 5
+
+# ---- The spin --------------------------------------------------------
+angle_degrees = 0      # how far the cube has turned so far
+SPEED = 1              # degrees added EVERY FRAME (60 frames a second)
+paused = False
+
+
+def rotate_y(point_3d, angle_degrees):
+    &quot;&quot;&quot;Turn one SHAPE point around the y axis (anticlockwise from above).&quot;&quot;&quot;
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = (x * cos_a) - (z * sin_a)
+    new_y = y
+    new_z = (x * sin_a) + (z * cos_a)
+    return (new_x, new_y, new_z)
+
+
+def project(point_3d):
+    &quot;&quot;&quot;Turn one 3D WORLD point into a 2D SCREEN point (from Lesson 1).&quot;&quot;&quot;
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        # SPACE flips paused between True and False (one press = one flip).
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            paused = not paused
+
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_UP]:
+        cube_distance = (cube_distance + 0.05)
+    if keys[pygame.K_DOWN]:
+        cube_distance = (cube_distance - 0.05)
+    if cube_distance &lt; 3:
+        cube_distance = 3
+
+    # ---- NEW: turn a little more every frame -------------------------
+    if not paused:
+        angle_degrees = (angle_degrees + SPEED)
+    if angle_degrees &gt;= 360:                    # a full turn is the same
+        angle_degrees = (angle_degrees - 360)   # as no turn: start again
+
+    screen.fill(BLACK)
+
+    # ---- rotate -&gt; move away -&gt; project, for all 8 corners -----------
+    screen_points = []
+    for p in cube_points:
+        turned = rotate_y(p, angle_degrees)          # SHAPE, turned
+        x, y, z = turned
+        moved = (x, y, (z + cube_distance))          # WORLD
+        screen_points.append(project(moved))         # SCREEN
+
+    for a, b in cube_edges:
+        pygame.draw.line(screen, GREEN, screen_points[a], screen_points[b], 2)
+
+    text = &quot;angle = &quot; + str(angle_degrees) + &quot;   SPEED = &quot; + str(SPEED) + &quot; deg/frame&quot;
+    screen.blit(font.render(text, True, YELLOW), (20, 20))
+    text2 = &quot;SPACE = pause,  UP / DOWN = distance &quot; + str(round(cube_distance, 1))
+    screen.blit(font.render(text2, True, YELLOW), (20, 50))
+
+    pygame.display.flip()
+    clock.tick(60)                     # 60 frames a second
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * SPEED = 3. How many seconds for one full turn now? (360 / (3 * 60))
+#   * SPEED = -1. Which way does it spin now?
+#   * Make TWO cubes: draw the loop twice, the second one with
+#     ((x + 3), y, (z + cube_distance)) and the angle doubled.
+#   * Spin the pyramid you made after Lesson 1 instead of the cube.
+# ----------------------------------------------------------------------</code></pre></details>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q12</span>Change SPEED to 2. How many seconds does one full turn take now?</p><details><summary>Show answer</summary><div class="ans"><pre><code>degrees per second = (2 * 60)   = 120
+seconds per turn   = (360 / 120) = 3</code></pre>3 seconds, twice as fast as before.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q13</span>Why does the program turn <code>cube_points</code> by the total angle every frame, instead of turning the previous frame's corners by SPEED?</p><details><summary>Show answer</summary><div class="ans">Every sum on a computer is very slightly rounded. Turning already-turned corners stacks those tiny errors frame after frame, and the cube slowly changes shape. Turning the untouched originals by the total angle starts fresh every frame, so the errors can never build up.</div></details></div>
+</div>
+
+<h2>Wrap up <span class="mins">2 MIN</span></h2>
+<div class="key">
+  <strong>The ideas from today</strong>
+  <p>1. Turning around the y axis changes x and z, never y. Look from above to see it.<br>2. Angles are in degrees in our code; <code>math.radians()</code> converts them for Python.<br>3. On a circle of radius 1, cos is how far across and sin is how far away.<br>4. <code>new_x = (x * cos_a) - (z * sin_a)</code> and <code>new_z = (x * sin_a) + (z * cos_a)</code>.<br>5. Rotate first (SHAPE), then move (WORLD), then project (SCREEN).<br>6. Add SPEED to the angle every frame to make it spin.</p>
+</div>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q14</span>Final check: list, in order, everything that happens to one corner of the cube in one frame of <code>step3_spin_cube.py</code>.</p><details><summary>Show answer</summary><div class="ans">1. The angle grows by SPEED (once per frame, for the whole cube). 2. The original SHAPE corner is turned with <code>rotate_y(p, angle_degrees)</code>. 3. cube_distance is added to its z, giving WORLD coordinates. 4. <code>project()</code> turns it into SCREEN pixels. 5. The edges are drawn between the screen points.</div></details></div>
+</div>
+<h3>Practice before Lesson 2B</h3>
+<ul>
+  <li>Spin the pyramid you made after Lesson 1 instead of the cube. Only <code>cube_points</code> and <code>cube_edges</code> change.</li>
+  <li>Set <code>SPEED = -1</code>. Which way does it spin now, seen from above?</li>
+  <li>Add two keys that change SPEED while the program runs, for example A for (SPEED - 0.5) and D for (SPEED + 0.5).</li>
+  <li>Draw a second cube 3 units to the right, <code>((x + 3), y, (z + cube_distance))</code>, spinning at twice the angle.</li>
+</ul>
+<h3>Next time: Lesson 2B, tip, roll and tumble</h3>
+<p>Today the cube turned around one skewer, the upright y axis. In Lesson 2B we add the other two skewers: tipping around x and rolling around z. The surprise is that both use today's rule with the letters swapped, so there is no new maths. At the end all three turns run together and the cube tumbles.</p>
+
+<h2>Files</h2>
+<p>Download the code for this lesson (right-click a file and choose <em>Save link as</em>):</p>
+<ul class="files">
+  <li><a href="code/step1_sin_cos.py" download><code>code/step1_sin_cos.py</code></a>: prints cos and sin, and turns corner 5 by hand</li>
+  <li><a href="code/step2_turn_cube.py" download><code>code/step2_turn_cube.py</code></a>: turn the cube with the arrow keys, with a map from above</li>
+  <li><a href="code/step3_spin_cube.py" download><code>code/step3_spin_cube.py</code></a>: the cube spins by itself</li>
+  <li><code>images/</code>: every diagram on this page as a PNG</li>
+  <li><a href="../figures/">Figure index</a>: every figure and table in the course, with its number. Numbers read <code>Fig lesson.part.figure</code>, plus a letter for one panel of a picture (for example <code>Fig 3.4.2b</code>).</li>
+</ul>
+</main>
+</body>
+</html>

@@ -1,0 +1,916 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframe 3D, Lesson 2B</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Chakra+Petch:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one readable column, like a lab notebook; diagrams and code break out slightly wider. */
+:root {
+  --bg:#f3f6f4; --paper:#ffffff; --fg:#17201b; --muted:#56635c; --line:#d5ded8;
+  --accent:#0d8a4a; --accent-soft:#e2f3e9; --code-bg:#121815; --code-fg:#d9f5e3; --warn:#9a6a00;
+  --display:"Chakra Petch", "Trebuchet MS", sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; --code-bg:#0a0e0c; --code-fg:#d9f5e3; --warn:#e6b84a; color-scheme:dark; } }
+:root[data-theme="dark"] {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; --code-bg:#0a0e0c; --code-fg:#d9f5e3; --warn:#e6b84a; color-scheme:dark; }
+body { background:var(--bg); color:var(--fg); font-family:var(--body); font-size:17px; line-height:1.6;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:32px 64px; }
+main { max-width:780px; margin:0 auto; display:flex; flex-direction:column; gap:20px; }
+h1,h2,h3 { font-family:var(--display); text-wrap:balance; line-height:1.2; margin:0; }
+h1 { font-size:clamp(30px,6vw,44px); }
+h2 { font-size:26px; margin-top:28px; padding-top:20px; border-top:2px solid var(--line); display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; }
+h2 .mins { font-family:var(--mono); font-size:14px; color:var(--accent); font-weight:600; letter-spacing:.04em; }
+h3 { font-size:20px; margin-top:12px; }
+p { margin:0; max-width:68ch; }
+.eyebrow { font-family:var(--mono); font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); }
+.lede { font-size:19px; color:var(--muted); }
+code { font-family:var(--mono); font-size:.88em; background:var(--accent-soft); padding:1px 5px; border-radius:4px; }
+pre { margin:0; background:var(--code-bg); color:var(--code-fg); padding:16px 18px; border-radius:8px; overflow-x:auto; font-size:14px; line-height:1.5; }
+pre code { background:none; padding:0; font-size:inherit; color:inherit; }
+figure { margin:0; display:flex; flex-direction:column; gap:8px; }
+figure img { width:100%; border-radius:8px; display:block; border:1px solid var(--line); }
+figcaption { font-size:14px; color:var(--muted); }
+table { border-collapse:collapse; width:100%; font-size:15px; }
+.tablewrap { overflow-x:auto; }
+th,td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+td.t { font-family:var(--mono); white-space:nowrap; color:var(--accent); font-variant-numeric:tabular-nums; }
+ul,ol { margin:0; padding-left:22px; max-width:68ch; }
+li+li { margin-top:4px; }
+.key { background:var(--accent-soft); border-left:4px solid var(--accent); padding:14px 18px; border-radius:0 8px 8px 0; display:flex; flex-direction:column; gap:6px; }
+.key strong { font-family:var(--display); }
+.q { background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:14px 18px; display:flex; flex-direction:column; gap:8px; }
+.qq { font-weight:700; display:flex; gap:10px; }
+.qn { font-family:var(--mono); color:var(--accent); flex:none; }
+details summary { cursor:pointer; color:var(--accent); font-weight:700; }
+details summary:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.ans { padding-top:8px; color:var(--fg); display:flex; flex-direction:column; gap:8px; }
+details.full { border:1px dashed var(--line); border-radius:8px; padding:10px 14px; }
+details.full[open] summary { margin-bottom:10px; }
+.check { display:flex; flex-direction:column; gap:12px; }
+.files li code { white-space:nowrap; }
+.key a { color:var(--accent); font-weight:700; }
+
+.fignum { font-family:var(--mono); font-weight:600; color:var(--accent); margin-right:6px; white-space:nowrap; }
+.panels { display:block; margin-top:4px; }
+.panels b { font-family:var(--mono); color:var(--fg); font-weight:600; }
+.tabcap { font-size:14px; color:var(--muted); margin-bottom:-12px; }
+figure, .tabcap { scroll-margin-top:16px; }
+</style>
+
+</head>
+<body>
+<main>
+<nav style="font-family:var(--mono, monospace);font-size:14px;"><a style="color:var(--accent)" href="../">&larr; All lessons</a> &middot; <a style="color:var(--accent)" href="../figures/">Figure index</a></nav>
+
+<header style="display:flex;flex-direction:column;gap:12px">
+  <span class="eyebrow">Wireframe 3D course · Lesson 2B · about 45 minutes</span>
+  <h1>Tip, roll and tumble</h1>
+  <p class="lede">Lesson 2 turned the cube around one skewer, the upright y axis. Today we add the other two skewers: tipping around x and rolling around z. The surprise is that both use Lesson 2's rule with the letters swapped, so there is no new maths. At the end all three run together and the cube tumbles through the air.</p>
+</header>
+
+<figure id="fig-2b-0-1"><img src="images/course_map.png" alt="Course map: eight lessons on a road from Lesson 1 to a mini game. Lesson 2B is highlighted as you are here; Lessons 1 and 2 are done." loading="lazy"><figcaption><span class="fignum">Fig 2B.0.1</span>The course map. Coloured cards are done or today; darker cards are still to come. Every lesson adds one idea to the same small program.</figcaption></figure>
+<div class="key">
+  <strong>Where this lesson fits</strong>
+  <p><strong>Before:</strong> <a href="../lesson2/">Lesson 2</a> spun the cube around y.<br><strong>Today:</strong> tip around x and roll around z, then all three turns together.<br><strong>Next:</strong> <a href="../lesson3/">Lesson 3, Solid faces</a> fills the wire cube in with colour.</p>
+  <p>This lesson finishes the turning part of the course. Today's <code>rotate_x()</code> comes back in Lesson 4 for looking up and down, and Lesson 6 packs all three turns into one table of numbers.</p>
+</div>
+
+<h2>Lesson plan</h2>
+<p><strong>Who it's for:</strong> someone who finished Lesson 2 and can run <code>step3_spin_cube.py</code>. You need cos, sin, <code>math.radians()</code> and the rotation rule from Lesson 2. <strong>Needs:</strong> Python 3 and <code>pip install pygame-ce</code>, as before.</p>
+<p><strong>By the end, the learner can:</strong></p>
+<ol>
+  <li>Name the three turns (tip, turn, roll), their skewers (x, y, z) and which letters each one changes.</li>
+  <li>Say any turn as "which letter swings toward which", and write its rule from memory.</li>
+  <li>Tip and roll corner 5 by hand, bracket by bracket, and follow it to the screen.</li>
+  <li>Chain three turns, each starting from the answer of the one before.</li>
+  <li>Explain, with a picture, why the order of the turns changes the result.</li>
+</ol>
+<p class="tabcap" id="fig-2b-0-2"><span class="fignum">Table 2B.0.2</span>Lesson plan: time, part and what happens</p>
+<div class="tablewrap"><table>
+<tr><th>Time</th><th>Part</th><th>What happens</th></tr>
+<tr><td class="t">0–5</td><td>Recap</td><td>Three skewers through the cube. Lesson 2's rule said a new way: "+x swings toward +z". Q1.</td></tr>
+<tr><td class="t">5–21</td><td>1. Tip around x</td><td>The side view, two easy cases, the tip rule, corner 5 by hand at 90° and 30°, all 8 corners. Run <code>step1_tip_cube.py</code>. Q2–Q6.</td></tr>
+<tr><td class="t">21–33</td><td>2. Roll around z</td><td>The front view, two easy cases, the roll rule, corner 5 at 90° and 30°, and why it rides a circle on screen. Run <code>step2_roll_cube.py</code>. Q7–Q10.</td></tr>
+<tr><td class="t">33–43</td><td>3. All three</td><td>The three rules side by side, why order matters, corner 5 through a chain of three turns, three speeds. Run <code>step3_tumble_cube.py</code>. Q11–Q14.</td></tr>
+<tr><td class="t">43–45</td><td>Wrap up</td><td>The ideas from today. Final check Q15. Preview of Lesson 3.</td></tr>
+</table></div>
+
+<h2>Recap: three skewers <span class="mins">5 MIN</span></h2>
+<p>In Lesson 2 we pushed a skewer straight down through the middle of the cube (the y axis) and twirled it. A cube has room for two more skewers through its centre: one going left to right (the x axis) and one pointing straight at you (the z axis). Each skewer gives a different way to turn.</p>
+<figure id="fig-2b-0-3"><img src="images/b01_three_skewers.png" alt="The cube with three skewers through its centre: x (blue, left-right) for TIP, y (yellow, up-down) for TURN, z (orange, toward you) for ROLL, with a curved arrow round each" loading="lazy"><figcaption><span class="fignum">Fig 2B.0.3</span>SHAPE coordinates, so the centre of the cube is (0, 0, 0) and every skewer passes through it. We give each turn a short name so we can talk about it: TIP (x), TURN (y, Lesson 2) and ROLL (z).</figcaption></figure>
+<p>The key fact from Lesson 2 still holds for every skewer: the skewer's own letter never changes, and the other two letters swing round in a flat circle.</p>
+<p>To use Lesson 2's rule for the new skewers, we need a way of describing a turn that doesn't depend on "clockwise" or "from above". Here it is: say which letter swings toward which.</p>
+<figure id="fig-2b-0-4"><img src="images/b02_swing_rule.png" alt="Top-down view: a point on +x turned 90 degrees lands on +z. Beside it, the rotation rule written as a pattern with SWINGER, TARGET and SKEWER" loading="lazy"><figcaption><span class="fignum">Fig 2B.0.4</span>Turn a point on +x by 90° and it lands exactly on +z, so we say "+x swings toward +z". The swinger is the letter that swings (x), the target is the letter it swings toward (z), and the skewer stays put (y).</figcaption></figure>
+<div class="key"><strong>The pattern we will reuse all lesson</strong>
+<p><code>new_SWINGER = (SWINGER * cos_a) - (TARGET * sin_a)</code><br><code>new_TARGET = (SWINGER * sin_a) + (TARGET * cos_a)</code><br>The skewer letter is copied unchanged. Put x in for SWINGER and z in for TARGET and you get Lesson 2's <code>rotate_y</code> exactly.</p></div>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q1</span>For Lesson 2's turn, which letter is the skewer, which is the swinger and which is the target?</p><details><summary>Show answer</summary><div class="ans">The skewer is y (up and down never changes). The swinger is x and the target is z, because a positive turn swings +x toward +z.</div></details></div>
+</div>
+
+<h2>Part 1: Tipping around x <span class="mins">16 MIN</span></h2>
+<p>Now push the skewer through the cube from left to right, along the x axis. When the cube turns on it, it tips over like a wheel rolling away from you.</p>
+<figure id="fig-2b-1-1"><img src="images/b03_tip_skewer.png" alt="The cube with a thick blue x skewer through its centre and corner 5's circular path drawn upright, side-on to you" loading="lazy"><figcaption><span class="fignum">Fig 2B.1.1</span>SHAPE coordinates. x is now the skewer, so it never changes. Corner 5 rides round an upright circle, moving up and back toward corner 6's place.</figcaption></figure>
+<p>For tipping, <strong>+y swings toward +z</strong>: the top moves away from you and the front moves up. So y is the swinger, z is the target and x is the skewer.</p>
+
+<h3>1.1 Looking from the side</h3>
+<p>In Lesson 2 we looked down from above, because y didn't change. Now x doesn't change, so we look along the x axis instead: walk round to the cube's left side and look at it side-on.</p>
+<figure id="fig-2b-1-2"><img src="images/b04_side_view.png" alt="Left: the cube with an eye on its left side looking along +x. Right: the side view, a square with z across and y up, corners labelled 5, 6, 1, 2" loading="lazy"><figcaption><span class="fignum">Fig 2B.1.2</span>From the side, z goes across the page (away from your usual seat is to the right) and y goes up it. Corner 4 sits exactly in front of corner 5, because they only differ in x.<span class="panels">Panels: <b>2B.1.2a</b> (left) 1. walk round to the LEFT · <b>2B.1.2b</b> (right) 2. what you see: a square</span></figcaption></figure>
+<div class="key"><strong>Reading the side-view diagrams</strong><p>+z (away) is to the right and +y (up) is up the page. Your usual seat, in front of the screen, is off to the left at -z. All of these are SHAPE coordinates, so the centre of the cube is (0, 0, 0).</p></div>
+
+<h3>1.2 The two easy cases</h3>
+<p>Exactly as in Lesson 2, we turn two simple points first: one on the swinger axis (+y, the top) and one on the target axis (+z, the back).</p>
+<figure id="fig-2b-1-3"><img src="images/b05_tip_easy_cases.png" alt="Case A: a point on +y tipped 30 degrees lands at y 0.866, z 0.5. Case B: a point on +z tipped 30 degrees lands at y -0.5, z 0.866, swinging down" loading="lazy"><figcaption><span class="fignum">Fig 2B.1.3</span>Case A gives the cos and sin you know. Case B shows where the minus comes from: the back swings DOWN, and down is -y.<span class="panels">Panels: <b>2B.1.3a</b> (left) Case A: the top swings away · <b>2B.1.3b</b> (right) Case B: the back swings down</span></figcaption></figure>
+<p>In this side picture (Fig 2B.1.3) the tip looks clockwise. That is only because we are standing on the cube's left side; from the right side it would look anticlockwise. The words that never mislead are "+y swings toward +z".</p>
+
+<h3>1.3 The tip rule</h3>
+<p>Adding the two cases together, as we did in Lesson 2, gives the tip rule. It is Lesson 2's rule with every x swapped for a y.</p>
+<figure id="fig-2b-1-4"><img src="images/b06_tip_formula.png" alt="Lesson 2's rotate_y at the top in grey, then the tip rule colour coded: new_y = (y * cos_a) - (z * sin_a), new_z = (y * sin_a) + (z * cos_a), new_x = x" loading="lazy"><figcaption><span class="fignum">Fig 2B.1.4</span>Yellow brackets come from the top (case A), orange brackets from the back (case B). The red minus is "the back swings down".</figcaption></figure>
+<pre><code>def rotate_x(point_3d, angle_degrees):
+    x, y, z = point_3d
+
+    # Python's sin and cos need RADIANS, so convert first (as Lesson 2).
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+
+    new_x = x                              # the skewer: left/right never changes
+    new_y = (y * cos_a) - (z * sin_a)
+    new_z = (y * sin_a) + (z * cos_a)
+
+    return (new_x, new_y, new_z)</code></pre>
+
+<h3>1.4 Worked example 1: corner 5, a quarter tip</h3>
+<p>As in Lesson 2 we start with 90°, because cos and sin are just 0 and 1 and the answer is easy to check against the picture (Fig 2B.1.5).</p>
+<figure id="fig-2b-1-5"><img src="images/b07_tip_corner5_90.png" alt="Side view: corner 5 at z -1, y 1 tips 90 degrees and lands at z 1, y 1, where corner 6 was" loading="lazy"><figcaption><span class="fignum">Fig 2B.1.5</span>After a quarter tip, corner 5 sits where corner 6 started, and the face that was looking at you is now the top.</figcaption></figure>
+
+<h3>1.5 Worked example 2: corner 5, tipped 30°</h3>
+<figure id="fig-2b-1-6"><img src="images/b08_tip_corner5_30.png" alt="Side view: corner 5 tipped 30 degrees lands at (1, 1.366, -0.366), with the sums worked inside-out and a distance check" loading="lazy"><figcaption><span class="fignum">Fig 2B.1.6</span>Compare with Lesson 2's 30° answer, (1.366, 1, -0.366). The numbers are the same; they have just moved from x into y.</figcaption></figure>
+
+<h3>1.6 To the screen</h3>
+<p>Nothing after the turn has changed since Lesson 2: add <code>cube_distance</code> to z, then <code>project()</code>.</p>
+<figure id="fig-2b-1-7"><img src="images/b09_tip_pipeline.png" alt="Corner 5 in four panels: shape (1, 1, -1), tipped (1, 1.366, -0.366), world (1, 1.366, 4.634), screen (486.3, 182.1), with all sums shown" loading="lazy"><figcaption><span class="fignum">Fig 2B.1.7</span>Unturned, corner 5 was drawn at (500, 200). Tipped 30°, it is drawn at (486.3, 182.1): higher, and a little nearer the middle because it moved further away.<span class="panels">Panels: <b>2B.1.7a</b> (first) 1. SHAPE · <b>2B.1.7b</b> (second) 2. SHAPE tipped · <b>2B.1.7c</b> (third) 3. WORLD · <b>2B.1.7d</b> (fourth) 4. SCREEN</span></figcaption></figure>
+<figure id="fig-2b-1-8"><img src="images/b10_tip_all_corners.png" alt="Table of all 8 corners tipped 30 degrees in shape, tipped, world and screen coordinates, next to the drawn cube with numbered corners" loading="lazy"><figcaption><span class="fignum">Fig 2B.1.8</span>The program does this for all 8 corners every frame. The bottom-front edge swung toward you, so it is drawn 220.2 px wide against 125.6 px for the top-back edge.<span class="panels">Panels: <b>2B.1.8a</b> (left) the table of all 8 corners · <b>2B.1.8b</b> (right) the cube in the window</span></figcaption></figure>
+<p>Run <code>step1_tip_cube.py</code>. Hold UP to tip the cube and DOWN to tip it back. The map in the corner shows the same tip from the side, like the diagrams, with corner 5 in yellow. Distance is fixed at 5 in this lesson, because the arrow keys are now needed for turning.</p>
+<figure id="fig-2b-1-9"><img src="images/run_step1_tip_cube.png" alt="Output of step 1: the cube tipped 30 degrees with corner 5 marked in yellow and a small side map in the bottom-left corner" loading="lazy"><figcaption><span class="fignum">Fig 2B.1.9</span>After holding UP for half a second (30 frames, so 30°). Corner 5 is at (486, 182), as worked out above.</figcaption></figure>
+<details class="full"><summary>Full code: <code>step1_tip_cube.py</code> (about 220 lines)</summary><pre><code># ======================================================================
+# LESSON 2B - STEP 1: TIP THE CUBE (turning around the x axis)
+# ----------------------------------------------------------------------
+# Goal: the cube from Lesson 2, but now the UP / DOWN arrows TIP it
+# around its x axis (the left-right line through its middle), like a
+# wheel rolling away from you.
+#
+# What is new since Lesson 2 (everything else is the same):
+#
+#   1. angle_x_degrees            - how far the cube has tipped
+#   2. rotate_x(point, angle)     - tips ONE point around the x axis
+#   3. a small &quot;map from the side&quot; in the bottom-left corner, so you
+#      can see the tip from the side, like the lesson diagrams.
+#
+# THE BIG IDEA:
+#   rotate_x is Lesson 2&#x27;s rotate_y with different letters.
+#
+#       Lesson 2, rotate_y:  +x swings toward +z.   y is the skewer.
+#       Today,    rotate_x:  +y swings toward +z.   x is the skewer.
+#
+#   So every &quot;x&quot; in the old rule becomes a &quot;y&quot;, and x is left alone.
+#
+# THE ORDER IS STILL:
+#   rotate (SHAPE coordinates)  -&gt;  move away (WORLD)  -&gt;  project (SCREEN)
+#
+# Controls:  UP / DOWN = tip the cube,   R = reset the angle to 0
+# Run:  python step1_tip_cube.py
+# ======================================================================
+
+import math
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption(&quot;Lesson 2B, step 1 - tip the cube&quot;)
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+
+BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
+YELLOW = (255, 255, 0)
+GREY = (90, 90, 90)
+ORANGE = (255, 160, 60)      # z is always orange, as in Lesson 2
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400                       # the lens zoom from Lesson 1
+
+# ---- The cube, in SHAPE coordinates (same as Lessons 1 and 2) --------
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+cube_edges = [
+    (0, 1), (1, 2), (2, 3), (3, 0),   # bottom square
+    (4, 5), (5, 6), (6, 7), (7, 4),   # top square
+    (0, 4), (1, 5), (2, 6), (3, 7),   # upright edges
+]
+
+# The cube stays 5 units away all lesson. (In Lesson 2 UP / DOWN moved
+# it nearer and further; today UP / DOWN are needed for tipping.)
+cube_distance = 5
+
+# ---- NEW: how far the cube has tipped --------------------------------
+# Still in DEGREES:  0 = facing you as in Lesson 1,  90 = quarter tip.
+angle_x_degrees = 0
+
+# 1 degree per frame of holding a key, 60 frames a second
+# -&gt; (1 * 60) = 60 degrees a second -&gt; (360 / 60) = 6 s for a full tip.
+TURN_STEP = 1
+
+
+def rotate_x(point_3d, angle_degrees):
+    &quot;&quot;&quot;Tip one (x, y, z) point around the x axis.
+
+    The point must be in SHAPE coordinates (from the shape&#x27;s own centre).
+    A positive angle swings +y (the top) toward +z (away from you):
+    the cube tips its top away from you, like a wheel rolling away.
+    &quot;&quot;&quot;
+    x, y, z = point_3d
+
+    # Python&#x27;s sin and cos need RADIANS, so convert first (as Lesson 2).
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+
+    # Lesson 2&#x27;s rule, with every x swapped for a y:
+    #   rotate_y had   new_x = (x * cos_a) - (z * sin_a)
+    #                  new_z = (x * sin_a) + (z * cos_a)
+    new_x = x                              # the skewer: left/right never changes
+    new_y = (y * cos_a) - (z * sin_a)
+    new_z = (y * sin_a) + (z * cos_a)
+
+    return (new_x, new_y, new_z)
+
+
+def project(point_3d):
+    &quot;&quot;&quot;Turn one 3D WORLD point into a 2D SCREEN point (from Lesson 1).&quot;&quot;&quot;
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+# ---- The little map from the side (bottom-left corner) ---------------
+# It shows the cube seen from its LEFT side, in SHAPE coordinates:
+#   +z to the RIGHT of the map (away from you),
+#   +y UP the map,
+#   centre (0, 0) in the middle of the map.
+# You (the viewer) are off to the LEFT of the map, looking right.
+# Each shape unit is drawn MAP_SCALE pixels long.
+MAP_X = 130            # map centre on the screen, in pixels
+MAP_Y = 470
+MAP_SCALE = 30         # 1 shape unit = 30 pixels, so the cube is 60 px tall
+
+
+def to_map(z, y):
+    &quot;&quot;&quot;Shape (z, y) -&gt; pixel position on the little side map.&quot;&quot;&quot;
+    map_x = MAP_X + (z * MAP_SCALE)      # +z goes RIGHT on the map
+    map_y = MAP_Y - (y * MAP_SCALE)      # minus: +y goes UP the map
+    return (map_x, map_y)
+
+
+def draw_map(turned_points):
+    # The axes: z (orange) across the map, y (grey) up the map.
+    pygame.draw.line(screen, ORANGE, to_map(-2.5, 0), to_map(2.5, 0), 1)
+    pygame.draw.line(screen, GREY, to_map(0, -2.5), to_map(0, 2.5), 1)
+    screen.blit(font.render(&quot;+z&quot;, True, ORANGE), to_map(2.6, 0.3))
+    screen.blit(font.render(&quot;+y&quot;, True, GREY), to_map(0.2, 3.2))
+    screen.blit(font.render(&quot;you&quot;, True, GREY), to_map(-3.9, 0.3))
+    # From the side, the right face (corners 1, 2, 6, 5) sits exactly
+    # behind the left face, so we only draw the right face&#x27;s 4 edges.
+    # We pick the right face because corner 5 is on it.
+    for a, b in [(1, 5), (5, 6), (6, 2), (2, 1)]:
+        xa, ya, za = turned_points[a]
+        xb, yb, zb = turned_points[b]
+        pygame.draw.line(screen, GREEN, to_map(za, ya), to_map(zb, yb), 2)
+    # Corner 5 gets a yellow dot, so you can follow it round.
+    x5, y5, z5 = turned_points[5]
+    pygame.draw.circle(screen, YELLOW, to_map(z5, y5), 5)
+    screen.blit(font.render(&quot;map from the side&quot;, True, GREY), (MAP_X - 85, MAP_Y + 85))
+
+
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    keys = pygame.key.get_pressed()
+    # ---- NEW: UP / DOWN change the tip angle -------------------------
+    # UP = a positive angle: the front of the cube moves UP the screen
+    # (and the top moves away from you).
+    if keys[pygame.K_UP]:
+        angle_x_degrees = (angle_x_degrees + TURN_STEP)
+    if keys[pygame.K_DOWN]:
+        angle_x_degrees = (angle_x_degrees - TURN_STEP)
+    if keys[pygame.K_r]:
+        angle_x_degrees = 0
+    # Keep the angle between 0 and 359 (360 is the same as 0).
+    if angle_x_degrees &gt;= 360:
+        angle_x_degrees = (angle_x_degrees - 360)
+    if angle_x_degrees &lt; 0:
+        angle_x_degrees = (angle_x_degrees + 360)
+
+    screen.fill(BLACK)
+
+    # ---- Work out where every corner goes ----------------------------
+    turned_points = []      # SHAPE coordinates after tipping (for the map)
+    screen_points = []      # SCREEN pixels (for the cube)
+    for p in cube_points:
+        # 1. TIP it around the cube&#x27;s own centre    (SHAPE coordinates)
+        turned = rotate_x(p, angle_x_degrees)
+        turned_points.append(turned)
+
+        # 2. MOVE it away from us                   (WORLD coordinates)
+        x, y, z = turned
+        moved = (x, y, (z + cube_distance))
+
+        # 3. PROJECT it onto the screen             (SCREEN pixels)
+        screen_points.append(project(moved))
+
+    # ---- Draw the edges (exactly as in Lesson 1) ---------------------
+    for a, b in cube_edges:
+        pygame.draw.line(screen, GREEN, screen_points[a], screen_points[b], 2)
+
+    # Corner 5 gets a yellow dot here too.
+    pygame.draw.circle(screen, YELLOW, screen_points[5], 5)
+
+    draw_map(turned_points)
+
+    text = &quot;tip angle (x) = &quot; + str(angle_x_degrees) + &quot; degrees   (UP / DOWN,  R = reset)&quot;
+    screen.blit(font.render(text, True, YELLOW), (20, 20))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Tip to exactly 90 degrees. Corner 5 (yellow) is now where which
+#     corner was at the start? Check with the lesson&#x27;s 90-degree diagram.
+#   * Tip to exactly 30 degrees. Is corner 5 at about (486, 182) on the
+#     screen, as worked out in the lesson?
+#   * In rotate_x, change the minus in new_y to a plus. Tip the cube.
+#     What goes wrong? (Change it back afterwards!)
+#   * Swap the letters back: make it rotate_y again by changing which
+#     two letters are used. Does LEFT / RIGHT turning from Lesson 2 come back?
+# ----------------------------------------------------------------------</code></pre></details>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q2</span>Tip corner 6, (1, 1, 1), by 90°. Where does it land, and whose place is that?</p><details><summary>Show answer</summary><div class="ans"><pre><code>cos(90°) = 0, sin(90°) = 1
+new_x = 1
+new_y = (1 * 0) - (1 * 1) = (0) - (1) = -1
+new_z = (1 * 1) + (1 * 0) = (1) + (0) =  1</code></pre>(1, -1, 1) is where corner 2 started. The top-back corner rolled round to the bottom-back.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q3</span>In the side view, which corner hides corner 5, and why?</p><details><summary>Show answer</summary><div class="ans">Corner 4, (-1, 1, -1). It has the same y and z as corner 5, (1, 1, -1); only x is different, and x is the direction you are looking along.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q4</span>Tip corner 5 by 180°. Where does it land?</p><details><summary>Show answer</summary><div class="ans"><pre><code>cos(180°) = -1, sin(180°) = 0
+new_y = (1 * -1) - (-1 * 0) = (-1) - (0)  = -1
+new_z = (1 * 0) + (-1 * -1) = (0) + (1)   =  1</code></pre>(1, -1, 1), corner 2's place: top-front has become bottom-back, the opposite corner of the side square.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q5</span>Look at the table of all 8 corners in Fig 2B.1.8a. Which corners are nearest you after a 30° tip, and how do you know from the numbers?</p><details><summary>Show answer</summary><div class="ans">Corners 0 and 1. Their WORLD z is 3.634, the smallest in the table. A smaller z means nearer, so we divide by a smaller number and they are drawn further from the middle of the screen.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q6</span>Someone types a plus instead of the minus in <code>new_y</code>. What happens to corner 5 at 45° (cos = sin = 0.707)?</p><details><summary>Show answer</summary><div class="ans"><pre><code>new_y = (1 * 0.707) + (-1 * 0.707) = (0.707) + (-0.707) = 0
+new_z = (1 * 0.707) + (-1 * 0.707) = (0.707) + (-0.707) = 0</code></pre>Corner 5 lands at (1, 0, 0), right on the skewer. Its distance from the skewer dropped from 1.414 to 0, so the cube squashes flat. It is the same mistake as Lesson 2's Q9, with different letters.</div></details></div>
+</div>
+
+<h2>Part 2: Rolling around z <span class="mins">12 MIN</span></h2>
+<p>The last skewer points straight at you, along the z axis. Turning on it rolls the cube round like a steering wheel.</p>
+<figure id="fig-2b-2-1"><img src="images/b11_roll_skewer.png" alt="The cube with a thick orange z skewer pointing at the viewer and corner 5's circular path facing you" loading="lazy"><figcaption><span class="fignum">Fig 2B.2.1</span>SHAPE coordinates. z is now the skewer, so the front square stays at z = -1 and the back square at z = +1. Every corner rides round a circle that faces you.</figcaption></figure>
+<p>For rolling, <strong>+x swings toward +y</strong>: the right side moves up. As you look at it, that is anticlockwise, like steering left. So x is the swinger, y is the target and z is the skewer.</p>
+
+<h3>2.1 The two easy cases</h3>
+<p>This time we need no special view: the skewer points at your eye, so the screen itself is already the view along the skewer.</p>
+<figure id="fig-2b-2-2"><img src="images/b12_roll_easy_cases.png" alt="Case A: a point on +x rolled 30 degrees lands at x 0.866, y 0.5. Case B: a point on +y rolled 30 degrees lands at x -0.5, y 0.866, swinging left" loading="lazy"><figcaption><span class="fignum">Fig 2B.2.2</span>Front view: +x right, +y up. Case B is where the minus comes from: the top swings LEFT, and left is -x.<span class="panels">Panels: <b>2B.2.2a</b> (left) Case A: the right side swings up · <b>2B.2.2b</b> (right) Case B: the top swings left</span></figcaption></figure>
+
+<h3>2.2 The roll rule</h3>
+<figure id="fig-2b-2-3"><img src="images/b13_roll_formula.png" alt="Lesson 2's rotate_y in grey, then the roll rule colour coded: new_x = (x * cos_a) - (y * sin_a), new_y = (x * sin_a) + (y * cos_a), new_z = z" loading="lazy"><figcaption><span class="fignum">Fig 2B.2.3</span>Lesson 2's rule with every z swapped for a y. Look closely: new_x has exactly the same shape as Lesson 2's new_x.</figcaption></figure>
+<pre><code>def rotate_z(point_3d, angle_degrees):
+    x, y, z = point_3d
+
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+
+    new_x = (x * cos_a) - (y * sin_a)
+    new_y = (x * sin_a) + (y * cos_a)
+    new_z = z                              # the skewer: near/far never changes
+
+    return (new_x, new_y, new_z)</code></pre>
+
+<h3>2.3 Worked example 1: corner 5, a quarter roll</h3>
+<figure id="fig-2b-2-4"><img src="images/b14_roll_corner5_90.png" alt="Front view: corner 5 at x 1, y 1 rolls 90 degrees and lands at x -1, y 1, where corner 4 was" loading="lazy"><figcaption><span class="fignum">Fig 2B.2.4</span>A quarter roll anticlockwise moves the top-right-front corner to the top-left-front: corner 4's place.</figcaption></figure>
+
+<h3>2.4 Worked example 2: corner 5, rolled 30°</h3>
+<figure id="fig-2b-2-5"><img src="images/b15_roll_corner5_30.png" alt="Front view: corner 5 rolled 30 degrees lands at (0.366, 1.366, -1), with the sums worked inside-out and a distance check" loading="lazy"><figcaption><span class="fignum">Fig 2B.2.5</span>Corner 5 moved left and up, and its z did not change at all.</figcaption></figure>
+
+<h3>2.5 To the screen</h3>
+<figure id="fig-2b-2-6"><img src="images/b16_roll_pipeline.png" alt="Corner 5 in four panels: shape (1, 1, -1), rolled (0.366, 1.366, -1), world (0.366, 1.366, 4), screen (436.6, 163.4)" loading="lazy"><figcaption><span class="fignum">Fig 2B.2.6</span>In panel 3 (Fig 2B.2.6c) the front face is seen edge-on, so it is a straight upright line at z = 4.<span class="panels">Panels: <b>2B.2.6a</b> (first) 1. SHAPE · <b>2B.2.6b</b> (second) 2. SHAPE rolled · <b>2B.2.6c</b> (third) 3. WORLD · <b>2B.2.6d</b> (fourth) 4. SCREEN</span></figcaption></figure>
+<p>Rolling has one property the other two turns don't: because z never changes, every corner keeps its distance from you. Corner 5 always stays at world z = 4, so on the screen it travels round a perfect circle.</p>
+<figure id="fig-2b-2-7"><img src="images/b17_roll_screen_circle.png" alt="A zoomed piece of the screen: the cube at 0 and 30 degrees, corner 5 on a yellow circle of radius 141.4 px and the back corners on a purple circle of radius 94.3 px" loading="lazy"><figcaption><span class="fignum">Fig 2B.2.7</span>The front corners ride a circle of 141.4 px and the back corners a circle of 94.3 px, because the back is further away. <code>step2_roll_cube.py</code> draws the yellow circle for you.</figcaption></figure>
+<p>Run <code>step2_roll_cube.py</code>. Hold LEFT to roll the cube anticlockwise and RIGHT to roll it back. Watch corner 5 stay on the grey circle.</p>
+<figure id="fig-2b-2-8"><img src="images/run_step2_roll_cube.png" alt="Output of step 2: the cube rolled 30 degrees inside a grey circle, with corner 5 marked in yellow on the circle" loading="lazy"><figcaption><span class="fignum">Fig 2B.2.8</span>After holding LEFT for half a second: 30°. Corner 5 is at (437, 163), on the circle.</figcaption></figure>
+<details class="full"><summary>Full code: <code>step2_roll_cube.py</code> (about 170 lines)</summary><pre><code># ======================================================================
+# LESSON 2B - STEP 2: ROLL THE CUBE (turning around the z axis)
+# ----------------------------------------------------------------------
+# Goal: the LEFT / RIGHT arrows ROLL the cube around its z axis (the
+# line through its middle that points straight at you), like turning
+# a steering wheel.
+#
+# What is new since step 1:
+#
+#   1. angle_z_degrees            - how far the cube has rolled
+#   2. rotate_z(point, angle)     - rolls ONE point around the z axis
+#   3. a faint circle on the screen showing the path corner 5 travels
+#
+# THE BIG IDEA (again!):
+#   rotate_z is Lesson 2&#x27;s rotate_y with different letters.
+#
+#       Lesson 2, rotate_y:  +x swings toward +z.   y is the skewer.
+#       Today,    rotate_z:  +x swings toward +y.   z is the skewer.
+#
+#   So every &quot;z&quot; in the old rule becomes a &quot;y&quot;, and z is left alone.
+#
+# No map this time: the z skewer points straight at you, so the screen
+# itself is already the &quot;map from the front&quot;.
+#
+# Controls:  LEFT / RIGHT = roll the cube,   R = reset the angle to 0
+# Run:  python step2_roll_cube.py
+# ======================================================================
+
+import math
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption(&quot;Lesson 2B, step 2 - roll the cube&quot;)
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+
+BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
+YELLOW = (255, 255, 0)
+GREY = (90, 90, 90)
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400
+
+# ---- The cube, in SHAPE coordinates (same as always) ------------------
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+cube_edges = [
+    (0, 1), (1, 2), (2, 3), (3, 0),   # bottom square
+    (4, 5), (5, 6), (6, 7), (7, 4),   # top square
+    (0, 4), (1, 5), (2, 6), (3, 7),   # upright edges
+]
+
+cube_distance = 5
+
+# ---- NEW: how far the cube has rolled --------------------------------
+angle_z_degrees = 0
+TURN_STEP = 1          # 1 degree per frame -&gt; 6 seconds for a full roll
+
+
+def rotate_z(point_3d, angle_degrees):
+    &quot;&quot;&quot;Roll one (x, y, z) point around the z axis.
+
+    The point must be in SHAPE coordinates (from the shape&#x27;s own centre).
+    A positive angle swings +x (the right side) toward +y (up):
+    as YOU look at it, that is ANTICLOCKWISE, like steering left.
+    &quot;&quot;&quot;
+    x, y, z = point_3d
+
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+
+    # Lesson 2&#x27;s rule, with every z swapped for a y:
+    #   rotate_y had   new_x = (x * cos_a) - (z * sin_a)
+    #                  new_z = (x * sin_a) + (z * cos_a)
+    new_x = (x * cos_a) - (y * sin_a)
+    new_y = (x * sin_a) + (y * cos_a)
+    new_z = z                              # the skewer: near/far never changes
+
+    return (new_x, new_y, new_z)
+
+
+def project(point_3d):
+    &quot;&quot;&quot;Turn one 3D WORLD point into a 2D SCREEN point (from Lesson 1).&quot;&quot;&quot;
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+# ---- The path of corner 5 --------------------------------------------
+# Rolling never changes z, so corner 5 stays at world z = (-1 + 5) = 4.
+# Its distance from the skewer is root( (1 * 1) + (1 * 1) ) = 1.414.
+# On screen that distance becomes ( (1.414 * FOCAL) / 4 ) = 141.4 px,
+# so corner 5 always travels round a circle of radius 141 px.
+PATH_RADIUS = ( (math.sqrt(2) * FOCAL) / (-1 + cube_distance) )
+
+
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    keys = pygame.key.get_pressed()
+    # ---- NEW: LEFT / RIGHT change the roll angle ---------------------
+    # LEFT = a positive angle = anticlockwise, like steering left:
+    # the top of the cube leans to the LEFT.
+    if keys[pygame.K_LEFT]:
+        angle_z_degrees = (angle_z_degrees + TURN_STEP)
+    if keys[pygame.K_RIGHT]:
+        angle_z_degrees = (angle_z_degrees - TURN_STEP)
+    if keys[pygame.K_r]:
+        angle_z_degrees = 0
+    if angle_z_degrees &gt;= 360:
+        angle_z_degrees = (angle_z_degrees - 360)
+    if angle_z_degrees &lt; 0:
+        angle_z_degrees = (angle_z_degrees + 360)
+
+    screen.fill(BLACK)
+
+    # The faint circle that corner 5 rides round.
+    pygame.draw.circle(screen, GREY, (CENTRE_X, CENTRE_Y), PATH_RADIUS, 1)
+
+    # ---- rotate -&gt; move away -&gt; project, for all 8 corners -----------
+    screen_points = []
+    for p in cube_points:
+        turned = rotate_z(p, angle_z_degrees)        # 1. ROLL   (SHAPE)
+        x, y, z = turned
+        moved = (x, y, (z + cube_distance))          # 2. MOVE   (WORLD)
+        screen_points.append(project(moved))         # 3. PROJECT (SCREEN)
+
+    for a, b in cube_edges:
+        pygame.draw.line(screen, GREEN, screen_points[a], screen_points[b], 2)
+
+    pygame.draw.circle(screen, YELLOW, screen_points[5], 5)
+
+    text = &quot;roll angle (z) = &quot; + str(angle_z_degrees) + &quot; degrees   (LEFT / RIGHT,  R = reset)&quot;
+    screen.blit(font.render(text, True, YELLOW), (20, 20))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Roll to exactly 90 degrees. Corner 5 is now where which corner was?
+#   * Roll to 30 degrees. Is corner 5 at about (437, 163), as worked out
+#     in the lesson? Is it on the grey circle?
+#   * Look at the BACK square of the cube (the smaller one). Does it
+#     roll round a smaller circle? Why? (Hint: its z is 6, not 4.)
+#   * Change cube_distance to 8. What radius is the circle now?
+#     ( (1.414 * 400) / 7 ) = ?
+# ----------------------------------------------------------------------</code></pre></details>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q7</span>Roll corner 1, (1, -1, -1), by 90°. Where does it land?</p><details><summary>Show answer</summary><div class="ans"><pre><code>cos(90°) = 0, sin(90°) = 1
+new_x = (1 * 0) - (-1 * 1) = (0) - (-1) = 1
+new_y = (1 * 1) + (-1 * 0) = (1) + (0)  = 1
+new_z = -1</code></pre>(1, 1, -1), corner 5's place. The bottom-right corner rolled up to the top-right.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q8</span>When the cube rolls, the front square on screen turns but never changes size. Why?</p><details><summary>Show answer</summary><div class="ans">Rolling never changes z. All four front corners stay at world z = 4, so <code>project()</code> always divides them by the same 4. Only tipping and turning move corners nearer or further.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q9</span>Roll corner 5 by 45° (cos = sin = 0.707) and follow it to the screen.</p><details><summary>Show answer</summary><div class="ans"><pre><code>new_x = (1 * 0.707) - (1 * 0.707) = (0.707) - (0.707) = 0
+new_y = (1 * 0.707) + (1 * 0.707) = (0.707) + (0.707) = 1.414
+world z = (-1 + 5) = 4
+sx = 400 + ( (0 * 400) / 4 )     = 400 + 0     = 400
+sy = 300 - ( (1.414 * 400) / 4 ) = 300 - 141.4 = 158.6</code></pre>(400, 158.6): straight above the middle of the screen, at the very top of the 141.4 px circle.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q10</span>Change <code>cube_distance</code> to 8. What is the radius of corner 5's circle now?</p><details><summary>Show answer</summary><div class="ans"><pre><code>world z = (-1 + 8) = 7
+radius  = ( (1.414 * 400) / 7 ) = ( 565.7 / 7 ) = 80.8 px</code></pre>Further away, so a smaller circle.</div></details></div>
+</div>
+
+<h2>Part 3: All three at once <span class="mins">10 MIN</span></h2>
+<p>We now have three functions that all follow one pattern. Here they are side by side.</p>
+<figure id="fig-2b-3-1"><img src="images/b18_three_rules.png" alt="Three columns: TIP rotate_x (+y swings toward +z), TURN rotate_y (+x swings toward +z), ROLL rotate_z (+x swings toward +y), each with its rule" loading="lazy"><figcaption><span class="fignum">Fig 2B.3.1</span>Keep this one as a cheat sheet. If you forget a rule, rebuild it from the three questions at the bottom.<span class="panels">Panels: <b>2B.3.1a</b> (left card) TIP around x · <b>2B.3.1b</b> (middle card) TURN around y · <b>2B.3.1c</b> (right card) ROLL around z</span></figcaption></figure>
+
+<h3>3.1 Why the order matters</h3>
+<p>To tumble the cube we do all three turns to every corner. That raises a question we never met in Lesson 2: which turn goes first? The answer changes the result. Here are two 90° turns done in both orders, with the front face painted pink so you can see where it ends up.</p>
+<figure id="fig-2b-3-2"><img src="images/b19_order_matters.png" alt="Row A: tip 90 then turn 90, the pink front face ends on top and corner 5 at corner 7's place. Row B: turn 90 then tip 90, the pink face ends on the right and corner 5 at corner 2's place" loading="lazy"><figcaption><span class="fignum">Fig 2B.3.2</span>Same two turns, same angles, different order, different cube. Try it with a book on your desk.<span class="panels">Panels: <b>2B.3.2a</b> (top row (A)) tip first, then turn · <b>2B.3.2b</b> (bottom row (B)) turn first, then tip</span></figcaption></figure>
+<p>Why? Each turn works on the corner <em>as the turn before left it</em>. In row A the tip moves the pink face to the top, and a turn around the upright skewer can't move the top face anywhere else. In row B the turn moves the pink face to the right side, and a tip around the left-right skewer can't move the right face.</p>
+<p>So we pick one order and always use it. We use <strong>tip, then turn, then roll</strong> (x, then y, then z), simply because it is alphabetical and easy to remember. Any order works as long as the program never changes it.</p>
+<pre><code>def rotate_all(point_3d):
+    """Do all three turns, one after another, in SHAPE coordinates."""
+    p = rotate_x(point_3d, angle_x)    # 1. tip
+    p = rotate_y(p, angle_y)           # 2. turn  (starts from the TIPPED corner)
+    p = rotate_z(p, angle_z)           # 3. roll  (starts from the TURNED corner)
+    return p</code></pre>
+<p>Each line feeds its answer into the next, like passing a parcel along. Here is corner 5 going through all three, at 30° each.</p>
+<figure id="fig-2b-3-3"><img src="images/b20_chain_corner5.png" alt="Corner 5 through tip, turn and roll at 30 degrees each, ending at (0.225, 1.708, 0.183) in shape coordinates and (417.4, 168.2) on screen, with a distance check and the other order's answer" loading="lazy"><figcaption><span class="fignum">Fig 2B.3.3</span>The distance check now uses all three numbers: corner 5 is root(3) = 1.732 from the centre before and after. In the other order the same angles put corner 5 46.8 px further right.<span class="panels">Panels: <b>2B.3.3a</b> (top row left) 1. tip · <b>2B.3.3b</b> (top row middle) 2. turn · <b>2B.3.3c</b> (top row right) 3. roll · <b>2B.3.3d</b> (middle row left) 4. move away (WORLD) · <b>2B.3.3e</b> (middle row right) 5. project (SCREEN)</span></figcaption></figure>
+
+<h3>3.2 Three speeds</h3>
+<p>In Lesson 2 one <code>SPEED</code> was added to one angle every frame. Now each angle gets its own speed.</p>
+<figure id="fig-2b-3-4"><img src="images/b21_speeds.png" alt="SPEED_Y 1, SPEED_X 0.5 and SPEED_Z 0.25 degrees per frame, giving 6, 12 and 24 seconds per full turn, and a table of the three angles at frames 0 to 1440" loading="lazy"><figcaption><span class="fignum">Fig 2B.3.4</span>Turning keeps Lesson 2's speed. Tipping is half of it and rolling a quarter, so the tumble is slow enough to follow with your eyes.<span class="panels">Panels: <b>2B.3.4a</b> (top) the three speeds and their full-turn times · <b>2B.3.4b</b> (bottom) the three angles as the frames go by</span></figcaption></figure>
+<pre><code>SPEED_X = 0.5          # tip:  (0.5 * 60)  = 30 deg/s -> 12 s a tip
+SPEED_Y = 1            # turn: (1 * 60)    = 60 deg/s ->  6 s a turn
+SPEED_Z = 0.25         # roll: (0.25 * 60) = 15 deg/s -> 24 s a roll
+
+    # inside the main loop:
+    if not paused:
+        angle_x = keep_under_360( (angle_x + SPEED_X) )
+        angle_y = keep_under_360( (angle_y + SPEED_Y) )
+        angle_z = keep_under_360( (angle_z + SPEED_Z) )</code></pre>
+<figure id="fig-2b-3-5"><img src="images/b22_filmstrip.png" alt="Seven frames of the tumbling cube every half second from frame 0 to frame 180, with the tip, turn and roll angles under each" loading="lazy"><figcaption><span class="fignum">Fig 2B.3.5</span>Real frames, drawn with the same sums as the program. Corner 5 is yellow.<span class="panels">Panels: <b>2B.3.5a</b> (1st frame) 0 s · <b>2B.3.5b</b> (2nd) 0.5 s · <b>2B.3.5c</b> (3rd) 1 s · <b>2B.3.5d</b> (4th) 1.5 s · <b>2B.3.5e</b> (5th) 2 s · <b>2B.3.5f</b> (6th) 2.5 s · <b>2B.3.5g</b> (7th) 3 s</span></figcaption></figure>
+<div class="key"><strong>Still never change cube_points</strong><p>As in Lesson 2, every frame turns the <em>original</em> corners by the <em>total</em> angles so far. With three turns per corner per frame, rounding errors would pile up three times as fast if we kept turning already-turned corners.</p></div>
+<p>Run <code>step3_tumble_cube.py</code>. SPACE pauses. While paused, press O to swap the order to roll, turn, tip: the angles on screen stay the same, but the cube jumps to a different pose. That is Part 3.1 happening live.</p>
+<figure id="fig-2b-3-6"><img src="images/run_step3_tumble_cube.png" alt="Output of step 3: the tumbling cube one second in, with tip 30, turn 60 and roll 15 degrees shown at the top" loading="lazy"><figcaption><span class="fignum">Fig 2B.3.6</span>One second in (frame 60): tip 30°, turn 60°, roll 15°. Compare with the frame 60 picture in the filmstrip, Fig 2B.3.5c.</figcaption></figure>
+<details class="full"><summary>Full code: <code>step3_tumble_cube.py</code> (about 230 lines)</summary><pre><code># ======================================================================
+# LESSON 2B - STEP 3: THE TUMBLING CUBE (all three turns at once)
+# ----------------------------------------------------------------------
+# Goal: the cube tips, turns AND rolls by itself, each at its own speed,
+# so it tumbles through the air and shows you every side.
+#
+# What is new since step 2:
+#
+#   1. THREE angles:   angle_x, angle_y, angle_z   (all in degrees)
+#   2. THREE speeds:   SPEED_X, SPEED_Y, SPEED_Z   (degrees per frame)
+#   3. rotate_all(point)  - does the three turns ONE AFTER ANOTHER:
+#
+#          tip (x)  -&gt;  turn (y)  -&gt;  roll (z)
+#
+#      Each turn starts from the answer of the turn before.
+#
+#   4. Press O to swap the ORDER to  roll (z) -&gt; turn (y) -&gt; tip (x).
+#      The cube JUMPS to a different position, even though the three
+#      angles are exactly the same. That is the lesson&#x27;s &quot;order matters&quot;.
+#
+# The full recipe for one corner, every frame:
+#
+#   SHAPE corner -&gt; tip -&gt; turn -&gt; roll -&gt; add cube_distance -&gt; project
+#   (all three turns in SHAPE coordinates)   (WORLD)           (SCREEN)
+#
+# Controls:  SPACE = pause / unpause,   O = swap the order,
+#            R = reset all three angles to 0
+# Run:  python step3_tumble_cube.py
+# ======================================================================
+
+import math
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption(&quot;Lesson 2B, step 3 - the tumbling cube&quot;)
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+
+BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
+YELLOW = (255, 255, 0)
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400
+
+# ---- The cube, in SHAPE coordinates (same as always) ------------------
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+cube_edges = [
+    (0, 1), (1, 2), (2, 3), (3, 0),   # bottom square
+    (4, 5), (5, 6), (6, 7), (7, 4),   # top square
+    (0, 4), (1, 5), (2, 6), (3, 7),   # upright edges
+]
+
+# A turned corner can now reach root(3) = 1.732 in front of the centre
+# (all three numbers of a corner can swing toward you at once), so the
+# nearest a corner gets is (5 - 1.732) = 3.268 away. Safe.
+cube_distance = 5
+
+# ---- NEW: three angles and three speeds ------------------------------
+angle_x = 0            # tip  so far, degrees
+angle_y = 0            # turn so far, degrees
+angle_z = 0            # roll so far, degrees
+
+# Degrees added EVERY FRAME (60 frames a second). Three DIFFERENT
+# speeds, so the cube does not just repeat the same wobble:
+#   SPEED_Y = 1    -&gt; (1 * 60)    = 60  deg/s -&gt; (360 / 60) =  6 s a turn
+#   SPEED_X = 0.5  -&gt; (0.5 * 60)  = 30  deg/s -&gt; (360 / 30) = 12 s a tip
+#   SPEED_Z = 0.25 -&gt; (0.25 * 60) = 15  deg/s -&gt; (360 / 15) = 24 s a roll
+# Turning stays at Lesson 2&#x27;s speed; tipping is half that and rolling a
+# quarter, so the tumble is slow enough to follow with your eyes.
+SPEED_X = 0.5
+SPEED_Y = 1
+SPEED_Z = 0.25
+
+paused = False
+x_first = True         # True: tip -&gt; turn -&gt; roll.  False: roll -&gt; turn -&gt; tip.
+
+
+# ---- The three turns. Same rule, three sets of letters ----------------
+#   rotate_x: +y swings toward +z  (x is the skewer)   = TIP
+#   rotate_y: +x swings toward +z  (y is the skewer)   = TURN (Lesson 2)
+#   rotate_z: +x swings toward +y  (z is the skewer)   = ROLL
+
+def rotate_x(point_3d, angle_degrees):
+    &quot;&quot;&quot;TIP one SHAPE point around the x axis (top swings away).&quot;&quot;&quot;
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = x
+    new_y = (y * cos_a) - (z * sin_a)
+    new_z = (y * sin_a) + (z * cos_a)
+    return (new_x, new_y, new_z)
+
+
+def rotate_y(point_3d, angle_degrees):
+    &quot;&quot;&quot;TURN one SHAPE point around the y axis (anticlockwise from above).&quot;&quot;&quot;
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = (x * cos_a) - (z * sin_a)
+    new_y = y
+    new_z = (x * sin_a) + (z * cos_a)
+    return (new_x, new_y, new_z)
+
+
+def rotate_z(point_3d, angle_degrees):
+    &quot;&quot;&quot;ROLL one SHAPE point around the z axis (anticlockwise as you see it).&quot;&quot;&quot;
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = (x * cos_a) - (y * sin_a)
+    new_y = (x * sin_a) + (y * cos_a)
+    new_z = z
+    return (new_x, new_y, new_z)
+
+
+def rotate_all(point_3d):
+    &quot;&quot;&quot;Do all three turns, one after another, in SHAPE coordinates.
+
+    Each line feeds its answer into the next line, like passing a
+    parcel along: the turn only ever sees the corner as the previous
+    turn left it.
+    &quot;&quot;&quot;
+    if x_first:
+        p = rotate_x(point_3d, angle_x)    # 1. tip
+        p = rotate_y(p, angle_y)           # 2. turn
+        p = rotate_z(p, angle_z)           # 3. roll
+    else:
+        p = rotate_z(point_3d, angle_z)    # 1. roll
+        p = rotate_y(p, angle_y)           # 2. turn
+        p = rotate_x(p, angle_x)           # 3. tip
+    return p
+
+
+def project(point_3d):
+    &quot;&quot;&quot;Turn one 3D WORLD point into a 2D SCREEN point (from Lesson 1).&quot;&quot;&quot;
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+def keep_under_360(angle):
+    &quot;&quot;&quot;360 degrees is the same as 0, so start again after a full turn.&quot;&quot;&quot;
+    if angle &gt;= 360:
+        angle = (angle - 360)
+    return angle
+
+
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                paused = not paused            # one press = one flip
+            if event.key == pygame.K_o:
+                x_first = not x_first          # swap the order
+            if event.key == pygame.K_r:
+                angle_x = 0
+                angle_y = 0
+                angle_z = 0
+
+    # ---- NEW: all three angles grow every frame ----------------------
+    if not paused:
+        angle_x = keep_under_360( (angle_x + SPEED_X) )
+        angle_y = keep_under_360( (angle_y + SPEED_Y) )
+        angle_z = keep_under_360( (angle_z + SPEED_Z) )
+
+    screen.fill(BLACK)
+
+    # ---- turn x3 -&gt; move away -&gt; project, for all 8 corners ----------
+    # As always, we turn the ORIGINAL cube_points by the TOTAL angles.
+    screen_points = []
+    for p in cube_points:
+        turned = rotate_all(p)                       # SHAPE, turned 3 times
+        x, y, z = turned
+        moved = (x, y, (z + cube_distance))          # WORLD
+        screen_points.append(project(moved))         # SCREEN
+
+    for a, b in cube_edges:
+        pygame.draw.line(screen, GREEN, screen_points[a], screen_points[b], 2)
+    pygame.draw.circle(screen, YELLOW, screen_points[5], 5)
+
+    text = (&quot;tip x = &quot; + str(round(angle_x, 1)) +
+            &quot;   turn y = &quot; + str(round(angle_y, 1)) +
+            &quot;   roll z = &quot; + str(round(angle_z, 1)))
+    screen.blit(font.render(text, True, YELLOW), (20, 20))
+    if x_first:
+        order_text = &quot;order: tip -&gt; turn -&gt; roll   (O = swap)&quot;
+    else:
+        order_text = &quot;order: roll -&gt; turn -&gt; tip   (O = swap)&quot;
+    screen.blit(font.render(order_text, True, YELLOW), (20, 50))
+    screen.blit(font.render(&quot;SPACE = pause,  R = reset&quot;, True, YELLOW), (20, 80))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Pause (SPACE), then press O a few times. The angles do not change,
+#     but the cube jumps. Why? (Lesson Part 3.)
+#   * Set SPEED_X = 0 and SPEED_Z = 0. You should get Lesson 2&#x27;s spin back.
+#   * Set all three speeds to 1. Does the tumble look more or less
+#     interesting than with three different speeds?
+#   * Write a 4th order, e.g. turn -&gt; tip -&gt; roll, and try it.
+# ----------------------------------------------------------------------</code></pre></details>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q11</span>Only one angle is not zero: tip 30°, turn 0°, roll 0°. Does the order of the three turns matter now?</p><details><summary>Show answer</summary><div class="ans">No. A 0° turn has cos = 1 and sin = 0, so <code>new_x = (x * 1) - (z * 0) = x</code> and so on: it changes nothing. Order only matters when two or more of the turns actually turn.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q12</span>Check row B's last step of the order diagram (Fig 2B.3.2b) by hand: after the turn, corner 5 is at (1, 1, 1). Tip it by 90°.</p><details><summary>Show answer</summary><div class="ans"><pre><code>cos(90°) = 0, sin(90°) = 1
+new_x = 1
+new_y = (1 * 0) - (1 * 1) = (0) - (1) = -1
+new_z = (1 * 1) + (1 * 0) = (1) + (0) =  1</code></pre>(1, -1, 1), corner 2's place, as the diagram says. Row A ends at (-1, 1, 1) instead: same turns, different order.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q13</span>Set <code>SPEED_X = 1</code>. How many seconds does one full tip take now?</p><details><summary>Show answer</summary><div class="ans"><pre><code>degrees per second = (1 * 60)   = 60
+seconds per tip    = (360 / 60) = 6</code></pre>6 seconds, the same as the turn. The tip and the turn now line up every 6 seconds.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q14</span>With all three turns, how close can a corner get to you at <code>cube_distance = 5</code>?</p><details><summary>Show answer</summary><div class="ans">A corner is root(3) = 1.732 from the centre, and with three turns it can end up pointing straight at you. Then its world z is (5 - 1.732) = 3.268, still well above 0, so <code>project()</code> never divides by something tiny.</div></details></div>
+</div>
+
+<h2>Wrap up <span class="mins">2 MIN</span></h2>
+<div class="key">
+  <strong>The ideas from today</strong>
+  <p>1. A cube has three skewers: tip around x, turn around y, roll around z. The skewer's letter never changes.<br>2. Describe any turn as "which letter swings toward which": tip +y toward +z, turn +x toward +z, roll +x toward +y.<br>3. One pattern for all three: <code>new_swinger = (swinger * cos_a) - (target * sin_a)</code> and <code>new_target = (swinger * sin_a) + (target * cos_a)</code>.<br>4. Rolling never changes z, so a rolling corner rides a circle on screen.<br>5. Several turns are done one after another, each starting from the last answer, and the order changes the result. We always use tip, turn, roll.<br>6. Rotate (SHAPE), then move (WORLD), then project (SCREEN), exactly as before.</p>
+</div>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q15</span>Final check: list, in order, everything that happens to one corner of the cube in one frame of <code>step3_tumble_cube.py</code>.</p><details><summary>Show answer</summary><div class="ans">1. All three angles grow by their speeds (once per frame, for the whole cube). 2. The original SHAPE corner is tipped with <code>rotate_x</code>. 3. The tipped corner is turned with <code>rotate_y</code>. 4. The turned corner is rolled with <code>rotate_z</code>. 5. cube_distance is added to its z, giving WORLD coordinates. 6. <code>project()</code> turns it into SCREEN pixels. 7. The edges are drawn between the screen points.</div></details></div>
+</div>
+<h3>Practice before Lesson 3</h3>
+<ul>
+  <li>Tumble the pyramid you made after Lesson 1 instead of the cube. Only <code>cube_points</code> and <code>cube_edges</code> change.</li>
+  <li>Add keys to step 3 that change one speed while it runs, for example T and G for SPEED_X up and down.</li>
+  <li>Write a fourth order, turn then tip then roll, and add it to the O key so it cycles through three orders.</li>
+  <li>Draw two cubes side by side, <code>((x - 3), y, (z + cube_distance))</code> and <code>((x + 3), y, (z + cube_distance))</code>, one tumbling in each order.</li>
+</ul>
+<h3>Next time: Lesson 3, solid faces</h3>
+<p>So far the cube is made of wire: 12 lines with nothing between them, so you can see the back edges straight through the front. In Lesson 3 we fill its six sides with colour, paint them in the right order, skip the ones that face away from you, and light them with a lamp. Walking around the cube comes after that, in Lesson 4.</p>
+
+<h2>Files</h2>
+<p>Download the code for this lesson (right-click a file and choose <em>Save link as</em>):</p>
+<ul class="files">
+  <li><a href="code/step1_tip_cube.py" download><code>code/step1_tip_cube.py</code></a>: tip the cube with UP and DOWN, with a map from the side</li>
+  <li><a href="code/step2_roll_cube.py" download><code>code/step2_roll_cube.py</code></a>: roll the cube with LEFT and RIGHT, with corner 5's circle</li>
+  <li><a href="code/step3_tumble_cube.py" download><code>code/step3_tumble_cube.py</code></a>: the cube tumbles by itself; O swaps the order</li>
+  <li><code>images/</code>: every diagram on this page as a PNG</li>
+  <li><a href="../figures/">Figure index</a>: every figure and table in the course, with its number. Numbers read <code>Fig lesson.part.figure</code>, plus a letter for one panel of a picture (for example <code>Fig 3.4.2b</code>).</li>
+</ul>
+</main>
+</body>
+</html>

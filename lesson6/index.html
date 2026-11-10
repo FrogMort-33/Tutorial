@@ -1,0 +1,2054 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframe 3D, Lesson 6</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Chakra+Petch:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one readable column, like a lab notebook; diagrams and code break out slightly wider. */
+:root {
+  --bg:#f3f6f4; --paper:#ffffff; --fg:#17201b; --muted:#56635c; --line:#d5ded8;
+  --accent:#0d8a4a; --accent-soft:#e2f3e9; --code-bg:#121815; --code-fg:#d9f5e3; --warn:#9a6a00;
+  --display:"Chakra Petch", "Trebuchet MS", sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; --code-bg:#0a0e0c; --code-fg:#d9f5e3; --warn:#e6b84a; color-scheme:dark; } }
+:root[data-theme="dark"] {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; --code-bg:#0a0e0c; --code-fg:#d9f5e3; --warn:#e6b84a; color-scheme:dark; }
+body { background:var(--bg); color:var(--fg); font-family:var(--body); font-size:17px; line-height:1.6;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:32px 64px; }
+main { max-width:780px; margin:0 auto; display:flex; flex-direction:column; gap:20px; }
+h1,h2,h3 { font-family:var(--display); text-wrap:balance; line-height:1.2; margin:0; }
+h1 { font-size:clamp(30px,6vw,44px); }
+h2 { font-size:26px; margin-top:28px; padding-top:20px; border-top:2px solid var(--line); display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; }
+h2 .mins { font-family:var(--mono); font-size:14px; color:var(--accent); font-weight:600; letter-spacing:.04em; }
+h3 { font-size:20px; margin-top:12px; }
+p { margin:0; max-width:68ch; }
+.eyebrow { font-family:var(--mono); font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); }
+.lede { font-size:19px; color:var(--muted); }
+code { font-family:var(--mono); font-size:.88em; background:var(--accent-soft); padding:1px 5px; border-radius:4px; }
+pre { margin:0; background:var(--code-bg); color:var(--code-fg); padding:16px 18px; border-radius:8px; overflow-x:auto; font-size:14px; line-height:1.5; }
+pre code { background:none; padding:0; font-size:inherit; color:inherit; }
+figure { margin:0; display:flex; flex-direction:column; gap:8px; }
+figure img { width:100%; border-radius:8px; display:block; border:1px solid var(--line); }
+figcaption { font-size:14px; color:var(--muted); }
+table { border-collapse:collapse; width:100%; font-size:15px; }
+.tablewrap { overflow-x:auto; }
+th,td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+td.t { font-family:var(--mono); white-space:nowrap; color:var(--accent); font-variant-numeric:tabular-nums; }
+ul,ol { margin:0; padding-left:22px; max-width:68ch; }
+li+li { margin-top:4px; }
+.key { background:var(--accent-soft); border-left:4px solid var(--accent); padding:14px 18px; border-radius:0 8px 8px 0; display:flex; flex-direction:column; gap:6px; }
+.key strong { font-family:var(--display); }
+.q { background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:14px 18px; display:flex; flex-direction:column; gap:8px; }
+.qq { font-weight:700; display:flex; gap:10px; }
+.qn { font-family:var(--mono); color:var(--accent); flex:none; }
+details summary { cursor:pointer; color:var(--accent); font-weight:700; }
+details summary:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.ans { padding-top:8px; color:var(--fg); display:flex; flex-direction:column; gap:8px; }
+details.full { border:1px dashed var(--line); border-radius:8px; padding:10px 14px; }
+details.full[open] summary { margin-bottom:10px; }
+.check { display:flex; flex-direction:column; gap:12px; }
+.files li code { white-space:nowrap; }
+.key a { color:var(--accent); font-weight:700; }
+
+.fignum { font-family:var(--mono); font-weight:600; color:var(--accent); margin-right:6px; white-space:nowrap; }
+.panels { display:block; margin-top:4px; }
+.panels b { font-family:var(--mono); color:var(--fg); font-weight:600; }
+.tabcap { font-size:14px; color:var(--muted); margin-bottom:-12px; }
+figure, .tabcap { scroll-margin-top:16px; }
+</style>
+
+</head>
+<body>
+<main>
+<nav style="font-family:var(--mono, monospace);font-size:14px;"><a style="color:var(--accent)" href="../">&larr; All lessons</a> &middot; <a style="color:var(--accent)" href="../figures/">Figure index</a></nav>
+
+<header style="display:flex;flex-direction:column;gap:12px">
+  <span class="eyebrow">Wireframe 3D course · Lesson 6 · about 50 minutes</span>
+  <h1>Matrices</h1>
+  <p class="lede">Since Lesson 2 every turn has been its own little formula: tip, turn, roll, then undo your turn and undo your tip. Today we pack each turn into a 3 × 3 grid of numbers called a matrix, and then join several grids into one. The picture on the screen does not change at all. What changes is how much work the computer does to draw it, and how tidy the code is. This is how real 3D engines store every turn.</p>
+</header>
+
+<figure id="fig-6-0-1"><img src="images/course_map.png" alt="Course map: eight lessons on a road from Lesson 1 to a mini game. Lesson 6, Matrices, is highlighted as you are here; Lessons 1 to 5 are done and Lesson 7, a mini game, is next." loading="lazy"><figcaption><span class="fignum">Fig 6.0.1</span>The course map. Coloured cards are done or today; darker cards are still to come. Every lesson adds one idea to the same small program.</figcaption></figure>
+<div class="key">
+  <strong>Where this lesson fits</strong>
+  <p><strong>Before:</strong> <a href="../lesson5/">Lesson 5</a>, A small world, filled the world with seven shapes and a floor grid.<br><strong>Today:</strong> every turn becomes a matrix, so the same world is drawn with far fewer cos and sin calls.<br><strong>Next:</strong> Lesson 7, A mini game, flies the camera round the world to collect cubes, using today's tidy code.</p>
+  <p>Lesson 6 adds no new picture. It is a "tidy-up" lesson: everything you see stays exactly the same, which makes it a good place to check your understanding of Lessons 2 to 5.</p>
+</div>
+
+<h2>Lesson plan</h2>
+<p><strong>Who it's for:</strong> someone who finished Lesson 5 and can run <code>step3_small_world.py</code>. You need the three turn rules (Lessons 2 and 2B), the dot product (Lesson 3), <code>to_camera()</code> (Lesson 4), and the <code>things</code> list (Lesson 5). <strong>Needs:</strong> Python 3 and <code>pip install pygame-ce</code>, as before.</p>
+<p><strong>By the end, the learner can:</strong></p>
+<ol>
+  <li>Say what a 3 × 3 matrix is, and read any number in it by row and column.</li>
+  <li>Put a point through a matrix by hand: one dot product per row.</li>
+  <li>Write Lesson 2's turn rule as a grid, and the tip and roll rules too.</li>
+  <li>Read a matrix's columns as "where the x, y and z arrows land".</li>
+  <li>Join two matrices into one with <code>combine(first, second)</code>, and explain why the order matters.</li>
+  <li>Explain, with measured numbers, why one camera matrix per frame saves thousands of cos and sin calls.</li>
+</ol>
+<p class="tabcap" id="fig-6-0-2"><span class="fignum">Table 6.0.2</span>Lesson plan: time, part and what happens</p>
+<div class="tablewrap"><table>
+<tr><th>Time</th><th>Part</th><th>What happens</th></tr>
+<tr><td class="t">0–4</td><td>Recap</td><td>The recipe so far, and the two places today's grids go.</td></tr>
+<tr><td class="t">4–12</td><td>1. What is a matrix?</td><td>Rows, columns, Python tuples. Matrix × point = one dot product per row. Corner 5 by hand. Q1–Q2.</td></tr>
+<tr><td class="t">12–16</td><td>2. Two warm-up grids</td><td>The do-nothing grid and a stretch grid. Q3.</td></tr>
+<tr><td class="t">16–28</td><td>3. Turns as grids</td><td>Lesson 2's rule becomes a grid. Columns are arrows. Tip and roll grids, checked against Lesson 2B. Run <code>step1_matrix_by_hand.py</code>. Q4–Q6.</td></tr>
+<tr><td class="t">28–38</td><td>4. Joining grids</td><td><code>combine()</code> one column at a time, the full spin matrix, order still matters. Q7–Q8.</td></tr>
+<tr><td class="t">38–42</td><td>5. The camera's grid</td><td>Lesson 4's two "undo" turns become <code>camera_matrix</code>. Q9.</td></tr>
+<tr><td class="t">42–48</td><td>6. Why bother?</td><td>Count the cos and sin calls: 5,068 → 50 a frame. Run <code>step2_spin_matrix.py</code> and <code>step3_camera_matrix.py</code>. Q10.</td></tr>
+<tr><td class="t">48–50</td><td>Wrap up</td><td>Final check Q11. Preview of Lesson 7.</td></tr>
+</table></div>
+
+<h2>Recap: the recipe so far <span class="mins">4 MIN</span></h2>
+<p>By the end of Lesson 5, every corner of every thing went through a long recipe each frame. It started in <strong>SHAPE</strong> coordinates (measured from the thing's own centre), became <strong>WORLD</strong> coordinates (measured from the map's centre), then <strong>CAMERA</strong> coordinates (measured from you), and finally <strong>SCREEN</strong> pixels. Five of the steps were turns, and every one of them called <code>math.cos</code> and <code>math.sin</code> again.</p>
+<p>As always, we follow <strong>corner 5</strong>: the cube's top-right-front corner, SHAPE (1, 1, −1). That means 1 to the right of the cube's centre (+x), 1 up (+y), and 1 toward you (−z is the front). You met it in Lesson 1 and it has been in every worked example since, so you can check today's answers against old ones.</p>
+<figure id="fig-6-0-3"><img src="images/g02_pipeline.png" alt="Two rows of boxes. Before: SHAPE point, tip, turn, roll, plus position, minus camera, undo turn, undo tip, NEAR check, project. After: SHAPE point, times spin_matrix, plus position, minus camera, times camera_matrix, NEAR check, project. Pink brackets show the three spin turns becoming one grid and the two camera turns becoming one grid." loading="lazy"><figcaption><span class="fignum">Fig 6.0.3</span>Today's change. Three spin turns become one grid (<code>spin_matrix</code>, Part 4) and the camera's two turns become one grid (<code>camera_matrix</code>, Part 5). Both are built once per frame, before any corner is drawn.<span class="panels">Panels: <b>6.0.3a</b> (top row) BEFORE (Lessons 2B to 5) · <b>6.0.3b</b> (bottom row) AFTER (Lesson 6)</span></figcaption></figure>
+
+<h2>Part 1: What is a matrix? <span class="mins">8 MIN</span></h2>
+<p>A <strong>matrix</strong> (plural: matrices) is a grid of numbers. Ours are always 3 rows by 3 columns, because a point has 3 numbers going in (x, y, z) and 3 numbers coming out (new x, new y, new z). Here is the first one we will use. It is Lesson 2's "turn by 30°" rule; Part 3 shows where every number comes from.</p>
+<figure id="fig-6-1-1"><img src="images/g03_what_is_a_matrix.png" alt="A 3 by 3 grid: row 0 is 0.866, 0, -0.5 in blue; row 1 is 0, 1, 0 in yellow; row 2 is 0.5, 0, 0.866 in orange. Labels: row 0 makes new_x, row 1 makes new_y, row 2 makes new_z; column 0 times x, column 1 times y, column 2 times z. Beside it, the same grid as a Python tuple of three tuples." loading="lazy"><figcaption><span class="fignum">Fig 6.1.1</span>Rows go across, columns go down, both numbered from 0 like Python lists. In Python, <code>turn_30[2][0]</code> means row 2, then item 0 of that row: 0.5.<span class="panels">Panels: <b>6.1.1a</b> (left) the grid turn_30 · <b>6.1.1b</b> (right) the same grid in Python</span></figcaption></figure>
+<h3>Matrix × point</h3>
+<p>To put a point through a matrix, take each row in turn and do Lesson 3's <strong>dot product</strong> with the point: multiply the first numbers together, the second numbers together, the third numbers together, then add the three answers. Row 0 gives the new x, row 1 the new y, row 2 the new z.</p>
+<figure id="fig-6-1-2"><img src="images/g04_row_times_point.png" alt="The turn_30 grid times corner 5 (1, 1, -1) equals (1.366, 1, -0.366), with each row's dot product written out: new_x = (0.866 * 1) + (0 * 1) + (-0.5 * -1) = 1.366; new_y = (0 * 1) + (1 * 1) + (0 * -1) = 1; new_z = (0.5 * 1) + (0 * 1) + (0.866 * -1) = -0.366. A panel explains corner 5's SHAPE coordinates." loading="lazy"><figcaption><span class="fignum">Fig 6.1.2</span>All in SHAPE coordinates, centre (0, 0, 0) = the middle of the cube. The answer, (1.366, 1, −0.366), is exactly what Lesson 2's <code>rotate_y(corner_5, 30)</code> gave.</figcaption></figure>
+<p>In code it is three calls to the <code>dot()</code> function you already have:</p>
+<pre><code>def matrix_times_point(matrix, point_3d):
+    row_0, row_1, row_2 = matrix
+    new_x = dot(row_0, point_3d)
+    new_y = dot(row_1, point_3d)
+    new_z = dot(row_2, point_3d)
+    return (new_x, new_y, new_z)</code></pre>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q1</span><span>Put corner 0, SHAPE (−1, −1, −1), through <code>turn_30</code>. Where does it end up?</span></p><details><summary>Show answer</summary><div class="ans"><p>new_x = <code>(0.866 * -1) + (0 * -1) + (-0.5 * -1)</code> = (−0.866) + (0) + (0.5) = −0.366.</p><p>new_y = <code>(0 * -1) + (1 * -1) + (0 * -1)</code> = −1.</p><p>new_z = <code>(0.5 * -1) + (0 * -1) + (0.866 * -1)</code> = (−0.5) + (0) + (−0.866) = −1.366.</p><p>(−0.366, −1, −1.366): the same as <code>rotate_y((-1, -1, -1), 30)</code>.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q2</span><span>What is <code>turn_30[0][2]</code>, and which letter of the point does it multiply?</span></p><details><summary>Show answer</summary><div class="ans"><p>Row 0, column 2: −0.5. Column 2 always multiplies z, and row 0 makes the new x. So it is the "<code>(-0.5 * z)</code>" part of new_x.</p></div></details></div>
+</div>
+
+<h2>Part 2: Two warm-up grids <span class="mins">4 MIN</span></h2>
+<p>Before turning anything, two simpler grids show what the numbers do. Think of each grid as a machine: point in, point out. The diagonal (top-left to bottom-right) says how much of each letter to keep; the other six numbers mix the letters together.</p>
+<figure id="fig-6-2-1"><img src="images/g05_two_warmup_grids.png" alt="Left: the identity grid with 1s on the diagonal turns corner 5 (1, 1, -1) into itself; the cube is still 200 px wide. Right: the stretch_x grid with 2 in the top-left turns corner 5 into (2, 1, -1); the cube is drawn 400 px wide." loading="lazy"><figcaption><span class="fignum">Fig 6.2.1</span>SHAPE coordinates. The widths are for the cube's front face at WORLD z = 4: <code>((2 * 400) / 4)</code> = 200 px normally, and <code>((4 * 400) / 4)</code> = 400 px when every x is doubled, because the face is now 4 units wide.<span class="panels">Panels: <b>6.2.1a</b> (left) do_nothing (the identity matrix) · <b>6.2.1b</b> (right) stretch_x (double the width)</span></figcaption></figure>
+<div class="key"><strong>The do-nothing grid (the identity)</strong><p>1s down the diagonal, 0s everywhere else. Whatever goes in comes out unchanged. You'll meet it again: turning by 0° gives exactly this grid, and so does turning one way and then back again.</p></div>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q3</span><span>Make a grid that squashes the cube to half its height. What does it do to corner 5?</span></p><details><summary>Show answer</summary><div class="ans"><p><code>((1, 0, 0), (0, 0.5, 0), (0, 0, 1))</code>: keep all of x and z, keep half of y. Corner 5 becomes <code>((1 * 1), (0.5 * 1), (1 * -1))</code> = (1, 0.5, −1).</p></div></details></div>
+</div>
+
+<h2>Part 3: Turns as grids <span class="mins">12 MIN</span></h2>
+<p>Where did the turn grid's numbers come from? Take Lesson 2's <code>rotate_y</code> rule and write every line with all three letters, x then y then z, putting a 0 in front of any letter that was missing. The numbers in front of the letters are the grid.</p>
+<figure id="fig-6-3-1"><img src="images/g06_formula_to_grid.png" alt="Lesson 2's rotate_y rule, then the same rule written the long way with all three letters on each line and the multipliers in pink: cos_a, 0, -sin_a; 0, 1, 0; sin_a, 0, cos_a. Below, turn_matrix(angle) in symbols and turn_matrix(30) in numbers." loading="lazy"><figcaption><span class="fignum">Fig 6.3.1</span><code>cos_a</code> and <code>sin_a</code> are Lesson 2's numbers: <code>math.cos</code> and <code>math.sin</code> of the angle in radians. At 30°, cos = 0.866 and sin = 0.5, which gives the grid from Part 1.<span class="panels">Panels: <b>6.3.1a</b> (top) Lesson 2&#x27;s rotate_y · <b>6.3.1b</b> (middle) the same rule written the long way · <b>6.3.1c</b> (bottom) turn_matrix(angle) and turn_matrix(30)</span></figcaption></figure>
+<p>So <code>turn_matrix(angle)</code> works out cos and sin once, and puts them in the right places:</p>
+<pre><code>def turn_matrix(angle_degrees):
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, 0, (-sin_a)),
+        (0,     1, 0       ),     # y is the skewer: it never changes
+        (sin_a, 0, cos_a   ),
+    )</code></pre>
+<h3>Another way to read a grid: columns are arrows</h3>
+<p>Put the arrow (1, 0, 0), which points along +x, through a grid. The 1 picks out the first number of each row and the 0s throw the rest away, so the answer is exactly column 0. The same goes for (0, 1, 0) and column 1, and (0, 0, 1) and column 2. So <strong>a grid's three columns are where the +x, +y and +z arrows land</strong>. We'll use this twice: to join grids (Part 4) and to find which way is forward (Part 6).</p>
+<figure id="fig-6-3-2"><img src="images/g07_columns_are_arrows.png" alt="turn_matrix(30) with column 0 shaded blue and column 2 shaded orange. A view from above in SHAPE coordinates: +x right, -x left, +z away, -z near you, centre (0,0,0). The +x arrow has turned 30 degrees to (0.866, 0, 0.5), which is column 0; the +z arrow has turned to (-0.5, 0, 0.866), which is column 2." loading="lazy"><figcaption><span class="fignum">Fig 6.3.2</span>SHAPE coordinates from above, centre (0, 0, 0), y pointing up out of the page at you. Lesson 2's rule: a positive turn swings +x toward +z, anticlockwise seen from above. Both arrows are still 1 long.<span class="panels">Panels: <b>6.3.2a</b> (left) turn_matrix(30) and the column 0 check · <b>6.3.2b</b> (right) the arrows seen from above</span></figcaption></figure>
+<h3>The other two turns</h3>
+<p>Lesson 2B's tip (around x) and roll (around z) pack the same way. In every grid the <strong>skewer</strong>, the letter that doesn't move, gets a 1 where its row and column cross and 0s along the rest of that row and column. The swinger and target share the cos and sin.</p>
+<figure id="fig-6-3-3"><img src="images/g08_three_grids.png" alt="Three grids side by side. tip_matrix: rows 1 0 0; 0 cos -sin; 0 sin cos. turn_matrix: cos 0 -sin; 0 1 0; sin 0 cos. roll_matrix: cos -sin 0; sin cos 0; 0 0 1. Each skewer's row and column are shaded, with the matching old formulas below." loading="lazy"><figcaption><span class="fignum">Fig 6.3.3</span>Lesson 2B's names: TIP = around x (+y swings toward +z), TURN = around y (+x swings toward +z), ROLL = around z (+x swings toward +y).<span class="panels">Panels: <b>6.3.3a</b> (left) tip_matrix (rotate_x) · <b>6.3.3b</b> (middle) turn_matrix (rotate_y) · <b>6.3.3c</b> (right) roll_matrix (rotate_z)</span></figcaption></figure>
+<figure id="fig-6-3-4"><img src="images/g09_tip_roll_check.png" alt="tip_matrix(30) times corner 5 equals (1, 1.366, -0.366); roll_matrix(30) times corner 5 equals (0.366, 1.366, -1), with every row worked out. Both match Lesson 2B." loading="lazy"><figcaption><span class="fignum">Fig 6.3.4</span>Both checks match Lesson 2B's worked examples exactly. SHAPE coordinates throughout.<span class="panels">Panels: <b>6.3.4a</b> (left) tip_matrix(30) x corner 5 · <b>6.3.4b</b> (right) roll_matrix(30) x corner 5</span></figcaption></figure>
+<h3>Run it: step 1</h3>
+<p>Run <code>step1_matrix_by_hand.py</code>. It opens no window: it builds every grid on this page, puts corner 5 through each one, and prints the answer next to the answer from the old <code>rotate_</code> functions. Every line should say MATCH. ("Match" means within 0.000001: the computer stores 0.866… with a tiny rounding error, so two routes to the same answer can differ in the 15th decimal place.)</p>
+<figure id="fig-6-3-5"><img src="images/run_step1_matrix_by_hand.png" alt="Terminal output of step 1: each check prints the matrix answer and the old answer, followed by MATCH, for the do-nothing grid, turn 30, tip 30, roll 30, tip then turn, and the full spin matrix." loading="lazy"><figcaption><span class="fignum">Fig 6.3.5</span>The first part of step 1's output. The rest checks the 90° order example (Part 4) and the camera (Part 5).</figcaption></figure>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q4</span><span>Write <code>turn_matrix(90)</code> as numbers, and put corner 5 through it.</span></p><details><summary>Show answer</summary><div class="ans"><p>cos(90°) = 0 and sin(90°) = 1, so the grid is <code>((0, 0, -1), (0, 1, 0), (1, 0, 0))</code>.</p><p>new_x = <code>(0 * 1) + (0 * 1) + (-1 * -1)</code> = 1. new_y = 1. new_z = <code>(1 * 1) + (0 * 1) + (0 * -1)</code> = 1.</p><p>(1, 1, 1): top-right-<em>back</em>. A quarter turn carried the front corner round to the back, as in Lesson 2.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q5</span><span>Using columns: after <code>turn_matrix(90)</code>, where does the +z arrow point?</span></p><details><summary>Show answer</summary><div class="ans"><p>Column 2, read downwards: (−1, 0, 0). The arrow that pointed away from you now points left. That fits the rule: +x swung to +z, so +z swung on round to −x.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q6</span><span>What is <code>turn_matrix(0)</code>?</span></p><details><summary>Show answer</summary><div class="ans"><p>cos(0) = 1 and sin(0) = 0, so it is <code>((1, 0, 0), (0, 1, 0), (0, 0, 1))</code>: the do-nothing grid from Part 2. Turning by nothing does nothing.</p></div></details></div>
+</div>
+
+<h2>Part 4: Joining grids <span class="mins">10 MIN</span></h2>
+<p>So far a grid only saves us a little typing. The real trick is that two grids can be joined into <strong>one</strong> grid that does both jobs. Lesson 2B tipped, then turned, then rolled each corner. If we can join those three into one grid, each corner needs just one "matrix × point".</p>
+<p>How do we join them? Use the column idea from Part 3. Column 0 of the first grid is where it left the +x arrow. Put that arrow through the second grid, and you have where +x ends up after both. Do the same for the other two columns and you have the joined grid.</p>
+<figure id="fig-6-4-1"><img src="images/g10_combine_columns.png" alt="tip_matrix(30), then turn_matrix(30), equals the joined grid 0.866, -0.25, -0.433; 0, 0.866, -0.5; 0.5, 0.433, 0.75. Column 0 is worked step by step: tip leaves +x at (1, 0, 0); turn_matrix(30) times (1, 0, 0) is (0.866, 0, 0.5), which becomes column 0. All three columns are listed." loading="lazy"><figcaption><span class="fignum">Fig 6.4.1</span>Each column of the joined grid = the second grid × that column of the first grid. Corner 5 through the joined grid gives (1.049, 1.366, 0.183): Lesson 2B's "after turn" answer, in one step.<span class="panels">Panels: <b>6.4.1a</b> (top) the two grids and their join · <b>6.4.1b</b> (middle) column 0 step by step · <b>6.4.1c</b> (bottom) all three columns</span></figcaption></figure>
+<p>In code, <code>combine(first, second)</code> does exactly those three "matrix × point" sums, then stores the columns back as rows:</p>
+<pre><code>def combine(first, second):
+    new_col_0 = matrix_times_point(second, column(first, 0))
+    new_col_1 = matrix_times_point(second, column(first, 1))
+    new_col_2 = matrix_times_point(second, column(first, 2))
+    return (
+        (new_col_0[0], new_col_1[0], new_col_2[0]),
+        (new_col_0[1], new_col_1[1], new_col_2[1]),
+        (new_col_0[2], new_col_1[2], new_col_2[2]),
+    )</code></pre>
+<p>Join the roll on as well and you have a thing's whole spin as one grid. <code>spin_matrix(angles)</code> takes the same <code>[tip, turn, roll]</code> list as Lesson 5's <code>thing["angles"]</code>:</p>
+<pre><code>def spin_matrix(angles):
+    tip_then_turn = combine(tip_matrix(angles[0]), turn_matrix(angles[1]))
+    return combine(tip_then_turn, roll_matrix(angles[2]))</code></pre>
+<figure id="fig-6-4-2"><img src="images/g11_spin_matrix_30.png" alt="The tip-then-turn grid, then roll_matrix(30), equals spin_matrix([30, 30, 30]) = 0.75, -0.65, -0.125; 0.433, 0.625, -0.65; 0.5, 0.433, 0.75. Corner 5 through it gives (0.225, 1.708, 0.183), matching Lesson 2B's three separate turns." loading="lazy"><figcaption><span class="fignum">Fig 6.4.2</span>Lesson 2B followed corner 5 through three turns to (0.225, 1.708, 0.183) and the screen at (417.4, 168.2). One grid gets the same answer in one step.<span class="panels">Panels: <b>6.4.2a</b> (top) the three grids joined · <b>6.4.2b</b> (middle) corner 5 through the one grid · <b>6.4.2c</b> (bottom left) Lesson 2B&#x27;s answer · <b>6.4.2d</b> (bottom right) Lesson 6&#x27;s answer</span></figcaption></figure>
+<h3>Order still matters</h3>
+<p>Lesson 2B showed that tipping then turning is not the same as turning then tipping. Joining grids can't change that: <code>combine(a, b)</code> and <code>combine(b, a)</code> are different grids. With 90° every number is 0, 1 or −1, so it's easy to check by hand.</p>
+<figure id="fig-6-4-3"><img src="images/g12_order_90.png" alt="Left: combine(tip 90, turn 90) gives grid 0 -1 0; 0 0 -1; 1 0 0 and sends corner 5 to (-1, 1, 1). Right: combine(turn 90, tip 90) gives 0 0 -1; -1 0 0; 0 1 0 and sends corner 5 to (1, -1, 1). Both match Lesson 2B." loading="lazy"><figcaption><span class="fignum">Fig 6.4.3</span>Same two grids, different order, different answer: top-left-back versus bottom-right-back. That's why <code>spin_matrix</code> always joins them as tip, then turn, then roll.<span class="panels">Panels: <b>6.4.3a</b> (left) combine(tip 90, turn 90) · <b>6.4.3b</b> (right) combine(turn 90, tip 90)</span></figcaption></figure>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q7</span><span>What is <code>combine(turn_matrix(30), turn_matrix(-30))</code>? Explain without working it out.</span></p><details><summary>Show answer</summary><div class="ans"><p>Turning left 30° and then right 30° puts everything back where it was, so it must be the do-nothing grid <code>((1, 0, 0), (0, 1, 0), (0, 0, 1))</code>. Step 1 can print it to check (you'll see numbers like 0.0000000000000001 instead of exact 0s).</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q8</span><span>Check that <code>combine(turn_matrix(30), turn_matrix(60))</code> has the same column 0 as <code>turn_matrix(90)</code>.</span></p><details><summary>Show answer</summary><div class="ans"><p>Column 0 of turn 30 is (0.866, 0, 0.5). Through turn 60 (cos 0.5, sin 0.866): new_x = <code>(0.5 * 0.866) + (0 * 0) + (-0.866 * 0.5)</code> = 0.433 − 0.433 = 0. new_y = 0. new_z = <code>(0.866 * 0.866) + (0 * 0) + (0.5 * 0.5)</code> = 0.75 + 0.25 = 1.</p><p>(0, 0, 1): exactly column 0 of <code>turn_matrix(90)</code>. Two turns round the same skewer simply add up.</p></div></details></div>
+</div>
+
+<h2>Part 5: The camera's grid <span class="mins">4 MIN</span></h2>
+<p>Lesson 4's <code>to_camera()</code> did three things: subtract where you stand, undo your turn (turn the world by <code>-cam_turn</code>), then undo your tip (tip the world by <code>-cam_tip</code>). The two "undo" steps are turns, so they join into one grid:</p>
+<pre><code>camera_matrix = combine(turn_matrix(-cam_turn), tip_matrix(-cam_tip))</code></pre>
+<p>The subtraction stays a subtraction. A 3 × 3 grid can turn, stretch and squash, but it always keeps (0, 0, 0) where it is, so it can't slide things about. (Real engines use 4 × 4 grids with an extra row and column to do the sliding too. We won't need that.)</p>
+<figure id="fig-6-5-1"><img src="images/g13_camera_matrix.png" alt="Lesson 4's worked example: you at (2, 0, 1), cam_turn 30, cam_tip 0, corner 5 at WORLD (1, 1, 4). Subtracting gives (-1, 1, 3). turn_matrix(-30) then tip_matrix(0) join into camera_matrix 0.866, 0, 0.5; 0, 1, 0; -0.5, 0, 0.866. camera_matrix times (-1, 1, 3) gives CAMERA (0.634, 1, 3.098), the same as Lesson 4." loading="lazy"><figcaption><span class="fignum">Fig 6.5.1</span>Lesson 4's numbers, reused so you can compare. After the subtraction you are the centre (0, 0, 0) but the axes still face the WORLD's way; the camera grid turns them to face your way. Then the screen is <code>400 + ((0.634 * 400) / 3.098)</code> = 481.9 across and <code>300 - ((1 * 400) / 3.098)</code> = 170.9 down, as before.<span class="panels">Panels: <b>6.5.1a</b> (top left) Lesson 4&#x27;s worked example · <b>6.5.1b</b> (top right) the two undo grids · <b>6.5.1c</b> (bottom) camera_matrix x (-1, 1, 3)</span></figcaption></figure>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q9</span><span>You stand at (0, 0, 0) and turn left 90° (<code>cam_turn = 90</code>, <code>cam_tip = 0</code>). Write <code>camera_matrix</code> and put corner 5, WORLD (1, 1, 4), through it. Is it drawn?</span></p><details><summary>Show answer</summary><div class="ans"><p><code>turn_matrix(-90)</code>: cos(−90°) = 0, sin(−90°) = −1, so the grid is <code>((0, 0, 1), (0, 1, 0), (-1, 0, 0))</code>. The tip grid is the do-nothing grid, so this is camera_matrix.</p><p>Subtracting (0, 0, 0) changes nothing. new_x = <code>(0 * 1) + (0 * 1) + (1 * 4)</code> = 4. new_y = 1. new_z = <code>(-1 * 1) + (0 * 1) + (0 * 4)</code> = −1.</p><p>CAMERA (4, 1, −1): z is less than NEAR (0.1), so it's behind you and is not drawn. Lesson 4 found the same answer.</p></div></details></div>
+</div>
+
+<h2>Part 6: Why bother? <span class="mins">6 MIN</span></h2>
+<p>Every picture today matched the old answers exactly, so what did we gain? Count the work. We ran Lesson 5's small world and today's two scripts, and counted every call to <code>math.cos</code> and <code>math.sin</code> while one frame was drawn:</p>
+<figure id="fig-6-6-1"><img src="images/g14_count_the_work.png" alt="Bar chart of cos and sin calls per frame: Lesson 5, 5,068; Lesson 6 step 2, 4,588; Lesson 6 step 3, 50. Notes: the floor grid's 1,088 points each cost 4 calls in Lesson 5 (4,352 in all); in step 3 the 50 calls are 42 for the seven spin matrices, 4 for the camera matrix and 4 for walking and the mini-map." loading="lazy"><figcaption><span class="fignum">Fig 6.6.1</span>Measured, not guessed: start position, everything switched on. The number of multiplications stays about the same (9 per point), but cos and sin are now worked out about 100 times less often.<span class="panels">Panels: <b>6.6.1a</b> (top) the three bars · <b>6.6.1b</b> (bottom left) where 5,068 comes from · <b>6.6.1c</b> (bottom right) where 50 comes from</span></figcaption></figure>
+<p>The biggest saving is the camera. The floor grid alone sends 1,088 points through <code>to_camera()</code> every frame, and in Lesson 5 each one worked out cos and sin of the same two camera angles all over again. Now those angles are worked out once, packed into <code>camera_matrix</code>, and every point just does 9 multiplications and 6 additions. The more things you add (and Lesson 7 adds lots), the bigger the saving.</p>
+<p>There is a second gain: tidiness. A thing's whole pose lives in one value, <code>thing["matrix"]</code>, and the walking arrows come straight out of a grid's columns (Part 3):</p>
+<pre><code>body_turn = turn_matrix(cam_turn)
+forward_x, forward_y, forward_z = column(body_turn, 2)   # where +z lands
+right_x, right_y, right_z = column(body_turn, 0)         # where +x lands</code></pre>
+<h3>Run it: step 2</h3>
+<p>Run <code>step2_spin_matrix.py</code>. It looks exactly like Lesson 5, and that is the point: we tested it frame by frame against Lesson 5 and every pixel of the world matched. The new box top-right shows the 9 numbers of the floating lilac cube's spin matrix. Watch them change as it tumbles. M hides the box.</p>
+<figure id="fig-6-6-2"><img src="images/run_step2_spin_matrix.png" alt="Output of step 2: Lesson 5's small world of cubes and pyramids on a green floor grid, with a box top-right showing the lilac cube's spin matrix as three coloured rows of numbers." loading="lazy"><figcaption><span class="fignum">Fig 6.6.2</span>After 150 frames (2.5 seconds). The lilac cube has tipped 75°, turned 150° and rolled 37.5°; its 9 numbers are rounded to 2 places in the box.</figcaption></figure>
+<h3>Run it: step 3</h3>
+<p>Run <code>step3_camera_matrix.py</code>, the finished script. The camera now uses <code>camera_matrix</code>, and <code>rotate_x</code>, <code>rotate_y</code>, <code>rotate_z</code> and <code>rotate_all</code> are gone from the program. A second box shows <code>camera_matrix</code>. Stand still and turn with LEFT and RIGHT: the cos and sin pattern from Part 3 appears in its corners, with the middle row and column staying at 0, 1, 0. Then look down with DOWN and watch those start to move too.</p>
+<figure id="fig-6-6-3"><img src="images/run_step3_camera_matrix.png" alt="Output of step 3: you are at (0, 0.5, 0), turned 30 and tipped 15, looking down across the floor at the pyramids and the green cube. Two boxes top-right show the lilac cube's spin matrix and the camera_matrix." loading="lazy"><figcaption><span class="fignum">Fig 6.6.3</span>Hold LEFT for 20 frames (30°), E for 10 frames (up 0.5), and DOWN for 10 frames (tip 15°). Row 0 of camera_matrix is (0.87, 0, 0.5): cos 30° and sin 30°, because the first job is undoing your 30° turn.</figcaption></figure>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q10</span><span>In step 3, if you made the floor grid 4 times bigger, how many more cos and sin calls would each frame need?</span></p><details><summary>Show answer</summary><div class="ans"><p>None. The floor points only go through <code>camera_matrix</code>, which is built once a frame whatever the number of points. (In Lesson 5 it would have been 4 more calls for every new point.) The multiplications still grow, though: 9 for every point.</p></div></details></div>
+</div>
+
+<h2>Wrap up <span class="mins">2 MIN</span></h2>
+<ul>
+  <li>A matrix is a 3 × 3 grid of numbers. Matrix × point = one dot product per row.</li>
+  <li>Read a grid's columns as where the +x, +y and +z arrows land.</li>
+  <li>Every turn rule from Lessons 2 and 2B is a grid: the skewer gets the 1, the others share cos and sin.</li>
+  <li><code>combine(first, second)</code> joins two grids into one. Order still matters.</li>
+  <li>Build each grid once per frame, then reuse it for every point: 5,068 cos and sin calls became 50.</li>
+</ul>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q11</span><span>Final check (Lesson 4's last question, the matrix way). You stand at (−1, 0, 2), turned right 30 (<code>cam_turn = -30</code>), looking level. Build <code>camera_matrix</code> and follow corner 5, WORLD (1, 1, 4), to the screen.</span></p><details><summary>Show answer</summary><div class="ans"><p>1. <code>camera_matrix = combine(turn_matrix(30), tip_matrix(0))</code>. The tip grid does nothing, so it is <code>turn_matrix(30)</code>: <code>((0.866, 0, -0.5), (0, 1, 0), (0.5, 0, 0.866))</code>.</p><p>2. Subtract: <code>((1 - -1), (1 - 0), (4 - 2))</code> = (2, 1, 2).</p><p>3. new_x = <code>(0.866 * 2) + (0 * 1) + (-0.5 * 2)</code> = 1.732 − 1 = 0.732. new_y = 1. new_z = <code>(0.5 * 2) + (0 * 1) + (0.866 * 2)</code> = 1 + 1.732 = 2.732. CAMERA (0.732, 1, 2.732), and z ≥ 0.1 so it's drawn.</p><p>4. Screen x = <code>400 + ((0.732 * 400) / 2.732)</code> = 400 + 107.2 = 507.2. Screen y = <code>300 - ((1 * 400) / 2.732)</code> = 300 − 146.4 = 153.6. Exactly Lesson 4's answer.</p></div></details></div>
+</div>
+<h3>Practice before Lesson 7</h3>
+<ul>
+  <li>Make a "fly where you look" forward arrow: <code>look = combine(tip_matrix(cam_tip), turn_matrix(cam_turn))</code>, then use <code>column(look, 2)</code> for W and S. Look up and press W.</li>
+  <li>Give one cube a stretch: join <code>((1.5, 0, 0), (0, 1, 0), (0, 0, 1))</code> onto its spin matrix. Why does the light look slightly wrong on its faces? (Hint: the face pointers get stretched too.)</li>
+  <li>Count the work yourself: add a counter to <code>tip_matrix</code>, <code>turn_matrix</code> and <code>roll_matrix</code> and print it once a second.</li>
+</ul>
+<h3>Next time: Lesson 7, a mini game</h3>
+<p>Everything is in place. Lesson 7 scatters cubes to collect around the world, lets you fly where you look (the first practice task above), checks how close you are to each cube, and adds a score and a countdown timer. Because every turn is now one grid, adding dozens of cubes costs only 6 cos and sin calls each.</p>
+
+<h2>Files</h2>
+<p>Download the code for this lesson (right-click a file and choose <em>Save link as</em>):</p>
+<ul class="files">
+  <li><a href="code/step1_matrix_by_hand.py" download><code>code/step1_matrix_by_hand.py</code></a>: every grid on this page, checked against the old turn functions (prints only, no window)</li>
+  <li><a href="code/step2_spin_matrix.py" download><code>code/step2_spin_matrix.py</code></a>: Lesson 5's world with one spin matrix per thing, and the lilac cube's matrix on screen</li>
+  <li><a href="code/step3_camera_matrix.py" download><code>code/step3_camera_matrix.py</code></a>: the camera matrix too; the finished script that Lesson 7 builds on</li>
+  <li><code>images/</code>: every diagram on this page as a PNG</li>
+  <li><a href="../figures/">Figure index</a>: every figure and table in the course, with its number. Numbers read <code>Fig lesson.part.figure</code>, plus a letter for one panel of a picture (for example <code>Fig 3.4.2b</code>).</li>
+</ul>
+<details class="full"><summary>Full code: <code>step1_matrix_by_hand.py</code> (about 310 lines)</summary><pre><code># ======================================================================
+# LESSON 6 - STEP 1: MATRICES BY HAND (no window, just printed numbers)
+# ----------------------------------------------------------------------
+# Goal: build Lesson 2B&#x27;s three turns as GRIDS of numbers (matrices),
+# and PROVE that they give exactly the same answers as the old
+# rotate_x, rotate_y and rotate_z functions.
+#
+# There is no pygame window in this step. Run it and read what it
+# prints. Every number it prints is also worked out by hand on the
+# lesson page, so you can tick them off one by one.
+#
+# What is new:
+#
+#   1. A MATRIX is a tuple of 3 rows, and each row is a tuple of
+#      3 numbers. turn_30[2][0] means &quot;row 2, column 0&quot;.
+#
+#   2. matrix_times_point(matrix, point): each ROW of the matrix is
+#      dotted with the point (Lesson 3&#x27;s dot product) to make one new
+#      number. 3 rows -&gt; 3 new numbers -&gt; the new point.
+#
+#   3. tip_matrix, turn_matrix, roll_matrix: Lesson 2B&#x27;s three rules,
+#      packed into grids. cos and sin are worked out ONCE, when the
+#      grid is built, not once for every point.
+#
+#   4. combine(first, second): ONE grid that does &quot;first, then second&quot;.
+#
+#   5. spin_matrix([tip, turn, roll]): tip, then turn, then roll, as
+#      one grid (Lesson 2B&#x27;s order). It replaces rotate_all. It takes a
+#      LIST of 3 angles, like Lesson 5&#x27;s thing[&quot;angles&quot;].
+#
+# Run:  python step1_matrix_by_hand.py
+# ======================================================================
+
+import math
+
+
+# ---- The OLD way: Lesson 2B&#x27;s three turns, unchanged -------------------
+# We keep them here ONLY to check the new matrices against them.
+def rotate_x(point_3d, angle_degrees):
+    &quot;&quot;&quot;TIP one point around the x axis (+y swings toward +z).&quot;&quot;&quot;
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = x
+    new_y = (y * cos_a) - (z * sin_a)
+    new_z = (y * sin_a) + (z * cos_a)
+    return (new_x, new_y, new_z)
+
+
+def rotate_y(point_3d, angle_degrees):
+    &quot;&quot;&quot;TURN one point around the y axis (+x swings toward +z).&quot;&quot;&quot;
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = (x * cos_a) - (z * sin_a)
+    new_y = y
+    new_z = (x * sin_a) + (z * cos_a)
+    return (new_x, new_y, new_z)
+
+
+def rotate_z(point_3d, angle_degrees):
+    &quot;&quot;&quot;ROLL one point around the z axis (+x swings toward +y).&quot;&quot;&quot;
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = (x * cos_a) - (y * sin_a)
+    new_y = (x * sin_a) + (y * cos_a)
+    new_z = z
+    return (new_x, new_y, new_z)
+
+
+# ---- The dot product (from Lesson 3, unchanged) ------------------------
+def dot(arrow_1, arrow_2):
+    &quot;&quot;&quot;Multiply x by x, y by y, z by z, then add the three together.&quot;&quot;&quot;
+    x1, y1, z1 = arrow_1
+    x2, y2, z2 = arrow_2
+    return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
+
+
+# ======================================================================
+# NEW: MATRICES
+# ======================================================================
+
+# ---- NEW: the do-nothing matrix (the IDENTITY) -------------------------
+# 1s down the diagonal (top-left to bottom-right), 0s everywhere else.
+# Row 0 says &quot;keep ALL of x and none of y or z&quot;, and so on.
+# Any point that goes through it comes out exactly the same.
+DO_NOTHING = (
+    (1, 0, 0),     # row 0 -&gt; new_x = (1 * x) + (0 * y) + (0 * z) = x
+    (0, 1, 0),     # row 1 -&gt; new_y = (0 * x) + (1 * y) + (0 * z) = y
+    (0, 0, 1),     # row 2 -&gt; new_z = (0 * x) + (0 * y) + (1 * z) = z
+)
+
+
+def matrix_times_point(matrix, point_3d):
+    &quot;&quot;&quot;NEW: put one point through a matrix.
+
+    Each ROW of the matrix is dotted with the point:
+        new_x = row 0 . point
+        new_y = row 1 . point
+        new_z = row 2 . point
+
+    Worked example (lesson Part 1): turn_matrix(30) x corner 5 (1, 1, -1)
+        new_x = (0.866 * 1) + (0 * 1) + (-0.5 * -1)  = 1.366
+        new_y = (0 * 1)     + (1 * 1) + (0 * -1)     = 1
+        new_z = (0.5 * 1)   + (0 * 1) + (0.866 * -1) = -0.366
+    &quot;&quot;&quot;
+    row_0, row_1, row_2 = matrix
+    new_x = dot(row_0, point_3d)
+    new_y = dot(row_1, point_3d)
+    new_z = dot(row_2, point_3d)
+    return (new_x, new_y, new_z)
+
+
+def tip_matrix(angle_degrees):
+    &quot;&quot;&quot;NEW: Lesson 2B&#x27;s TIP (rotate_x) as a grid.
+
+    The old rule, written with all three letters in every line:
+        new_x = (1 * x) + (0 * y)     + (0 * z)
+        new_y = (0 * x) + (cos_a * y) + (-sin_a * z)
+        new_z = (0 * x) + (sin_a * y) + (cos_a * z)
+    The numbers in front of x, y and z ARE the grid.
+    &quot;&quot;&quot;
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (1, 0,     0         ),   # x is the skewer: it never changes
+        (0, cos_a, (-sin_a)  ),
+        (0, sin_a, cos_a     ),
+    )
+
+
+def turn_matrix(angle_degrees):
+    &quot;&quot;&quot;NEW: Lesson 2&#x27;s TURN (rotate_y) as a grid.
+        new_x = (cos_a * x) + (0 * y) + (-sin_a * z)
+        new_y = (0 * x)     + (1 * y) + (0 * z)
+        new_z = (sin_a * x) + (0 * y) + (cos_a * z)
+    &quot;&quot;&quot;
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, 0, (-sin_a)),
+        (0,     1, 0       ),     # y is the skewer: it never changes
+        (sin_a, 0, cos_a   ),
+    )
+
+
+def roll_matrix(angle_degrees):
+    &quot;&quot;&quot;NEW: Lesson 2B&#x27;s ROLL (rotate_z) as a grid.
+        new_x = (cos_a * x) + (-sin_a * y) + (0 * z)
+        new_y = (sin_a * x) + (cos_a * y)  + (0 * z)
+        new_z = (0 * x)     + (0 * y)      + (1 * z)
+    &quot;&quot;&quot;
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, (-sin_a), 0),
+        (sin_a, cos_a,    0),
+        (0,     0,        1),     # z is the skewer: it never changes
+    )
+
+
+def column(matrix, column_number):
+    &quot;&quot;&quot;NEW: read one COLUMN of a matrix, top to bottom, as a point.
+    Column 0 is where the +x arrow (1, 0, 0) lands, column 1 is where
+    +y lands, column 2 is where +z lands (lesson Part 3).&quot;&quot;&quot;
+    row_0, row_1, row_2 = matrix
+    return (row_0[column_number], row_1[column_number], row_2[column_number])
+
+
+def combine(first, second):
+    &quot;&quot;&quot;NEW: ONE matrix that does &#x27;first&#x27;, then &#x27;second&#x27;.
+
+    The idea (lesson Part 4): a matrix&#x27;s columns are where the three
+    axis arrows land. So take each arrow where &#x27;first&#x27; left it (its
+    column) and put it through &#x27;second&#x27;. Those three answers are the
+    columns of the joined matrix.
+
+    Worked example: combine(tip_matrix(30), turn_matrix(30))
+        column 0 of tip = (1, 0, 0)
+        turn_matrix(30) x (1, 0, 0) = (0.866, 0, 0.5)  -&gt; new column 0
+    &quot;&quot;&quot;
+    new_col_0 = matrix_times_point(second, column(first, 0))
+    new_col_1 = matrix_times_point(second, column(first, 1))
+    new_col_2 = matrix_times_point(second, column(first, 2))
+    # We worked out COLUMNS, but a matrix is stored as ROWS, so we read
+    # them back across: row 0 is the first number of each column, etc.
+    return (
+        (new_col_0[0], new_col_1[0], new_col_2[0]),
+        (new_col_0[1], new_col_1[1], new_col_2[1]),
+        (new_col_0[2], new_col_1[2], new_col_2[2]),
+    )
+
+
+def spin_matrix(angles):
+    &quot;&quot;&quot;NEW: tip, then turn, then roll (Lesson 2B&#x27;s order) as ONE grid.
+    angles is a list of 3 angles in degrees: [tip, turn, roll].
+    This does the same job as Lesson 2B&#x27;s rotate_all, but you build it
+    once and then use it on as many points as you like.&quot;&quot;&quot;
+    tip_then_turn = combine(tip_matrix(angles[0]), turn_matrix(angles[1]))
+    return combine(tip_then_turn, roll_matrix(angles[2]))
+
+
+# ======================================================================
+# Printing helpers (only to make the output easy to read)
+# ======================================================================
+def show_point(point_3d):
+    &quot;&quot;&quot;(1.36602540, 1, -0.3660254) -&gt; &#x27;(1.366, 1.0, -0.366)&#x27;.
+    round(..., 3) keeps 3 decimal places, like the lesson page.
+    The &#x27;+ 0&#x27; turns a &#x27;-0.0&#x27; into a plain &#x27;0.0&#x27;.&quot;&quot;&quot;
+    x, y, z = point_3d
+    return (&quot;(&quot; + str(round(x, 3) + 0) + &quot;, &quot; + str(round(y, 3) + 0) +
+            &quot;, &quot; + str(round(z, 3) + 0) + &quot;)&quot;)
+
+
+def show_matrix(name, matrix):
+    &quot;&quot;&quot;Print a matrix as 3 lines, one row per line.&quot;&quot;&quot;
+    print(name)
+    for row in matrix:
+        print(&quot;    &quot;, show_point(row))
+
+
+def check(label, new_answer, old_answer):
+    &quot;&quot;&quot;Print both answers and say if they match.
+    &#x27;Match&#x27; means every number is within 0.000001 of the other one.
+    (Computers store numbers like 0.866 with a tiny rounding error, so
+    two ways of getting the same answer can differ in the 15th place.)&quot;&quot;&quot;
+    same = True
+    for k in range(3):
+        if abs(new_answer[k] - old_answer[k]) &gt; 0.000001:
+            same = False
+    if same:
+        result = &quot;MATCH&quot;
+    else:
+        result = &quot;DIFFERENT!&quot;
+    print(label)
+    print(&quot;    matrix:&quot;, show_point(new_answer))
+    print(&quot;    old:   &quot;, show_point(old_answer), &quot;  -&gt;&quot;, result)
+
+
+# ======================================================================
+# THE CHECKS (each one is worked by hand on the lesson page)
+# ======================================================================
+corner_5 = (1, 1, -1)       # top-right-front, SHAPE coordinates
+
+print(&quot;=== Part 2: the do-nothing grid ===&quot;)
+check(&quot;DO_NOTHING x corner 5&quot;, matrix_times_point(DO_NOTHING, corner_5), corner_5)
+
+print()
+print(&quot;=== Part 3: turn by 30 as a grid ===&quot;)
+turn_30 = turn_matrix(30)
+show_matrix(&quot;turn_matrix(30):&quot;, turn_30)
+check(&quot;turn_matrix(30) x corner 5&quot;, matrix_times_point(turn_30, corner_5),
+      rotate_y(corner_5, 30))
+print(&quot;column 0 = where +x lands:&quot;, show_point(column(turn_30, 0)))
+
+print()
+print(&quot;=== Part 3: tip and roll by 30 ===&quot;)
+check(&quot;tip_matrix(30) x corner 5&quot;, matrix_times_point(tip_matrix(30), corner_5),
+      rotate_x(corner_5, 30))
+check(&quot;roll_matrix(30) x corner 5&quot;, matrix_times_point(roll_matrix(30), corner_5),
+      rotate_z(corner_5, 30))
+
+print()
+print(&quot;=== Part 4: tip then turn, as ONE grid ===&quot;)
+tip_turn = combine(tip_matrix(30), turn_matrix(30))
+show_matrix(&quot;combine(tip_matrix(30), turn_matrix(30)):&quot;, tip_turn)
+check(&quot;joined grid x corner 5&quot;, matrix_times_point(tip_turn, corner_5),
+      rotate_y(rotate_x(corner_5, 30), 30))
+
+print()
+print(&quot;=== Part 4: all three, spin_matrix([30, 30, 30]) ===&quot;)
+spin = spin_matrix([30, 30, 30])
+show_matrix(&quot;spin_matrix([30, 30, 30]):&quot;, spin)
+old = rotate_z(rotate_y(rotate_x(corner_5, 30), 30), 30)
+check(&quot;spin_matrix x corner 5&quot;, matrix_times_point(spin, corner_5), old)
+
+print()
+print(&quot;=== Part 4: order matters (90 degrees) ===&quot;)
+a = combine(tip_matrix(90), turn_matrix(90))
+b = combine(turn_matrix(90), tip_matrix(90))
+check(&quot;tip 90, then turn 90&quot;, matrix_times_point(a, corner_5),
+      rotate_y(rotate_x(corner_5, 90), 90))
+check(&quot;turn 90, then tip 90&quot;, matrix_times_point(b, corner_5),
+      rotate_x(rotate_y(corner_5, 90), 90))
+
+print()
+print(&quot;=== Part 5: the camera&#x27;s grid (Lesson 4&#x27;s worked example) ===&quot;)
+# You stand at (2, 0, 1), turned left 30, looking level. Corner 5 is
+# at WORLD (1, 1, 4). Subtracting gives (-1, 1, 3) (lesson Part 5).
+camera_matrix = combine(turn_matrix(-30), tip_matrix(-0))
+show_matrix(&quot;camera_matrix:&quot;, camera_matrix)
+check(&quot;camera_matrix x (-1, 1, 3)&quot;, matrix_times_point(camera_matrix, (-1, 1, 3)),
+      rotate_x(rotate_y((-1, 1, 3), -30), -0))
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Change every 30 to 45. Do all the checks still say MATCH?
+#   * Print turn_matrix(0). Which grid from Part 2 is it?
+#   * Make a &#x27;stretch_x&#x27; grid ((2, 0, 0), (0, 1, 0), (0, 0, 1)) and put
+#     corner 5 through it. Then try combine(stretch_x, turn_30) and
+#     combine(turn_30, stretch_x) on corner 5. Same answer?
+#   * Print combine(turn_matrix(30), turn_matrix(-30)). Which grid is
+#     it, and why? (Turning left 30 then right 30 ...)
+# ----------------------------------------------------------------------
+</code></pre></details>
+<details class="full"><summary>Full code: <code>step2_spin_matrix.py</code> (about 740 lines)</summary><pre><code># ======================================================================
+# LESSON 6 - STEP 2: EVERY THING SPINS WITH ONE MATRIX
+# ----------------------------------------------------------------------
+# Goal: the same small world as Lesson 5, looking EXACTLY the same, but
+# each thing&#x27;s spin is now ONE matrix (a 3 x 3 grid of numbers) instead
+# of three separate turns.
+#
+# This script is Lesson 5&#x27;s step3_small_world.py with these changes:
+#
+#   1. NEW matrix tools from step 1: matrix_times_point, tip_matrix,
+#      turn_matrix, roll_matrix, column, combine and spin_matrix.
+#
+#   2. rotate_z and rotate_all are GONE. rotate_x and rotate_y stay
+#      for now, because the camera still uses them (step 3 swaps those
+#      too).
+#
+#   3. Once per frame, every thing builds its own spin matrix and keeps
+#      it in thing[&quot;matrix&quot;]. Then EVERY corner (and every face&#x27;s
+#      pointer) of that thing uses the same grid:
+#          spun = matrix_times_point(thing[&quot;matrix&quot;], sized)
+#      cos and sin are worked out once per thing per frame, not three
+#      times for every single corner.
+#
+#   4. NEW: the 9 numbers of the floating LILAC cube&#x27;s spin matrix are
+#      drawn top-right, so you can watch them change as it tumbles.
+#      M hides them.
+#
+# The recipe for one corner of one thing, every frame:
+#
+#   SHAPE -&gt; * size -&gt; x spin matrix -&gt; + position -&gt; - camera -&gt; undo turn -&gt; undo tip -&gt; NEAR -&gt; project
+#   (model points)                     (WORLD)                                 (CAMERA)           (SCREEN)
+#
+# Controls:  LEFT / RIGHT = turn,   UP / DOWN = look up / down
+#            W / S = walk forward / back,   A / D = step left / right
+#            Q / E = go down / up
+#            SPACE = pause the spinning,   R = reset
+#            L = light on / off,   C = one colour per thing / face colours
+#            G = floor grid on / off,   M = matrix numbers on / off
+# Run:  python step2_spin_matrix.py
+# ======================================================================
+
+import math
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption(&quot;Lesson 6, step 2 - one matrix per thing&quot;)
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+PINK = (255, 105, 200)        # the colour we use for YOU (the camera)
+MAP_BACK = (25, 30, 36)       # dark grey-blue behind the mini-map
+GRID_COLOUR = (40, 90, 70)    # (Lesson 5) dim green for the floor lines.
+                              # Dim on purpose: the floor is background,
+                              # so it must not shout louder than the shapes.
+
+# ---- One colour for each face direction (from Lesson 3) ---------------
+RED = (235, 80, 80)          # faces pointing to the front (-z)
+PURPLE = (160, 100, 230)     # faces pointing to the back  (+z)
+BLUE = (70, 150, 255)        # faces pointing left         (-x)
+GREEN = (70, 210, 120)       # faces pointing right        (+x)
+GOLD = (245, 200, 60)        # faces pointing up           (+y)
+ORANGE = (245, 140, 50)      # faces pointing down         (-y)
+
+# ---- One colour for each THING (C key) --------------------------------
+CUBE_GREEN = (70, 230, 120)
+SKY_BLUE = (90, 170, 255)
+SUN_GOLD = (250, 200, 70)
+CORAL = (250, 120, 100)
+LILAC = (190, 140, 255)
+TEAL = (60, 210, 200)
+ROSE = (255, 110, 170)
+
+# ---- NEW: colours for the matrix numbers, like the diagrams ----
+ROW_X_BLUE = (90, 170, 255)      # row 0 makes the new x
+ROW_Y_YELLOW = (255, 214, 64)    # row 1 makes the new y
+ROW_Z_ORANGE = (255, 160, 60)    # row 2 makes the new z
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400
+
+
+# ======================================================================
+# MODELS: the shape of a thing, in SHAPE coordinates (its own centre)
+# ======================================================================
+
+# ---- The cube&#x27;s 8 corners (same as every lesson) ----------------------
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+
+# ---- The cube&#x27;s 6 faces -----------------------------------------------
+# (Lesson 5) each face is now THREE things:
+#   (corners clockwise from outside,  colour,  pointer)
+# The pointer is the arrow straight out of the face, 1 unit long.
+# For a cube it is easy: the front face points to -z, so (0, 0, -1).
+cube_faces = [
+    ((4, 5, 1, 0), RED,    ( 0,  0, -1)),   # front
+    ((6, 7, 3, 2), PURPLE, ( 0,  0,  1)),   # back
+    ((7, 4, 0, 3), BLUE,   (-1,  0,  0)),   # left
+    ((5, 6, 2, 1), GREEN,  ( 1,  0,  0)),   # right
+    ((7, 6, 5, 4), GOLD,   ( 0,  1,  0)),   # top
+    ((2, 3, 0, 1), ORANGE, ( 0, -1,  0)),   # bottom
+]
+
+# ---- (Lesson 5) the pyramid&#x27;s 5 corners ------------------------------------
+# Corners 0 to 3 are EXACTLY the cube&#x27;s 4 bottom corners, with the same
+# numbers. Corner 4 is the tip, straight above the centre, at the
+# height of the cube&#x27;s top (y = 1). So a pyramid is the same height and
+# width as a cube: 2 units each way.
+pyramid_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    ( 0,  1,  0),   # 4  the tip
+]
+
+# ---- (Lesson 5) the pyramid&#x27;s 5 faces --------------------------------------
+# Four TRIANGLES (3 corners each) and one square base (4 corners).
+# Still clockwise as seen from outside. Each triangle starts at the tip.
+# The sloping pointers were worked out in the lesson (Part 2):
+#   the slope rises 2 for every 1 across, so the arrow out of it is
+#   (2 out, 1 up), shrunk to 1 unit long: divide by 2.236 (the square
+#   root of ((2 * 2) + (1 * 1)) = 5)  -&gt;  (0.894 out, 0.447 up).
+pyramid_faces = [
+    ((4, 1, 0),    RED,    ( 0,     0.447, -0.894)),   # front slope
+    ((4, 3, 2),    PURPLE, ( 0,     0.447,  0.894)),   # back slope
+    ((4, 0, 3),    BLUE,   (-0.894, 0.447,  0)),       # left slope
+    ((4, 2, 1),    GREEN,  ( 0.894, 0.447,  0)),       # right slope
+    ((2, 3, 0, 1), ORANGE, ( 0,    -1,      0)),       # base (bottom)
+]
+
+# ---- (Lesson 5) a MODEL = a shape&#x27;s points and faces, kept together --------
+cube_model = {&quot;points&quot;: cube_points, &quot;faces&quot;: cube_faces}
+pyramid_model = {&quot;points&quot;: pyramid_points, &quot;faces&quot;: pyramid_faces}
+
+
+# ======================================================================
+# THE WORLD
+# ======================================================================
+
+# ---- (Lesson 5) the floor ------------------------------------------------------
+# FLOOR_Y = -1: the bottom of the old cube (centre y 0, half-height 1).
+# Your eye starts at y = 0, so you stand 1 unit above the floor.
+FLOOR_Y = -1
+# The grid covers exactly what the mini-map shows (see MAP_ below):
+#   x from -8 to 8   (16 units across)
+#   z from -3 to 13  (16 units deep, starting a little behind you)
+GRID_LEFT = -8
+GRID_RIGHT = 8
+GRID_NEAR = -3
+GRID_FAR = 13
+
+# ---- (Lesson 5) THINGS: every shape in the world, in one list --------------
+# Each thing is a dictionary (from the Python lists course):
+#   &quot;model&quot;    - which shape (cube_model or pyramid_model)
+#   &quot;position&quot; - where its centre is, in WORLD coordinates
+#   &quot;size&quot;     - (Lesson 5) 1 = normal, 2 = twice as big, 0.5 = half
+#   &quot;angles&quot;   - (Lesson 5) its spin right now: [tip, turn, roll] in degrees
+#   &quot;speeds&quot;   - (Lesson 5) how many degrees it spins each frame (tip, turn, roll)
+#   &quot;colour&quot;   - its one colour when you press C
+#
+# A thing SITS ON THE FLOOR when its centre y = (FLOOR_Y + size):
+#   size 1   -&gt; y = (-1 + 1)   = 0
+#   size 2   -&gt; y = (-1 + 2)   = 1
+#   size 0.5 -&gt; y = (-1 + 0.5) = -0.5
+#
+# The list order does NOT matter: all faces are sorted together later.
+things = [
+    # The old cube, in its old place, standing still: corner 5 is at
+    # WORLD (1, 1, 4) like in every lesson so far.
+    {&quot;model&quot;: cube_model, &quot;position&quot;: (0, 0, 5), &quot;size&quot;: 1,
+     &quot;angles&quot;: [0, 0, 0], &quot;speeds&quot;: (0, 0, 0), &quot;colour&quot;: CUBE_GREEN},
+
+    # (Lesson 5) a pyramid behind it and to the left. Its tip is at WORLD
+    # (-2.5, 1, 8), which lands on the screen at exactly (275, 250).
+    {&quot;model&quot;: pyramid_model, &quot;position&quot;: (-2.5, 0, 8), &quot;size&quot;: 1,
+     &quot;angles&quot;: [0, 0, 0], &quot;speeds&quot;: (0, 1, 0), &quot;colour&quot;: SUN_GOLD},
+
+    # (Lesson 5) a BIG cube, size 2, sitting on the floor (y = 1). Turns
+    # slowly: 0.5 a frame = 30 a second = one turn in 12 seconds.
+    {&quot;model&quot;: cube_model, &quot;position&quot;: (4, 1, 9), &quot;size&quot;: 2,
+     &quot;angles&quot;: [0, 0, 0], &quot;speeds&quot;: (0, 0.5, 0), &quot;colour&quot;: SKY_BLUE},
+
+    # (Lesson 5) a SMALL cube, size 0.5, on the floor (y = -0.5), just to
+    # the right of the old cube. Turns fast: 3 a frame = one turn in 2 s.
+    {&quot;model&quot;: cube_model, &quot;position&quot;: (2, -0.5, 4), &quot;size&quot;: 0.5,
+     &quot;angles&quot;: [0, 0, 0], &quot;speeds&quot;: (0, 3, 0), &quot;colour&quot;: CORAL},
+
+    # (Lesson 5) a cube floating up high, tumbling with Lesson 2B&#x27;s speeds.
+    # It is off the floor, so it can tip and roll without hitting it.
+    {&quot;model&quot;: cube_model, &quot;position&quot;: (-1.5, 2.5, 9), &quot;size&quot;: 0.5,
+     &quot;angles&quot;: [0, 0, 0], &quot;speeds&quot;: (0.5, 1, 0.25), &quot;colour&quot;: LILAC},
+
+    # (Lesson 5) a big pyramid far away on the left, turning the OTHER way
+    # (a negative speed turns clockwise seen from above).
+    {&quot;model&quot;: pyramid_model, &quot;position&quot;: (-6, 1, 11), &quot;size&quot;: 2,
+     &quot;angles&quot;: [0, 0, 0], &quot;speeds&quot;: (0, -0.5, 0), &quot;colour&quot;: TEAL},
+
+    # (Lesson 5) a pyramid BEHIND you at the start (z = -2). Turn round to
+    # find it: hold LEFT for 2 seconds (180 degrees).
+    {&quot;model&quot;: pyramid_model, &quot;position&quot;: (0, 0, -2), &quot;size&quot;: 1,
+     &quot;angles&quot;: [0, 0, 0], &quot;speeds&quot;: (0, 2, 0), &quot;colour&quot;: ROSE},
+]
+
+# ---- Where YOU are (from Lesson 4, unchanged) ------------------------
+cam_x = 0
+cam_y = 0
+cam_z = 0
+cam_turn = 0        # degrees, positive = turned LEFT
+cam_tip = 0         # degrees, positive = looking DOWN
+TIP_LIMIT = 60
+MOVE_SPEED = 0.05   # (0.05 * 60) = 3 units a second
+TURN_SPEED = 1.5    # (1.5 * 60) = 90 degrees a second
+NEAR = 0.1          # closer than this (CAMERA z) is not drawn
+
+# ---- The light (from Lesson 3, unchanged) -----------------------------
+LIGHT = (0.48, 0.6, -0.64)
+AMBIENT = 0.2
+
+spinning = True        # (Lesson 5) SPACE pauses every thing&#x27;s spin
+use_light = True
+one_colour = True      # (Lesson 5) default one colour per thing: in a world
+                       # full of shapes, it tells the THINGS apart
+show_grid = True       # G turns the floor grid off and on (Lesson 5)
+show_matrices = True   # NEW: M hides the matrix numbers
+
+# ---- The mini-map (from Lesson 4, unchanged) --------------------------
+MAP_LEFT = 630
+MAP_TOP = 430
+MAP_SIZE = 160
+MAP_CX = (MAP_LEFT + (MAP_SIZE / 2))    # (630 + 80) = 710
+MAP_CY = (MAP_TOP + 130)                # (430 + 130) = 560
+MAP_SCALE = 10                          # 10 px for every 1 world unit
+
+
+# ======================================================================
+# FUNCTIONS
+# ======================================================================
+
+# ---- Lesson 2B&#x27;s tip and turn, kept ONLY for the camera and walking ----
+# NEW: rotate_z and rotate_all are gone: every thing&#x27;s spin is a
+# matrix now. Step 3 removes these two as well.
+def rotate_x(point_3d, angle_degrees):
+    &quot;&quot;&quot;TIP one point around the x axis (+y swings toward +z).&quot;&quot;&quot;
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = x
+    new_y = (y * cos_a) - (z * sin_a)
+    new_z = (y * sin_a) + (z * cos_a)
+    return (new_x, new_y, new_z)
+
+
+def rotate_y(point_3d, angle_degrees):
+    &quot;&quot;&quot;TURN one point around the y axis (+x swings toward +z).&quot;&quot;&quot;
+    x, y, z = point_3d
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    new_x = (x * cos_a) - (z * sin_a)
+    new_y = y
+    new_z = (x * sin_a) + (z * cos_a)
+    return (new_x, new_y, new_z)
+
+
+# ======================================================================
+# (step 1) MATRIX TOOLS - every turn as a 3 x 3 grid of numbers
+# ======================================================================
+# A matrix is a tuple of 3 ROWS, each a tuple of 3 numbers.
+#   matrix[2][0] means row 2, column 0.
+# Row 0 makes the new x, row 1 the new y, row 2 the new z.
+
+def matrix_times_point(matrix, point_3d):
+    &quot;&quot;&quot;(step 1) put one point through a matrix: each ROW is dotted with
+    the point (Lesson 3&#x27;s dot product) to make one new number.
+
+    turn_matrix(30) x corner 5 (1, 1, -1):
+        new_x = (0.866 * 1) + (0 * 1) + (-0.5 * -1)  = 1.366
+        new_y = (0 * 1)     + (1 * 1) + (0 * -1)     = 1
+        new_z = (0.5 * 1)   + (0 * 1) + (0.866 * -1) = -0.366
+    &quot;&quot;&quot;
+    row_0, row_1, row_2 = matrix
+    new_x = dot(row_0, point_3d)
+    new_y = dot(row_1, point_3d)
+    new_z = dot(row_2, point_3d)
+    return (new_x, new_y, new_z)
+
+
+def tip_matrix(angle_degrees):
+    &quot;&quot;&quot;(step 1) Lesson 2B&#x27;s TIP (rotate_x) as a grid. x is the skewer.&quot;&quot;&quot;
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (1, 0,     0         ),
+        (0, cos_a, (-sin_a)  ),
+        (0, sin_a, cos_a     ),
+    )
+
+
+def turn_matrix(angle_degrees):
+    &quot;&quot;&quot;(step 1) Lesson 2&#x27;s TURN (rotate_y) as a grid. y is the skewer.&quot;&quot;&quot;
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, 0, (-sin_a)),
+        (0,     1, 0       ),
+        (sin_a, 0, cos_a   ),
+    )
+
+
+def roll_matrix(angle_degrees):
+    &quot;&quot;&quot;(step 1) Lesson 2B&#x27;s ROLL (rotate_z) as a grid. z is the skewer.&quot;&quot;&quot;
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, (-sin_a), 0),
+        (sin_a, cos_a,    0),
+        (0,     0,        1),
+    )
+
+
+def column(matrix, column_number):
+    &quot;&quot;&quot;(step 1) one COLUMN of a matrix, top to bottom.
+    Column 0 = where +x (1, 0, 0) lands, column 1 = where +y lands,
+    column 2 = where +z lands.&quot;&quot;&quot;
+    row_0, row_1, row_2 = matrix
+    return (row_0[column_number], row_1[column_number], row_2[column_number])
+
+
+def combine(first, second):
+    &quot;&quot;&quot;(step 1) ONE matrix that does &#x27;first&#x27;, then &#x27;second&#x27;.
+    Put each column of &#x27;first&#x27; (where it left each axis arrow) through
+    &#x27;second&#x27;. The three answers are the columns of the joined matrix.&quot;&quot;&quot;
+    new_col_0 = matrix_times_point(second, column(first, 0))
+    new_col_1 = matrix_times_point(second, column(first, 1))
+    new_col_2 = matrix_times_point(second, column(first, 2))
+    # Columns worked out -&gt; stored back as rows.
+    return (
+        (new_col_0[0], new_col_1[0], new_col_2[0]),
+        (new_col_0[1], new_col_1[1], new_col_2[1]),
+        (new_col_0[2], new_col_1[2], new_col_2[2]),
+    )
+
+
+def spin_matrix(angles):
+    &quot;&quot;&quot;NEW: a thing&#x27;s whole spin as ONE matrix: tip, then turn, then
+    roll (Lesson 2B&#x27;s order). It replaces Lesson 5&#x27;s rotate_all.
+    angles is the thing&#x27;s list [tip, turn, roll] in degrees.
+    spin_matrix([30, 30, 30]) x corner 5 = (0.225, 1.708, 0.183),
+    the same as Lesson 2B.&quot;&quot;&quot;
+    tip_then_turn = combine(tip_matrix(angles[0]), turn_matrix(angles[1]))
+    return combine(tip_then_turn, roll_matrix(angles[2]))
+
+
+def to_world(shape_point, thing):
+    &quot;&quot;&quot;(Lesson 5) one SHAPE point of a thing -&gt; a WORLD point.
+
+    1. size:  multiply by the thing&#x27;s size (grow or shrink round its
+              own centre).
+    2. spin:  CHANGED (Lesson 6): put it through the thing&#x27;s spin
+              matrix, thing[&quot;matrix&quot;], built once this frame.
+    3. place: add the thing&#x27;s position.
+
+    Worked example (lesson Part 5): the small cube, size 0.5, still,
+    at (2, -0.5, 4). Its corner 5 is SHAPE (1, 1, -1):
+        1. ((1 * 0.5), (1 * 0.5), (-1 * 0.5)) = (0.5, 0.5, -0.5)
+        2. angles 0 -&gt; the do-nothing matrix   = no change
+        3. ((0.5 + 2), (0.5 + -0.5), (-0.5 + 4)) = (2.5, 0, 3.5)
+    &quot;&quot;&quot;
+    x, y, z = shape_point
+    size = thing[&quot;size&quot;]
+    sized = ( (x * size), (y * size), (z * size) )         # 1. size
+    spun = matrix_times_point(thing[&quot;matrix&quot;], sized)       # 2. spin
+    pos_x, pos_y, pos_z = thing[&quot;position&quot;]
+    sx, sy, sz = spun
+    return ( (sx + pos_x), (sy + pos_y), (sz + pos_z) )     # 3. place
+
+
+def to_camera(world_point):
+    &quot;&quot;&quot;One WORLD point -&gt; one CAMERA point (from Lesson 4, unchanged).
+    Subtract where you stand, undo your turn, undo your tip.&quot;&quot;&quot;
+    x, y, z = world_point
+    moved = ( (x - cam_x), (y - cam_y), (z - cam_z) )
+    turned = rotate_y(moved, (-cam_turn))
+    tipped = rotate_x(turned, (-cam_tip))
+    return tipped
+
+
+def project(point_3d):
+    &quot;&quot;&quot;One CAMERA point -&gt; one SCREEN point (from Lesson 1).
+    Only ever call this with z &gt;= NEAR, so we never divide by 0.&quot;&quot;&quot;
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+def average_z(corners, camera_points):
+    &quot;&quot;&quot;How far away is this face? (from Lesson 3, uses CAMERA points).
+
+    It divides by len(corners), so it works for a triangle (3 corners)
+    just as well as for a square (4). Nothing to change!
+    &quot;&quot;&quot;
+    total = 0
+    for corner_number in corners:
+        x, y, z = camera_points[corner_number]
+        total = (total + z)
+    return (total / len(corners))
+
+
+def is_facing_you(face_points):
+    &quot;&quot;&quot;The clock test (from Lesson 3, unchanged). It only looks at the
+    first 3 corners, so it works for triangles too.&quot;&quot;&quot;
+    a_x, a_y = face_points[0]
+    b_x, b_y = face_points[1]
+    c_x, c_y = face_points[2]
+    arrow_a_x = (b_x - a_x)
+    arrow_a_y = (b_y - a_y)
+    arrow_b_x = (c_x - a_x)
+    arrow_b_y = (c_y - a_y)
+    cross = ( (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x) )
+    return (cross &gt; 0)
+
+
+def dot(arrow_1, arrow_2):
+    &quot;&quot;&quot;The dot product (from Lesson 3).&quot;&quot;&quot;
+    x1, y1, z1 = arrow_1
+    x2, y2, z2 = arrow_2
+    return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
+
+
+def shade_colour(colour, pointer):
+    &quot;&quot;&quot;Brighter when the face points at the light (from Lesson 3).&quot;&quot;&quot;
+    brightness = dot(pointer, LIGHT)
+    if brightness &lt; 0:
+        brightness = 0
+    shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )
+    red, green, blue = colour
+    return ( round(red * shade), round(green * shade), round(blue * shade) )
+
+
+def keep_under_360(angle):
+    &quot;&quot;&quot;Keep an angle between 0 and 360.
+    (Lesson 5) CHANGED: a NEGATIVE speed (the big pyramid) counts DOWN,
+    so we also add 360 when it drops below 0.&quot;&quot;&quot;
+    if angle &gt;= 360:
+        angle = (angle - 360)
+    if angle &lt; 0:
+        angle = (angle + 360)
+    return angle
+
+
+def add_faces_of(thing, faces_to_draw):
+    &quot;&quot;&quot;(Lesson 5) work out every face of ONE thing and add the ones we
+    should paint to the shared list faces_to_draw.
+
+    This is Lesson 4&#x27;s face loop, moved into a function so we can run
+    it once for EACH thing. Every thing adds to the SAME list, so the
+    painter&#x27;s sort later sees all faces of all things together.
+    &quot;&quot;&quot;
+    model = thing[&quot;model&quot;]
+
+    # ---- spin -&gt; place -&gt; camera, for every corner of this thing ----
+    camera_points = []
+    screen_points = []
+    for p in model[&quot;points&quot;]:
+        world = to_world(p, thing)                     # WORLD
+        camera = to_camera(world)                      # CAMERA
+        camera_points.append(camera)
+        if camera[2] &gt;= NEAR:
+            screen_points.append(project(camera))      # SCREEN
+        else:
+            screen_points.append(None)
+
+    for corners, face_colour, pointer in model[&quot;faces&quot;]:
+        # 0. skip the face if ANY corner is too close or behind you.
+        too_close = False
+        for corner_number in corners:
+            if camera_points[corner_number][2] &lt; NEAR:
+                too_close = True
+        if too_close:
+            continue
+
+        face_points = []
+        for corner_number in corners:
+            face_points.append(screen_points[corner_number])
+
+        # 1. The clock test (Lesson 3).
+        if not is_facing_you(face_points):
+            continue
+
+        # 2. How far away is it? (CAMERA z, Lesson 4)
+        distance = average_z(corners, camera_points)
+
+        # 3. What colour?
+        colour = face_colour
+        if one_colour:
+            colour = thing[&quot;colour&quot;]
+        if use_light:
+            # The pointer must spin WITH the thing, so it goes through
+            # the SAME spin matrix (Lesson 6). We do NOT multiply it by the size:
+            # a bigger face still points the same way, and the arrow
+            # must stay exactly 1 long for the light maths.
+            spun_pointer = matrix_times_point(thing[&quot;matrix&quot;], pointer)
+            colour = shade_colour(colour, spun_pointer)
+
+        faces_to_draw.append( (distance, face_points, colour) )
+
+
+def draw_floor():
+    &quot;&quot;&quot;(Lesson 5) draw the floor grid at y = FLOOR_Y, in 1-unit pieces.
+
+    Two sets of lines:
+      * lines running AWAY from you (fixed x, z changes)
+      * lines running ACROSS        (fixed z, x changes)
+    Each line is cut into pieces 1 unit long. A piece is drawn only if
+    BOTH its ends are in front of you (CAMERA z &gt;= NEAR). A short piece
+    means only a short gap at your feet, not a missing line.
+    &quot;&quot;&quot;
+    # Lines running away: x = -8, -7, ... 8.  range() stops BEFORE the
+    # end number, so we add 1 to include 8 itself.
+    for x in range(GRID_LEFT, (GRID_RIGHT + 1)):
+        for z in range(GRID_NEAR, GRID_FAR):
+            draw_floor_piece( (x, FLOOR_Y, z), (x, FLOOR_Y, (z + 1)) )
+    # Lines running across: z = -3, -2, ... 13.
+    for z in range(GRID_NEAR, (GRID_FAR + 1)):
+        for x in range(GRID_LEFT, GRID_RIGHT):
+            draw_floor_piece( (x, FLOOR_Y, z), ((x + 1), FLOOR_Y, z) )
+
+
+def draw_floor_piece(world_start, world_end):
+    &quot;&quot;&quot;(Lesson 5) one 1-unit piece of floor line, WORLD -&gt; CAMERA -&gt; SCREEN.&quot;&quot;&quot;
+    start = to_camera(world_start)
+    end = to_camera(world_end)
+    if (start[2] &lt; NEAR) or (end[2] &lt; NEAR):
+        return                                   # behind you: skip it
+    pygame.draw.line(screen, GRID_COLOUR, project(start), project(end), 1)
+
+
+
+def draw_matrix(matrix, name, left, top):
+    &quot;&quot;&quot;NEW: draw a matrix&#x27;s 9 numbers in a small box, rounded to 2
+    places. Rows are coloured like the lesson&#x27;s diagrams:
+    row 0 (new x) blue, row 1 (new y) yellow, row 2 (new z) orange.
+    The box is 220 x 110 px.&quot;&quot;&quot;
+    box = pygame.Rect(left, top, 220, 110)
+    pygame.draw.rect(screen, MAP_BACK, box)
+    pygame.draw.rect(screen, WHITE, box, 1)
+    screen.blit(font.render(name, True, WHITE), ((left + 8), (top + 6)))
+    row_colours = (ROW_X_BLUE, ROW_Y_YELLOW, ROW_Z_ORANGE)
+    for row_number in range(3):
+        row = matrix[row_number]
+        for column_number in range(3):
+            # round(..., 2) + 0 : 2 decimal places, and no &quot;-0.0&quot;
+            number = (round(row[column_number], 2) + 0)
+            text = font.render(str(number), True, row_colours[row_number])
+            x = (left + 12 + (column_number * 70))
+            y = (top + 32 + (row_number * 25))
+            screen.blit(text, (x, y))
+
+
+def to_map(x, z):
+    &quot;&quot;&quot;A WORLD (x, z) -&gt; a pixel on the mini-map (from Lesson 4).&quot;&quot;&quot;
+    map_x = MAP_CX + (x * MAP_SCALE)
+    map_y = MAP_CY - (z * MAP_SCALE)
+    return (map_x, map_y)
+
+
+def draw_map():
+    &quot;&quot;&quot;Draw the mini-map: every thing&#x27;s base and you, from above.
+
+    (Lesson 5) a loop over ALL things. Corners 0, 1, 2, 3 are the bottom
+    corners of BOTH models (that is why the pyramid&#x27;s base uses the
+    cube&#x27;s numbers), so the same 4 numbers work for every thing.
+    &quot;&quot;&quot;
+    box = pygame.Rect(MAP_LEFT, MAP_TOP, MAP_SIZE, MAP_SIZE)
+    pygame.draw.rect(screen, MAP_BACK, box)
+    screen.set_clip(box)
+    for thing in things:
+        outline = []
+        for corner_number in (0, 1, 2, 3):
+            corner = thing[&quot;model&quot;][&quot;points&quot;][corner_number]
+            x, y, z = to_world(corner, thing)
+            outline.append(to_map(x, z))
+        pygame.draw.polygon(screen, thing[&quot;colour&quot;], outline, 2)
+    forward_x, forward_y, forward_z = rotate_y((0, 0, 1), cam_turn)
+    you = to_map(cam_x, cam_z)
+    nose = to_map( (cam_x + (forward_x * 1.5)), (cam_z + (forward_z * 1.5)) )
+    pygame.draw.line(screen, PINK, you, nose, 2)
+    pygame.draw.circle(screen, PINK, you, 4)
+    screen.set_clip(None)
+    pygame.draw.rect(screen, WHITE, box, 1)
+
+
+# ======================================================================
+# THE MAIN LOOP
+# ======================================================================
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                spinning = not spinning
+            if event.key == pygame.K_l:
+                use_light = not use_light
+            if event.key == pygame.K_c:
+                one_colour = not one_colour
+            if event.key == pygame.K_g:
+                show_grid = not show_grid
+            if event.key == pygame.K_m:          # NEW
+                show_matrices = not show_matrices
+            if event.key == pygame.K_r:          # back to the start
+                cam_x = 0
+                cam_y = 0
+                cam_z = 0
+                cam_turn = 0
+                cam_tip = 0
+                for thing in things:
+                    thing[&quot;angles&quot;] = [0, 0, 0]
+
+    # ---- Keys you HOLD (from Lesson 4, unchanged) ---------------------
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        cam_turn = (cam_turn + TURN_SPEED)
+    if keys[pygame.K_RIGHT]:
+        cam_turn = (cam_turn - TURN_SPEED)
+    if keys[pygame.K_UP]:
+        cam_tip = (cam_tip - TURN_SPEED)
+    if keys[pygame.K_DOWN]:
+        cam_tip = (cam_tip + TURN_SPEED)
+    if cam_tip &gt; TIP_LIMIT:
+        cam_tip = TIP_LIMIT
+    if cam_tip &lt; (-TIP_LIMIT):
+        cam_tip = (-TIP_LIMIT)
+
+    forward_x, forward_y, forward_z = rotate_y((0, 0, 1), cam_turn)
+    right_x, right_y, right_z = rotate_y((1, 0, 0), cam_turn)
+    if keys[pygame.K_w]:
+        cam_x = (cam_x + (forward_x * MOVE_SPEED))
+        cam_z = (cam_z + (forward_z * MOVE_SPEED))
+    if keys[pygame.K_s]:
+        cam_x = (cam_x - (forward_x * MOVE_SPEED))
+        cam_z = (cam_z - (forward_z * MOVE_SPEED))
+    if keys[pygame.K_d]:
+        cam_x = (cam_x + (right_x * MOVE_SPEED))
+        cam_z = (cam_z + (right_z * MOVE_SPEED))
+    if keys[pygame.K_a]:
+        cam_x = (cam_x - (right_x * MOVE_SPEED))
+        cam_z = (cam_z - (right_z * MOVE_SPEED))
+    if keys[pygame.K_e]:
+        cam_y = (cam_y + MOVE_SPEED)
+    if keys[pygame.K_q]:
+        cam_y = (cam_y - MOVE_SPEED)
+
+    # ---- (Lesson 5) every thing spins at its OWN speeds --------------------
+    if spinning:
+        for thing in things:
+            angles = thing[&quot;angles&quot;]
+            speeds = thing[&quot;speeds&quot;]
+            angles[0] = keep_under_360( (angles[0] + speeds[0]) )   # tip
+            angles[1] = keep_under_360( (angles[1] + speeds[1]) )   # turn
+            angles[2] = keep_under_360( (angles[2] + speeds[2]) )   # roll
+
+    # ---- NEW: build each thing&#x27;s spin matrix ONCE this frame ----
+    # Every corner, every face pointer and the mini-map then reuse it.
+    for thing in things:
+        thing[&quot;matrix&quot;] = spin_matrix(thing[&quot;angles&quot;])
+
+    screen.fill(BLACK)
+
+    # ---- (Lesson 5) the floor first, so every shape is painted on top of it -
+    if show_grid:
+        draw_floor()
+
+    # ---- (Lesson 5) ONE list for the faces of EVERY thing --------------------
+    faces_to_draw = []
+    for thing in things:
+        add_faces_of(thing, faces_to_draw)
+
+    # ---- The painter&#x27;s method: furthest first, ALL faces together ----
+    faces_to_draw.sort(reverse=True)
+    for distance, face_points, colour in faces_to_draw:
+        pygame.draw.polygon(screen, colour, face_points)
+        pygame.draw.polygon(screen, BLACK, face_points, 2)
+
+    draw_map()
+
+    # ---- NEW: the matrix numbers, top-right --------------------
+    # things[4] is the floating LILAC cube: the only one that tips,
+    # turns AND rolls, so all 9 of its numbers keep changing.
+    if show_matrices:
+        draw_matrix(things[4][&quot;matrix&quot;], &quot;lilac cube spin&quot;, 570, 115)
+
+    text = (&quot;you are at (&quot; + str(round(cam_x, 2)) + &quot;, &quot; +
+            str(round(cam_y, 2)) + &quot;, &quot; + str(round(cam_z, 2)) + &quot;)&quot;)
+    text = (text + &quot;   turn &quot; + str(round(cam_turn, 1)) +
+            &quot;   tip &quot; + str(round(cam_tip, 1)))
+    screen.blit(font.render(text, True, PINK), (20, 20))
+    screen.blit(font.render(&quot;ARROWS = turn and look,  W A S D = walk,  Q / E = down / up&quot;, True, YELLOW), (20, 50))
+    screen.blit(font.render(&quot;SPACE = pause,  R = reset,  L = light,  C = colours,  G = grid,  M = matrices&quot;, True, YELLOW), (20, 80))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Press SPACE to pause, then compare with Lesson 5&#x27;s script: every
+#     shape should be in exactly the same place.
+#   * In the lilac cube&#x27;s box, find the row or column that stays
+#     closest to (0, 0, 1)-ish. Now give the lilac cube &quot;speeds&quot;:
+#     (0, 1, 0) (turn only). Which row and column now stay at 0, 1, 0?
+#   * Swap the order inside spin_matrix: roll, then turn, then tip.
+#     Which things look different, and which look the same? (Hint:
+#     the things that only turn don&#x27;t care.)
+#   * Give the old cube a &quot;stretch&quot; by putting this line just after
+#     thing[&quot;matrix&quot;] is built:
+#         things[0][&quot;matrix&quot;] = combine(((1.5, 0, 0), (0, 1, 0), (0, 0, 1)), things[0][&quot;matrix&quot;])
+#     Why is the light a little wrong on it now?
+# ----------------------------------------------------------------------
+</code></pre></details>
+<details class="full"><summary>Full code: <code>step3_camera_matrix.py</code> (about 740 lines)</summary><pre><code># ======================================================================
+# LESSON 6 - STEP 3: THE CAMERA MATRIX (the finished script of Lesson 6)
+# ----------------------------------------------------------------------
+# Goal: no more separate turns ANYWHERE. Every turn in the program is a
+# matrix. The world still looks exactly like Lesson 5.
+#
+# What is new since step 2:
+#
+#   1. camera_matrix: Lesson 4&#x27;s &quot;undo your turn, then undo your tip&quot;,
+#      joined into ONE grid, built ONCE per frame:
+#          camera_matrix = combine(turn_matrix(-cam_turn),
+#                                  tip_matrix(-cam_tip))
+#      The camera is the same for every thing AND every floor line, so
+#      one grid serves them all (over 1,100 points a frame).
+#
+#   2. to_camera() keeps its name, but now does:
+#          subtract where you stand -&gt; matrix_times_point(camera_matrix, ...)
+#
+#   3. Walking: the forward and right arrows are COLUMNS of your turn
+#      matrix (lesson Part 3: a column = where an axis arrow lands):
+#          forward = column 2 (where +z lands)
+#          right   = column 0 (where +x lands)
+#
+#   4. rotate_x and rotate_y are GONE. Nothing uses them any more.
+#
+#   5. M also shows the camera_matrix&#x27;s 9 numbers. Turn left and right
+#      and watch the cos / sin pattern of Part 3 appear in them.
+#
+# The recipe for one corner of one thing, every frame:
+#
+#   SHAPE -&gt; * size -&gt; x spin matrix -&gt; + position -&gt; - camera -&gt; x camera_matrix -&gt; NEAR -&gt; project
+#   (model points)                     (WORLD)                                    (CAMERA)          (SCREEN)
+#
+# Controls:  LEFT / RIGHT = turn,   UP / DOWN = look up / down
+#            W / S = walk forward / back,   A / D = step left / right
+#            Q / E = go down / up
+#            SPACE = pause the spinning,   R = reset
+#            L = light on / off,   C = one colour per thing / face colours
+#            G = floor grid on / off,   M = matrix numbers on / off
+# Run:  python step3_camera_matrix.py
+# ======================================================================
+
+import math
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption(&quot;Lesson 6, step 3 - the camera matrix&quot;)
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+PINK = (255, 105, 200)        # the colour we use for YOU (the camera)
+MAP_BACK = (25, 30, 36)       # dark grey-blue behind the mini-map
+GRID_COLOUR = (40, 90, 70)    # (Lesson 5) dim green for the floor lines.
+                              # Dim on purpose: the floor is background,
+                              # so it must not shout louder than the shapes.
+
+# ---- One colour for each face direction (from Lesson 3) ---------------
+RED = (235, 80, 80)          # faces pointing to the front (-z)
+PURPLE = (160, 100, 230)     # faces pointing to the back  (+z)
+BLUE = (70, 150, 255)        # faces pointing left         (-x)
+GREEN = (70, 210, 120)       # faces pointing right        (+x)
+GOLD = (245, 200, 60)        # faces pointing up           (+y)
+ORANGE = (245, 140, 50)      # faces pointing down         (-y)
+
+# ---- One colour for each THING (C key) --------------------------------
+CUBE_GREEN = (70, 230, 120)
+SKY_BLUE = (90, 170, 255)
+SUN_GOLD = (250, 200, 70)
+CORAL = (250, 120, 100)
+LILAC = (190, 140, 255)
+TEAL = (60, 210, 200)
+ROSE = (255, 110, 170)
+
+# ---- (step 2) colours for the matrix numbers, like the diagrams ----
+ROW_X_BLUE = (90, 170, 255)      # row 0 makes the new x
+ROW_Y_YELLOW = (255, 214, 64)    # row 1 makes the new y
+ROW_Z_ORANGE = (255, 160, 60)    # row 2 makes the new z
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400
+
+
+# ======================================================================
+# MODELS: the shape of a thing, in SHAPE coordinates (its own centre)
+# ======================================================================
+
+# ---- The cube&#x27;s 8 corners (same as every lesson) ----------------------
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+
+# ---- The cube&#x27;s 6 faces -----------------------------------------------
+# (Lesson 5) each face is now THREE things:
+#   (corners clockwise from outside,  colour,  pointer)
+# The pointer is the arrow straight out of the face, 1 unit long.
+# For a cube it is easy: the front face points to -z, so (0, 0, -1).
+cube_faces = [
+    ((4, 5, 1, 0), RED,    ( 0,  0, -1)),   # front
+    ((6, 7, 3, 2), PURPLE, ( 0,  0,  1)),   # back
+    ((7, 4, 0, 3), BLUE,   (-1,  0,  0)),   # left
+    ((5, 6, 2, 1), GREEN,  ( 1,  0,  0)),   # right
+    ((7, 6, 5, 4), GOLD,   ( 0,  1,  0)),   # top
+    ((2, 3, 0, 1), ORANGE, ( 0, -1,  0)),   # bottom
+]
+
+# ---- (Lesson 5) the pyramid&#x27;s 5 corners ------------------------------------
+# Corners 0 to 3 are EXACTLY the cube&#x27;s 4 bottom corners, with the same
+# numbers. Corner 4 is the tip, straight above the centre, at the
+# height of the cube&#x27;s top (y = 1). So a pyramid is the same height and
+# width as a cube: 2 units each way.
+pyramid_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    ( 0,  1,  0),   # 4  the tip
+]
+
+# ---- (Lesson 5) the pyramid&#x27;s 5 faces --------------------------------------
+# Four TRIANGLES (3 corners each) and one square base (4 corners).
+# Still clockwise as seen from outside. Each triangle starts at the tip.
+# The sloping pointers were worked out in the lesson (Part 2):
+#   the slope rises 2 for every 1 across, so the arrow out of it is
+#   (2 out, 1 up), shrunk to 1 unit long: divide by 2.236 (the square
+#   root of ((2 * 2) + (1 * 1)) = 5)  -&gt;  (0.894 out, 0.447 up).
+pyramid_faces = [
+    ((4, 1, 0),    RED,    ( 0,     0.447, -0.894)),   # front slope
+    ((4, 3, 2),    PURPLE, ( 0,     0.447,  0.894)),   # back slope
+    ((4, 0, 3),    BLUE,   (-0.894, 0.447,  0)),       # left slope
+    ((4, 2, 1),    GREEN,  ( 0.894, 0.447,  0)),       # right slope
+    ((2, 3, 0, 1), ORANGE, ( 0,    -1,      0)),       # base (bottom)
+]
+
+# ---- (Lesson 5) a MODEL = a shape&#x27;s points and faces, kept together --------
+cube_model = {&quot;points&quot;: cube_points, &quot;faces&quot;: cube_faces}
+pyramid_model = {&quot;points&quot;: pyramid_points, &quot;faces&quot;: pyramid_faces}
+
+
+# ======================================================================
+# THE WORLD
+# ======================================================================
+
+# ---- (Lesson 5) the floor ------------------------------------------------------
+# FLOOR_Y = -1: the bottom of the old cube (centre y 0, half-height 1).
+# Your eye starts at y = 0, so you stand 1 unit above the floor.
+FLOOR_Y = -1
+# The grid covers exactly what the mini-map shows (see MAP_ below):
+#   x from -8 to 8   (16 units across)
+#   z from -3 to 13  (16 units deep, starting a little behind you)
+GRID_LEFT = -8
+GRID_RIGHT = 8
+GRID_NEAR = -3
+GRID_FAR = 13
+
+# ---- (Lesson 5) THINGS: every shape in the world, in one list --------------
+# Each thing is a dictionary (from the Python lists course):
+#   &quot;model&quot;    - which shape (cube_model or pyramid_model)
+#   &quot;position&quot; - where its centre is, in WORLD coordinates
+#   &quot;size&quot;     - (Lesson 5) 1 = normal, 2 = twice as big, 0.5 = half
+#   &quot;angles&quot;   - (Lesson 5) its spin right now: [tip, turn, roll] in degrees
+#   &quot;speeds&quot;   - (Lesson 5) how many degrees it spins each frame (tip, turn, roll)
+#   &quot;colour&quot;   - its one colour when you press C
+#
+# A thing SITS ON THE FLOOR when its centre y = (FLOOR_Y + size):
+#   size 1   -&gt; y = (-1 + 1)   = 0
+#   size 2   -&gt; y = (-1 + 2)   = 1
+#   size 0.5 -&gt; y = (-1 + 0.5) = -0.5
+#
+# The list order does NOT matter: all faces are sorted together later.
+things = [
+    # The old cube, in its old place, standing still: corner 5 is at
+    # WORLD (1, 1, 4) like in every lesson so far.
+    {&quot;model&quot;: cube_model, &quot;position&quot;: (0, 0, 5), &quot;size&quot;: 1,
+     &quot;angles&quot;: [0, 0, 0], &quot;speeds&quot;: (0, 0, 0), &quot;colour&quot;: CUBE_GREEN},
+
+    # (Lesson 5) a pyramid behind it and to the left. Its tip is at WORLD
+    # (-2.5, 1, 8), which lands on the screen at exactly (275, 250).
+    {&quot;model&quot;: pyramid_model, &quot;position&quot;: (-2.5, 0, 8), &quot;size&quot;: 1,
+     &quot;angles&quot;: [0, 0, 0], &quot;speeds&quot;: (0, 1, 0), &quot;colour&quot;: SUN_GOLD},
+
+    # (Lesson 5) a BIG cube, size 2, sitting on the floor (y = 1). Turns
+    # slowly: 0.5 a frame = 30 a second = one turn in 12 seconds.
+    {&quot;model&quot;: cube_model, &quot;position&quot;: (4, 1, 9), &quot;size&quot;: 2,
+     &quot;angles&quot;: [0, 0, 0], &quot;speeds&quot;: (0, 0.5, 0), &quot;colour&quot;: SKY_BLUE},
+
+    # (Lesson 5) a SMALL cube, size 0.5, on the floor (y = -0.5), just to
+    # the right of the old cube. Turns fast: 3 a frame = one turn in 2 s.
+    {&quot;model&quot;: cube_model, &quot;position&quot;: (2, -0.5, 4), &quot;size&quot;: 0.5,
+     &quot;angles&quot;: [0, 0, 0], &quot;speeds&quot;: (0, 3, 0), &quot;colour&quot;: CORAL},
+
+    # (Lesson 5) a cube floating up high, tumbling with Lesson 2B&#x27;s speeds.
+    # It is off the floor, so it can tip and roll without hitting it.
+    {&quot;model&quot;: cube_model, &quot;position&quot;: (-1.5, 2.5, 9), &quot;size&quot;: 0.5,
+     &quot;angles&quot;: [0, 0, 0], &quot;speeds&quot;: (0.5, 1, 0.25), &quot;colour&quot;: LILAC},
+
+    # (Lesson 5) a big pyramid far away on the left, turning the OTHER way
+    # (a negative speed turns clockwise seen from above).
+    {&quot;model&quot;: pyramid_model, &quot;position&quot;: (-6, 1, 11), &quot;size&quot;: 2,
+     &quot;angles&quot;: [0, 0, 0], &quot;speeds&quot;: (0, -0.5, 0), &quot;colour&quot;: TEAL},
+
+    # (Lesson 5) a pyramid BEHIND you at the start (z = -2). Turn round to
+    # find it: hold LEFT for 2 seconds (180 degrees).
+    {&quot;model&quot;: pyramid_model, &quot;position&quot;: (0, 0, -2), &quot;size&quot;: 1,
+     &quot;angles&quot;: [0, 0, 0], &quot;speeds&quot;: (0, 2, 0), &quot;colour&quot;: ROSE},
+]
+
+# ---- Where YOU are (from Lesson 4, unchanged) ------------------------
+cam_x = 0
+cam_y = 0
+cam_z = 0
+cam_turn = 0        # degrees, positive = turned LEFT
+cam_tip = 0         # degrees, positive = looking DOWN
+TIP_LIMIT = 60
+MOVE_SPEED = 0.05   # (0.05 * 60) = 3 units a second
+TURN_SPEED = 1.5    # (1.5 * 60) = 90 degrees a second
+NEAR = 0.1          # closer than this (CAMERA z) is not drawn
+
+# ---- The light (from Lesson 3, unchanged) -----------------------------
+LIGHT = (0.48, 0.6, -0.64)
+AMBIENT = 0.2
+
+spinning = True        # (Lesson 5) SPACE pauses every thing&#x27;s spin
+use_light = True
+one_colour = True      # (Lesson 5) default one colour per thing: in a world
+                       # full of shapes, it tells the THINGS apart
+show_grid = True       # G turns the floor grid off and on (Lesson 5)
+show_matrices = True   # (step 2) M hides the matrix numbers
+
+# ---- The mini-map (from Lesson 4, unchanged) --------------------------
+MAP_LEFT = 630
+MAP_TOP = 430
+MAP_SIZE = 160
+MAP_CX = (MAP_LEFT + (MAP_SIZE / 2))    # (630 + 80) = 710
+MAP_CY = (MAP_TOP + 130)                # (430 + 130) = 560
+MAP_SCALE = 10                          # 10 px for every 1 world unit
+
+
+# ======================================================================
+# FUNCTIONS
+# ======================================================================
+
+# ======================================================================
+# (step 1) MATRIX TOOLS - every turn as a 3 x 3 grid of numbers
+# ======================================================================
+# A matrix is a tuple of 3 ROWS, each a tuple of 3 numbers.
+#   matrix[2][0] means row 2, column 0.
+# Row 0 makes the new x, row 1 the new y, row 2 the new z.
+
+def matrix_times_point(matrix, point_3d):
+    &quot;&quot;&quot;(step 1) put one point through a matrix: each ROW is dotted with
+    the point (Lesson 3&#x27;s dot product) to make one new number.
+
+    turn_matrix(30) x corner 5 (1, 1, -1):
+        new_x = (0.866 * 1) + (0 * 1) + (-0.5 * -1)  = 1.366
+        new_y = (0 * 1)     + (1 * 1) + (0 * -1)     = 1
+        new_z = (0.5 * 1)   + (0 * 1) + (0.866 * -1) = -0.366
+    &quot;&quot;&quot;
+    row_0, row_1, row_2 = matrix
+    new_x = dot(row_0, point_3d)
+    new_y = dot(row_1, point_3d)
+    new_z = dot(row_2, point_3d)
+    return (new_x, new_y, new_z)
+
+
+def tip_matrix(angle_degrees):
+    &quot;&quot;&quot;(step 1) Lesson 2B&#x27;s TIP (rotate_x) as a grid. x is the skewer.&quot;&quot;&quot;
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (1, 0,     0         ),
+        (0, cos_a, (-sin_a)  ),
+        (0, sin_a, cos_a     ),
+    )
+
+
+def turn_matrix(angle_degrees):
+    &quot;&quot;&quot;(step 1) Lesson 2&#x27;s TURN (rotate_y) as a grid. y is the skewer.&quot;&quot;&quot;
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, 0, (-sin_a)),
+        (0,     1, 0       ),
+        (sin_a, 0, cos_a   ),
+    )
+
+
+def roll_matrix(angle_degrees):
+    &quot;&quot;&quot;(step 1) Lesson 2B&#x27;s ROLL (rotate_z) as a grid. z is the skewer.&quot;&quot;&quot;
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, (-sin_a), 0),
+        (sin_a, cos_a,    0),
+        (0,     0,        1),
+    )
+
+
+def column(matrix, column_number):
+    &quot;&quot;&quot;(step 1) one COLUMN of a matrix, top to bottom.
+    Column 0 = where +x (1, 0, 0) lands, column 1 = where +y lands,
+    column 2 = where +z lands.&quot;&quot;&quot;
+    row_0, row_1, row_2 = matrix
+    return (row_0[column_number], row_1[column_number], row_2[column_number])
+
+
+def combine(first, second):
+    &quot;&quot;&quot;(step 1) ONE matrix that does &#x27;first&#x27;, then &#x27;second&#x27;.
+    Put each column of &#x27;first&#x27; (where it left each axis arrow) through
+    &#x27;second&#x27;. The three answers are the columns of the joined matrix.&quot;&quot;&quot;
+    new_col_0 = matrix_times_point(second, column(first, 0))
+    new_col_1 = matrix_times_point(second, column(first, 1))
+    new_col_2 = matrix_times_point(second, column(first, 2))
+    # Columns worked out -&gt; stored back as rows.
+    return (
+        (new_col_0[0], new_col_1[0], new_col_2[0]),
+        (new_col_0[1], new_col_1[1], new_col_2[1]),
+        (new_col_0[2], new_col_1[2], new_col_2[2]),
+    )
+
+
+def spin_matrix(angles):
+    &quot;&quot;&quot;(step 2) a thing&#x27;s whole spin as ONE matrix: tip, then turn, then
+    roll (Lesson 2B&#x27;s order). It replaces Lesson 5&#x27;s rotate_all.
+    angles is the thing&#x27;s list [tip, turn, roll] in degrees.
+    spin_matrix([30, 30, 30]) x corner 5 = (0.225, 1.708, 0.183),
+    the same as Lesson 2B.&quot;&quot;&quot;
+    tip_then_turn = combine(tip_matrix(angles[0]), turn_matrix(angles[1]))
+    return combine(tip_then_turn, roll_matrix(angles[2]))
+
+
+def to_world(shape_point, thing):
+    &quot;&quot;&quot;(Lesson 5) one SHAPE point of a thing -&gt; a WORLD point.
+
+    1. size:  multiply by the thing&#x27;s size (grow or shrink round its
+              own centre).
+    2. spin:  CHANGED (Lesson 6): put it through the thing&#x27;s spin
+              matrix, thing[&quot;matrix&quot;], built once this frame.
+    3. place: add the thing&#x27;s position.
+
+    Worked example (lesson Part 5): the small cube, size 0.5, still,
+    at (2, -0.5, 4). Its corner 5 is SHAPE (1, 1, -1):
+        1. ((1 * 0.5), (1 * 0.5), (-1 * 0.5)) = (0.5, 0.5, -0.5)
+        2. angles 0 -&gt; the do-nothing matrix   = no change
+        3. ((0.5 + 2), (0.5 + -0.5), (-0.5 + 4)) = (2.5, 0, 3.5)
+    &quot;&quot;&quot;
+    x, y, z = shape_point
+    size = thing[&quot;size&quot;]
+    sized = ( (x * size), (y * size), (z * size) )         # 1. size
+    spun = matrix_times_point(thing[&quot;matrix&quot;], sized)       # 2. spin
+    pos_x, pos_y, pos_z = thing[&quot;position&quot;]
+    sx, sy, sz = spun
+    return ( (sx + pos_x), (sy + pos_y), (sz + pos_z) )     # 3. place
+
+
+def to_camera(world_point):
+    &quot;&quot;&quot;One WORLD point -&gt; one CAMERA point (from Lesson 4).
+
+    CHANGED (step 3): subtract where you stand, then ONE matrix does
+    both &quot;undo your turn&quot; and &quot;undo your tip&quot;. camera_matrix is built
+    once per frame in the main loop, before anything is drawn.
+
+    Worked example (lesson Part 5): you at (2, 0, 1), cam_turn 30,
+    cam_tip 0, corner 5 at WORLD (1, 1, 4):
+        1. ((1 - 2), (1 - 0), (4 - 1))          = (-1, 1, 3)
+        2. camera_matrix x (-1, 1, 3)
+             new_x = (0.866 * -1) + (0 * 1) + (0.5 * 3)   = 0.634
+             new_y = (0 * -1)     + (1 * 1) + (0 * 3)     = 1
+             new_z = (-0.5 * -1)  + (0 * 1) + (0.866 * 3) = 3.098
+    &quot;&quot;&quot;
+    x, y, z = world_point
+    moved = ( (x - cam_x), (y - cam_y), (z - cam_z) )      # 1. subtract
+    return matrix_times_point(camera_matrix, moved)        # 2. both undos
+
+
+def project(point_3d):
+    &quot;&quot;&quot;One CAMERA point -&gt; one SCREEN point (from Lesson 1).
+    Only ever call this with z &gt;= NEAR, so we never divide by 0.&quot;&quot;&quot;
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+def average_z(corners, camera_points):
+    &quot;&quot;&quot;How far away is this face? (from Lesson 3, uses CAMERA points).
+
+    It divides by len(corners), so it works for a triangle (3 corners)
+    just as well as for a square (4). Nothing to change!
+    &quot;&quot;&quot;
+    total = 0
+    for corner_number in corners:
+        x, y, z = camera_points[corner_number]
+        total = (total + z)
+    return (total / len(corners))
+
+
+def is_facing_you(face_points):
+    &quot;&quot;&quot;The clock test (from Lesson 3, unchanged). It only looks at the
+    first 3 corners, so it works for triangles too.&quot;&quot;&quot;
+    a_x, a_y = face_points[0]
+    b_x, b_y = face_points[1]
+    c_x, c_y = face_points[2]
+    arrow_a_x = (b_x - a_x)
+    arrow_a_y = (b_y - a_y)
+    arrow_b_x = (c_x - a_x)
+    arrow_b_y = (c_y - a_y)
+    cross = ( (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x) )
+    return (cross &gt; 0)
+
+
+def dot(arrow_1, arrow_2):
+    &quot;&quot;&quot;The dot product (from Lesson 3).&quot;&quot;&quot;
+    x1, y1, z1 = arrow_1
+    x2, y2, z2 = arrow_2
+    return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
+
+
+def shade_colour(colour, pointer):
+    &quot;&quot;&quot;Brighter when the face points at the light (from Lesson 3).&quot;&quot;&quot;
+    brightness = dot(pointer, LIGHT)
+    if brightness &lt; 0:
+        brightness = 0
+    shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )
+    red, green, blue = colour
+    return ( round(red * shade), round(green * shade), round(blue * shade) )
+
+
+def keep_under_360(angle):
+    &quot;&quot;&quot;Keep an angle between 0 and 360.
+    (Lesson 5) CHANGED: a NEGATIVE speed (the big pyramid) counts DOWN,
+    so we also add 360 when it drops below 0.&quot;&quot;&quot;
+    if angle &gt;= 360:
+        angle = (angle - 360)
+    if angle &lt; 0:
+        angle = (angle + 360)
+    return angle
+
+
+def add_faces_of(thing, faces_to_draw):
+    &quot;&quot;&quot;(Lesson 5) work out every face of ONE thing and add the ones we
+    should paint to the shared list faces_to_draw.
+
+    This is Lesson 4&#x27;s face loop, moved into a function so we can run
+    it once for EACH thing. Every thing adds to the SAME list, so the
+    painter&#x27;s sort later sees all faces of all things together.
+    &quot;&quot;&quot;
+    model = thing[&quot;model&quot;]
+
+    # ---- spin -&gt; place -&gt; camera, for every corner of this thing ----
+    camera_points = []
+    screen_points = []
+    for p in model[&quot;points&quot;]:
+        world = to_world(p, thing)                     # WORLD
+        camera = to_camera(world)                      # CAMERA
+        camera_points.append(camera)
+        if camera[2] &gt;= NEAR:
+            screen_points.append(project(camera))      # SCREEN
+        else:
+            screen_points.append(None)
+
+    for corners, face_colour, pointer in model[&quot;faces&quot;]:
+        # 0. skip the face if ANY corner is too close or behind you.
+        too_close = False
+        for corner_number in corners:
+            if camera_points[corner_number][2] &lt; NEAR:
+                too_close = True
+        if too_close:
+            continue
+
+        face_points = []
+        for corner_number in corners:
+            face_points.append(screen_points[corner_number])
+
+        # 1. The clock test (Lesson 3).
+        if not is_facing_you(face_points):
+            continue
+
+        # 2. How far away is it? (CAMERA z, Lesson 4)
+        distance = average_z(corners, camera_points)
+
+        # 3. What colour?
+        colour = face_colour
+        if one_colour:
+            colour = thing[&quot;colour&quot;]
+        if use_light:
+            # The pointer must spin WITH the thing, so it goes through
+            # the SAME spin matrix (Lesson 6). We do NOT multiply it by the size:
+            # a bigger face still points the same way, and the arrow
+            # must stay exactly 1 long for the light maths.
+            spun_pointer = matrix_times_point(thing[&quot;matrix&quot;], pointer)
+            colour = shade_colour(colour, spun_pointer)
+
+        faces_to_draw.append( (distance, face_points, colour) )
+
+
+def draw_floor():
+    &quot;&quot;&quot;(Lesson 5) draw the floor grid at y = FLOOR_Y, in 1-unit pieces.
+
+    Two sets of lines:
+      * lines running AWAY from you (fixed x, z changes)
+      * lines running ACROSS        (fixed z, x changes)
+    Each line is cut into pieces 1 unit long. A piece is drawn only if
+    BOTH its ends are in front of you (CAMERA z &gt;= NEAR). A short piece
+    means only a short gap at your feet, not a missing line.
+    &quot;&quot;&quot;
+    # Lines running away: x = -8, -7, ... 8.  range() stops BEFORE the
+    # end number, so we add 1 to include 8 itself.
+    for x in range(GRID_LEFT, (GRID_RIGHT + 1)):
+        for z in range(GRID_NEAR, GRID_FAR):
+            draw_floor_piece( (x, FLOOR_Y, z), (x, FLOOR_Y, (z + 1)) )
+    # Lines running across: z = -3, -2, ... 13.
+    for z in range(GRID_NEAR, (GRID_FAR + 1)):
+        for x in range(GRID_LEFT, GRID_RIGHT):
+            draw_floor_piece( (x, FLOOR_Y, z), ((x + 1), FLOOR_Y, z) )
+
+
+def draw_floor_piece(world_start, world_end):
+    &quot;&quot;&quot;(Lesson 5) one 1-unit piece of floor line, WORLD -&gt; CAMERA -&gt; SCREEN.&quot;&quot;&quot;
+    start = to_camera(world_start)
+    end = to_camera(world_end)
+    if (start[2] &lt; NEAR) or (end[2] &lt; NEAR):
+        return                                   # behind you: skip it
+    pygame.draw.line(screen, GRID_COLOUR, project(start), project(end), 1)
+
+
+
+def draw_matrix(matrix, name, left, top):
+    &quot;&quot;&quot;(step 2) draw a matrix&#x27;s 9 numbers in a small box, rounded to 2
+    places. Rows are coloured like the lesson&#x27;s diagrams:
+    row 0 (new x) blue, row 1 (new y) yellow, row 2 (new z) orange.
+    The box is 220 x 110 px.&quot;&quot;&quot;
+    box = pygame.Rect(left, top, 220, 110)
+    pygame.draw.rect(screen, MAP_BACK, box)
+    pygame.draw.rect(screen, WHITE, box, 1)
+    screen.blit(font.render(name, True, WHITE), ((left + 8), (top + 6)))
+    row_colours = (ROW_X_BLUE, ROW_Y_YELLOW, ROW_Z_ORANGE)
+    for row_number in range(3):
+        row = matrix[row_number]
+        for column_number in range(3):
+            # round(..., 2) + 0 : 2 decimal places, and no &quot;-0.0&quot;
+            number = (round(row[column_number], 2) + 0)
+            text = font.render(str(number), True, row_colours[row_number])
+            x = (left + 12 + (column_number * 70))
+            y = (top + 32 + (row_number * 25))
+            screen.blit(text, (x, y))
+
+
+def to_map(x, z):
+    &quot;&quot;&quot;A WORLD (x, z) -&gt; a pixel on the mini-map (from Lesson 4).&quot;&quot;&quot;
+    map_x = MAP_CX + (x * MAP_SCALE)
+    map_y = MAP_CY - (z * MAP_SCALE)
+    return (map_x, map_y)
+
+
+def draw_map():
+    &quot;&quot;&quot;Draw the mini-map: every thing&#x27;s base and you, from above.
+
+    (Lesson 5) a loop over ALL things. Corners 0, 1, 2, 3 are the bottom
+    corners of BOTH models (that is why the pyramid&#x27;s base uses the
+    cube&#x27;s numbers), so the same 4 numbers work for every thing.
+    &quot;&quot;&quot;
+    box = pygame.Rect(MAP_LEFT, MAP_TOP, MAP_SIZE, MAP_SIZE)
+    pygame.draw.rect(screen, MAP_BACK, box)
+    screen.set_clip(box)
+    for thing in things:
+        outline = []
+        for corner_number in (0, 1, 2, 3):
+            corner = thing[&quot;model&quot;][&quot;points&quot;][corner_number]
+            x, y, z = to_world(corner, thing)
+            outline.append(to_map(x, z))
+        pygame.draw.polygon(screen, thing[&quot;colour&quot;], outline, 2)
+    # (step 3) your forward arrow = column 2 of your turn matrix.
+    forward_x, forward_y, forward_z = column(turn_matrix(cam_turn), 2)
+    you = to_map(cam_x, cam_z)
+    nose = to_map( (cam_x + (forward_x * 1.5)), (cam_z + (forward_z * 1.5)) )
+    pygame.draw.line(screen, PINK, you, nose, 2)
+    pygame.draw.circle(screen, PINK, you, 4)
+    screen.set_clip(None)
+    pygame.draw.rect(screen, WHITE, box, 1)
+
+
+# ======================================================================
+# THE MAIN LOOP
+# ======================================================================
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                spinning = not spinning
+            if event.key == pygame.K_l:
+                use_light = not use_light
+            if event.key == pygame.K_c:
+                one_colour = not one_colour
+            if event.key == pygame.K_g:
+                show_grid = not show_grid
+            if event.key == pygame.K_m:          # (step 2)
+                show_matrices = not show_matrices
+            if event.key == pygame.K_r:          # back to the start
+                cam_x = 0
+                cam_y = 0
+                cam_z = 0
+                cam_turn = 0
+                cam_tip = 0
+                for thing in things:
+                    thing[&quot;angles&quot;] = [0, 0, 0]
+
+    # ---- Keys you HOLD (from Lesson 4, unchanged) ---------------------
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT]:
+        cam_turn = (cam_turn + TURN_SPEED)
+    if keys[pygame.K_RIGHT]:
+        cam_turn = (cam_turn - TURN_SPEED)
+    if keys[pygame.K_UP]:
+        cam_tip = (cam_tip - TURN_SPEED)
+    if keys[pygame.K_DOWN]:
+        cam_tip = (cam_tip + TURN_SPEED)
+    if cam_tip &gt; TIP_LIMIT:
+        cam_tip = TIP_LIMIT
+    if cam_tip &lt; (-TIP_LIMIT):
+        cam_tip = (-TIP_LIMIT)
+
+    # ---- (step 3) which way is forward and right? -------------------
+    # Lesson 4 turned the arrows (0, 0, 1) and (1, 0, 0) with rotate_y.
+    # A matrix&#x27;s columns ARE where those arrows land (lesson Part 3),
+    # so we just read them out of your turn matrix:
+    #   cam_turn 30: forward = column 2 = (-0.5, 0, 0.866)
+    #                right   = column 0 = (0.866, 0, 0.5)
+    # (Your tip is NOT used, so you still walk level, as in Lesson 4.)
+    body_turn = turn_matrix(cam_turn)
+    forward_x, forward_y, forward_z = column(body_turn, 2)
+    right_x, right_y, right_z = column(body_turn, 0)
+    if keys[pygame.K_w]:
+        cam_x = (cam_x + (forward_x * MOVE_SPEED))
+        cam_z = (cam_z + (forward_z * MOVE_SPEED))
+    if keys[pygame.K_s]:
+        cam_x = (cam_x - (forward_x * MOVE_SPEED))
+        cam_z = (cam_z - (forward_z * MOVE_SPEED))
+    if keys[pygame.K_d]:
+        cam_x = (cam_x + (right_x * MOVE_SPEED))
+        cam_z = (cam_z + (right_z * MOVE_SPEED))
+    if keys[pygame.K_a]:
+        cam_x = (cam_x - (right_x * MOVE_SPEED))
+        cam_z = (cam_z - (right_z * MOVE_SPEED))
+    if keys[pygame.K_e]:
+        cam_y = (cam_y + MOVE_SPEED)
+    if keys[pygame.K_q]:
+        cam_y = (cam_y - MOVE_SPEED)
+
+    # ---- (Lesson 5) every thing spins at its OWN speeds --------------------
+    if spinning:
+        for thing in things:
+            angles = thing[&quot;angles&quot;]
+            speeds = thing[&quot;speeds&quot;]
+            angles[0] = keep_under_360( (angles[0] + speeds[0]) )   # tip
+            angles[1] = keep_under_360( (angles[1] + speeds[1]) )   # turn
+            angles[2] = keep_under_360( (angles[2] + speeds[2]) )   # roll
+
+    # ---- (step 2) build each thing&#x27;s spin matrix ONCE this frame ----
+    # Every corner, every face pointer and the mini-map then reuse it.
+    for thing in things:
+        thing[&quot;matrix&quot;] = spin_matrix(thing[&quot;angles&quot;])
+
+    # ---- NEW: build the camera&#x27;s matrix ONCE this frame -------------
+    # Lesson 4&#x27;s order: undo your turn FIRST, then undo your tip.
+    # It is used by to_camera() for every thing and every floor line.
+    camera_matrix = combine(turn_matrix(-cam_turn), tip_matrix(-cam_tip))
+
+    screen.fill(BLACK)
+
+    # ---- (Lesson 5) the floor first, so every shape is painted on top of it -
+    if show_grid:
+        draw_floor()
+
+    # ---- (Lesson 5) ONE list for the faces of EVERY thing --------------------
+    faces_to_draw = []
+    for thing in things:
+        add_faces_of(thing, faces_to_draw)
+
+    # ---- The painter&#x27;s method: furthest first, ALL faces together ----
+    faces_to_draw.sort(reverse=True)
+    for distance, face_points, colour in faces_to_draw:
+        pygame.draw.polygon(screen, colour, face_points)
+        pygame.draw.polygon(screen, BLACK, face_points, 2)
+
+    draw_map()
+
+    # ---- (step 2) the matrix numbers, top-right --------------------
+    # things[4] is the floating LILAC cube: the only one that tips,
+    # turns AND rolls, so all 9 of its numbers keep changing.
+    if show_matrices:
+        draw_matrix(things[4][&quot;matrix&quot;], &quot;lilac cube spin&quot;, 570, 115)
+        # NEW: the camera&#x27;s grid. Turn with LEFT / RIGHT and watch it.
+        draw_matrix(camera_matrix, &quot;camera_matrix&quot;, 570, 235)
+
+    text = (&quot;you are at (&quot; + str(round(cam_x, 2)) + &quot;, &quot; +
+            str(round(cam_y, 2)) + &quot;, &quot; + str(round(cam_z, 2)) + &quot;)&quot;)
+    text = (text + &quot;   turn &quot; + str(round(cam_turn, 1)) +
+            &quot;   tip &quot; + str(round(cam_tip, 1)))
+    screen.blit(font.render(text, True, PINK), (20, 20))
+    screen.blit(font.render(&quot;ARROWS = turn and look,  W A S D = walk,  Q / E = down / up&quot;, True, YELLOW), (20, 50))
+    screen.blit(font.render(&quot;SPACE = pause,  R = reset,  L = light,  C = colours,  G = grid,  M = matrices&quot;, True, YELLOW), (20, 80))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Stand still, turn LEFT exactly 90 degrees (1 second) and read
+#     camera_matrix. Compare it with the 90-degree grids in Part 4.
+#   * Look down (DOWN arrow) and watch which numbers change. Why do
+#     the middle row and middle column start to move?
+#   * Fly where you look: build
+#         look = combine(tip_matrix(cam_tip), turn_matrix(cam_turn))
+#     and use column(look, 2) as the forward arrow for W and S.
+#     (Lesson 7 uses this.)
+#   * Count the work: add a counter to tip_matrix, turn_matrix and
+#     roll_matrix (a global that goes up by 1 each call) and print it
+#     once a second. Compare with the numbers in the lesson&#x27;s Part 6.
+# ----------------------------------------------------------------------
+</code></pre></details>
+</main>
+</body>
+</html>
