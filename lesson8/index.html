@@ -1,0 +1,2902 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframe 3D, Lesson 8</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Chakra+Petch:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one readable column, like a lab notebook; diagrams and code break out slightly wider. */
+:root {
+  --bg:#f3f6f4; --paper:#ffffff; --fg:#17201b; --muted:#56635c; --line:#d5ded8;
+  --accent:#0d8a4a; --accent-soft:#e2f3e9; --code-bg:#121815; --code-fg:#d9f5e3; --warn:#9a6a00;
+  --display:"Chakra Petch", "Trebuchet MS", sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; --code-bg:#0a0e0c; --code-fg:#d9f5e3; --warn:#e6b84a; color-scheme:dark; } }
+:root[data-theme="dark"] {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; --code-bg:#0a0e0c; --code-fg:#d9f5e3; --warn:#e6b84a; color-scheme:dark; }
+body { background:var(--bg); color:var(--fg); font-family:var(--body); font-size:17px; line-height:1.6;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:32px 64px; }
+main { max-width:780px; margin:0 auto; display:flex; flex-direction:column; gap:20px; }
+h1,h2,h3 { font-family:var(--display); text-wrap:balance; line-height:1.2; margin:0; }
+h1 { font-size:clamp(30px,6vw,44px); }
+h2 { font-size:26px; margin-top:28px; padding-top:20px; border-top:2px solid var(--line); display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; }
+h2 .mins { font-family:var(--mono); font-size:14px; color:var(--accent); font-weight:600; letter-spacing:.04em; }
+h3 { font-size:20px; margin-top:12px; }
+p { margin:0; max-width:68ch; }
+.eyebrow { font-family:var(--mono); font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); }
+.lede { font-size:19px; color:var(--muted); }
+code { font-family:var(--mono); font-size:.88em; background:var(--accent-soft); padding:1px 5px; border-radius:4px; }
+pre { margin:0; background:var(--code-bg); color:var(--code-fg); padding:16px 18px; border-radius:8px; overflow-x:auto; font-size:14px; line-height:1.5; }
+pre code { background:none; padding:0; font-size:inherit; color:inherit; }
+figure { margin:0; display:flex; flex-direction:column; gap:8px; }
+figure img { width:100%; border-radius:8px; display:block; border:1px solid var(--line); }
+figcaption { font-size:14px; color:var(--muted); }
+table { border-collapse:collapse; width:100%; font-size:15px; }
+.tablewrap { overflow-x:auto; }
+th,td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+td.t { font-family:var(--mono); white-space:nowrap; color:var(--accent); font-variant-numeric:tabular-nums; }
+ul,ol { margin:0; padding-left:22px; max-width:68ch; }
+li+li { margin-top:4px; }
+.key { background:var(--accent-soft); border-left:4px solid var(--accent); padding:14px 18px; border-radius:0 8px 8px 0; display:flex; flex-direction:column; gap:6px; }
+.key strong { font-family:var(--display); }
+.q { background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:14px 18px; display:flex; flex-direction:column; gap:8px; }
+.qq { font-weight:700; display:flex; gap:10px; }
+.qn { font-family:var(--mono); color:var(--accent); flex:none; }
+details summary { cursor:pointer; color:var(--accent); font-weight:700; }
+details summary:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.ans { padding-top:8px; color:var(--fg); display:flex; flex-direction:column; gap:8px; }
+details.full { border:1px dashed var(--line); border-radius:8px; padding:10px 14px; }
+details.full[open] summary { margin-bottom:10px; }
+.check { display:flex; flex-direction:column; gap:12px; }
+.files li code { white-space:nowrap; }
+.key a { color:var(--accent); font-weight:700; }
+
+.fignum { font-family:var(--mono); font-weight:600; color:var(--accent); margin-right:6px; white-space:nowrap; }
+.panels { display:block; margin-top:4px; }
+.panels b { font-family:var(--mono); color:var(--fg); font-weight:600; }
+.tabcap { font-size:14px; color:var(--muted); margin-bottom:-12px; }
+figure, .tabcap { scroll-margin-top:16px; }
+/* Key concept box (same as Lesson 1). */
+.keyconcept { background:#14110a; border:3px solid #ffd23c; border-radius:10px; padding:18px 20px 20px; display:flex; flex-direction:column; gap:12px; }
+.keyconcept .kc-label { align-self:flex-start; background:#ffd23c; color:#14110a; font-family:var(--mono); font-weight:800; font-size:15px; letter-spacing:.14em; padding:4px 10px; border-radius:4px; }
+.keyconcept pre { background:none; color:#ffd23c; padding:0; font-size:clamp(14px, 3.6vw, 28px); font-weight:700; line-height:1.6; overflow-x:auto; }
+.keyconcept p { margin:0; color:#f3e7b5; font-size:16px; }
+</style>
+
+</head>
+<body>
+<main>
+<nav style="font-family:var(--mono, monospace);font-size:14px;"><a style="color:var(--accent)" href="../">&larr; All lessons</a> &middot; <a style="color:var(--accent)" href="../figures/">Figure index</a></nav>
+
+<header style="display:flex;flex-direction:column;gap:12px">
+  <span class="eyebrow">Wireframe 3D course · Lesson 8 · about 55 minutes</span>
+  <h1>Clipping: cutting faces at the near wall</h1>
+  <p class="lede">Fly right up beside something big in Cube Hunt and a whole wall of it can vanish. Lesson 4 told the program to skip any face with a corner behind you, and that was the safe choice then. Today we do better: we cut each face, and each floor line, exactly where it crosses a wall just in front of your eye, and draw the part that is still in front. The maths is one new idea: how far along a line, from 0 to 1.</p>
+</header>
+
+<figure id="fig-8-0-1"><img src="images/course_map.png" alt="Course map: twelve lessons on a road. Lesson 8, Clipping, is highlighted as you are here; Lessons 1 to 7 are done; Lessons 9 to 11 are still to come." loading="lazy"><figcaption><span class="fignum">Fig 8.0.1</span>The course map. It has grown: after the Cube Hunt game come four more lessons that make the engine stronger. Coloured cards are done or today; darker cards are still to come.</figcaption></figure>
+<div class="key">
+  <strong>Where this lesson fits</strong>
+  <p><strong>Before:</strong> <a href="../lesson7/">Lesson 7</a> turned the 3D world into Cube Hunt, a 60 second cube-collecting game.<br><strong>Today:</strong> clipping: cut faces and lines cleanly at the NEAR wall instead of throwing them away.<br><strong>Next:</strong> Lesson 9, models from files: load a shape such as the famous teapot from a text file instead of typing its corners in.</p>
+  <p>The game is unchanged. We add four big stone rocks so there is something large to fly beside, and then fix how the program draws things that are very close to you.</p>
+</div>
+
+<h2>Lesson plan</h2>
+<p><strong>Who it's for:</strong> someone who finished Lesson 7 and can run <code>step3_cube_hunt.py</code>. You need <code>project()</code> (Lesson 1), faces and the clock test (Lesson 3), CAMERA coordinates and <code>NEAR</code> (Lesson 4), the floor grid and the <code>things</code> list (Lesson 5), the matrices (Lesson 6) and <code>distance_3d()</code> (Lesson 7). <strong>Needs:</strong> Python 3 and <code>pip install pygame-ce</code>, as before.</p>
+<p><strong>By the end, the learner can:</strong></p>
+<ol>
+  <li>Explain, with a screenshot, why skipping a face that crosses NEAR makes a wall vanish, and why projecting it anyway is worse.</li>
+  <li>Say whether a CAMERA point is in front of the NEAR wall or behind it, from its z alone.</li>
+  <li>Work out t, and the point where a line crosses the NEAR wall, by hand.</li>
+  <li>Walk round a face with the four in/out rules and list the corners that come back.</li>
+  <li>Explain why clipping happens in CAMERA coordinates, before <code>project()</code>.</li>
+</ol>
+
+<p class="tabcap" id="fig-8-0-2"><span class="fignum">Table 8.0.2</span>Lesson plan: time, part and what happens</p>
+<div class="tablewrap"><table>
+<tr><th>Time</th><th>Part</th><th>What happens</th></tr>
+<tr><td class="t">0–3</td><td>Recap</td><td>Where Lesson 7 left the program, and a preview of today's fix.</td></tr>
+<tr><td class="t">3–14</td><td>1. Rocks, and the problem</td><td>Four rocks, their size, keeping gold cubes out of them. Run <code>step1_rocks.py</code> and watch a wall vanish. Three ways to handle it. Q1–Q3.</td></tr>
+<tr><td class="t">14–30</td><td>2. Cutting a line</td><td>In or out, the floor's 1-unit pieces, t, finding where a line meets NEAR, <code>clip_line()</code>. Run <code>step2_clip_lines.py</code>. Q4–Q6.</td></tr>
+<tr><td class="t">30–44</td><td>3. Cutting a face</td><td>The four edge rules, how many corners come back, the worked rock face, the face on the screen. Q7–Q9.</td></tr>
+<tr><td class="t">44–51</td><td>4. Clipping in Cube Hunt</td><td>Where <code>clip_face()</code> goes in <code>add_faces_of()</code>. Run <code>step3_clipped_hunt.py</code>. Q10.</td></tr>
+<tr><td class="t">51–55</td><td>Wrap up</td><td>The new recipe for one face, final check Q11, and what comes next.</td></tr>
+</table></div>
+
+<h2>Recap: where Lesson 7 left us <span class="mins">3 MIN</span></h2>
+<p>Lesson 7's Cube Hunt sends every corner of every thing through the same recipe: SHAPE → size, spin, place (WORLD) → minus you, times <code>camera_matrix</code> (CAMERA) → <code>project()</code> (SCREEN). Between CAMERA and SCREEN sits Lesson 4's safety rule: <em>if any corner of a face has a CAMERA z smaller than <code>NEAR</code> (0.1), skip the whole face.</em> The floor follows the same rule, which is why Lesson 5 had to chop it into 1,200 short pieces.</p>
+<p>The gold cubes are small, so you rarely notice the rule. Today we add four big rocks, and then you will. Here is the whole story of this lesson in six real screenshots: the top row is Lesson 7's rule, the bottom row is what you will have at the end.</p>
+
+<figure id="fig-8-0-3"><img src="images/k01_filmstrip.png" alt="Six screenshots in two rows. You fly along x = 2.5 past a big grey rock on your left, at z = 2, 3 and 3.6. Top row, Lesson 7&#x27;s rule: the rock&#x27;s side wall is there at z = 2 and gone at 3 and 3.6. Bottom row, clipped: the wall stays, getting narrower as you pass." loading="lazy"><figcaption><span class="fignum">Fig 8.0.3</span>WORLD positions are above each column. At z = 2 all four corners of the wall are in front of you, so both rows agree. From z = 3 two corners are behind you: Lesson 7 throws the wall away; Lesson 8 keeps the part in front.<span class="panels">Panels: <b>8.0.3a</b> (top row 1st) skip, z = 2 · <b>8.0.3b</b> (top row 2nd) skip, z = 3 · <b>8.0.3c</b> (top row 3rd) skip, z = 3.6 · <b>8.0.3d</b> (bottom row 1st) clip, z = 2 · <b>8.0.3e</b> (bottom row 2nd) clip, z = 3 · <b>8.0.3f</b> (bottom row 3rd) clip, z = 3.6</span></figcaption></figure>
+<h2>Part 1: Rocks, and the problem <span class="mins">11 MIN</span></h2>
+<p>To see the problem clearly we need something big. Gold cubes are 1 unit wide and you collect them before you get really close, so we add four stone rocks as scenery. They are Lesson 5 things like any other, using the same cube model.</p>
+<h3>Four rocks on the field</h3>
+
+<figure id="fig-8-1-1"><img src="images/k02_rocks_map.png" alt="WORLD from above, x and z from -12 to 12 inside the red walls. Eight small gold squares are the cubes; four larger grey squares numbered 0 to 3 are rocks at (0,0.5,4), (-5,0.5,-3), (5,0.5,10) and (7,0.5,-7). You are a pink dot at the centre facing +z. A side box lists the rocks and ROCK_SIZE." loading="lazy"><figcaption><span class="fignum">Fig 8.1.1</span>WORLD coordinates seen from above, 1 grid square = 1 unit. The centre (0, 0, 0) is where you start, facing +z up the page. Rock 0, straight ahead, is our worked example all lesson.<span class="panels">Panels: <b>8.1.1a</b> (left) the field from above · <b>8.1.1b</b> (top right) the rocks · <b>8.1.1c</b> (bottom right) key</span></figcaption></figure>
+<pre><code>STONE = (150, 150, 160)       # the colour of every rock
+
+ROCK_SIZE = 1.5                      # 3 units wide
+ROCK_Y = (FLOOR_Y + ROCK_SIZE)       # (-1 + 1.5) = 0.5: sits on the floor
+
+ROCK_SPOTS = [
+    (0, ROCK_Y, 4),       # 0  straight ahead, its front face at z = 2.5
+    (-5, ROCK_Y, -3),     # 1  behind you, to the left
+    (5, ROCK_Y, 10),      # 2  far ahead, to the right
+    (7, ROCK_Y, -7),      # 3  behind you, to the right
+]</code></pre>
+<h3>How big is a rock?</h3>
+<p>Why 1.5? We want a rock big enough that you can fly right up beside it while a lot of it is still on the screen, but small enough to fly round. Follow corner 5 of rock 0 from SHAPE to the screen:</p>
+
+<figure id="fig-8-1-2"><img src="images/k03_rock_size.png" alt="Left: SHAPE coordinates from the front, the 2-unit Lesson 1 cube inside a 3-unit grey rock, corner 5 moving from (1,1,-1) to (1.5,1.5,-1.5). Middle: five numbered steps taking corner 5 to WORLD (1.5,2,2.5) and the screen (640,-20). Right: a side view with the rock sitting on the floor 2.5 in front of you, and the 800 by 600 window with the rock&#x27;s face 480 px wide." loading="lazy"><figcaption><span class="fignum">Fig 8.1.2</span>Corner 5 of rock 0, all the way through Lesson 5's <code>to_world()</code> and Lesson 1's <code>project()</code>. From the start, the rock's front face is <code>((3 * 400) / 2.5)</code> = 480 px wide: well over half the 800 px window.<span class="panels">Panels: <b>8.1.2a</b> (left) SHAPE coordinates, from the front · <b>8.1.2b</b> (middle) the five steps · <b>8.1.2c</b> (top right) WORLD, from the side · <b>8.1.2d</b> (bottom right) on the window</span></figcaption></figure>
+<pre><code>def make_rocks():
+    rocks = []
+    for spot in ROCK_SPOTS:
+        rocks.append({"model": cube_model, "position": spot,
+                      "size": ROCK_SIZE, "angles": [0, 0, 0],
+                      "speeds": (0, 0, 0), "colour": STONE,
+                      "pickup": False})
+    return rocks
+
+
+def make_world():
+    return (make_pickups() + make_rocks())     # (8 + 4) = 12 things
+
+things = make_world()</code></pre>
+<p>Two new things to notice. Every thing now has a <code>"pickup"</code> key: <code>True</code> for gold cubes, <code>False</code> for rocks. The collect loop and the "nearest cube" sum both start with <code>if not thing["pickup"]: continue</code>, so rocks are never collected. And <code>+</code> between two lists joins them into one longer list, gold cubes first, so <code>things[0]</code> is still cube 0.</p>
+<h3>Keeping gold cubes out of rocks</h3>
+<p>Lesson 7's <code>new_pickup_spot()</code> picks a random spot for a collected cube. Now it must also stay away from rocks, or a cube could appear hidden inside one:</p>
+
+<figure id="fig-8-1-3"><img src="images/k04_clearance.png" alt="WORLD from above, zoomed in on rock 0. A red circle of radius 3 surrounds the 3-unit grey rock. Spot A at (1,1,5), inside the circle, distance 1.5, is rejected; spot B at (3,1,6), outside, distance 3.64, is kept. A box explains 3 = 1.5 + 0.5 + 1." loading="lazy"><figcaption><span class="fignum">Fig 8.1.3</span>WORLD from above, 1 grid square = 0.5 unit. 3 is not a guess: it is half a rock, plus half a gold cube, plus your collect radius, so you can always reach a new cube without flying into stone.<span class="panels">Panels: <b>8.1.3a</b> (left) the clearance ball round rock 0 · <b>8.1.3b</b> (right) the sums</span></figcaption></figure>
+<pre><code>ROCK_CLEARANCE = ( (ROCK_SIZE + PICKUP_SIZE) + COLLECT_RADIUS )   # ( (1.5 + 0.5) + 1 ) = 3
+
+def far_from_rocks(spot):
+    for rock_spot in ROCK_SPOTS:
+        if distance_3d(spot, rock_spot) &lt; ROCK_CLEARANCE:
+            return False
+    return True
+
+# in new_pickup_spot(): BOTH must be True
+        if (distance_3d(you, spot) &gt;= MIN_SPAWN_DISTANCE) and far_from_rocks(spot):
+            return spot</code></pre>
+<h3>Run it: step 1, and find the problem</h3>
+<p>Run <code>step1_rocks.py</code>. Nothing about drawing has changed yet. Press D for about 0.8 seconds to slide right to x = 2.5, then W for 1 second to fly to z = 3. Rock 0 is right beside you on the left. Look at the screen:</p>
+
+<figure id="fig-8-1-4"><img src="images/run_step1_rocks.png" alt="Screenshot of step 1 at WORLD (2.5, 0, 3): gold cube 0 big at the top right, rock 2 behind it, two small gold cubes and the floor grid. The left of the screen is empty floor; rock 0 is not drawn at all." loading="lazy"><figcaption><span class="fignum">Fig 8.1.4</span>You at WORLD (2.5, 0, 3). Rock 0 should fill the left of the window. There is nothing there.</figcaption></figure>
+<details class="full"><summary>Full code: <code>step1_rocks.py</code> (about 760 lines)</summary><pre><code># ======================================================================
+# LESSON 8 - STEP 1: ROCKS (and the problem they show)
+# ----------------------------------------------------------------------
+# Goal: put four big stone rocks in the Cube Hunt field, then fly right
+# up beside one and watch its wall VANISH. That is the problem this
+# lesson fixes.
+#
+# This starts from Lesson 7's finished game (step3_cube_hunt.py).
+#
+# What is new since Lesson 7:
+#
+#   1. ROCKS (lesson Part 1)
+#        Four grey cubes, "size" 1.5, so each is 3 units wide. They sit
+#        on the floor and do not spin. They are SCENERY: you can't
+#        collect them.
+#
+#   2. "pickup": True / False (lesson Part 1)
+#        Every thing gets a new key. Gold cubes are True, rocks are
+#        False. Collecting and "nearest cube" only look at True ones.
+#
+#   3. New gold cubes never appear inside a rock (lesson Part 1)
+#        new_pickup_spot() also says no to any spot closer than
+#        ROCK_CLEARANCE (3) to a rock's centre.
+#
+# Nothing in the drawing has changed yet. Fly to (2.5, 0, 3), just right
+# of the rock straight ahead, and look forward: the rock's whole side
+# wall is skipped, because two of its corners are behind you
+# (Lesson 4's rule: "any corner closer than NEAR? skip the face").
+#
+# Controls:  LEFT / RIGHT = turn,   UP / DOWN = look up / down
+#            W / S = fly forward / back (the way you LOOK)
+#            A / D = slide left / right,   Q / E = straight down / up
+#            R = play again (after TIME UP)
+#            G = floor grid on / off,   L = light on / off
+# Run:  python step1_rocks.py
+# ======================================================================
+
+import math
+import random                 # (Lesson 7) for random.uniform
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Lesson 8, step 1 - rocks")
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+big_font = pygame.font.SysFont(None, 96)    # (Lesson 7) for "TIME UP"
+
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+PINK = (255, 105, 200)        # the colour we use for YOU (the camera)
+MAP_BACK = (25, 30, 36)       # dark grey-blue behind the mini-map
+GRID_COLOUR = (40, 90, 70)    # (Lesson 5) dim green for the floor lines
+WALL_RED = (235, 80, 80)      # (Lesson 7) the wall square on the mini-map
+SUN_GOLD = (250, 200, 70)     # (Lesson 7) the colour of every pickup cube
+STONE = (150, 150, 160)       # NEW: the colour of every rock
+
+# ---- One colour for each face direction (from Lesson 3) ---------------
+RED = (235, 80, 80)          # front (-z)
+PURPLE = (160, 100, 230)     # back  (+z)
+BLUE = (70, 150, 255)        # left  (-x)
+GREEN = (70, 210, 120)       # right (+x)
+GOLD = (245, 200, 60)        # top   (+y)
+ORANGE = (245, 140, 50)      # bottom (-y)
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400
+
+
+# ======================================================================
+# MODELS (from Lesson 5, unchanged)
+# ======================================================================
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+# (corners clockwise from outside,  colour,  pointer)
+cube_faces = [
+    ((4, 5, 1, 0), RED,    ( 0,  0, -1)),   # front
+    ((6, 7, 3, 2), PURPLE, ( 0,  0,  1)),   # back
+    ((7, 4, 0, 3), BLUE,   (-1,  0,  0)),   # left
+    ((5, 6, 2, 1), GREEN,  ( 1,  0,  0)),   # right
+    ((7, 6, 5, 4), GOLD,   ( 0,  1,  0)),   # top
+    ((2, 3, 0, 1), ORANGE, ( 0, -1,  0)),   # bottom
+]
+cube_model = {"points": cube_points, "faces": cube_faces}
+
+
+# ======================================================================
+# THE PLAYING FIELD (lesson Part 1)
+# ======================================================================
+
+# ---- (Lesson 7) the sizes of the field ------------------------------------
+# FIELD = 10: new cubes appear with x and z from -10 to 10, a 20 x 20
+#   square. You fly 3 units a second, so edge to edge is
+#   (20 / 3) = 6.7 seconds: some flying, but never boring.
+# WALL = 12: you can't fly further than 12 from the centre, 2 more than
+#   FIELD, so you can always fly round a cube at the edge.
+FIELD = 10
+WALL = 12
+
+# ---- (Lesson 7) the floor (from Lesson 5), now as big as the walls --------
+FLOOR_Y = -1
+GRID_LEFT = (-WALL)       # -12
+GRID_RIGHT = WALL         # 12
+GRID_NEAR = (-WALL)       # -12
+GRID_FAR = WALL           # 12
+
+# ---- (Lesson 7) the pickups ------------------------------------------------
+# PICKUP_SIZE = 0.5: Lesson 5's "size", so each cube is 1 unit wide
+#   (its corners are at -0.5 and 0.5). A 1-unit face 5 away is
+#   ((1 * 400) / 5) = 80 px wide; 20 away it is 20 px (lesson Part 1).
+PICKUP_SIZE = 0.5
+
+# (Lesson 7) cube heights: their centres float from y = 0 to y = 2.
+#   0 is your eye height at the start; the lowest cube's bottom is then
+#   at (0 - 0.5) = -0.5, half a unit above the floor (FLOOR_Y = -1).
+PICKUP_LOW = 0
+PICKUP_HIGH = 2
+
+# (Lesson 7) the 8 spots the cubes start at, in WORLD coordinates.
+# The same every game, so you can learn a good route. Cube 0 at
+# (3, 1, 5) is the lesson's worked example.
+START_SPOTS = [
+    (3, 1, 5),      # 0  ahead and to the right: the first one you see
+    (-2, 0, 8),     # 1
+    (0, 0, 10),     # 2  straight ahead, at the far edge
+    (-6, 1, 3),     # 3
+    (6, 0, -2),     # 4  behind you, to the right
+    (-4, 2, -7),    # 5  behind you, up high
+    (8, 0, 7),      # 6
+    (2, 1, -9),     # 7  far behind you
+]
+
+# (Lesson 7) COLLECT_RADIUS = 1.0: you collect a cube when your eye is
+#   1 unit or less from its CENTRE. Its faces are 0.5 from the centre,
+#   so your nose is then 0.5 from a face, which fills the window:
+#   ((1 * 400) / 0.5) = 800 px wide (lesson Part 3).
+COLLECT_RADIUS = 1.0
+
+# (Lesson 7) MIN_SPAWN_DISTANCE = 5: a new cube never appears closer than
+#   5 to you, so it is at least (5 / 3) = 1.7 seconds of flying away.
+MIN_SPAWN_DISTANCE = 5
+
+# ---- NEW: ROCKS, big scenery cubes (lesson Part 1) -------------------
+# ROCK_SIZE = 1.5: Lesson 5's "size", so a rock is (2 * 1.5) = 3 units
+#   wide, 3 times a gold cube. Big enough that you can fly right up
+#   beside one while most of it is still on the screen: its front face,
+#   2.5 away, is ((3 * 400) / 2.5) = 480 px wide.
+ROCK_SIZE = 1.5
+
+# Each rock SITS on the floor: its centre is ROCK_SIZE above FLOOR_Y,
+#   so centre y = (-1 + 1.5) = 0.5, bottom at -1, top at 2.
+ROCK_Y = (FLOOR_Y + ROCK_SIZE)
+
+# Where the 4 rocks are, in WORLD coordinates. Rock 0 is straight ahead
+# of where you start: the lesson's worked example.
+ROCK_SPOTS = [
+    (0, ROCK_Y, 4),       # 0  straight ahead, its front face at z = 2.5
+    (-5, ROCK_Y, -3),     # 1  behind you, to the left
+    (5, ROCK_Y, 10),      # 2  far ahead, to the right
+    (7, ROCK_Y, -7),      # 3  behind you, to the right
+]
+
+# ROCK_CLEARANCE = 3: a new gold cube must be at least 3 from every
+#   rock's centre: 1.5 (half a rock) + 0.5 (half a gold cube) + 1 (your
+#   COLLECT_RADIUS, so you can always reach it) = 3.
+ROCK_CLEARANCE = ( (ROCK_SIZE + PICKUP_SIZE) + COLLECT_RADIUS )
+
+# ---- (Lesson 7) how high and low you can fly (lesson Part 5) -----------------
+# GROUND = -0.5: your eye stays half a unit above the floor (y = -1).
+# CEILING = 4: two more than PICKUP_HIGH, so you can look down on every
+#   cube but never fly off where none could be.
+GROUND = (FLOOR_Y + 0.5)     # (-1 + 0.5) = -0.5
+CEILING = 4
+
+# ---- (Lesson 7) the clock (lesson Part 6) -------------------------------------
+# 60 seconds: at 3 units a second that is (3 * 60) = 180 units of
+# flying, enough for a good handful of cubes, short enough to retry.
+GAME_SECONDS = 60
+
+
+def make_pickups():
+    """(Lesson 7) build a fresh list of 8 pickup THINGS (Lesson 5's
+    dictionaries), one at each START_SPOTS position.
+
+    Each one is a small gold cube (size 0.5) that spins slowly so it
+    catches your eye: 1 degree a frame of turn = one turn in 6 seconds,
+    and 0.5 of tip so it wobbles a little too.
+    """
+    pickups = []
+    for spot in START_SPOTS:
+        pickups.append({"model": cube_model, "position": spot,
+                        "size": PICKUP_SIZE, "angles": [0, 0, 0],
+                        "speeds": (0.5, 1, 0), "colour": SUN_GOLD,
+                        "pickup": True})          # NEW
+    return pickups
+
+
+def make_rocks():
+    """NEW: build a list of 4 rock THINGS, one at each ROCK_SPOTS position.
+
+    Same dictionary keys as a gold cube, with three differences:
+    size 1.5, speeds (0, 0, 0) so they never spin, and "pickup": False
+    so you can't collect them.
+    """
+    rocks = []
+    for spot in ROCK_SPOTS:
+        rocks.append({"model": cube_model, "position": spot,
+                      "size": ROCK_SIZE, "angles": [0, 0, 0],
+                      "speeds": (0, 0, 0), "colour": STONE,
+                      "pickup": False})
+    return rocks
+
+
+def make_world():
+    """NEW: the whole world = 8 gold cubes + 4 rocks.
+
+    "+" joins two lists into one longer list: (8 + 4) = 12 things.
+    The gold cubes come first, so things[0] is still cube 0.
+    """
+    return (make_pickups() + make_rocks())
+
+
+# "things" is Lesson 5's list of everything in the world.
+# NEW: 8 gold cubes AND 4 rocks.
+things = make_world()
+
+# ---- Where YOU are (from Lesson 4) ------------------------------------
+cam_x = 0
+cam_y = 0
+cam_z = 0
+cam_turn = 0        # degrees, positive = turned LEFT
+cam_tip = 0         # degrees, positive = looking DOWN
+TIP_LIMIT = 60
+MOVE_SPEED = 0.05   # (0.05 * 60) = 3 units a second
+TURN_SPEED = 1.5    # (1.5 * 60) = 90 degrees a second
+NEAR = 0.1          # closer than this (CAMERA z) is not drawn
+
+# ---- The light (from Lesson 3, unchanged) -----------------------------
+LIGHT = (0.48, 0.6, -0.64)
+AMBIENT = 0.2
+use_light = True
+show_grid = True
+
+# ---- (Lesson 7) the score ------------------------------------------------
+score = 0
+# ---- (Lesson 7) the clock and the game's two states (lesson Part 6) ----------
+best_score = 0                         # NOT reset by R
+frames_left = (GAME_SECONDS * 60)      # (60 * 60) = 3600
+game_over = False                      # False = PLAYING, True = TIME UP
+
+# ---- The mini-map (lesson Part 1: resized for the whole field) ---------
+MAP_LEFT = 630
+MAP_TOP = 430
+MAP_SIZE = 160
+# (Lesson 7) the WORLD centre now sits in the MIDDLE of the box, because
+# the field goes the same distance every way (-12 to 12).
+MAP_CX = (MAP_LEFT + (MAP_SIZE / 2))    # (630 + 80) = 710
+MAP_CY = (MAP_TOP + (MAP_SIZE / 2))     # (430 + 80) = 510
+# (Lesson 7) 6 px per unit: the walls are 24 units across, and
+# (24 * 6) = 144 px fits the 160 px box with 8 px to spare.
+MAP_SCALE = 6
+
+
+# ======================================================================
+# MATRIX TOOLS (from Lesson 6, unchanged)
+# ======================================================================
+
+def matrix_times_point(matrix, point_3d):
+    """Put one point through a matrix: each ROW dotted with the point."""
+    row_0, row_1, row_2 = matrix
+    new_x = dot(row_0, point_3d)
+    new_y = dot(row_1, point_3d)
+    new_z = dot(row_2, point_3d)
+    return (new_x, new_y, new_z)
+
+
+def tip_matrix(angle_degrees):
+    """Lesson 2B's TIP as a grid. x is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (1, 0,     0         ),
+        (0, cos_a, (-sin_a)  ),
+        (0, sin_a, cos_a     ),
+    )
+
+
+def turn_matrix(angle_degrees):
+    """Lesson 2's TURN as a grid. y is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, 0, (-sin_a)),
+        (0,     1, 0       ),
+        (sin_a, 0, cos_a   ),
+    )
+
+
+def roll_matrix(angle_degrees):
+    """Lesson 2B's ROLL as a grid. z is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, (-sin_a), 0),
+        (sin_a, cos_a,    0),
+        (0,     0,        1),
+    )
+
+
+def column(matrix, column_number):
+    """One COLUMN of a matrix = where that axis arrow lands."""
+    row_0, row_1, row_2 = matrix
+    return (row_0[column_number], row_1[column_number], row_2[column_number])
+
+
+def combine(first, second):
+    """ONE matrix that does 'first', then 'second' (Lesson 6)."""
+    new_col_0 = matrix_times_point(second, column(first, 0))
+    new_col_1 = matrix_times_point(second, column(first, 1))
+    new_col_2 = matrix_times_point(second, column(first, 2))
+    return (
+        (new_col_0[0], new_col_1[0], new_col_2[0]),
+        (new_col_0[1], new_col_1[1], new_col_2[1]),
+        (new_col_0[2], new_col_1[2], new_col_2[2]),
+    )
+
+
+def spin_matrix(angles):
+    """A thing's whole spin as ONE matrix: tip, then turn, then roll."""
+    tip_then_turn = combine(tip_matrix(angles[0]), turn_matrix(angles[1]))
+    return combine(tip_then_turn, roll_matrix(angles[2]))
+
+
+# ======================================================================
+# THE 3D PIPELINE (Lessons 1 to 6, unchanged)
+# ======================================================================
+
+def to_world(shape_point, thing):
+    """(Lesson 5) SHAPE -&gt; WORLD: size, then spin, then place."""
+    x, y, z = shape_point
+    size = thing["size"]
+    sized = ( (x * size), (y * size), (z * size) )
+    spun = matrix_times_point(thing["matrix"], sized)
+    pos_x, pos_y, pos_z = thing["position"]
+    sx, sy, sz = spun
+    return ( (sx + pos_x), (sy + pos_y), (sz + pos_z) )
+
+
+def to_camera(world_point):
+    """(Lessons 4 and 6) WORLD -&gt; CAMERA: subtract you, then camera_matrix."""
+    x, y, z = world_point
+    moved = ( (x - cam_x), (y - cam_y), (z - cam_z) )
+    return matrix_times_point(camera_matrix, moved)
+
+
+def project(point_3d):
+    """(Lesson 1) CAMERA -&gt; SCREEN. Only call it with z &gt;= NEAR."""
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+def average_z(corners, camera_points):
+    """(Lesson 3) how far away is this face? Uses CAMERA z."""
+    total = 0
+    for corner_number in corners:
+        x, y, z = camera_points[corner_number]
+        total = (total + z)
+    return (total / len(corners))
+
+
+def is_facing_you(face_points):
+    """(Lesson 3) the clock test: True if clockwise on the screen."""
+    a_x, a_y = face_points[0]
+    b_x, b_y = face_points[1]
+    c_x, c_y = face_points[2]
+    arrow_a_x = (b_x - a_x)
+    arrow_a_y = (b_y - a_y)
+    arrow_b_x = (c_x - a_x)
+    arrow_b_y = (c_y - a_y)
+    cross = ( (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x) )
+    return (cross &gt; 0)
+
+
+def dot(arrow_1, arrow_2):
+    """(Lesson 3) the dot product."""
+    x1, y1, z1 = arrow_1
+    x2, y2, z2 = arrow_2
+    return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
+
+
+def shade_colour(colour, pointer):
+    """(Lesson 3) brighter when the face points at the light."""
+    brightness = dot(pointer, LIGHT)
+    if brightness &lt; 0:
+        brightness = 0
+    shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )
+    red, green, blue = colour
+    return ( round(red * shade), round(green * shade), round(blue * shade) )
+
+
+def keep_under_360(angle):
+    """Keep an angle between 0 and 360."""
+    if angle &gt;= 360:
+        angle = (angle - 360)
+    if angle &lt; 0:
+        angle = (angle + 360)
+    return angle
+
+
+def add_faces_of(thing, faces_to_draw):
+    """(Lesson 5) work out every face of ONE thing and add the ones to
+    paint to the shared list (unchanged from Lesson 6)."""
+    model = thing["model"]
+    camera_points = []
+    screen_points = []
+    for p in model["points"]:
+        world = to_world(p, thing)                     # WORLD
+        camera = to_camera(world)                      # CAMERA
+        camera_points.append(camera)
+        if camera[2] &gt;= NEAR:
+            screen_points.append(project(camera))      # SCREEN
+        else:
+            screen_points.append(None)
+
+    for corners, face_colour, pointer in model["faces"]:
+        too_close = False
+        for corner_number in corners:
+            if camera_points[corner_number][2] &lt; NEAR:
+                too_close = True
+        if too_close:
+            continue
+        face_points = []
+        for corner_number in corners:
+            face_points.append(screen_points[corner_number])
+        if not is_facing_you(face_points):
+            continue
+        distance = average_z(corners, camera_points)
+        colour = thing["colour"]
+        if use_light:
+            spun_pointer = matrix_times_point(thing["matrix"], pointer)
+            colour = shade_colour(colour, spun_pointer)
+        faces_to_draw.append( (distance, face_points, colour) )
+
+
+def draw_floor():
+    """(Lesson 5) the floor grid, in 1-unit pieces (now -12 to 12)."""
+    for x in range(GRID_LEFT, (GRID_RIGHT + 1)):
+        for z in range(GRID_NEAR, GRID_FAR):
+            draw_floor_piece( (x, FLOOR_Y, z), (x, FLOOR_Y, (z + 1)) )
+    for z in range(GRID_NEAR, (GRID_FAR + 1)):
+        for x in range(GRID_LEFT, GRID_RIGHT):
+            draw_floor_piece( (x, FLOOR_Y, z), ((x + 1), FLOOR_Y, z) )
+
+
+def draw_floor_piece(world_start, world_end):
+    """(Lesson 5) one 1-unit piece of floor line."""
+    start = to_camera(world_start)
+    end = to_camera(world_end)
+    if (start[2] &lt; NEAR) or (end[2] &lt; NEAR):
+        return
+    pygame.draw.line(screen, GRID_COLOUR, project(start), project(end), 1)
+
+
+# ======================================================================
+# THE GAME TOOLS (Lesson 7)
+# ======================================================================
+
+def distance_3d(point_a, point_b):
+    """(Lesson 7) how far apart are two WORLD points? (lesson Part 2)
+
+    Subtract, square each part, add them up, square-root the total:
+    Pythagoras done twice, in one line.
+
+    Worked example (lesson Part 2): you at (1, 0, 3), cube 0 at (3, 1, 5)
+        dx = (3 - 1) = 2,  dy = (1 - 0) = 1,  dz = (5 - 3) = 2
+        math.sqrt( (2 * 2) + (1 * 1) + (2 * 2) ) = math.sqrt(9) = 3
+    """
+    ax, ay, az = point_a
+    bx, by, bz = point_b
+    dx = (bx - ax)
+    dy = (by - ay)
+    dz = (bz - az)
+    return math.sqrt( (dx * dx) + (dy * dy) + (dz * dz) )
+
+
+def far_from_rocks(spot):
+    """NEW: True if this WORLD spot is at least ROCK_CLEARANCE (3) from
+    the centre of every rock, so a new gold cube never hides inside one.
+
+    Worked example (lesson Part 1): spot (1, 1, 5) and rock 0 at
+    (0, 0.5, 4): math.sqrt( (1 * 1) + (0.5 * 0.5) + (1 * 1) ) = 1.5,
+    less than 3, so False: try again.
+    """
+    for rock_spot in ROCK_SPOTS:
+        if distance_3d(spot, rock_spot) &lt; ROCK_CLEARANCE:
+            return False
+    return True
+
+
+def new_pickup_spot():
+    """(Lesson 7) a random WORLD spot for a cube, at least
+    MIN_SPAWN_DISTANCE from you (lesson Part 4).
+
+    "while True" repeats for ever, until "return" jumps out. Usually the
+    first try is far enough; about 1 try in 5 is too close and we
+    simply pick again.
+    """
+    you = (cam_x, cam_y, cam_z)
+    while True:
+        new_x = random.uniform((-FIELD), FIELD)
+        new_y = random.uniform(PICKUP_LOW, PICKUP_HIGH)
+        new_z = random.uniform((-FIELD), FIELD)
+        spot = (new_x, new_y, new_z)
+        # NEW: "and far_from_rocks(spot)": BOTH must be True.
+        if (distance_3d(you, spot) &gt;= MIN_SPAWN_DISTANCE) and far_from_rocks(spot):
+            return spot
+
+
+def to_map(x, z):
+    """A WORLD (x, z) -&gt; a pixel on the mini-map (from Lesson 4)."""
+    map_x = MAP_CX + (x * MAP_SCALE)
+    map_y = MAP_CY - (z * MAP_SCALE)
+    return (map_x, map_y)
+
+
+def draw_map():
+    """The mini-map: the wall square, every cube, and you, from above."""
+    box = pygame.Rect(MAP_LEFT, MAP_TOP, MAP_SIZE, MAP_SIZE)
+    pygame.draw.rect(screen, MAP_BACK, box)
+    screen.set_clip(box)
+    # (Lesson 7) the walls: from map (-12, 12) to map (12, -12)
+    wall_left, wall_top = to_map((-WALL), WALL)          # (638, 438)
+    wall_size = ( (2 * WALL) * MAP_SCALE )                # (24 * 6) = 144
+    pygame.draw.rect(screen, WALL_RED,
+                     pygame.Rect(wall_left, wall_top, wall_size, wall_size), 1)
+    # Each cube's 4 bottom corners (from Lesson 5): a small gold square.
+    for thing in things:
+        outline = []
+        for corner_number in (0, 1, 2, 3):
+            corner = thing["model"]["points"][corner_number]
+            x, y, z = to_world(corner, thing)
+            outline.append(to_map(x, z))
+        pygame.draw.polygon(screen, thing["colour"], outline, 2)
+    # You: pink dot and a line the way your BODY faces.
+    forward_x, forward_y, forward_z = column(turn_matrix(cam_turn), 2)
+    you = to_map(cam_x, cam_z)
+    nose = to_map( (cam_x + (forward_x * 1.5)), (cam_z + (forward_z * 1.5)) )
+    pygame.draw.line(screen, PINK, you, nose, 2)
+    pygame.draw.circle(screen, PINK, you, 4)
+    screen.set_clip(None)
+    pygame.draw.rect(screen, WHITE, box, 1)
+
+
+# ======================================================================
+# THE MAIN LOOP
+# ======================================================================
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_l:
+                use_light = not use_light
+            if event.key == pygame.K_g:
+                show_grid = not show_grid
+            # (Lesson 7) R only works after TIME UP, so you can't restart by
+            # accident in the middle of a good game.
+            if (event.key == pygame.K_r) and game_over:
+                # Every game number back to its start value...
+                cam_x = 0
+                cam_y = 0
+                cam_z = 0
+                cam_turn = 0
+                cam_tip = 0
+                things = make_world()      # NEW: cubes AND rocks
+                score = 0
+                frames_left = (GAME_SECONDS * 60)
+                game_over = False
+                # ...but NOT best_score: it remembers your best.
+
+    # ==================================================================
+    # PLAYING: everything in this "if" stops when game_over is True.
+    # ==================================================================
+    if not game_over:
+        keys = pygame.key.get_pressed()
+
+        # ---- Turning and looking (from Lesson 4, unchanged) ----------
+        if keys[pygame.K_LEFT]:
+            cam_turn = (cam_turn + TURN_SPEED)
+        if keys[pygame.K_RIGHT]:
+            cam_turn = (cam_turn - TURN_SPEED)
+        if keys[pygame.K_UP]:
+            cam_tip = (cam_tip - TURN_SPEED)
+        if keys[pygame.K_DOWN]:
+            cam_tip = (cam_tip + TURN_SPEED)
+        if cam_tip &gt; TIP_LIMIT:
+            cam_tip = TIP_LIMIT
+        if cam_tip &lt; (-TIP_LIMIT):
+            cam_tip = (-TIP_LIMIT)
+
+        # ---- (Lesson 7) fly where you LOOK (lesson Part 5) -----------------
+        # Build the arrow the way your head points: tip first (the head
+        # nods), then turn (the body turns), and read off column 2,
+        # where the +z arrow lands (Lesson 6).
+        #   cam_tip -30, cam_turn 0:   forward = (0, 0.5, 0.866)   climbing
+        #   cam_tip -30, cam_turn 90:  forward = (-0.866, 0.5, 0)  left + up
+        # Right stays level (from your body only), so A and D slide
+        # sideways without climbing.
+        look = combine(tip_matrix(cam_tip), turn_matrix(cam_turn))
+        forward_x, forward_y, forward_z = column(look, 2)
+        right_x, right_y, right_z = column(turn_matrix(cam_turn), 0)
+        if keys[pygame.K_w]:
+            cam_x = (cam_x + (forward_x * MOVE_SPEED))
+            cam_y = (cam_y + (forward_y * MOVE_SPEED))   # (Lesson 7) y too
+            cam_z = (cam_z + (forward_z * MOVE_SPEED))
+        if keys[pygame.K_s]:
+            cam_x = (cam_x - (forward_x * MOVE_SPEED))
+            cam_y = (cam_y - (forward_y * MOVE_SPEED))   # (Lesson 7) y too
+            cam_z = (cam_z - (forward_z * MOVE_SPEED))
+        if keys[pygame.K_d]:
+            cam_x = (cam_x + (right_x * MOVE_SPEED))
+            cam_z = (cam_z + (right_z * MOVE_SPEED))
+        if keys[pygame.K_a]:
+            cam_x = (cam_x - (right_x * MOVE_SPEED))
+            cam_z = (cam_z - (right_z * MOVE_SPEED))
+        if keys[pygame.K_e]:
+            cam_y = (cam_y + MOVE_SPEED)
+        if keys[pygame.K_q]:
+            cam_y = (cam_y - MOVE_SPEED)
+
+        # ---- (Lesson 7) walls, ground and ceiling (lesson Part 5) ----------
+        # Past a limit? Put it back ON the limit. You slide along the
+        # wall instead of going through it.
+        if cam_x &gt; WALL:
+            cam_x = WALL
+        if cam_x &lt; (-WALL):
+            cam_x = (-WALL)
+        if cam_z &gt; WALL:
+            cam_z = WALL
+        if cam_z &lt; (-WALL):
+            cam_z = (-WALL)
+        if cam_y &gt; CEILING:
+            cam_y = CEILING
+        if cam_y &lt; GROUND:
+            cam_y = GROUND
+
+        # ---- (Lesson 7) collect any cube you are touching (Part 3) -----
+        you = (cam_x, cam_y, cam_z)
+        for thing in things:
+            # NEW: rocks have "pickup": False, so they are never collected.
+            if not thing["pickup"]:
+                continue
+            if distance_3d(you, thing["position"]) &lt;= COLLECT_RADIUS:
+                score = (score + 1)
+                # (Lesson 7) the same cube jumps to a new spot (Part 4):
+                # there are always exactly 8 cubes to find.
+                thing["position"] = new_pickup_spot()
+
+        # ---- (Lesson 7) tick the clock (lesson Part 6) ---------------------
+        frames_left = (frames_left - 1)
+        if frames_left &lt;= 0:
+            frames_left = 0
+            game_over = True
+            if score &gt; best_score:
+                best_score = score
+
+    # ---- Every pickup spins (Lesson 5), even after TIME UP -------------
+    for thing in things:
+        angles = thing["angles"]
+        speeds = thing["speeds"]
+        angles[0] = keep_under_360( (angles[0] + speeds[0]) )
+        angles[1] = keep_under_360( (angles[1] + speeds[1]) )
+        angles[2] = keep_under_360( (angles[2] + speeds[2]) )
+        thing["matrix"] = spin_matrix(angles)
+
+    # ---- The camera's matrix, once a frame (Lesson 6) ------------------
+    camera_matrix = combine(turn_matrix(-cam_turn), tip_matrix(-cam_tip))
+
+    # ==================================================================
+    # DRAW: the world first, then the HUD on top (lesson Part 2)
+    # ==================================================================
+    screen.fill(BLACK)
+    if show_grid:
+        draw_floor()
+    faces_to_draw = []
+    for thing in things:
+        add_faces_of(thing, faces_to_draw)
+    faces_to_draw.sort(reverse=True)
+    for distance, face_points, colour in faces_to_draw:
+        pygame.draw.polygon(screen, colour, face_points)
+        pygame.draw.polygon(screen, BLACK, face_points, 2)
+
+    draw_map()
+
+    # ---- (Lesson 7) how far is the nearest cube? -------------------------
+    # Start with a huge number, then keep the smallest distance found.
+    nearest = 1000
+    for thing in things:
+        if not thing["pickup"]:          # NEW: rocks don't count
+            continue
+        d = distance_3d((cam_x, cam_y, cam_z), thing["position"])
+        if d &lt; nearest:
+            nearest = d
+
+    # ---- The HUD: words drawn LAST, so no cube can hide them -----------
+    # str() turns a number into letters so + can join it to words.
+    text = ("score " + str(score) + "   best " + str(best_score))
+    screen.blit(font.render(text, True, SUN_GOLD), (20, 20))
+    text = ("nearest cube " + str(round(nearest, 1)))
+    screen.blit(font.render(text, True, PINK), (20, 50))
+    # (Lesson 7) math.ceil rounds UP, so the clock never shows 0 while you
+    # can still play: 59.98 seconds left shows as 60.
+    seconds = math.ceil(frames_left / 60)
+    screen.blit(font.render("time " + str(seconds), True, WHITE), (680, 20))
+    screen.blit(font.render("ARROWS look,  W / S fly,  A / D slide,  Q / E down / up",
+                            True, YELLOW), (20, 570))
+
+    # ---- (Lesson 7) TIME UP on top of everything -------------------------
+    if game_over:
+        words = big_font.render("TIME UP", True, WHITE)
+        # Centre it: half its width to the left of the screen's middle.
+        # get_width() is how many pixels wide the words came out.
+        left = (CENTRE_X - (words.get_width() / 2))
+        screen.blit(words, (left, 200))
+        words = font.render("score " + str(score) + "   best " + str(best_score) +
+                            "      press R to play again", True, YELLOW)
+        left = (CENTRE_X - (words.get_width() / 2))
+        screen.blit(words, (left, 290))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Fly to the right of rock 0 (press D for about 0.8 seconds, then
+#     W for 1 second) and look ahead. Where did the rock go? Count how
+#     many of its 4 corners on that side are behind you.
+#   * Make the rocks bigger: ROCK_SIZE = 3. Is the problem better or
+#     worse? (Bigger faces cross NEAR more often.)
+#   * Add a fifth rock at (-8, ROCK_Y, 8). Is it far enough from every
+#     gold cube's start spot? Use distance_3d by hand.
+#   * Set NEAR = 1 and fly at a rock. When does its front face vanish?
+# ----------------------------------------------------------------------
+</code></pre></details>
+<p>Why? Here is the same moment seen from above, in CAMERA coordinates, with the numbers for the one face that matters:</p>
+
+<figure id="fig-8-1-5"><img src="images/k05_vanishing_wall.png" alt="Left: CAMERA coordinates from above. You at the centre; rock 0 is a grey square to your left from x -4 to -1 and z -0.5 to 2.5. Its right face, a yellow line at x = -1, crosses the cyan NEAR line at z = 0.1: corners 6 and 2 at z 2.5 are in front, 5 and 1 at z -0.5 are behind. Right: the step 1 screenshot with a red dashed line at x = 240 px marking where the wall belongs." loading="lazy"><figcaption><span class="fignum">Fig 8.1.5</span>CAMERA coordinates: subtract you, (2.5, 0, 3), from every WORLD corner. The right face has two corners behind you, so Lesson 4's rule skips it. Every other face of the rock is either behind you or facing away, so the whole rock disappears.<span class="panels">Panels: <b>8.1.5a</b> (left) CAMERA from above · <b>8.1.5b</b> (bottom left) the four corners · <b>8.1.5c</b> (right) what step 1 draws</span></figcaption></figure>
+<h3>Three things we could do</h3>
+<p>A face with some corners in front of you and some behind has three possible fates. We have tried the first. The second is what Lesson 4 warned about. The third is today's lesson:</p>
+
+<figure id="fig-8-1-6"><img src="images/k06_three_choices.png" alt="Three screenshots of the same moment. 1, skip it: the left of the screen is empty floor. 2, project it anyway: a wrong grey bow-tie shape covers the right of the screen, because corner 5 at z -0.5 lands at x = 1200. 3, cut it at NEAR: the left 240 px are solid rock." loading="lazy"><figcaption><span class="fignum">Fig 8.1.6</span>SCREEN pixels, (0, 0) at the top-left. Projecting a corner with negative z flips it to the other side of the screen (Lesson 4's ghost), so the shape comes out as a crossed bow-tie in the wrong place.<span class="panels">Panels: <b>8.1.6a</b> (left) skip it · <b>8.1.6b</b> (middle) project it anyway · <b>8.1.6c</b> (right) cut it at NEAR</span></figcaption></figure>
+<div class="keyconcept" role="note" aria-label="Key concept">
+<span class="kc-label">KEY CONCEPT</span>
+<pre><code>Don't skip it. Don't project it.
+CUT it at NEAR, then project what is left.</code></pre>
+<p>This is the whole idea of clipping. Everything else in this lesson is the how: first for a line with two ends (Part 2), then for a face with many corners (Part 3).</p>
+</div>
+<div class="check"><div class="q"><p class="qq"><span class="qn">Q1</span><span>Where is rock 3, at WORLD (7, 0.5, −7), on the mini-map? How wide is its square there?</span></p><details><summary>Show answer</summary><div class="ans"><p>map_x = <code>(710 + (7 * 6))</code> = 710 + 42 = 752. map_y = <code>(510 - (-7 * 6))</code> = 510 + 42 = 552. The rock is 3 units wide, so its square is <code>(3 * 6)</code> = 18 px across: three times a gold cube's 6 px.</p></div></details></div><div class="q"><p class="qq"><span class="qn">Q2</span><span>A cube is collected and <code>random.uniform</code> picks the spot (−3, 1, −1). Will <code>far_from_rocks()</code> let it stay?</span></p><details><summary>Show answer</summary><div class="ans"><p>Rock 1 is at (−5, 0.5, −3). dx = 2, dy = 0.5, dz = 2. <code>math.sqrt( (2 * 2) + (0.5 * 0.5) + (2 * 2) )</code> = <code>math.sqrt(8.25)</code> = 2.87. That is less than 3, so it returns False and a new spot is picked.</p></div></details></div><div class="q"><p class="qq"><span class="qn">Q3</span><span>You are at WORLD (2.5, 0, 2), one unit further back than in Fig 8.1.5. Does Lesson 7's rule skip rock 0's right face?</span></p><details><summary>Show answer</summary><div class="ans"><p>Subtract you: the face's corners have CAMERA z = <code>(2.5 - 2)</code> = 0.5 and <code>(5.5 - 2)</code> = 3.5. Both are 0.1 or more, so nothing is skipped and the wall is drawn. That is the first column of Fig 8.0.3.</p></div></details></div></div>
+<h2>Part 2: Cutting a line <span class="mins">16 MIN</span></h2>
+<p>A line has only two ends, so it is the easiest thing to clip. We start there, and the floor grid gets better on the way.</p>
+<h3>In front of the wall, or behind it?</h3>
+<p>Picture <code>NEAR</code> as a flat sheet of glass 0.1 in front of your eye, stretching for ever left, right, up and down. We call it the NEAR wall. Every CAMERA point is either in front of it ("in") or behind it ("out"), and only its z decides which:</p>
+
+<figure id="fig-8-2-1"><img src="images/k07_in_out.png" alt="CAMERA from above. A cyan line at z = 0.1 splits the picture into a green IN region (z at least 0.1) and a red OUT region. P at z 2 and T at z exactly 0.1 are in; Q at z -0.5 and R at z 0.05 are out." loading="lazy"><figcaption><span class="fignum">Fig 8.2.1</span>CAMERA coordinates: (0, 0, 0) is your eye, +z is straight ahead. T, exactly on the wall, counts as in because the test is <code>&gt;=</code>.<span class="panels">Panels: <b>8.2.1a</b> (left) the wall from above · <b>8.2.1b</b> (right) the test for each point</span></figcaption></figure>
+<pre><code>in = (z &gt;= NEAR)       # True: safe to project.  False: never project it.</code></pre>
+<h3>Why the floor was in pieces</h3>
+<p>Lesson 5 drew every floor line as 1-unit pieces, and promised a better way later. This is it. Count what each method draws when you stand at the start:</p>
+
+<figure id="fig-8-2-2"><img src="images/k08_floor_lines.png" alt="Three top-down views of the floor grid. a: long lines with the old rule, only the 12 cross lines ahead are green. b: Lesson 5&#x27;s 1-unit pieces, 563 of 1,200 drawn, everything ahead green. c: long lines clipped at z = 0.1, 37 of 50 drawn, the same green grid as b." loading="lazy"><figcaption><span class="fignum">Fig 8.2.2</span>WORLD from above with you at (0, 0, 0) facing +z, so CAMERA z = WORLD z. Pieces (b) and clipped long lines (c) draw the same picture, but c needs 50 lines instead of 1,200.<span class="panels">Panels: <b>8.2.2a</b> (left) long lines, old rule · <b>8.2.2b</b> (middle) Lesson 5 pieces · <b>8.2.2c</b> (right) long lines, clipped</span></figcaption></figure>
+<p>A long line is still exactly right when only its two ends are projected: a straight line in 3D always lands as a straight line on the screen. So once we can cut a line at NEAR, we can draw the floor as 50 long lines.</p>
+<h3>t: how far along a line</h3>
+<p>To say where on a line something happens, we use one number, called <code>t</code>. It is a fraction of the way from one end to the other:</p>
+
+<figure id="fig-8-2-3"><img src="images/k09_fraction_t.png" alt="A number line from 0 to 12. A at 2 (pink), B at 10 (green). Yellow dots at t = 0.25, 0.5 and 0.75 land on 4, 6 and 8, each with its sum written underneath." loading="lazy"><figcaption><span class="fignum">Fig 8.2.3</span>One number line. The gap from A to B is <code>(10 - 2)</code> = 8. t says what fraction of that gap to walk from A.</figcaption></figure>
+<h3>Finding t for the NEAR wall</h3>
+<p>Now turn it round. We know where the wall is (z = 0.1) and want t. Look only at z: how far is it from A to the wall, out of the whole way from A to B?</p>
+
+<figure id="fig-8-2-4"><img src="images/k10_find_t.png" alt="The CAMERA z number line from -1.5 to 3.5. A at z -1 (red), B at z 3 (green), a cyan NEAR line at 0.1. A yellow bar shows A to the wall is 1.1; a white bar shows A to B is 4. t = 1.1 / 4 = 0.275." loading="lazy"><figcaption><span class="fignum">Fig 8.2.4</span>CAMERA z only. 1.1 out of 4 is 0.275 of the way: the wall is just over a quarter of the way from A to B. The check shows that walking 0.275 of the gap lands exactly on 0.1.</figcaption></figure>
+<h3>The cut point</h3>
+<p>t is the same for x, y and z, because the cut point is one point on one line. So once t comes from z, use it to walk x and y the same fraction of their gaps:</p>
+
+<figure id="fig-8-2-5"><img src="images/k11_cut_line.png" alt="CAMERA from above. A floor line from A (-2,-1,-1), behind you, to B (2,-1,3), in front. It crosses the cyan NEAR line at the yellow cut point (-0.9,-1,0.1). The part from A to the cut is a red dashed line; the part from the cut to B is green. A box shows the four steps of the sum." loading="lazy"><figcaption><span class="fignum">Fig 8.2.5</span>Worked example in CAMERA coordinates. Every point has y = −1 because it is a floor line, so y does not change. The green part, cut to B, is what gets drawn.<span class="panels">Panels: <b>8.2.5a</b> (left) the line from above · <b>8.2.5b</b> (right) the four steps</span></figcaption></figure>
+<div class="keyconcept" role="note" aria-label="Key concept">
+<span class="kc-label">KEY CONCEPT</span>
+<pre><code>t     = ( (NEAR - a_z) / (b_z - a_z) )
+cut_x = ( a_x + (t * (b_x - a_x)) )
+cut_y = ( a_y + (t * (b_y - a_y)) )
+cut_z = NEAR</code></pre>
+<p>These four lines are the only new maths today. Every cut in this lesson, for floor lines and for faces, is this sum.</p>
+</div>
+<pre><code>def cut_at_near(point_a, point_b):
+    a_x, a_y, a_z = point_a
+    b_x, b_y, b_z = point_b
+    t = ( (NEAR - a_z) / (b_z - a_z) )
+    cut_x = ( a_x + (t * (b_x - a_x)) )
+    cut_y = ( a_y + (t * (b_y - a_y)) )
+    return (cut_x, cut_y, NEAR)</code></pre>
+<p>Can <code>(b_z - a_z)</code> ever be 0 and crash? Only if both ends have the same z, and then they are both in or both out, so we never call <code>cut_at_near()</code> for that line. We only ever cut a line that crosses the wall.</p>
+<h3>clip_line: three cases</h3>
+
+<figure id="fig-8-2-6"><img src="images/k12_clip_line_cases.png" alt="Three small top-down pictures. Both ends in front: the whole line is green. One in front, one behind: green from the cut point to the front end, red dashes behind. Both behind: all red dashes, None." loading="lazy"><figcaption><span class="fignum">Fig 8.2.6</span>CAMERA from above. The cyan line is the NEAR wall.<span class="panels">Panels: <b>8.2.6a</b> (left) both in front · <b>8.2.6b</b> (middle) one each · <b>8.2.6c</b> (right) both behind</span></figcaption></figure>
+<pre><code>def clip_line(start, end):
+    start_in = (start[2] &gt;= NEAR)
+    end_in = (end[2] &gt;= NEAR)
+    if start_in and end_in:
+        return (start, end)                       # all in front: keep it all
+    if (not start_in) and (not end_in):
+        return None                               # all behind: nothing
+    cut = cut_at_near(start, end)
+    if start_in:
+        return (start, cut)                       # end was behind
+    return (cut, end)                             # start was behind</code></pre>
+<p><code>None</code> is Python's word for "nothing". The caller checks <code>if clipped is None: return</code> before drawing.</p>
+<h3>Where does the cut point land on the screen?</h3>
+<p>The cut point has z = 0.1, which is very close, so <code>project()</code> sends it a long way off the window. That is fine:</p>
+
+<figure id="fig-8-2-7"><img src="images/k13_far_off_screen.png" alt="SCREEN pixels shrunk to 15 percent. The real 800 by 600 window is a small white box at the top right. The line from B (666.7, 433.3) runs down-left to the cut point at (-3200, 4300), far outside the window; only the short part inside the window, to (500, 600), is drawn." loading="lazy"><figcaption><span class="fignum">Fig 8.2.7</span>SCREEN pixels, (0, 0) at the window's top-left. This is the same line as Fig 8.2.5. Lesson 4's Fig 4.3.3 showed the same thing for one point: at z = 0.1, 1 unit to the side is 4,000 px.<span class="panels">Panels: <b>8.2.7a</b> (left) the window and the line, shrunk · <b>8.2.7b</b> (right) the projections</span></figcaption></figure>
+<h3>The new floor</h3>
+
+<pre><code>def draw_floor():
+    for x in range(GRID_LEFT, (GRID_RIGHT + 1)):            # 25 lines running away
+        draw_floor_line( (x, FLOOR_Y, GRID_NEAR), (x, FLOOR_Y, GRID_FAR) )
+    for z in range(GRID_NEAR, (GRID_FAR + 1)):              # 25 lines across
+        draw_floor_line( (GRID_LEFT, FLOOR_Y, z), (GRID_RIGHT, FLOOR_Y, z) )
+
+
+def draw_floor_line(world_start, world_end):
+    start = to_camera(world_start)
+    end = to_camera(world_end)
+    if use_clipping:
+        clipped = clip_line(start, end)
+        if clipped is None:              # both ends behind you
+            return
+        start, end = clipped
+    else:
+        # Lesson 4's old rule, for comparing (K): any end behind? skip.
+        if (start[2] &lt; NEAR) or (end[2] &lt; NEAR):
+            return
+    pygame.draw.line(screen, GRID_COLOUR, project(start), project(end), 1)</code></pre>
+<p><code>use_clipping</code> starts as <code>True</code> and the K key flips it, just like L for the light. The HUD now says "clipping ON (K)" or "clipping OFF (K)" under the nearest-cube line, so you always know which you are looking at.</p>
+<h3>Run it: step 2</h3>
+<p>Run <code>step2_clip_lines.py</code> and press the DOWN arrow for a moment to look down at the floor. Then press K a few times.</p>
+
+<figure id="fig-8-2-8"><img src="images/run_step2_clip_lines.png" alt="Screenshot of step 2 at the start, looking down 30 degrees: rock 0&#x27;s front face as a grey trapezoid at the top, and the full floor grid with lines running away from you down to the bottom edge. The HUD says clipping ON (K)." loading="lazy"><figcaption><span class="fignum">Fig 8.2.8</span>At the start, (0, 0, 0), looking down 30 degrees (<code>cam_tip = 30</code>). Every one of the 25 lines running away is cut at NEAR and reaches the bottom of the window.</figcaption></figure>
+<figure id="fig-8-2-9"><img src="images/k14_floor_on_off.png" alt="Two screenshots side by side at the same moment. OFF: only horizontal cross lines on the floor. ON: the full grid, with lines running away from you." loading="lazy"><figcaption><span class="fignum">Fig 8.2.9</span>Real screenshots at the same place. Faces are not clipped yet in step 2, so rock 0 still vanishes when you fly beside it: that is Part 3.<span class="panels">Panels: <b>8.2.9a</b> (left) clipping OFF · <b>8.2.9b</b> (right) clipping ON</span></figcaption></figure>
+<details class="full"><summary>Full code: <code>step2_clip_lines.py</code> (about 850 lines)</summary><pre><code># ======================================================================
+# LESSON 8 - STEP 2: CLIPPING A LINE
+# ----------------------------------------------------------------------
+# Goal: cut a floor line where it crosses the NEAR wall, and keep the
+# part in front of you, instead of throwing the whole line away.
+#
+# What is new since step 1:
+#
+#   1. cut_at_near(a, b)   (lesson Part 2)
+#        Where does the line from CAMERA point a to CAMERA point b
+#        cross the NEAR wall (z = 0.1)?
+#            t = ( (NEAR - a_z) / (b_z - a_z) )     how far along, 0 to 1
+#            x = ( a_x + (t * (b_x - a_x)) )        same for y
+#
+#   2. clip_line(a, b)   (lesson Part 2)
+#        Both ends in front: keep the line.  Both behind: None.
+#        One of each: swap the one behind for the cut point.
+#
+#   3. The floor is 50 LONG lines (lesson Part 2)
+#        Lesson 5 cut every floor line into 1-unit pieces, so only the
+#        pieces behind you were thrown away: (25 * 24) * 2 = 1,200
+#        pieces a frame. Now each line goes right across the field,
+#        -12 to 12, and is clipped: (25 + 25) = 50 lines a frame.
+#
+#   4. K = clipping on / off, and the HUD says which.
+#        Off: the old rule. Every long line has an end behind you, so
+#        nearly the whole floor vanishes. Try it!
+#
+# Faces are NOT clipped yet: the rock wall still vanishes. Step 3.
+#
+# Controls:  LEFT / RIGHT = turn,   UP / DOWN = look up / down
+#            W / S = fly forward / back (the way you LOOK)
+#            A / D = slide left / right,   Q / E = straight down / up
+#            R = play again (after TIME UP),   K = clipping on / off
+#            G = floor grid on / off,   L = light on / off
+# Run:  python step2_clip_lines.py
+# ======================================================================
+
+import math
+import random                 # (Lesson 7) for random.uniform
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Lesson 8, step 2 - clipping a line")
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+big_font = pygame.font.SysFont(None, 96)    # (Lesson 7) for "TIME UP"
+
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+PINK = (255, 105, 200)        # the colour we use for YOU (the camera)
+MAP_BACK = (25, 30, 36)       # dark grey-blue behind the mini-map
+GRID_COLOUR = (40, 90, 70)    # (Lesson 5) dim green for the floor lines
+WALL_RED = (235, 80, 80)      # (Lesson 7) the wall square on the mini-map
+SUN_GOLD = (250, 200, 70)     # (Lesson 7) the colour of every pickup cube
+STONE = (150, 150, 160)       # (step 1): the colour of every rock
+
+# ---- One colour for each face direction (from Lesson 3) ---------------
+RED = (235, 80, 80)          # front (-z)
+PURPLE = (160, 100, 230)     # back  (+z)
+BLUE = (70, 150, 255)        # left  (-x)
+GREEN = (70, 210, 120)       # right (+x)
+GOLD = (245, 200, 60)        # top   (+y)
+ORANGE = (245, 140, 50)      # bottom (-y)
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400
+
+
+# ======================================================================
+# MODELS (from Lesson 5, unchanged)
+# ======================================================================
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+# (corners clockwise from outside,  colour,  pointer)
+cube_faces = [
+    ((4, 5, 1, 0), RED,    ( 0,  0, -1)),   # front
+    ((6, 7, 3, 2), PURPLE, ( 0,  0,  1)),   # back
+    ((7, 4, 0, 3), BLUE,   (-1,  0,  0)),   # left
+    ((5, 6, 2, 1), GREEN,  ( 1,  0,  0)),   # right
+    ((7, 6, 5, 4), GOLD,   ( 0,  1,  0)),   # top
+    ((2, 3, 0, 1), ORANGE, ( 0, -1,  0)),   # bottom
+]
+cube_model = {"points": cube_points, "faces": cube_faces}
+
+
+# ======================================================================
+# THE PLAYING FIELD (lesson Part 1)
+# ======================================================================
+
+# ---- (Lesson 7) the sizes of the field ------------------------------------
+# FIELD = 10: new cubes appear with x and z from -10 to 10, a 20 x 20
+#   square. You fly 3 units a second, so edge to edge is
+#   (20 / 3) = 6.7 seconds: some flying, but never boring.
+# WALL = 12: you can't fly further than 12 from the centre, 2 more than
+#   FIELD, so you can always fly round a cube at the edge.
+FIELD = 10
+WALL = 12
+
+# ---- (Lesson 7) the floor (from Lesson 5), now as big as the walls --------
+FLOOR_Y = -1
+GRID_LEFT = (-WALL)       # -12
+GRID_RIGHT = WALL         # 12
+GRID_NEAR = (-WALL)       # -12
+GRID_FAR = WALL           # 12
+
+# ---- (Lesson 7) the pickups ------------------------------------------------
+# PICKUP_SIZE = 0.5: Lesson 5's "size", so each cube is 1 unit wide
+#   (its corners are at -0.5 and 0.5). A 1-unit face 5 away is
+#   ((1 * 400) / 5) = 80 px wide; 20 away it is 20 px (lesson Part 1).
+PICKUP_SIZE = 0.5
+
+# (Lesson 7) cube heights: their centres float from y = 0 to y = 2.
+#   0 is your eye height at the start; the lowest cube's bottom is then
+#   at (0 - 0.5) = -0.5, half a unit above the floor (FLOOR_Y = -1).
+PICKUP_LOW = 0
+PICKUP_HIGH = 2
+
+# (Lesson 7) the 8 spots the cubes start at, in WORLD coordinates.
+# The same every game, so you can learn a good route. Cube 0 at
+# (3, 1, 5) is the lesson's worked example.
+START_SPOTS = [
+    (3, 1, 5),      # 0  ahead and to the right: the first one you see
+    (-2, 0, 8),     # 1
+    (0, 0, 10),     # 2  straight ahead, at the far edge
+    (-6, 1, 3),     # 3
+    (6, 0, -2),     # 4  behind you, to the right
+    (-4, 2, -7),    # 5  behind you, up high
+    (8, 0, 7),      # 6
+    (2, 1, -9),     # 7  far behind you
+]
+
+# (Lesson 7) COLLECT_RADIUS = 1.0: you collect a cube when your eye is
+#   1 unit or less from its CENTRE. Its faces are 0.5 from the centre,
+#   so your nose is then 0.5 from a face, which fills the window:
+#   ((1 * 400) / 0.5) = 800 px wide (lesson Part 3).
+COLLECT_RADIUS = 1.0
+
+# (Lesson 7) MIN_SPAWN_DISTANCE = 5: a new cube never appears closer than
+#   5 to you, so it is at least (5 / 3) = 1.7 seconds of flying away.
+MIN_SPAWN_DISTANCE = 5
+
+# ---- (step 1): ROCKS, big scenery cubes (lesson Part 1) -------------------
+# ROCK_SIZE = 1.5: Lesson 5's "size", so a rock is (2 * 1.5) = 3 units
+#   wide, 3 times a gold cube. Big enough that you can fly right up
+#   beside one while most of it is still on the screen: its front face,
+#   2.5 away, is ((3 * 400) / 2.5) = 480 px wide.
+ROCK_SIZE = 1.5
+
+# Each rock SITS on the floor: its centre is ROCK_SIZE above FLOOR_Y,
+#   so centre y = (-1 + 1.5) = 0.5, bottom at -1, top at 2.
+ROCK_Y = (FLOOR_Y + ROCK_SIZE)
+
+# Where the 4 rocks are, in WORLD coordinates. Rock 0 is straight ahead
+# of where you start: the lesson's worked example.
+ROCK_SPOTS = [
+    (0, ROCK_Y, 4),       # 0  straight ahead, its front face at z = 2.5
+    (-5, ROCK_Y, -3),     # 1  behind you, to the left
+    (5, ROCK_Y, 10),      # 2  far ahead, to the right
+    (7, ROCK_Y, -7),      # 3  behind you, to the right
+]
+
+# ROCK_CLEARANCE = 3: a new gold cube must be at least 3 from every
+#   rock's centre: 1.5 (half a rock) + 0.5 (half a gold cube) + 1 (your
+#   COLLECT_RADIUS, so you can always reach it) = 3.
+ROCK_CLEARANCE = ( (ROCK_SIZE + PICKUP_SIZE) + COLLECT_RADIUS )
+
+# ---- (Lesson 7) how high and low you can fly (lesson Part 5) -----------------
+# GROUND = -0.5: your eye stays half a unit above the floor (y = -1).
+# CEILING = 4: two more than PICKUP_HIGH, so you can look down on every
+#   cube but never fly off where none could be.
+GROUND = (FLOOR_Y + 0.5)     # (-1 + 0.5) = -0.5
+CEILING = 4
+
+# ---- (Lesson 7) the clock (lesson Part 6) -------------------------------------
+# 60 seconds: at 3 units a second that is (3 * 60) = 180 units of
+# flying, enough for a good handful of cubes, short enough to retry.
+GAME_SECONDS = 60
+
+
+def make_pickups():
+    """(Lesson 7) build a fresh list of 8 pickup THINGS (Lesson 5's
+    dictionaries), one at each START_SPOTS position.
+
+    Each one is a small gold cube (size 0.5) that spins slowly so it
+    catches your eye: 1 degree a frame of turn = one turn in 6 seconds,
+    and 0.5 of tip so it wobbles a little too.
+    """
+    pickups = []
+    for spot in START_SPOTS:
+        pickups.append({"model": cube_model, "position": spot,
+                        "size": PICKUP_SIZE, "angles": [0, 0, 0],
+                        "speeds": (0.5, 1, 0), "colour": SUN_GOLD,
+                        "pickup": True})          # (step 1)
+    return pickups
+
+
+def make_rocks():
+    """(step 1): build a list of 4 rock THINGS, one at each ROCK_SPOTS position.
+
+    Same dictionary keys as a gold cube, with three differences:
+    size 1.5, speeds (0, 0, 0) so they never spin, and "pickup": False
+    so you can't collect them.
+    """
+    rocks = []
+    for spot in ROCK_SPOTS:
+        rocks.append({"model": cube_model, "position": spot,
+                      "size": ROCK_SIZE, "angles": [0, 0, 0],
+                      "speeds": (0, 0, 0), "colour": STONE,
+                      "pickup": False})
+    return rocks
+
+
+def make_world():
+    """(step 1): the whole world = 8 gold cubes + 4 rocks.
+
+    "+" joins two lists into one longer list: (8 + 4) = 12 things.
+    The gold cubes come first, so things[0] is still cube 0.
+    """
+    return (make_pickups() + make_rocks())
+
+
+# "things" is Lesson 5's list of everything in the world.
+# (step 1): 8 gold cubes AND 4 rocks.
+things = make_world()
+
+# ---- Where YOU are (from Lesson 4) ------------------------------------
+cam_x = 0
+cam_y = 0
+cam_z = 0
+cam_turn = 0        # degrees, positive = turned LEFT
+cam_tip = 0         # degrees, positive = looking DOWN
+TIP_LIMIT = 60
+MOVE_SPEED = 0.05   # (0.05 * 60) = 3 units a second
+TURN_SPEED = 1.5    # (1.5 * 60) = 90 degrees a second
+NEAR = 0.1          # closer than this (CAMERA z) is not drawn
+
+# ---- The light (from Lesson 3, unchanged) -----------------------------
+LIGHT = (0.48, 0.6, -0.64)
+AMBIENT = 0.2
+use_light = True
+show_grid = True
+# NEW: K turns clipping on / off, so you can see the difference.
+use_clipping = True
+
+# ---- (Lesson 7) the score ------------------------------------------------
+score = 0
+# ---- (Lesson 7) the clock and the game's two states (lesson Part 6) ----------
+best_score = 0                         # NOT reset by R
+frames_left = (GAME_SECONDS * 60)      # (60 * 60) = 3600
+game_over = False                      # False = PLAYING, True = TIME UP
+
+# ---- The mini-map (lesson Part 1: resized for the whole field) ---------
+MAP_LEFT = 630
+MAP_TOP = 430
+MAP_SIZE = 160
+# (Lesson 7) the WORLD centre now sits in the MIDDLE of the box, because
+# the field goes the same distance every way (-12 to 12).
+MAP_CX = (MAP_LEFT + (MAP_SIZE / 2))    # (630 + 80) = 710
+MAP_CY = (MAP_TOP + (MAP_SIZE / 2))     # (430 + 80) = 510
+# (Lesson 7) 6 px per unit: the walls are 24 units across, and
+# (24 * 6) = 144 px fits the 160 px box with 8 px to spare.
+MAP_SCALE = 6
+
+
+# ======================================================================
+# MATRIX TOOLS (from Lesson 6, unchanged)
+# ======================================================================
+
+def matrix_times_point(matrix, point_3d):
+    """Put one point through a matrix: each ROW dotted with the point."""
+    row_0, row_1, row_2 = matrix
+    new_x = dot(row_0, point_3d)
+    new_y = dot(row_1, point_3d)
+    new_z = dot(row_2, point_3d)
+    return (new_x, new_y, new_z)
+
+
+def tip_matrix(angle_degrees):
+    """Lesson 2B's TIP as a grid. x is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (1, 0,     0         ),
+        (0, cos_a, (-sin_a)  ),
+        (0, sin_a, cos_a     ),
+    )
+
+
+def turn_matrix(angle_degrees):
+    """Lesson 2's TURN as a grid. y is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, 0, (-sin_a)),
+        (0,     1, 0       ),
+        (sin_a, 0, cos_a   ),
+    )
+
+
+def roll_matrix(angle_degrees):
+    """Lesson 2B's ROLL as a grid. z is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, (-sin_a), 0),
+        (sin_a, cos_a,    0),
+        (0,     0,        1),
+    )
+
+
+def column(matrix, column_number):
+    """One COLUMN of a matrix = where that axis arrow lands."""
+    row_0, row_1, row_2 = matrix
+    return (row_0[column_number], row_1[column_number], row_2[column_number])
+
+
+def combine(first, second):
+    """ONE matrix that does 'first', then 'second' (Lesson 6)."""
+    new_col_0 = matrix_times_point(second, column(first, 0))
+    new_col_1 = matrix_times_point(second, column(first, 1))
+    new_col_2 = matrix_times_point(second, column(first, 2))
+    return (
+        (new_col_0[0], new_col_1[0], new_col_2[0]),
+        (new_col_0[1], new_col_1[1], new_col_2[1]),
+        (new_col_0[2], new_col_1[2], new_col_2[2]),
+    )
+
+
+def spin_matrix(angles):
+    """A thing's whole spin as ONE matrix: tip, then turn, then roll."""
+    tip_then_turn = combine(tip_matrix(angles[0]), turn_matrix(angles[1]))
+    return combine(tip_then_turn, roll_matrix(angles[2]))
+
+
+# ======================================================================
+# THE 3D PIPELINE (Lessons 1 to 6, unchanged)
+# ======================================================================
+
+def to_world(shape_point, thing):
+    """(Lesson 5) SHAPE -&gt; WORLD: size, then spin, then place."""
+    x, y, z = shape_point
+    size = thing["size"]
+    sized = ( (x * size), (y * size), (z * size) )
+    spun = matrix_times_point(thing["matrix"], sized)
+    pos_x, pos_y, pos_z = thing["position"]
+    sx, sy, sz = spun
+    return ( (sx + pos_x), (sy + pos_y), (sz + pos_z) )
+
+
+def to_camera(world_point):
+    """(Lessons 4 and 6) WORLD -&gt; CAMERA: subtract you, then camera_matrix."""
+    x, y, z = world_point
+    moved = ( (x - cam_x), (y - cam_y), (z - cam_z) )
+    return matrix_times_point(camera_matrix, moved)
+
+
+def project(point_3d):
+    """(Lesson 1) CAMERA -&gt; SCREEN. Only call it with z &gt;= NEAR."""
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+def average_z(corners, camera_points):
+    """(Lesson 3) how far away is this face? Uses CAMERA z."""
+    total = 0
+    for corner_number in corners:
+        x, y, z = camera_points[corner_number]
+        total = (total + z)
+    return (total / len(corners))
+
+
+def is_facing_you(face_points):
+    """(Lesson 3) the clock test: True if clockwise on the screen."""
+    a_x, a_y = face_points[0]
+    b_x, b_y = face_points[1]
+    c_x, c_y = face_points[2]
+    arrow_a_x = (b_x - a_x)
+    arrow_a_y = (b_y - a_y)
+    arrow_b_x = (c_x - a_x)
+    arrow_b_y = (c_y - a_y)
+    cross = ( (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x) )
+    return (cross &gt; 0)
+
+
+def dot(arrow_1, arrow_2):
+    """(Lesson 3) the dot product."""
+    x1, y1, z1 = arrow_1
+    x2, y2, z2 = arrow_2
+    return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
+
+
+def shade_colour(colour, pointer):
+    """(Lesson 3) brighter when the face points at the light."""
+    brightness = dot(pointer, LIGHT)
+    if brightness &lt; 0:
+        brightness = 0
+    shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )
+    red, green, blue = colour
+    return ( round(red * shade), round(green * shade), round(blue * shade) )
+
+
+def keep_under_360(angle):
+    """Keep an angle between 0 and 360."""
+    if angle &gt;= 360:
+        angle = (angle - 360)
+    if angle &lt; 0:
+        angle = (angle + 360)
+    return angle
+
+
+def add_faces_of(thing, faces_to_draw):
+    """(Lesson 5) work out every face of ONE thing and add the ones to
+    paint to the shared list (unchanged from Lesson 6)."""
+    model = thing["model"]
+    camera_points = []
+    screen_points = []
+    for p in model["points"]:
+        world = to_world(p, thing)                     # WORLD
+        camera = to_camera(world)                      # CAMERA
+        camera_points.append(camera)
+        if camera[2] &gt;= NEAR:
+            screen_points.append(project(camera))      # SCREEN
+        else:
+            screen_points.append(None)
+
+    for corners, face_colour, pointer in model["faces"]:
+        too_close = False
+        for corner_number in corners:
+            if camera_points[corner_number][2] &lt; NEAR:
+                too_close = True
+        if too_close:
+            continue
+        face_points = []
+        for corner_number in corners:
+            face_points.append(screen_points[corner_number])
+        if not is_facing_you(face_points):
+            continue
+        distance = average_z(corners, camera_points)
+        colour = thing["colour"]
+        if use_light:
+            spun_pointer = matrix_times_point(thing["matrix"], pointer)
+            colour = shade_colour(colour, spun_pointer)
+        faces_to_draw.append( (distance, face_points, colour) )
+
+
+def draw_floor():
+    """NEW: the floor grid as LONG lines, right across the field.
+
+    25 lines running away from you (x = -12 to 12) and 25 lines running
+    across (z = -12 to 12): (25 + 25) = 50 lines a frame. Lesson 5 had
+    to cut them into 1-unit pieces, (25 * 24) * 2 = 1,200 of them, so
+    that only the pieces behind you were lost. Clipping keeps the part
+    of a long line in front of you, so the pieces are not needed.
+
+    A long line is still exactly right on the screen: a straight line
+    in 3D projects to a straight line on the screen, so its two ends
+    are all we need (lesson Part 2).
+    """
+    for x in range(GRID_LEFT, (GRID_RIGHT + 1)):
+        draw_floor_line( (x, FLOOR_Y, GRID_NEAR), (x, FLOOR_Y, GRID_FAR) )
+    for z in range(GRID_NEAR, (GRID_FAR + 1)):
+        draw_floor_line( (GRID_LEFT, FLOOR_Y, z), (GRID_RIGHT, FLOOR_Y, z) )
+
+
+def draw_floor_line(world_start, world_end):
+    """NEW: one long floor line, WORLD -&gt; CAMERA -&gt; clip -&gt; SCREEN."""
+    start = to_camera(world_start)
+    end = to_camera(world_end)
+    if use_clipping:
+        clipped = clip_line(start, end)
+        if clipped is None:              # both ends behind you
+            return
+        start, end = clipped
+    else:
+        # Lesson 4's old rule, for comparing (K): any end behind? skip.
+        if (start[2] &lt; NEAR) or (end[2] &lt; NEAR):
+            return
+    pygame.draw.line(screen, GRID_COLOUR, project(start), project(end), 1)
+
+# ======================================================================
+# CLIPPING (Lesson 8)
+# ======================================================================
+# Everything here works in CAMERA coordinates: (0, 0, 0) is your eye,
+# +x is right, +y is up, +z is straight ahead. The NEAR wall is the
+# flat sheet z = NEAR (0.1) just in front of your eye.
+#   "in"  = in front of the wall:  z &gt;= NEAR   (safe to project)
+#   "out" = behind the wall:       z &lt;  NEAR   (must never be projected)
+
+def cut_at_near(point_a, point_b):
+    """NEW: the CAMERA point where the line from point_a to point_b
+    crosses the NEAR wall. One end must be in, the other out.
+
+    t says how far along the line the wall is: 0 = at point_a,
+    1 = at point_b, 0.5 = halfway (lesson Part 2).
+
+        t = ( (NEAR - a_z) / (b_z - a_z) )
+
+    Then each of x and y moves the same fraction t of its own gap:
+
+        x = ( a_x + (t * (b_x - a_x)) )
+
+    Worked example (lesson Part 2): a = (-2, -1, -1), b = (2, -1, 3)
+        t = ( (0.1 - (-1)) / (3 - (-1)) ) = (1.1 / 4) = 0.275
+        x = ( -2 + (0.275 * (2 - (-2))) ) = ( -2 + 1.1 ) = -0.9
+        y = ( -1 + (0.275 * (-1 - (-1))) ) = -1
+        z = NEAR = 0.1          -&gt; (-0.9, -1, 0.1)
+    """
+    a_x, a_y, a_z = point_a
+    b_x, b_y, b_z = point_b
+    t = ( (NEAR - a_z) / (b_z - a_z) )
+    cut_x = ( a_x + (t * (b_x - a_x)) )
+    cut_y = ( a_y + (t * (b_y - a_y)) )
+    # The same sum for z would give exactly NEAR, which is the whole
+    # point of t, so we just use NEAR.
+    return (cut_x, cut_y, NEAR)
+
+
+def clip_line(start, end):
+    """NEW: keep the part of a CAMERA line that is in front of NEAR.
+
+    Gives back (start, end) with any end behind you swapped for the
+    cut point, or None ("nothing to draw") if both ends are behind.
+    """
+    start_in = (start[2] &gt;= NEAR)
+    end_in = (end[2] &gt;= NEAR)
+    if start_in and end_in:
+        return (start, end)                       # all in front: keep it all
+    if (not start_in) and (not end_in):
+        return None                               # all behind: nothing
+    cut = cut_at_near(start, end)
+    if start_in:
+        return (start, cut)                       # end was behind
+    return (cut, end)                             # start was behind
+
+
+# ======================================================================
+# THE GAME TOOLS (Lesson 7)
+# ======================================================================
+
+def distance_3d(point_a, point_b):
+    """(Lesson 7) how far apart are two WORLD points? (lesson Part 2)
+
+    Subtract, square each part, add them up, square-root the total:
+    Pythagoras done twice, in one line.
+
+    Worked example (lesson Part 2): you at (1, 0, 3), cube 0 at (3, 1, 5)
+        dx = (3 - 1) = 2,  dy = (1 - 0) = 1,  dz = (5 - 3) = 2
+        math.sqrt( (2 * 2) + (1 * 1) + (2 * 2) ) = math.sqrt(9) = 3
+    """
+    ax, ay, az = point_a
+    bx, by, bz = point_b
+    dx = (bx - ax)
+    dy = (by - ay)
+    dz = (bz - az)
+    return math.sqrt( (dx * dx) + (dy * dy) + (dz * dz) )
+
+
+def far_from_rocks(spot):
+    """(step 1): True if this WORLD spot is at least ROCK_CLEARANCE (3) from
+    the centre of every rock, so a new gold cube never hides inside one.
+
+    Worked example (lesson Part 1): spot (1, 1, 5) and rock 0 at
+    (0, 0.5, 4): math.sqrt( (1 * 1) + (0.5 * 0.5) + (1 * 1) ) = 1.5,
+    less than 3, so False: try again.
+    """
+    for rock_spot in ROCK_SPOTS:
+        if distance_3d(spot, rock_spot) &lt; ROCK_CLEARANCE:
+            return False
+    return True
+
+
+def new_pickup_spot():
+    """(Lesson 7) a random WORLD spot for a cube, at least
+    MIN_SPAWN_DISTANCE from you (lesson Part 4).
+
+    "while True" repeats for ever, until "return" jumps out. Usually the
+    first try is far enough; about 1 try in 5 is too close and we
+    simply pick again.
+    """
+    you = (cam_x, cam_y, cam_z)
+    while True:
+        new_x = random.uniform((-FIELD), FIELD)
+        new_y = random.uniform(PICKUP_LOW, PICKUP_HIGH)
+        new_z = random.uniform((-FIELD), FIELD)
+        spot = (new_x, new_y, new_z)
+        # (step 1): "and far_from_rocks(spot)": BOTH must be True.
+        if (distance_3d(you, spot) &gt;= MIN_SPAWN_DISTANCE) and far_from_rocks(spot):
+            return spot
+
+
+def to_map(x, z):
+    """A WORLD (x, z) -&gt; a pixel on the mini-map (from Lesson 4)."""
+    map_x = MAP_CX + (x * MAP_SCALE)
+    map_y = MAP_CY - (z * MAP_SCALE)
+    return (map_x, map_y)
+
+
+def draw_map():
+    """The mini-map: the wall square, every cube, and you, from above."""
+    box = pygame.Rect(MAP_LEFT, MAP_TOP, MAP_SIZE, MAP_SIZE)
+    pygame.draw.rect(screen, MAP_BACK, box)
+    screen.set_clip(box)
+    # (Lesson 7) the walls: from map (-12, 12) to map (12, -12)
+    wall_left, wall_top = to_map((-WALL), WALL)          # (638, 438)
+    wall_size = ( (2 * WALL) * MAP_SCALE )                # (24 * 6) = 144
+    pygame.draw.rect(screen, WALL_RED,
+                     pygame.Rect(wall_left, wall_top, wall_size, wall_size), 1)
+    # Each cube's 4 bottom corners (from Lesson 5): a small gold square.
+    for thing in things:
+        outline = []
+        for corner_number in (0, 1, 2, 3):
+            corner = thing["model"]["points"][corner_number]
+            x, y, z = to_world(corner, thing)
+            outline.append(to_map(x, z))
+        pygame.draw.polygon(screen, thing["colour"], outline, 2)
+    # You: pink dot and a line the way your BODY faces.
+    forward_x, forward_y, forward_z = column(turn_matrix(cam_turn), 2)
+    you = to_map(cam_x, cam_z)
+    nose = to_map( (cam_x + (forward_x * 1.5)), (cam_z + (forward_z * 1.5)) )
+    pygame.draw.line(screen, PINK, you, nose, 2)
+    pygame.draw.circle(screen, PINK, you, 4)
+    screen.set_clip(None)
+    pygame.draw.rect(screen, WHITE, box, 1)
+
+
+# ======================================================================
+# THE MAIN LOOP
+# ======================================================================
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_l:
+                use_light = not use_light
+            if event.key == pygame.K_g:
+                show_grid = not show_grid
+            if event.key == pygame.K_k:                  # NEW
+                use_clipping = not use_clipping
+            # (Lesson 7) R only works after TIME UP, so you can't restart by
+            # accident in the middle of a good game.
+            if (event.key == pygame.K_r) and game_over:
+                # Every game number back to its start value...
+                cam_x = 0
+                cam_y = 0
+                cam_z = 0
+                cam_turn = 0
+                cam_tip = 0
+                things = make_world()      # (step 1): cubes AND rocks
+                score = 0
+                frames_left = (GAME_SECONDS * 60)
+                game_over = False
+                # ...but NOT best_score: it remembers your best.
+
+    # ==================================================================
+    # PLAYING: everything in this "if" stops when game_over is True.
+    # ==================================================================
+    if not game_over:
+        keys = pygame.key.get_pressed()
+
+        # ---- Turning and looking (from Lesson 4, unchanged) ----------
+        if keys[pygame.K_LEFT]:
+            cam_turn = (cam_turn + TURN_SPEED)
+        if keys[pygame.K_RIGHT]:
+            cam_turn = (cam_turn - TURN_SPEED)
+        if keys[pygame.K_UP]:
+            cam_tip = (cam_tip - TURN_SPEED)
+        if keys[pygame.K_DOWN]:
+            cam_tip = (cam_tip + TURN_SPEED)
+        if cam_tip &gt; TIP_LIMIT:
+            cam_tip = TIP_LIMIT
+        if cam_tip &lt; (-TIP_LIMIT):
+            cam_tip = (-TIP_LIMIT)
+
+        # ---- (Lesson 7) fly where you LOOK (lesson Part 5) -----------------
+        # Build the arrow the way your head points: tip first (the head
+        # nods), then turn (the body turns), and read off column 2,
+        # where the +z arrow lands (Lesson 6).
+        #   cam_tip -30, cam_turn 0:   forward = (0, 0.5, 0.866)   climbing
+        #   cam_tip -30, cam_turn 90:  forward = (-0.866, 0.5, 0)  left + up
+        # Right stays level (from your body only), so A and D slide
+        # sideways without climbing.
+        look = combine(tip_matrix(cam_tip), turn_matrix(cam_turn))
+        forward_x, forward_y, forward_z = column(look, 2)
+        right_x, right_y, right_z = column(turn_matrix(cam_turn), 0)
+        if keys[pygame.K_w]:
+            cam_x = (cam_x + (forward_x * MOVE_SPEED))
+            cam_y = (cam_y + (forward_y * MOVE_SPEED))   # (Lesson 7) y too
+            cam_z = (cam_z + (forward_z * MOVE_SPEED))
+        if keys[pygame.K_s]:
+            cam_x = (cam_x - (forward_x * MOVE_SPEED))
+            cam_y = (cam_y - (forward_y * MOVE_SPEED))   # (Lesson 7) y too
+            cam_z = (cam_z - (forward_z * MOVE_SPEED))
+        if keys[pygame.K_d]:
+            cam_x = (cam_x + (right_x * MOVE_SPEED))
+            cam_z = (cam_z + (right_z * MOVE_SPEED))
+        if keys[pygame.K_a]:
+            cam_x = (cam_x - (right_x * MOVE_SPEED))
+            cam_z = (cam_z - (right_z * MOVE_SPEED))
+        if keys[pygame.K_e]:
+            cam_y = (cam_y + MOVE_SPEED)
+        if keys[pygame.K_q]:
+            cam_y = (cam_y - MOVE_SPEED)
+
+        # ---- (Lesson 7) walls, ground and ceiling (lesson Part 5) ----------
+        # Past a limit? Put it back ON the limit. You slide along the
+        # wall instead of going through it.
+        if cam_x &gt; WALL:
+            cam_x = WALL
+        if cam_x &lt; (-WALL):
+            cam_x = (-WALL)
+        if cam_z &gt; WALL:
+            cam_z = WALL
+        if cam_z &lt; (-WALL):
+            cam_z = (-WALL)
+        if cam_y &gt; CEILING:
+            cam_y = CEILING
+        if cam_y &lt; GROUND:
+            cam_y = GROUND
+
+        # ---- (Lesson 7) collect any cube you are touching (Part 3) -----
+        you = (cam_x, cam_y, cam_z)
+        for thing in things:
+            # (step 1): rocks have "pickup": False, so they are never collected.
+            if not thing["pickup"]:
+                continue
+            if distance_3d(you, thing["position"]) &lt;= COLLECT_RADIUS:
+                score = (score + 1)
+                # (Lesson 7) the same cube jumps to a new spot (Part 4):
+                # there are always exactly 8 cubes to find.
+                thing["position"] = new_pickup_spot()
+
+        # ---- (Lesson 7) tick the clock (lesson Part 6) ---------------------
+        frames_left = (frames_left - 1)
+        if frames_left &lt;= 0:
+            frames_left = 0
+            game_over = True
+            if score &gt; best_score:
+                best_score = score
+
+    # ---- Every pickup spins (Lesson 5), even after TIME UP -------------
+    for thing in things:
+        angles = thing["angles"]
+        speeds = thing["speeds"]
+        angles[0] = keep_under_360( (angles[0] + speeds[0]) )
+        angles[1] = keep_under_360( (angles[1] + speeds[1]) )
+        angles[2] = keep_under_360( (angles[2] + speeds[2]) )
+        thing["matrix"] = spin_matrix(angles)
+
+    # ---- The camera's matrix, once a frame (Lesson 6) ------------------
+    camera_matrix = combine(turn_matrix(-cam_turn), tip_matrix(-cam_tip))
+
+    # ==================================================================
+    # DRAW: the world first, then the HUD on top (lesson Part 2)
+    # ==================================================================
+    screen.fill(BLACK)
+    if show_grid:
+        draw_floor()
+    faces_to_draw = []
+    for thing in things:
+        add_faces_of(thing, faces_to_draw)
+    faces_to_draw.sort(reverse=True)
+    for distance, face_points, colour in faces_to_draw:
+        pygame.draw.polygon(screen, colour, face_points)
+        pygame.draw.polygon(screen, BLACK, face_points, 2)
+
+    draw_map()
+
+    # ---- (Lesson 7) how far is the nearest cube? -------------------------
+    # Start with a huge number, then keep the smallest distance found.
+    nearest = 1000
+    for thing in things:
+        if not thing["pickup"]:          # (step 1): rocks don't count
+            continue
+        d = distance_3d((cam_x, cam_y, cam_z), thing["position"])
+        if d &lt; nearest:
+            nearest = d
+
+    # ---- The HUD: words drawn LAST, so no cube can hide them -----------
+    # str() turns a number into letters so + can join it to words.
+    text = ("score " + str(score) + "   best " + str(best_score))
+    screen.blit(font.render(text, True, SUN_GOLD), (20, 20))
+    text = ("nearest cube " + str(round(nearest, 1)))
+    screen.blit(font.render(text, True, PINK), (20, 50))
+    # NEW: say whether clipping is on, so screenshots are never confusing.
+    if use_clipping:
+        text = "clipping ON (K)"
+    else:
+        text = "clipping OFF (K)"
+    screen.blit(font.render(text, True, WHITE), (20, 80))
+    # (Lesson 7) math.ceil rounds UP, so the clock never shows 0 while you
+    # can still play: 59.98 seconds left shows as 60.
+    seconds = math.ceil(frames_left / 60)
+    screen.blit(font.render("time " + str(seconds), True, WHITE), (680, 20))
+    screen.blit(font.render("ARROWS look,  W / S fly,  A / D slide,  Q / E down / up",
+                            True, YELLOW), (20, 570))
+
+    # ---- (Lesson 7) TIME UP on top of everything -------------------------
+    if game_over:
+        words = big_font.render("TIME UP", True, WHITE)
+        # Centre it: half its width to the left of the screen's middle.
+        # get_width() is how many pixels wide the words came out.
+        left = (CENTRE_X - (words.get_width() / 2))
+        screen.blit(words, (left, 200))
+        words = font.render("score " + str(score) + "   best " + str(best_score) +
+                            "      press R to play again", True, YELLOW)
+        left = (CENTRE_X - (words.get_width() / 2))
+        screen.blit(words, (left, 290))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Press K and look down (DOWN arrow). With clipping off, which floor
+#     lines are left? (Only the cross lines wholly in front of you.)
+#   * Make the floor bigger: GRID_LEFT = -50 and so on. With clipping
+#     it is still (101 + 101) = 202 lines. How many 1-unit pieces would
+#     Lesson 5 have needed?
+#   * print(clip_line((-2, -1, -1), (2, -1, 3))) once, before the main
+#     loop. Do you get the lesson's answer, (-0.9, -1, 0.1) at the start?
+#   * Change GRID_COLOUR for the part that was cut: draw the clipped
+#     line in green and the whole unclipped line first in dark red.
+# ----------------------------------------------------------------------
+</code></pre></details>
+<div class="check"><div class="q"><p class="qq"><span class="qn">Q4</span><span>Is the CAMERA point (0.3, 1, 0.08) in or out? Can we project it?</span></p><details><summary>Show answer</summary><div class="ans"><p>Out: 0.08 is less than 0.1. We must not project it. It is in front of your eye, but so close that it would land <code>((0.3 * 400) / 0.08)</code> = 1,500 px from the centre.</p></div></details></div><div class="q"><p class="qq"><span class="qn">Q5</span><span>Cut the line from A (1, −1, −3) to B (1, −1, 1) at NEAR.</span></p><details><summary>Show answer</summary><div class="ans"><p>t = <code>( (0.1 - (-3)) / (1 - (-3)) )</code> = <code>(3.1 / 4)</code> = 0.775.</p><p>x = <code>( 1 + (0.775 * (1 - 1)) )</code> = 1. y = <code>( -1 + (0.775 * (-1 - (-1))) )</code> = −1. So the cut is (1, −1, 0.1). This line runs straight away from you, so only z changes.</p></div></details></div><div class="q"><p class="qq"><span class="qn">Q6</span><span>Cut the line from A (−4, −1, −2) to B (4, −1, 6). What does <code>clip_line(A, B)</code> give back?</span></p><details><summary>Show answer</summary><div class="ans"><p>t = <code>( (0.1 - (-2)) / (6 - (-2)) )</code> = <code>(2.1 / 8)</code> = 0.2625.</p><p>x = <code>( -4 + (0.2625 * (4 - (-4))) )</code> = <code>( -4 + 2.1 )</code> = −1.9. The cut is (−1.9, −1, 0.1). A was behind, so it returns <code>(cut, B)</code> = ((−1.9, −1, 0.1), (4, −1, 6)).</p></div></details></div></div>
+<h2>Part 3: Cutting a face <span class="mins">14 MIN</span></h2>
+<p>A face is a ring of corners joined by edges. Each edge is a line, and we already know how to cut a line. So we walk once round the face, one edge at a time, and write down the corners we keep. Each edge goes from the <em>previous</em> corner to the <em>current</em> one, and there are only four cases:</p>
+
+<figure id="fig-8-3-1"><img src="images/k15_four_cases.png" alt="Four small top-down pictures, each with an arrow from previous to current. in to in: keep current. in to out: keep the cut point. out to in: keep the cut point, then current. out to out: keep nothing." loading="lazy"><figcaption><span class="fignum">Fig 8.3.1</span>CAMERA from above. The kept points are ringed in white. Notice the third case keeps two points: the cut, and then the corner we just stepped onto.<span class="panels">Panels: <b>8.3.1a</b> (1st) in -> in · <b>8.3.1b</b> (2nd) in -> out · <b>8.3.1c</b> (3rd) out -> in · <b>8.3.1d</b> (4th) out -> out</span></figcaption></figure>
+<div class="keyconcept" role="note" aria-label="Key concept">
+<span class="kc-label">KEY CONCEPT</span>
+<pre><code>previous  current   keep
+in        in        current
+in        out       the cut point
+out       in        the cut point, then current
+out       out       nothing</code></pre>
+<p>Four rules, applied to every edge in turn. Because we go round in order, the kept corners come out in the same clockwise order as the face, so the clock test from Lesson 3 still works on them.</p>
+</div>
+<h3>How many corners come back?</h3>
+<p>A 4-corner face does not always come back with 4 corners. It depends on how many are behind the wall:</p>
+
+<figure id="fig-8-3-2"><img src="images/k16_corner_counts.png" alt="Five flat 4-corner faces from above, each cut by a cyan wall. 0 behind: 4 corners back. 1 behind: 5. 2 behind: 4. 3 behind: 3. 4 behind: none. Kept parts green, thrown-away parts dark red, cut points yellow." loading="lazy"><figcaption><span class="fignum">Fig 8.3.2</span>CAMERA from above. One corner behind trades 1 corner for 2 cut points, so the face grows to 5 corners. <code>pygame.draw.polygon</code> takes any number of corners, so that is no problem.<span class="panels">Panels: <b>8.3.2a</b> (1st) 0 behind: 4 · <b>8.3.2b</b> (2nd) 1 behind: 5 · <b>8.3.2c</b> (3rd) 2 behind: 4 · <b>8.3.2d</b> (4th) 3 behind: 3 · <b>8.3.2e</b> (5th) 4 behind: 0</span></figcaption></figure>
+<pre><code>def clip_face(face_corners):
+    kept = []
+    previous = face_corners[-1]          # [-1] = the LAST corner in the list
+    for current in face_corners:
+        previous_in = (previous[2] &gt;= NEAR)
+        current_in = (current[2] &gt;= NEAR)
+        if previous_in and current_in:
+            kept.append(current)
+        elif previous_in and (not current_in):
+            kept.append(cut_at_near(previous, current))
+        elif (not previous_in) and current_in:
+            kept.append(cut_at_near(previous, current))
+            kept.append(current)
+        # out -&gt; out: keep nothing
+        previous = current
+    return kept</code></pre>
+<p>Why start with <code>previous = face_corners[-1]</code>? In Python, <code>[-1]</code> means "the last item in the list". Starting there makes the first edge go from the last corner to the first one, which closes the ring. A 4-corner face has 4 edges, and the loop visits each exactly once.</p>
+<h3>Worked example: rock 0's right face</h3>
+<p>Back to Fig 8.1.5: you at WORLD (2.5, 0, 3), looking straight ahead. The right face of rock 0 is the flat sheet x = −1 in CAMERA coordinates, so we can look at it side-on, with z across and y up:</p>
+
+<figure id="fig-8-3-3"><img src="images/k17_walk_rock_face.png" alt="Side view of the face: z across, y up. A rectangle from z -0.5 to 2.5 and y -1 to 2, with the cyan NEAR line at z 0.1. Corners 5 and 1 on the left are red (behind); 6 and 2 on the right are green. Cut points C1 (-1,2,0.1) and C2 (-1,-1,0.1) are yellow. A table walks the four edges and shows the two t sums." loading="lazy"><figcaption><span class="fignum">Fig 8.3.3</span>CAMERA coordinates, seen from the side: every corner has x = −1. The walk keeps [C1, 6, 2, C2]: still 4 corners, still clockwise.<span class="panels">Panels: <b>8.3.3a</b> (left) the face, side-on · <b>8.3.3b</b> (right) the walk and the sums</span></figcaption></figure>
+<h3>The clipped face on the screen</h3>
+<p>Now every corner left has z of at least 0.1, so <code>project()</code> is safe for all of them:</p>
+
+<figure id="fig-8-3-4"><img src="images/k18_face_on_screen.png" alt="Left: SCREEN pixels shrunk to 6 percent: a tall grey triangle-like shape from C1 (-3600,-7700) and C2 (-3600,4300) to corners 6 and 2 at the tiny 800 by 600 window. Middle: the four projections and the clock test, cross = 1,843,200. Right: the step 3 screenshot with corners 6 at (240,-20) and 2 at (240,460) marked; the left of the window is solid rock." loading="lazy"><figcaption><span class="fignum">Fig 8.3.4</span>SCREEN pixels: (0, 0) at the window's top-left, y counts down. The clock test uses the first 3 corners only, and the cross is positive, so the face is facing you and gets painted.<span class="panels">Panels: <b>8.3.4a</b> (left) the whole face, shrunk · <b>8.3.4b</b> (middle) projections and clock test · <b>8.3.4c</b> (right) what step 3 draws</span></figcaption></figure>
+<div class="check"><div class="q"><p class="qq"><span class="qn">Q7</span><span>A triangle's corners have CAMERA z of 2, 2 and −1. How many corners does <code>clip_face()</code> give back?</span></p><details><summary>Show answer</summary><div class="ans"><p>4. One corner is behind, so its two edges are each cut once: we lose 1 corner and gain 2 cut points. <code>(3 - 1) + 2</code> = 4.</p></div></details></div><div class="q"><p class="qq"><span class="qn">Q8</span><span>A face's corners, in order, have z: A = 1, B = −1, C = −1, D = 1. Walk it. What comes back?</span></p><details><summary>Show answer</summary><div class="ans"><p>previous starts as D. D→A: in → in, keep A. A→B: in → out, keep cut(A, B). B→C: out → out, nothing. C→D: out → in, keep cut(C, D), then D.</p><p>Result: [A, cut(A, B), cut(C, D), D]: 4 corners, still in order.</p></div></details></div><div class="q"><p class="qq"><span class="qn">Q9</span><span>You fly on to WORLD (2.5, 0, 4). Rock 0's right face now has CAMERA corners 5 (−1, 2, −1.5), 6 (−1, 2, 1.5), 2 (−1, −1, 1.5), 1 (−1, −1, −1.5). Where on the screen are corners 6 and 2, and how wide is the strip of rock?</span></p><details><summary>Show answer</summary><div class="ans"><p>6: x = <code>(400 + ((-1 * 400) / 1.5))</code> = 400 − 266.7 = 133.3. y = <code>(300 - ((2 * 400) / 1.5))</code> = 300 − 533.3 = −233.3.</p><p>2: x = 133.3, y = <code>(300 - ((-1 * 400) / 1.5))</code> = 300 + 266.7 = 566.7.</p><p>So the rock fills the left 133 px of the window, narrower than the 240 px at z = 3, because more of the wall is now behind you.</p></div></details></div></div>
+<h2>Part 4: Clipping in Cube Hunt <span class="mins">7 MIN</span></h2>
+<p>Where does <code>clip_face()</code> go? It must work on CAMERA points, because z is what it tests, and it must come before <code>project()</code>, because <code>project()</code> divides by z. That is exactly where Lesson 4's skip rule was:</p>
+
+<figure id="fig-8-4-1"><img src="images/k19_pipeline.png" alt="Two rows of seven boxes: SHAPE, size spin place, minus you camera_matrix, then a highlighted box, project, clock test, light sort paint. Lesson 7&#x27;s highlighted box says any corner z &lt; NEAR? skip face. Lesson 8&#x27;s says clip_face(), cut at NEAR." loading="lazy"><figcaption><span class="fignum">Fig 8.4.1</span>The recipe for one face. Only the fourth box changes.<span class="panels">Panels: <b>8.4.1a</b> (top row) Lesson 7 · <b>8.4.1b</b> (bottom row) Lesson 8</span></figcaption></figure>
+<p>One small reshuffle follows. Lesson 7 projected every corner of a thing once, up front, and then built faces from those screen points. A clipped face can have cut points that are not corners of the model, so now each face is clipped first and then projected corner by corner:</p>
+
+<pre><code>    for corners, face_colour, pointer in model["faces"]:
+        # this face's corners in CAMERA coordinates, clockwise
+        face_camera = []
+        for corner_number in corners:
+            face_camera.append(camera_points[corner_number])
+
+        if use_clipping:
+            face_camera = clip_face(face_camera)     # NEW
+            if len(face_camera) &lt; 3:                 # nothing left to paint
+                continue
+        else:
+            ...   # Lesson 4's old skip rule, for comparing with K
+
+        face_points = []
+        for camera in face_camera:
+            face_points.append(project(camera))      # every z is now &gt;= 0.1
+        if not is_facing_you(face_points):
+            continue
+        ...   # light and painter's sort, unchanged</code></pre>
+<p>What doesn't change: the clock test only reads the first 3 corners, and clipping keeps them clockwise. The painter's <code>average_z()</code> still averages the face's <em>original</em> CAMERA corners, which is a fine measure of how far away the face is. The light uses the face's pointer, which clipping never touches.</p>
+<p>The cost: each corner is now projected once per face it belongs to, 3 times for a cube corner, so a cube needs <code>(6 * 4)</code> = 24 calls to <code>project()</code> instead of 8. For 12 things that is 288 a frame, tiny next to the floor's saving from 1,200 pieces to 50 lines.</p>
+<h3>Run it: step 3</h3>
+<p>Run <code>step3_clipped_hunt.py</code>. Play a game, and fly close past every rock. Then press K and fly past one again to see Lesson 7's way, and K once more to switch clipping back on.</p>
+
+<figure id="fig-8-4-2"><img src="images/run_step3_clipped_hunt.png" alt="Screenshot of step 3 at WORLD (2.5, 0, 3): the left 240 px are rock 0&#x27;s grey side wall, its bottom edge sloping down to the left; gold cube 0 is big at the top right, and the floor grid reaches the bottom of the window. HUD says clipping ON (K)." loading="lazy"><figcaption><span class="fignum">Fig 8.4.2</span>You at WORLD (2.5, 0, 3), the same moment as Fig 8.1.4. Rock 0's side wall is back, cut at the NEAR wall, and every floor line runs to the edge of the window.</figcaption></figure>
+<details class="full"><summary>Full code: <code>step3_clipped_hunt.py</code> (about 910 lines)</summary><pre><code># ======================================================================
+# LESSON 8 - STEP 3: CLIPPING FACES (Cube Hunt, clipped)
+# ----------------------------------------------------------------------
+# Goal: a face that crosses the NEAR wall is CUT at the wall, not
+# skipped. Fly right past a rock and its wall stays solid all the way.
+#
+# This is the finished script of Lesson 8, and Lesson 9's start.
+#
+# What is new since step 2:
+#
+#   1. clip_face(corners)   (lesson Part 3)
+#        Walk round the face's corners, one edge at a time. For each
+#        edge "previous -&gt; current" there are only 4 cases:
+#            in  -&gt; in   keep current
+#            in  -&gt; out  keep the cut point
+#            out -&gt; in   keep the cut point, then current
+#            out -&gt; out  keep nothing
+#        ("in" means CAMERA z &gt;= NEAR, in front of the wall.)
+#        A 4-corner face can come back with 3, 4 or 5 corners, or
+#        with none at all if every corner is behind you.
+#
+#   2. add_faces_of() clips each face in CAMERA coordinates, THEN
+#      projects it (lesson Part 4). The recipe for one face is now:
+#        SHAPE -&gt; WORLD -&gt; CAMERA -&gt; clip -&gt; project -&gt; clock test
+#
+#   3. K turns face clipping on / off too, so you can compare.
+#
+# The game itself is unchanged: 60 seconds, touch the gold cubes.
+#
+# Controls:  LEFT / RIGHT = turn,   UP / DOWN = look up / down
+#            W / S = fly forward / back (the way you LOOK)
+#            A / D = slide left / right,   Q / E = straight down / up
+#            R = play again (after TIME UP),   K = clipping on / off
+#            G = floor grid on / off,   L = light on / off
+# Run:  python step3_clipped_hunt.py
+# ======================================================================
+
+import math
+import random                 # (Lesson 7) for random.uniform
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Lesson 8, step 3 - Cube Hunt, clipped")
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+big_font = pygame.font.SysFont(None, 96)    # (Lesson 7) for "TIME UP"
+
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+PINK = (255, 105, 200)        # the colour we use for YOU (the camera)
+MAP_BACK = (25, 30, 36)       # dark grey-blue behind the mini-map
+GRID_COLOUR = (40, 90, 70)    # (Lesson 5) dim green for the floor lines
+WALL_RED = (235, 80, 80)      # (Lesson 7) the wall square on the mini-map
+SUN_GOLD = (250, 200, 70)     # (Lesson 7) the colour of every pickup cube
+STONE = (150, 150, 160)       # (step 1): the colour of every rock
+
+# ---- One colour for each face direction (from Lesson 3) ---------------
+RED = (235, 80, 80)          # front (-z)
+PURPLE = (160, 100, 230)     # back  (+z)
+BLUE = (70, 150, 255)        # left  (-x)
+GREEN = (70, 210, 120)       # right (+x)
+GOLD = (245, 200, 60)        # top   (+y)
+ORANGE = (245, 140, 50)      # bottom (-y)
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400
+
+
+# ======================================================================
+# MODELS (from Lesson 5, unchanged)
+# ======================================================================
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+# (corners clockwise from outside,  colour,  pointer)
+cube_faces = [
+    ((4, 5, 1, 0), RED,    ( 0,  0, -1)),   # front
+    ((6, 7, 3, 2), PURPLE, ( 0,  0,  1)),   # back
+    ((7, 4, 0, 3), BLUE,   (-1,  0,  0)),   # left
+    ((5, 6, 2, 1), GREEN,  ( 1,  0,  0)),   # right
+    ((7, 6, 5, 4), GOLD,   ( 0,  1,  0)),   # top
+    ((2, 3, 0, 1), ORANGE, ( 0, -1,  0)),   # bottom
+]
+cube_model = {"points": cube_points, "faces": cube_faces}
+
+
+# ======================================================================
+# THE PLAYING FIELD (lesson Part 1)
+# ======================================================================
+
+# ---- (Lesson 7) the sizes of the field ------------------------------------
+# FIELD = 10: new cubes appear with x and z from -10 to 10, a 20 x 20
+#   square. You fly 3 units a second, so edge to edge is
+#   (20 / 3) = 6.7 seconds: some flying, but never boring.
+# WALL = 12: you can't fly further than 12 from the centre, 2 more than
+#   FIELD, so you can always fly round a cube at the edge.
+FIELD = 10
+WALL = 12
+
+# ---- (Lesson 7) the floor (from Lesson 5), now as big as the walls --------
+FLOOR_Y = -1
+GRID_LEFT = (-WALL)       # -12
+GRID_RIGHT = WALL         # 12
+GRID_NEAR = (-WALL)       # -12
+GRID_FAR = WALL           # 12
+
+# ---- (Lesson 7) the pickups ------------------------------------------------
+# PICKUP_SIZE = 0.5: Lesson 5's "size", so each cube is 1 unit wide
+#   (its corners are at -0.5 and 0.5). A 1-unit face 5 away is
+#   ((1 * 400) / 5) = 80 px wide; 20 away it is 20 px (lesson Part 1).
+PICKUP_SIZE = 0.5
+
+# (Lesson 7) cube heights: their centres float from y = 0 to y = 2.
+#   0 is your eye height at the start; the lowest cube's bottom is then
+#   at (0 - 0.5) = -0.5, half a unit above the floor (FLOOR_Y = -1).
+PICKUP_LOW = 0
+PICKUP_HIGH = 2
+
+# (Lesson 7) the 8 spots the cubes start at, in WORLD coordinates.
+# The same every game, so you can learn a good route. Cube 0 at
+# (3, 1, 5) is the lesson's worked example.
+START_SPOTS = [
+    (3, 1, 5),      # 0  ahead and to the right: the first one you see
+    (-2, 0, 8),     # 1
+    (0, 0, 10),     # 2  straight ahead, at the far edge
+    (-6, 1, 3),     # 3
+    (6, 0, -2),     # 4  behind you, to the right
+    (-4, 2, -7),    # 5  behind you, up high
+    (8, 0, 7),      # 6
+    (2, 1, -9),     # 7  far behind you
+]
+
+# (Lesson 7) COLLECT_RADIUS = 1.0: you collect a cube when your eye is
+#   1 unit or less from its CENTRE. Its faces are 0.5 from the centre,
+#   so your nose is then 0.5 from a face, which fills the window:
+#   ((1 * 400) / 0.5) = 800 px wide (lesson Part 3).
+COLLECT_RADIUS = 1.0
+
+# (Lesson 7) MIN_SPAWN_DISTANCE = 5: a new cube never appears closer than
+#   5 to you, so it is at least (5 / 3) = 1.7 seconds of flying away.
+MIN_SPAWN_DISTANCE = 5
+
+# ---- (step 1): ROCKS, big scenery cubes (lesson Part 1) -------------------
+# ROCK_SIZE = 1.5: Lesson 5's "size", so a rock is (2 * 1.5) = 3 units
+#   wide, 3 times a gold cube. Big enough that you can fly right up
+#   beside one while most of it is still on the screen: its front face,
+#   2.5 away, is ((3 * 400) / 2.5) = 480 px wide.
+ROCK_SIZE = 1.5
+
+# Each rock SITS on the floor: its centre is ROCK_SIZE above FLOOR_Y,
+#   so centre y = (-1 + 1.5) = 0.5, bottom at -1, top at 2.
+ROCK_Y = (FLOOR_Y + ROCK_SIZE)
+
+# Where the 4 rocks are, in WORLD coordinates. Rock 0 is straight ahead
+# of where you start: the lesson's worked example.
+ROCK_SPOTS = [
+    (0, ROCK_Y, 4),       # 0  straight ahead, its front face at z = 2.5
+    (-5, ROCK_Y, -3),     # 1  behind you, to the left
+    (5, ROCK_Y, 10),      # 2  far ahead, to the right
+    (7, ROCK_Y, -7),      # 3  behind you, to the right
+]
+
+# ROCK_CLEARANCE = 3: a new gold cube must be at least 3 from every
+#   rock's centre: 1.5 (half a rock) + 0.5 (half a gold cube) + 1 (your
+#   COLLECT_RADIUS, so you can always reach it) = 3.
+ROCK_CLEARANCE = ( (ROCK_SIZE + PICKUP_SIZE) + COLLECT_RADIUS )
+
+# ---- (Lesson 7) how high and low you can fly (lesson Part 5) -----------------
+# GROUND = -0.5: your eye stays half a unit above the floor (y = -1).
+# CEILING = 4: two more than PICKUP_HIGH, so you can look down on every
+#   cube but never fly off where none could be.
+GROUND = (FLOOR_Y + 0.5)     # (-1 + 0.5) = -0.5
+CEILING = 4
+
+# ---- (Lesson 7) the clock (lesson Part 6) -------------------------------------
+# 60 seconds: at 3 units a second that is (3 * 60) = 180 units of
+# flying, enough for a good handful of cubes, short enough to retry.
+GAME_SECONDS = 60
+
+
+def make_pickups():
+    """(Lesson 7) build a fresh list of 8 pickup THINGS (Lesson 5's
+    dictionaries), one at each START_SPOTS position.
+
+    Each one is a small gold cube (size 0.5) that spins slowly so it
+    catches your eye: 1 degree a frame of turn = one turn in 6 seconds,
+    and 0.5 of tip so it wobbles a little too.
+    """
+    pickups = []
+    for spot in START_SPOTS:
+        pickups.append({"model": cube_model, "position": spot,
+                        "size": PICKUP_SIZE, "angles": [0, 0, 0],
+                        "speeds": (0.5, 1, 0), "colour": SUN_GOLD,
+                        "pickup": True})          # (step 1)
+    return pickups
+
+
+def make_rocks():
+    """(step 1): build a list of 4 rock THINGS, one at each ROCK_SPOTS position.
+
+    Same dictionary keys as a gold cube, with three differences:
+    size 1.5, speeds (0, 0, 0) so they never spin, and "pickup": False
+    so you can't collect them.
+    """
+    rocks = []
+    for spot in ROCK_SPOTS:
+        rocks.append({"model": cube_model, "position": spot,
+                      "size": ROCK_SIZE, "angles": [0, 0, 0],
+                      "speeds": (0, 0, 0), "colour": STONE,
+                      "pickup": False})
+    return rocks
+
+
+def make_world():
+    """(step 1): the whole world = 8 gold cubes + 4 rocks.
+
+    "+" joins two lists into one longer list: (8 + 4) = 12 things.
+    The gold cubes come first, so things[0] is still cube 0.
+    """
+    return (make_pickups() + make_rocks())
+
+
+# "things" is Lesson 5's list of everything in the world.
+# (step 1): 8 gold cubes AND 4 rocks.
+things = make_world()
+
+# ---- Where YOU are (from Lesson 4) ------------------------------------
+cam_x = 0
+cam_y = 0
+cam_z = 0
+cam_turn = 0        # degrees, positive = turned LEFT
+cam_tip = 0         # degrees, positive = looking DOWN
+TIP_LIMIT = 60
+MOVE_SPEED = 0.05   # (0.05 * 60) = 3 units a second
+TURN_SPEED = 1.5    # (1.5 * 60) = 90 degrees a second
+NEAR = 0.1          # closer than this (CAMERA z) is not drawn
+
+# ---- The light (from Lesson 3, unchanged) -----------------------------
+LIGHT = (0.48, 0.6, -0.64)
+AMBIENT = 0.2
+use_light = True
+show_grid = True
+# (step 2): K turns clipping on / off, so you can see the difference.
+use_clipping = True
+
+# ---- (Lesson 7) the score ------------------------------------------------
+score = 0
+# ---- (Lesson 7) the clock and the game's two states (lesson Part 6) ----------
+best_score = 0                         # NOT reset by R
+frames_left = (GAME_SECONDS * 60)      # (60 * 60) = 3600
+game_over = False                      # False = PLAYING, True = TIME UP
+
+# ---- The mini-map (lesson Part 1: resized for the whole field) ---------
+MAP_LEFT = 630
+MAP_TOP = 430
+MAP_SIZE = 160
+# (Lesson 7) the WORLD centre now sits in the MIDDLE of the box, because
+# the field goes the same distance every way (-12 to 12).
+MAP_CX = (MAP_LEFT + (MAP_SIZE / 2))    # (630 + 80) = 710
+MAP_CY = (MAP_TOP + (MAP_SIZE / 2))     # (430 + 80) = 510
+# (Lesson 7) 6 px per unit: the walls are 24 units across, and
+# (24 * 6) = 144 px fits the 160 px box with 8 px to spare.
+MAP_SCALE = 6
+
+
+# ======================================================================
+# MATRIX TOOLS (from Lesson 6, unchanged)
+# ======================================================================
+
+def matrix_times_point(matrix, point_3d):
+    """Put one point through a matrix: each ROW dotted with the point."""
+    row_0, row_1, row_2 = matrix
+    new_x = dot(row_0, point_3d)
+    new_y = dot(row_1, point_3d)
+    new_z = dot(row_2, point_3d)
+    return (new_x, new_y, new_z)
+
+
+def tip_matrix(angle_degrees):
+    """Lesson 2B's TIP as a grid. x is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (1, 0,     0         ),
+        (0, cos_a, (-sin_a)  ),
+        (0, sin_a, cos_a     ),
+    )
+
+
+def turn_matrix(angle_degrees):
+    """Lesson 2's TURN as a grid. y is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, 0, (-sin_a)),
+        (0,     1, 0       ),
+        (sin_a, 0, cos_a   ),
+    )
+
+
+def roll_matrix(angle_degrees):
+    """Lesson 2B's ROLL as a grid. z is the skewer."""
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, (-sin_a), 0),
+        (sin_a, cos_a,    0),
+        (0,     0,        1),
+    )
+
+
+def column(matrix, column_number):
+    """One COLUMN of a matrix = where that axis arrow lands."""
+    row_0, row_1, row_2 = matrix
+    return (row_0[column_number], row_1[column_number], row_2[column_number])
+
+
+def combine(first, second):
+    """ONE matrix that does 'first', then 'second' (Lesson 6)."""
+    new_col_0 = matrix_times_point(second, column(first, 0))
+    new_col_1 = matrix_times_point(second, column(first, 1))
+    new_col_2 = matrix_times_point(second, column(first, 2))
+    return (
+        (new_col_0[0], new_col_1[0], new_col_2[0]),
+        (new_col_0[1], new_col_1[1], new_col_2[1]),
+        (new_col_0[2], new_col_1[2], new_col_2[2]),
+    )
+
+
+def spin_matrix(angles):
+    """A thing's whole spin as ONE matrix: tip, then turn, then roll."""
+    tip_then_turn = combine(tip_matrix(angles[0]), turn_matrix(angles[1]))
+    return combine(tip_then_turn, roll_matrix(angles[2]))
+
+
+# ======================================================================
+# THE 3D PIPELINE (Lessons 1 to 6, unchanged)
+# ======================================================================
+
+def to_world(shape_point, thing):
+    """(Lesson 5) SHAPE -&gt; WORLD: size, then spin, then place."""
+    x, y, z = shape_point
+    size = thing["size"]
+    sized = ( (x * size), (y * size), (z * size) )
+    spun = matrix_times_point(thing["matrix"], sized)
+    pos_x, pos_y, pos_z = thing["position"]
+    sx, sy, sz = spun
+    return ( (sx + pos_x), (sy + pos_y), (sz + pos_z) )
+
+
+def to_camera(world_point):
+    """(Lessons 4 and 6) WORLD -&gt; CAMERA: subtract you, then camera_matrix."""
+    x, y, z = world_point
+    moved = ( (x - cam_x), (y - cam_y), (z - cam_z) )
+    return matrix_times_point(camera_matrix, moved)
+
+
+def project(point_3d):
+    """(Lesson 1) CAMERA -&gt; SCREEN. Only call it with z &gt;= NEAR."""
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+def average_z(corners, camera_points):
+    """(Lesson 3) how far away is this face? Uses CAMERA z."""
+    total = 0
+    for corner_number in corners:
+        x, y, z = camera_points[corner_number]
+        total = (total + z)
+    return (total / len(corners))
+
+
+def is_facing_you(face_points):
+    """(Lesson 3) the clock test: True if clockwise on the screen."""
+    a_x, a_y = face_points[0]
+    b_x, b_y = face_points[1]
+    c_x, c_y = face_points[2]
+    arrow_a_x = (b_x - a_x)
+    arrow_a_y = (b_y - a_y)
+    arrow_b_x = (c_x - a_x)
+    arrow_b_y = (c_y - a_y)
+    cross = ( (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x) )
+    return (cross &gt; 0)
+
+
+def dot(arrow_1, arrow_2):
+    """(Lesson 3) the dot product."""
+    x1, y1, z1 = arrow_1
+    x2, y2, z2 = arrow_2
+    return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
+
+
+def shade_colour(colour, pointer):
+    """(Lesson 3) brighter when the face points at the light."""
+    brightness = dot(pointer, LIGHT)
+    if brightness &lt; 0:
+        brightness = 0
+    shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )
+    red, green, blue = colour
+    return ( round(red * shade), round(green * shade), round(blue * shade) )
+
+
+def keep_under_360(angle):
+    """Keep an angle between 0 and 360."""
+    if angle &gt;= 360:
+        angle = (angle - 360)
+    if angle &lt; 0:
+        angle = (angle + 360)
+    return angle
+
+
+def add_faces_of(thing, faces_to_draw):
+    """(Lesson 5) work out every face of ONE thing and add the ones to
+    paint to the shared list.
+
+    NEW in Lesson 8: each face is CLIPPED in CAMERA coordinates first,
+    and only then projected. So we no longer project every corner up
+    front: a face's cut points only exist once that face is clipped.
+    """
+    model = thing["model"]
+    camera_points = []
+    for p in model["points"]:
+        world = to_world(p, thing)                     # WORLD
+        camera_points.append(to_camera(world))         # CAMERA
+
+    for corners, face_colour, pointer in model["faces"]:
+        # NEW: this face's corners in CAMERA coordinates, clockwise.
+        face_camera = []
+        for corner_number in corners:
+            face_camera.append(camera_points[corner_number])
+
+        if use_clipping:
+            # NEW: cut the face at the NEAR wall (lesson Part 3).
+            face_camera = clip_face(face_camera)
+            # Fewer than 3 corners left: nothing to paint.
+            if len(face_camera) &lt; 3:
+                continue
+        else:
+            # Lesson 4's old rule, for comparing (K): any corner behind
+            # the NEAR wall? Skip the whole face.
+            too_close = False
+            for camera in face_camera:
+                if camera[2] &lt; NEAR:
+                    too_close = True
+            if too_close:
+                continue
+
+        # Every corner left is now in front of NEAR, so project() is safe.
+        face_points = []
+        for camera in face_camera:
+            face_points.append(project(camera))        # SCREEN
+        # The clock test works on any number of corners (it only looks
+        # at the first 3), and clipping keeps them clockwise.
+        if not is_facing_you(face_points):
+            continue
+        distance = average_z(corners, camera_points)
+        colour = thing["colour"]
+        if use_light:
+            spun_pointer = matrix_times_point(thing["matrix"], pointer)
+            colour = shade_colour(colour, spun_pointer)
+        faces_to_draw.append( (distance, face_points, colour) )
+
+
+def draw_floor():
+    """(step 2): the floor grid as LONG lines, right across the field.
+
+    25 lines running away from you (x = -12 to 12) and 25 lines running
+    across (z = -12 to 12): (25 + 25) = 50 lines a frame. Lesson 5 had
+    to cut them into 1-unit pieces, (25 * 24) * 2 = 1,200 of them, so
+    that only the pieces behind you were lost. Clipping keeps the part
+    of a long line in front of you, so the pieces are not needed.
+
+    A long line is still exactly right on the screen: a straight line
+    in 3D projects to a straight line on the screen, so its two ends
+    are all we need (lesson Part 2).
+    """
+    for x in range(GRID_LEFT, (GRID_RIGHT + 1)):
+        draw_floor_line( (x, FLOOR_Y, GRID_NEAR), (x, FLOOR_Y, GRID_FAR) )
+    for z in range(GRID_NEAR, (GRID_FAR + 1)):
+        draw_floor_line( (GRID_LEFT, FLOOR_Y, z), (GRID_RIGHT, FLOOR_Y, z) )
+
+
+def draw_floor_line(world_start, world_end):
+    """(step 2): one long floor line, WORLD -&gt; CAMERA -&gt; clip -&gt; SCREEN."""
+    start = to_camera(world_start)
+    end = to_camera(world_end)
+    if use_clipping:
+        clipped = clip_line(start, end)
+        if clipped is None:              # both ends behind you
+            return
+        start, end = clipped
+    else:
+        # Lesson 4's old rule, for comparing (K): any end behind? skip.
+        if (start[2] &lt; NEAR) or (end[2] &lt; NEAR):
+            return
+    pygame.draw.line(screen, GRID_COLOUR, project(start), project(end), 1)
+
+# ======================================================================
+# CLIPPING (Lesson 8)
+# ======================================================================
+# Everything here works in CAMERA coordinates: (0, 0, 0) is your eye,
+# +x is right, +y is up, +z is straight ahead. The NEAR wall is the
+# flat sheet z = NEAR (0.1) just in front of your eye.
+#   "in"  = in front of the wall:  z &gt;= NEAR   (safe to project)
+#   "out" = behind the wall:       z &lt;  NEAR   (must never be projected)
+
+def cut_at_near(point_a, point_b):
+    """(step 2): the CAMERA point where the line from point_a to point_b
+    crosses the NEAR wall. One end must be in, the other out.
+
+    t says how far along the line the wall is: 0 = at point_a,
+    1 = at point_b, 0.5 = halfway (lesson Part 2).
+
+        t = ( (NEAR - a_z) / (b_z - a_z) )
+
+    Then each of x and y moves the same fraction t of its own gap:
+
+        x = ( a_x + (t * (b_x - a_x)) )
+
+    Worked example (lesson Part 2): a = (-2, -1, -1), b = (2, -1, 3)
+        t = ( (0.1 - (-1)) / (3 - (-1)) ) = (1.1 / 4) = 0.275
+        x = ( -2 + (0.275 * (2 - (-2))) ) = ( -2 + 1.1 ) = -0.9
+        y = ( -1 + (0.275 * (-1 - (-1))) ) = -1
+        z = NEAR = 0.1          -&gt; (-0.9, -1, 0.1)
+    """
+    a_x, a_y, a_z = point_a
+    b_x, b_y, b_z = point_b
+    t = ( (NEAR - a_z) / (b_z - a_z) )
+    cut_x = ( a_x + (t * (b_x - a_x)) )
+    cut_y = ( a_y + (t * (b_y - a_y)) )
+    # The same sum for z would give exactly NEAR, which is the whole
+    # point of t, so we just use NEAR.
+    return (cut_x, cut_y, NEAR)
+
+
+def clip_line(start, end):
+    """(step 2): keep the part of a CAMERA line that is in front of NEAR.
+
+    Gives back (start, end) with any end behind you swapped for the
+    cut point, or None ("nothing to draw") if both ends are behind.
+    """
+    start_in = (start[2] &gt;= NEAR)
+    end_in = (end[2] &gt;= NEAR)
+    if start_in and end_in:
+        return (start, end)                       # all in front: keep it all
+    if (not start_in) and (not end_in):
+        return None                               # all behind: nothing
+    cut = cut_at_near(start, end)
+    if start_in:
+        return (start, cut)                       # end was behind
+    return (cut, end)                             # start was behind
+
+
+def clip_face(face_corners):
+    """NEW: cut one face at the NEAR wall (lesson Part 3).
+
+    face_corners: the face's corners in CAMERA coordinates, clockwise.
+    Gives back the corners of the part in front of NEAR, still in
+    clockwise order. That can be 3, 4 or 5 corners, or an empty list
+    if the whole face is behind you.
+
+    We walk round the face one edge at a time. Each edge goes from the
+    PREVIOUS corner to the CURRENT one, and there are only 4 cases:
+
+        previous  current   keep
+        in        in        current
+        in        out       the cut point
+        out       in        the cut point, then current
+        out       out       nothing
+
+    face_corners[-1] means "the LAST item in the list". Starting with
+    it as "previous" makes the first edge go last corner -&gt; first
+    corner, so the walk goes all the way round and closes the face.
+
+    Worked example (lesson Part 3): the right face of rock 0, seen from
+    WORLD (2.5, 0, 3). CAMERA corners in clockwise order:
+        5 (-1, 2, -0.5) out    6 (-1, 2, 2.5) in
+        2 (-1, -1, 2.5) in     1 (-1, -1, -0.5) out
+    Edges 1-&gt;5 nothing,  5-&gt;6 cut (-1, 2, 0.1) then 6,
+          6-&gt;2 keep 2,    2-&gt;1 cut (-1, -1, 0.1)
+    Result: 4 corners  (-1, 2, 0.1) (-1, 2, 2.5) (-1, -1, 2.5) (-1, -1, 0.1)
+    """
+    kept = []
+    previous = face_corners[-1]
+    for current in face_corners:
+        previous_in = (previous[2] &gt;= NEAR)
+        current_in = (current[2] &gt;= NEAR)
+        if previous_in and current_in:
+            kept.append(current)
+        elif previous_in and (not current_in):
+            kept.append(cut_at_near(previous, current))
+        elif (not previous_in) and current_in:
+            kept.append(cut_at_near(previous, current))
+            kept.append(current)
+        # out -&gt; out: keep nothing
+        previous = current
+    return kept
+
+
+# ======================================================================
+# THE GAME TOOLS (Lesson 7)
+# ======================================================================
+
+def distance_3d(point_a, point_b):
+    """(Lesson 7) how far apart are two WORLD points? (lesson Part 2)
+
+    Subtract, square each part, add them up, square-root the total:
+    Pythagoras done twice, in one line.
+
+    Worked example (lesson Part 2): you at (1, 0, 3), cube 0 at (3, 1, 5)
+        dx = (3 - 1) = 2,  dy = (1 - 0) = 1,  dz = (5 - 3) = 2
+        math.sqrt( (2 * 2) + (1 * 1) + (2 * 2) ) = math.sqrt(9) = 3
+    """
+    ax, ay, az = point_a
+    bx, by, bz = point_b
+    dx = (bx - ax)
+    dy = (by - ay)
+    dz = (bz - az)
+    return math.sqrt( (dx * dx) + (dy * dy) + (dz * dz) )
+
+
+def far_from_rocks(spot):
+    """(step 1): True if this WORLD spot is at least ROCK_CLEARANCE (3) from
+    the centre of every rock, so a new gold cube never hides inside one.
+
+    Worked example (lesson Part 1): spot (1, 1, 5) and rock 0 at
+    (0, 0.5, 4): math.sqrt( (1 * 1) + (0.5 * 0.5) + (1 * 1) ) = 1.5,
+    less than 3, so False: try again.
+    """
+    for rock_spot in ROCK_SPOTS:
+        if distance_3d(spot, rock_spot) &lt; ROCK_CLEARANCE:
+            return False
+    return True
+
+
+def new_pickup_spot():
+    """(Lesson 7) a random WORLD spot for a cube, at least
+    MIN_SPAWN_DISTANCE from you (lesson Part 4).
+
+    "while True" repeats for ever, until "return" jumps out. Usually the
+    first try is far enough; about 1 try in 5 is too close and we
+    simply pick again.
+    """
+    you = (cam_x, cam_y, cam_z)
+    while True:
+        new_x = random.uniform((-FIELD), FIELD)
+        new_y = random.uniform(PICKUP_LOW, PICKUP_HIGH)
+        new_z = random.uniform((-FIELD), FIELD)
+        spot = (new_x, new_y, new_z)
+        # (step 1): "and far_from_rocks(spot)": BOTH must be True.
+        if (distance_3d(you, spot) &gt;= MIN_SPAWN_DISTANCE) and far_from_rocks(spot):
+            return spot
+
+
+def to_map(x, z):
+    """A WORLD (x, z) -&gt; a pixel on the mini-map (from Lesson 4)."""
+    map_x = MAP_CX + (x * MAP_SCALE)
+    map_y = MAP_CY - (z * MAP_SCALE)
+    return (map_x, map_y)
+
+
+def draw_map():
+    """The mini-map: the wall square, every cube, and you, from above."""
+    box = pygame.Rect(MAP_LEFT, MAP_TOP, MAP_SIZE, MAP_SIZE)
+    pygame.draw.rect(screen, MAP_BACK, box)
+    screen.set_clip(box)
+    # (Lesson 7) the walls: from map (-12, 12) to map (12, -12)
+    wall_left, wall_top = to_map((-WALL), WALL)          # (638, 438)
+    wall_size = ( (2 * WALL) * MAP_SCALE )                # (24 * 6) = 144
+    pygame.draw.rect(screen, WALL_RED,
+                     pygame.Rect(wall_left, wall_top, wall_size, wall_size), 1)
+    # Each cube's 4 bottom corners (from Lesson 5): a small gold square.
+    for thing in things:
+        outline = []
+        for corner_number in (0, 1, 2, 3):
+            corner = thing["model"]["points"][corner_number]
+            x, y, z = to_world(corner, thing)
+            outline.append(to_map(x, z))
+        pygame.draw.polygon(screen, thing["colour"], outline, 2)
+    # You: pink dot and a line the way your BODY faces.
+    forward_x, forward_y, forward_z = column(turn_matrix(cam_turn), 2)
+    you = to_map(cam_x, cam_z)
+    nose = to_map( (cam_x + (forward_x * 1.5)), (cam_z + (forward_z * 1.5)) )
+    pygame.draw.line(screen, PINK, you, nose, 2)
+    pygame.draw.circle(screen, PINK, you, 4)
+    screen.set_clip(None)
+    pygame.draw.rect(screen, WHITE, box, 1)
+
+
+# ======================================================================
+# THE MAIN LOOP
+# ======================================================================
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_l:
+                use_light = not use_light
+            if event.key == pygame.K_g:
+                show_grid = not show_grid
+            if event.key == pygame.K_k:                  # (step 2)
+                use_clipping = not use_clipping
+            # (Lesson 7) R only works after TIME UP, so you can't restart by
+            # accident in the middle of a good game.
+            if (event.key == pygame.K_r) and game_over:
+                # Every game number back to its start value...
+                cam_x = 0
+                cam_y = 0
+                cam_z = 0
+                cam_turn = 0
+                cam_tip = 0
+                things = make_world()      # (step 1): cubes AND rocks
+                score = 0
+                frames_left = (GAME_SECONDS * 60)
+                game_over = False
+                # ...but NOT best_score: it remembers your best.
+
+    # ==================================================================
+    # PLAYING: everything in this "if" stops when game_over is True.
+    # ==================================================================
+    if not game_over:
+        keys = pygame.key.get_pressed()
+
+        # ---- Turning and looking (from Lesson 4, unchanged) ----------
+        if keys[pygame.K_LEFT]:
+            cam_turn = (cam_turn + TURN_SPEED)
+        if keys[pygame.K_RIGHT]:
+            cam_turn = (cam_turn - TURN_SPEED)
+        if keys[pygame.K_UP]:
+            cam_tip = (cam_tip - TURN_SPEED)
+        if keys[pygame.K_DOWN]:
+            cam_tip = (cam_tip + TURN_SPEED)
+        if cam_tip &gt; TIP_LIMIT:
+            cam_tip = TIP_LIMIT
+        if cam_tip &lt; (-TIP_LIMIT):
+            cam_tip = (-TIP_LIMIT)
+
+        # ---- (Lesson 7) fly where you LOOK (lesson Part 5) -----------------
+        # Build the arrow the way your head points: tip first (the head
+        # nods), then turn (the body turns), and read off column 2,
+        # where the +z arrow lands (Lesson 6).
+        #   cam_tip -30, cam_turn 0:   forward = (0, 0.5, 0.866)   climbing
+        #   cam_tip -30, cam_turn 90:  forward = (-0.866, 0.5, 0)  left + up
+        # Right stays level (from your body only), so A and D slide
+        # sideways without climbing.
+        look = combine(tip_matrix(cam_tip), turn_matrix(cam_turn))
+        forward_x, forward_y, forward_z = column(look, 2)
+        right_x, right_y, right_z = column(turn_matrix(cam_turn), 0)
+        if keys[pygame.K_w]:
+            cam_x = (cam_x + (forward_x * MOVE_SPEED))
+            cam_y = (cam_y + (forward_y * MOVE_SPEED))   # (Lesson 7) y too
+            cam_z = (cam_z + (forward_z * MOVE_SPEED))
+        if keys[pygame.K_s]:
+            cam_x = (cam_x - (forward_x * MOVE_SPEED))
+            cam_y = (cam_y - (forward_y * MOVE_SPEED))   # (Lesson 7) y too
+            cam_z = (cam_z - (forward_z * MOVE_SPEED))
+        if keys[pygame.K_d]:
+            cam_x = (cam_x + (right_x * MOVE_SPEED))
+            cam_z = (cam_z + (right_z * MOVE_SPEED))
+        if keys[pygame.K_a]:
+            cam_x = (cam_x - (right_x * MOVE_SPEED))
+            cam_z = (cam_z - (right_z * MOVE_SPEED))
+        if keys[pygame.K_e]:
+            cam_y = (cam_y + MOVE_SPEED)
+        if keys[pygame.K_q]:
+            cam_y = (cam_y - MOVE_SPEED)
+
+        # ---- (Lesson 7) walls, ground and ceiling (lesson Part 5) ----------
+        # Past a limit? Put it back ON the limit. You slide along the
+        # wall instead of going through it.
+        if cam_x &gt; WALL:
+            cam_x = WALL
+        if cam_x &lt; (-WALL):
+            cam_x = (-WALL)
+        if cam_z &gt; WALL:
+            cam_z = WALL
+        if cam_z &lt; (-WALL):
+            cam_z = (-WALL)
+        if cam_y &gt; CEILING:
+            cam_y = CEILING
+        if cam_y &lt; GROUND:
+            cam_y = GROUND
+
+        # ---- (Lesson 7) collect any cube you are touching (Part 3) -----
+        you = (cam_x, cam_y, cam_z)
+        for thing in things:
+            # (step 1): rocks have "pickup": False, so they are never collected.
+            if not thing["pickup"]:
+                continue
+            if distance_3d(you, thing["position"]) &lt;= COLLECT_RADIUS:
+                score = (score + 1)
+                # (Lesson 7) the same cube jumps to a new spot (Part 4):
+                # there are always exactly 8 cubes to find.
+                thing["position"] = new_pickup_spot()
+
+        # ---- (Lesson 7) tick the clock (lesson Part 6) ---------------------
+        frames_left = (frames_left - 1)
+        if frames_left &lt;= 0:
+            frames_left = 0
+            game_over = True
+            if score &gt; best_score:
+                best_score = score
+
+    # ---- Every pickup spins (Lesson 5), even after TIME UP -------------
+    for thing in things:
+        angles = thing["angles"]
+        speeds = thing["speeds"]
+        angles[0] = keep_under_360( (angles[0] + speeds[0]) )
+        angles[1] = keep_under_360( (angles[1] + speeds[1]) )
+        angles[2] = keep_under_360( (angles[2] + speeds[2]) )
+        thing["matrix"] = spin_matrix(angles)
+
+    # ---- The camera's matrix, once a frame (Lesson 6) ------------------
+    camera_matrix = combine(turn_matrix(-cam_turn), tip_matrix(-cam_tip))
+
+    # ==================================================================
+    # DRAW: the world first, then the HUD on top (lesson Part 2)
+    # ==================================================================
+    screen.fill(BLACK)
+    if show_grid:
+        draw_floor()
+    faces_to_draw = []
+    for thing in things:
+        add_faces_of(thing, faces_to_draw)
+    faces_to_draw.sort(reverse=True)
+    for distance, face_points, colour in faces_to_draw:
+        pygame.draw.polygon(screen, colour, face_points)
+        pygame.draw.polygon(screen, BLACK, face_points, 2)
+
+    draw_map()
+
+    # ---- (Lesson 7) how far is the nearest cube? -------------------------
+    # Start with a huge number, then keep the smallest distance found.
+    nearest = 1000
+    for thing in things:
+        if not thing["pickup"]:          # (step 1): rocks don't count
+            continue
+        d = distance_3d((cam_x, cam_y, cam_z), thing["position"])
+        if d &lt; nearest:
+            nearest = d
+
+    # ---- The HUD: words drawn LAST, so no cube can hide them -----------
+    # str() turns a number into letters so + can join it to words.
+    text = ("score " + str(score) + "   best " + str(best_score))
+    screen.blit(font.render(text, True, SUN_GOLD), (20, 20))
+    text = ("nearest cube " + str(round(nearest, 1)))
+    screen.blit(font.render(text, True, PINK), (20, 50))
+    # (step 2): say whether clipping is on, so screenshots are never confusing.
+    if use_clipping:
+        text = "clipping ON (K)"
+    else:
+        text = "clipping OFF (K)"
+    screen.blit(font.render(text, True, WHITE), (20, 80))
+    # (Lesson 7) math.ceil rounds UP, so the clock never shows 0 while you
+    # can still play: 59.98 seconds left shows as 60.
+    seconds = math.ceil(frames_left / 60)
+    screen.blit(font.render("time " + str(seconds), True, WHITE), (680, 20))
+    screen.blit(font.render("ARROWS look,  W / S fly,  A / D slide,  Q / E down / up",
+                            True, YELLOW), (20, 570))
+
+    # ---- (Lesson 7) TIME UP on top of everything -------------------------
+    if game_over:
+        words = big_font.render("TIME UP", True, WHITE)
+        # Centre it: half its width to the left of the screen's middle.
+        # get_width() is how many pixels wide the words came out.
+        left = (CENTRE_X - (words.get_width() / 2))
+        screen.blit(words, (left, 200))
+        words = font.render("score " + str(score) + "   best " + str(best_score) +
+                            "      press R to play again", True, YELLOW)
+        left = (CENTRE_X - (words.get_width() / 2))
+        screen.blit(words, (left, 290))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Press K while you fly past a rock, to see Lesson 7's skipping
+#     again. Then press K to turn clipping back on.
+#   * Print len(face_camera) after clip_face() for rock 0 only. Fly
+#     round it: can you find a 3, a 4 and a 5?
+#   * Set NEAR = 1. Clipping still works, but now you can see the wall
+#     slicing the rock 1 unit in front of you. Why is 0.1 a better
+#     choice? (Lesson 4, Fig 4.3.3.)
+#   * Draw each cut point as a small white circle, so you can watch it
+#     slide along the edge as you move.
+#   * Lesson 9 loads big models from files. They have many more faces
+#     crossing NEAR when you get close: clipping is ready for them.
+# ----------------------------------------------------------------------
+</code></pre></details>
+<div class="check"><div class="q"><p class="qq"><span class="qn">Q10</span><span>Why must we clip in CAMERA coordinates, and not first project and then cut on the screen?</span></p><details><summary>Show answer</summary><div class="ans"><p><code>project()</code> divides by z. A corner with negative z lands on the wrong side of the screen (corner 5 at x = 1200 instead of far to the left), and z = 0 crashes. By the time it is a screen point, the information about where it really was is wrong. In CAMERA coordinates the NEAR wall is just "z = 0.1", the easiest flat sheet there is to cut against.</p></div></details></div></div>
+<h2>Wrap up <span class="mins">4 MIN</span></h2>
+<ul>
+  <li>Lesson 4's rule skipped any face or line with a corner behind <code>NEAR</code>. Next to something big, that throws away whole walls (Fig 8.1.5).</li>
+  <li>Projecting such a corner anyway flips it to the wrong side (Fig 8.1.6). The fix is to <strong>cut at NEAR, then project</strong>.</li>
+  <li>A CAMERA point is in when <code>z &gt;= NEAR</code>. Only z matters.</li>
+  <li>Where a line crosses the wall: <code>t = ( (NEAR - a_z) / (b_z - a_z) )</code>, then <code>( a + (t * (b - a)) )</code> for x and y.</li>
+  <li><code>clip_line()</code> has 3 cases; <code>clip_face()</code> walks the edges with 4 rules and can return 3, 4 or 5 corners, or none.</li>
+  <li>The floor is now 50 long lines instead of 1,200 pieces.</li>
+</ul>
+<div class="check"><div class="q"><p class="qq"><span class="qn">Q11</span><span>Final check, using the whole course. You stand at the start, (0, 0, 0), turned left 90 (<code>cam_turn = 90</code>), looking level. Take the floor's cross line at z = 1, from WORLD (−12, −1, 1) to (12, −1, 1). Take it to CAMERA, clip it, and find where it is on the screen.</span></p><details><summary>Show answer</summary><div class="ans"><p>1. camera_matrix (Lesson 6) = <code>combine(turn_matrix(-90), tip_matrix(0))</code> = <code>turn_matrix(-90)</code>. cos(−90) = 0 and sin(−90) = −1, so its rows are (0, 0, 1), (0, 1, 0), (−1, 0, 0). In words: CAMERA x = WORLD z, y = y, CAMERA z = −(WORLD x).</p><p>2. Start (−12, −1, 1) → CAMERA (1, −1, 12). End (12, −1, 1) → CAMERA (1, −1, −12). The start is in front of you, the end behind: you are facing −x, so the line runs from ahead to behind.</p><p>3. Clip (today): t = <code>( (0.1 - 12) / (-12 - 12) )</code> = <code>(-11.9 / -24)</code> = 0.4958. x = <code>( 1 + (0.4958 * (1 - 1)) )</code> = 1, y = −1. The end becomes the cut (1, −1, 0.1).</p><p>4. Project (Lesson 1): start x = <code>(400 + ((1 * 400) / 12))</code> = 433.3, y = <code>(300 - ((-1 * 400) / 12))</code> = 333.3. Cut x = <code>(400 + ((1 * 400) / 0.1))</code> = 4400, y = <code>(300 - ((-1 * 400) / 0.1))</code> = 4300.</p><p>5. The line goes from (433.3, 333.3) down and right at 45 degrees towards (4400, 4300), and leaves the window through the bottom edge at (700, 600). With Lesson 7's rule, the whole line would have been skipped.</p></div></details></div></div>
+<h3>What comes next</h3>
+<p>Clipping makes the engine safe for anything big and close. That matters for Lesson 9, which loads whole models from files, such as the famous teapot, with hundreds or thousands of faces. Some ideas to try first (the scripts' TRY THIS boxes have more):</p>
+<ul>
+  <li>Print <code>len(face_camera)</code> after <code>clip_face()</code> for rock 0 only, and fly round it: can you find a 3, a 4 and a 5?</li>
+  <li>Set <code>NEAR = 1</code>. Clipping still works, but you can now see the wall slicing rocks 1 unit in front of you. Why is 0.1 a better choice?</li>
+  <li>Draw each cut point as a small white circle, so you can watch it slide along an edge as you move.</li>
+</ul>
+
+<h2>Files</h2>
+<p>Download the code for this lesson (right-click a file and choose <em>Save link as</em>):</p>
+<ul class="files">
+  <li><a href="code/step1_rocks.py" download><code>code/step1_rocks.py</code></a>: Cube Hunt plus four stone rocks, the <code>"pickup"</code> key and <code>far_from_rocks()</code>; shows the problem</li>
+  <li><a href="code/step2_clip_lines.py" download><code>code/step2_clip_lines.py</code></a>: <code>cut_at_near()</code>, <code>clip_line()</code>, the floor as 50 long lines, K to switch clipping</li>
+  <li><a href="code/step3_clipped_hunt.py" download><code>code/step3_clipped_hunt.py</code></a>: <code>clip_face()</code> in <code>add_faces_of()</code>; the finished script and Lesson 9's start</li>
+  <li><code>images/</code>: every diagram on this page as a PNG</li>
+  <li><a href="../figures/">Figure index</a>: every figure and table in the course, with its number. Numbers read <code>Fig lesson.part.figure</code>, plus a letter for one panel of a picture (for example <code>Fig 8.3.2b</code>).</li>
+</ul>
+</main>
+</body>
+</html>

@@ -1,9 +1,11 @@
 # Draws the course map PNG, one "you are here" version per lesson.
+# 2026-11-10: grown from 8 to 12 cards (Lessons 8 clipping, 9 models from files,
+# 10 depth buffer, 11 movement and collisions), in a third row.
 # Usage: python3 course_map.py OUTDIR   -> writes course_map_<key>.png for every lesson
 import sys, math
 from PIL import Image, ImageDraw, ImageFont
 
-W, H = 1800, 1180
+W, H = 1800, 1600
 BG = (16, 20, 24)
 FG = (232, 238, 234)
 MUTED = (150, 162, 156)
@@ -32,7 +34,16 @@ LESSONS = [
         "every turn as one number table", "does the same with tidier maths"),
  ("7",  "LESSON 7",  "A mini game",                (255, 130, 70),
         "distance check, score, timer", "becomes a cube-collecting game"),
+ ("8",  "LESSON 8",  "Clipping",                   (90, 200, 255),
+        "the near wall, cutting faces", "cuts faces cleanly up close"),
+ ("9",  "LESSON 9",  "Models from files",          (240, 170, 90),
+        "reading .obj files, the teapot", "loads shapes from text files"),
+ ("10", "LESSON 10", "The depth buffer",           (120, 220, 170),
+        "closest-per-pixel check", "never draws faces in wrong order"),
+ ("11", "LESSON 11", "Movement and collisions",    (255, 120, 120),
+        "velocity, gravity, bumping", "feels solid and real"),
 ]
+N = len(LESSONS)
 
 # ---------- small icons, each drawn inside a box (x, y, w, h) ----------
 def proj(p, cx, cy, s, dist=4.0):
@@ -122,6 +133,46 @@ def icon(d, key, x, y, w, h, col, on):
             star.append((sx + r * math.cos(a), sy + r * math.sin(a)))
         d.polygon(star, fill=c)
         d.text((cx + 70, cy + 32), "SCORE 3", font=font(20, True, True), fill=c, anchor="mm")
+    elif key == "8":
+        # a cube cut by the near wall: the part past the wall is dashed/dim
+        pts = wire_cube(d, cx + 20, cy, 120, c, ay=0.6, ax=-0.3)
+        wx = cx - 10
+        d.rectangle([wx - 4, y + 2, wx + 4, y + h - 2], fill=(255, 255, 255) if on else DIM)
+        d.rectangle([x, y, wx - 6, y + h], fill=CARD)   # hide the part past the wall
+        d.text((wx - 12, y + 8), "NEAR", font=font(18, True, True), fill=c, anchor="rm")
+    elif key == "9":
+        # a simple teapot outline: body, lid, spout, handle
+        d.ellipse([cx - 55, cy - 30, cx + 55, cy + 45], outline=c, width=3)
+        d.arc([cx - 30, cy - 50, cx + 30, cy - 10], 180, 360, fill=c, width=3)
+        d.ellipse([cx - 6, cy - 58, cx + 6, cy - 46], outline=c, width=3)
+        d.line([cx + 50, cy + 5, cx + 85, cy - 30, cx + 95, cy - 32], fill=c, width=4)
+        d.arc([cx - 90, cy - 20, cx - 40, cy + 30], 90, 270, fill=c, width=4)
+        d.text((cx + 95, cy + 40), ".obj", font=font(18, True, True), fill=c, anchor="mm")
+    elif key == "10":
+        # a little grid of pixels, each holding a depth number
+        f = font(15, mono=True)
+        vals = [["9", "9", "4", "4"], ["9", "3", "3", "4"], ["2", "2", "3", "9"]]
+        for r in range(3):
+            for k in range(4):
+                bx, by = cx - 80 + k * 40, y + 6 + r * 34
+                inner = tuple(int(v * (0.25 + 0.08 * int(vals[r][k]))) for v in (col if on else DIM))
+                d.rectangle([bx, by, bx + 38, by + 32], fill=inner, outline=CARD)
+                d.text((bx + 19, by + 16), vals[r][k], font=f, fill=FG if on else MUTED, anchor="mm")
+    elif key == "11":
+        # a ball arcing over the ground, with a velocity arrow
+        gy = y + h - 10
+        d.line([x, gy, x + w, gy], fill=c, width=3)
+        prev = None
+        for i in range(0, 21):
+            t = i / 20
+            px, py = x + 20 + t * (w - 60), gy - 15 - (4 * t * (1 - t)) * 80
+            if prev and i % 2 == 0:
+                d.line([prev, (px, py)], fill=MUTED, width=2)
+            prev = (px, py)
+        bx, by = x + 60, gy - 60
+        d.ellipse([bx - 16, by - 16, bx + 16, by + 16], fill=c)
+        d.line([bx, by, bx + 55, by - 30], fill=FG if on else DIM, width=4)
+        d.polygon([(bx + 62, by - 34), (bx + 44, by - 34), (bx + 54, by - 20)], fill=FG if on else DIM)
 
 def fit(d, text, size, maxw, bold=False):
     # shrink the font a point at a time until the text fits inside maxw pixels
@@ -140,9 +191,10 @@ def wrap(d, text, f, maxw):
 
 # ---------- the board ----------
 CW, CH, GAP, LEFT = 380, 330, 60, 50
-ROW_Y = [200, 660]
+ROW_Y = [200, 640, 1080]
 def card_xy(i):
-    # snake: row 1 left->right (lessons 1,2,2B,3), row 2 right->left (4,5,6,7)
+    # snake: row 1 left->right (1,2,2B,3), row 2 right->left (4,5,6,7),
+    # row 3 left->right again (8,9,10,11)
     row, col = divmod(i, 4)
     if row == 1: col = 3 - col
     return LEFT + col * (CW + GAP), ROW_Y[row]
@@ -154,17 +206,18 @@ def draw(current):
     cur = LESSONS[ci]
 
     d.text((W / 2, 52), "Wireframe 3D course map", font=font(50, True), fill=FG, anchor="mm")
-    d.text((W / 2, 108), "8 lessons, one program that grows a little each time. Follow the road from Lesson 1 to the game.",
+    d.text((W / 2, 108), str(N) + " lessons, one program that grows a little each time. Follow the road from Lesson 1 to the end.",
            font=font(26), fill=MUTED, anchor="mm")
 
     # road behind the cards: one thick line through every card centre
-    centres = [(card_xy(i)[0] + CW / 2, card_xy(i)[1] + CH / 2) for i in range(8)]
-    for i in range(7):
+    centres = [(card_xy(i)[0] + CW / 2, card_xy(i)[1] + CH / 2) for i in range(N)]
+    for i in range(N - 1):
         a, b = centres[i], centres[i + 1]
         done = i < ci
         col = LESSONS[i][3] if done else (52, 60, 58)
-        if i == 3:   # the bend from Lesson 3 down to Lesson 4, on the right edge
-            rx = a[0] + CW / 2 + 28
+        if i % 4 == 3:   # a bend down to the next row: right edge after card 4, left edge after card 8
+            side = 1 if (i // 4) % 2 == 0 else -1
+            rx = a[0] + side * (CW / 2 + 28)
             d.line([a, (rx, a[1]), (rx, b[1]), b], fill=col, width=14, joint="curve")
             mx, my = rx, (a[1] + b[1]) / 2
             d.polygon([(mx - 16, my - 8), (mx + 16, my - 8), (mx, my + 16)], fill=FG if done else MUTED)
@@ -210,9 +263,9 @@ def draw(current):
             d.text((px, y - 40), "YOU ARE HERE", font=font(26, True), fill=BG, anchor="mm")
 
     # bottom strip: before / today / next
-    sy = 1040
+    sy = 1470
     prev = LESSONS[ci - 1] if ci > 0 else None
-    nxt = LESSONS[ci + 1] if ci < 7 else None
+    nxt = LESSONS[ci + 1] if ci < (N - 1) else None
     parts = [
         ("BEFORE", prev[1] + ": " + prev[2] if prev else "nothing: this is the start", prev[3] if prev else MUTED),
         ("TODAY", cur[1] + ": " + cur[2], cur[3]),
