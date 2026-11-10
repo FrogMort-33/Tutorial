@@ -1,0 +1,2823 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wireframe 3D, Lesson 10</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Chakra+Petch:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one readable column, like a lab notebook; diagrams and code break out slightly wider. */
+:root {
+  --bg:#f3f6f4; --paper:#ffffff; --fg:#17201b; --muted:#56635c; --line:#d5ded8;
+  --accent:#0d8a4a; --accent-soft:#e2f3e9; --code-bg:#121815; --code-fg:#d9f5e3; --warn:#9a6a00;
+  --display:"Chakra Petch", "Trebuchet MS", sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; --code-bg:#0a0e0c; --code-fg:#d9f5e3; --warn:#e6b84a; color-scheme:dark; } }
+:root[data-theme="dark"] {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; --code-bg:#0a0e0c; --code-fg:#d9f5e3; --warn:#e6b84a; color-scheme:dark; }
+body { background:var(--bg); color:var(--fg); font-family:var(--body); font-size:17px; line-height:1.6;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:32px 64px; }
+main { max-width:780px; margin:0 auto; display:flex; flex-direction:column; gap:20px; }
+h1,h2,h3 { font-family:var(--display); text-wrap:balance; line-height:1.2; margin:0; }
+h1 { font-size:clamp(30px,6vw,44px); }
+h2 { font-size:26px; margin-top:28px; padding-top:20px; border-top:2px solid var(--line); display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; }
+h2 .mins { font-family:var(--mono); font-size:14px; color:var(--accent); font-weight:600; letter-spacing:.04em; }
+h3 { font-size:20px; margin-top:12px; }
+p { margin:0; max-width:68ch; }
+.eyebrow { font-family:var(--mono); font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); }
+.lede { font-size:19px; color:var(--muted); }
+code { font-family:var(--mono); font-size:.88em; background:var(--accent-soft); padding:1px 5px; border-radius:4px; }
+pre { margin:0; background:var(--code-bg); color:var(--code-fg); padding:16px 18px; border-radius:8px; overflow-x:auto; font-size:14px; line-height:1.5; }
+pre code { background:none; padding:0; font-size:inherit; color:inherit; }
+figure { margin:0; display:flex; flex-direction:column; gap:8px; }
+figure img { width:100%; border-radius:8px; display:block; border:1px solid var(--line); }
+figcaption { font-size:14px; color:var(--muted); }
+table { border-collapse:collapse; width:100%; font-size:15px; }
+.tablewrap { overflow-x:auto; }
+th,td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+td.t { font-family:var(--mono); white-space:nowrap; color:var(--accent); font-variant-numeric:tabular-nums; }
+ul,ol { margin:0; padding-left:22px; max-width:68ch; }
+li+li { margin-top:4px; }
+.key { background:var(--accent-soft); border-left:4px solid var(--accent); padding:14px 18px; border-radius:0 8px 8px 0; display:flex; flex-direction:column; gap:6px; }
+.key strong { font-family:var(--display); }
+.q { background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:14px 18px; display:flex; flex-direction:column; gap:8px; }
+.qq { font-weight:700; display:flex; gap:10px; }
+.qn { font-family:var(--mono); color:var(--accent); flex:none; }
+details summary { cursor:pointer; color:var(--accent); font-weight:700; }
+details summary:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.ans { padding-top:8px; color:var(--fg); display:flex; flex-direction:column; gap:8px; }
+details.full { border:1px dashed var(--line); border-radius:8px; padding:10px 14px; }
+details.full[open] summary { margin-bottom:10px; }
+.check { display:flex; flex-direction:column; gap:12px; }
+.files li code { white-space:nowrap; }
+.key a { color:var(--accent); font-weight:700; }
+
+.fignum { font-family:var(--mono); font-weight:600; color:var(--accent); margin-right:6px; white-space:nowrap; }
+.panels { display:block; margin-top:4px; }
+.panels b { font-family:var(--mono); color:var(--fg); font-weight:600; }
+.tabcap { font-size:14px; color:var(--muted); margin-bottom:-12px; }
+figure, .tabcap { scroll-margin-top:16px; }
+/* Key concept box (same as Lesson 1). */
+.keyconcept { background:#14110a; border:3px solid #ffd23c; border-radius:10px; padding:18px 20px 20px; display:flex; flex-direction:column; gap:12px; }
+.keyconcept .kc-label { align-self:flex-start; background:#ffd23c; color:#14110a; font-family:var(--mono); font-weight:800; font-size:15px; letter-spacing:.14em; padding:4px 10px; border-radius:4px; }
+.keyconcept pre { background:none; color:#ffd23c; padding:0; font-size:clamp(14px, 3.6vw, 28px); font-weight:700; line-height:1.6; overflow-x:auto; }
+.keyconcept p { margin:0; color:#f3e7b5; font-size:16px; }
+</style>
+
+
+</head>
+<body>
+<main>
+<nav style="font-family:var(--mono, monospace);font-size:14px;"><a style="color:var(--accent)" href="../">&larr; All lessons</a> &middot; <a style="color:var(--accent)" href="../figures/">Figure index</a></nav>
+
+<header style="display:flex;flex-direction:column;gap:12px">
+  <span class="eyebrow">Wireframe 3D course · Lesson 10 · about 55 minutes</span>
+  <h1>The depth buffer: closest wins, block by block</h1>
+  <p class="lede">Since Lesson 3 the program has drawn solid shapes with the painter's order: sort whole faces far to near, then paint them in turn. That works until two shapes cross, and then no order of whole faces is right. Today we fill every face ourselves, one small block at a time, and keep one number for every block of the window: how close the nearest thing painted there is. A face only paints a block if it is closer. That is the depth buffer, and with it the order of faces stops mattering.</p>
+</header>
+
+<figure id="fig-10-0-1"><img src="images/course_map.png" alt="Course map: twelve lessons on a road. Lesson 10, The depth buffer, is highlighted as you are here; Lessons 1 to 9 are done; Lesson 11 is still to come." loading="lazy"><figcaption><span class="fignum">Fig 10.0.1</span>The course map. Coloured cards are done or today; darker cards are still to come.</figcaption></figure>
+<div class="key">
+  <strong>Where this lesson fits</strong>
+  <p><strong>Before:</strong> <a href="../lesson8/">Lesson 8</a> cut faces cleanly at the NEAR wall, and Lesson 9 loaded big models such as the teapot from files.<br><strong>Today:</strong> the depth buffer: a closest-wins check for every block of the window, which replaces the painter's sort.<br><strong>Next:</strong> Lesson 11, movement and collisions: speed, gravity and bumping into things.</p>
+  <p>Today's code starts from Lesson 8's finished game, <code>step3_clipped_hunt.py</code> (Cube Hunt with rocks and clipping), so you can follow it even before you do Lesson 9. The 3D pipeline does not change at all: only the very last job, putting colours on the window, is new.</p>
+</div>
+
+<h2>Lesson plan</h2>
+<p><strong>Who it's for:</strong> someone who finished Lesson 8 and can run <code>step3_clipped_hunt.py</code>. You need <code>project()</code> (Lesson 1), the painter's order and the clock test (Lesson 3), CAMERA z and <code>NEAR</code> (Lesson 4), the <code>things</code> list and models as points + faces (Lesson 5), matrices (Lesson 6), Cube Hunt (Lesson 7) and <code>clip_face()</code> (Lesson 8). <strong>Needs:</strong> Python 3 and <code>pip install pygame-ce</code>, as before.</p>
+<p><strong>By the end, the learner can:</strong></p>
+<ol>
+  <li>Show, with the board-and-cube scene, a picture the painter's order can never draw correctly, and say why.</li>
+  <li>Turn a SCREEN point into BLOCK coordinates, and explain with measured numbers why we fill 4 × 4 blocks and not single pixels.</li>
+  <li>Decide by hand whether a block is inside a triangle, using <code>side_of_edge()</code> three times.</li>
+  <li>Follow the depth buffer rule for one block: compare, store, paint or skip.</li>
+  <li>Work out a block's z from the three corner weights, and explain why we blend (1 / z) and not z.</li>
+</ol>
+
+<p class="tabcap" id="fig-10-0-2"><span class="fignum">Table 10.0.2</span>Lesson plan: time, part and what happens</p>
+<div class="tablewrap"><table>
+<tr><th>Time</th><th>Part</th><th>What happens</th></tr>
+<tr><td class="t">0–3</td><td>Recap</td><td>Where Lesson 8 left the program, and a preview of today's fix.</td></tr>
+<tr><td class="t">3–11</td><td>1. When the painter gets it wrong</td><td>The board-and-cube test scene, the painter's order step by step, and why no order works. Q1.</td></tr>
+<tr><td class="t">11–20</td><td>2. Pixels and blocks</td><td>What a pixel is, what checking each one costs in Python, BLOCK = 4, BLOCK coordinates. Q2–Q3.</td></tr>
+<tr><td class="t">20–32</td><td>3. Filling a triangle yourself</td><td>Faces into triangles, <code>side_of_edge()</code>, the inside test, the bounding box. Run <code>step1_fill_by_hand.py</code>. Q4–Q5.</td></tr>
+<tr><td class="t">32–46</td><td>4. The depth buffer</td><td>One number per block, the rule, any order works, weights, why (1 / z), seeing the buffer. Run <code>step2_depth_buffer.py</code>. Q6–Q9.</td></tr>
+<tr><td class="t">46–52</td><td>5. The depth buffer in Cube Hunt</td><td>Clipped faces as fans, one frame, what it costs, the teapot. Run <code>step3_cube_hunt_depth.py</code>. Q10.</td></tr>
+<tr><td class="t">52–55</td><td>Wrap up</td><td>Painter's order and depth buffer side by side, final check Q11.</td></tr>
+</table></div>
+
+<h2>Recap: where Lesson 8 left us <span class="mins">3 MIN</span></h2>
+<p>Every frame, every corner of every thing goes SHAPE → size → spin → + position (WORLD) → − you, × <code>camera_matrix</code> (CAMERA). Each face is clipped at <code>NEAR</code> (Lesson 8), projected to SCREEN pixels, and kept if the clock test says it faces you (Lesson 3). Then the program does what Lesson 3 called the <em>painter's order</em>: it works out each face's average CAMERA z, sorts the list far to near with <code>faces_to_draw.sort(reverse=True)</code>, and lets <code>pygame.draw.polygon()</code> paint each face over the ones before it.</p>
+<p>Today we replace only that last step. Here is the difference it makes, on a scene we will build in Part 1:</p>
+<figure id="fig-10-0-3"><img src="images/z01_before_after.png" alt="Two real screenshots of a blue board through a gold cube. Left, painter&#x27;s order: the whole cube is drawn over the board. Right, depth buffer: the board&#x27;s front half hides the bottom half of the cube." loading="lazy"><figcaption><span class="fignum">Fig 10.0.3</span>Real screenshots from <code>step2_depth_buffer.py</code>, the script you will have after Part 4. Press P in it to switch between the two.<span class="panels">Panels: <b>10.0.3a</b> (left) painter's order · <b>10.0.3b</b> (right) depth buffer</span></figcaption></figure>
+
+<h2>Part 1: When the painter gets it wrong <span class="mins">8 MIN</span></h2>
+<p>To see the problem clearly we need a scene where two shapes really cross. A gold cube is easy (Lesson 5's <code>cube_model</code>, <code>"size"</code> 1). The second shape is a flat board. Lesson 5 said a model is just points and faces, so the board is the cube's own faces with squashed points: x and z go out to 2.5, y only to 0.1. Same 8 corner numbers, same <code>cube_faces</code>:</p>
+<pre><code>board_points = [
+    (-2.5, -0.1, -2.5),   # 0
+    ( 2.5, -0.1, -2.5),   # 1
+    ( 2.5, -0.1,  2.5),   # 2
+    (-2.5, -0.1,  2.5),   # 3
+    (-2.5,  0.1, -2.5),   # 4
+    ( 2.5,  0.1, -2.5),   # 5
+    ( 2.5,  0.1,  2.5),   # 6
+    (-2.5,  0.1,  2.5),   # 7
+]
+board_model = {"points": board_points, "faces": cube_faces}
+
+things = [
+    {"model": board_model, "position": (0, 0, 6), "size": 1,
+     "angles": [-20, 0, 0], "speeds": (0, 0, 0), "colour": BOARD_BLUE},
+    {"model": cube_model, "position": (0, 0, 6), "size": 1,
+     "angles": [0, 30, 0], "speeds": (0, 0.5, 0), "colour": SUN_GOLD},
+]</code></pre>
+<p>Both things have the same centre, WORLD (0, 0, 6): 6 units in front of where you start. The board is tipped −20 degrees (Lesson 2B's TIP), so its front edge goes down and its back edge up, and from the start you look down onto its top. The cube is turned 30 degrees (Lesson 2's TURN), the same pose as Lesson 2's worked example, so its corner 5 is at SHAPE (1.366, 1, −0.366), which is WORLD (1.366, 1, 5.634).</p>
+<figure id="fig-10-1-1"><img src="images/z02_test_scene.png" alt="Two views of WORLD coordinates. Left, from the side with z across and y up: you at (0,0,0), the cube from z 4.634 to 7.366 and y -1 to 1, the tipped board passing through its centre (0,0,6) from z 3.69, y -0.95 to z 8.38, y 0.76. Right, from above with x across and z up: the 5 by 4.7 board under the cube turned 30, corner 5 at (1.366, 1, 5.634)." loading="lazy"><figcaption><span class="fignum">Fig 10.1.1</span>WORLD coordinates, centre (0, 0, 0) where you stand. The front half of the board is closer to you than the cube's middle, the back half is further away: the board goes right through the cube.<span class="panels">Panels: <b>10.1.1a</b> (left) from the side · <b>10.1.1b</b> (right) from above</span></figcaption></figure>
+<h3>The painter's order, step by step</h3>
+<p>From the start, four faces face you: the board's top and front edge, and the cube's front and left. Here they are in the painter's order, with the picture after each one is painted:</p>
+<figure id="fig-10-1-2"><img src="images/z03_painter_order.png" alt="Four rows. 1 board top, average z 5.966: the blue board appears. 2 cube left, 5.500: a dark strip appears over the board. 3 cube front, 5.134: the gold face covers the board. 4 board front, 3.651: the thin front edge appears." loading="lazy"><figcaption><span class="fignum">Fig 10.1.2</span>Average CAMERA z of each face (corner z values from the test scene, added and divided by 4). The biggest goes first. The cube's faces come after the board's top, so they cover it completely.</figcaption></figure>
+<p>Every average is right, and the sort is right. The trouble is the question the painter asks: "which <em>whole</em> face is nearer?" The board's top starts 3.6 away from you and ends 8.4 away. Its front part is in front of the cube; its back part is behind. One number per face can't say that.</p>
+<figure id="fig-10-1-3"><img src="images/z04_no_right_order.png" alt="Three pictures. Board first then cube: the cube covers all of the board. Cube first then board: the board covers all of the cube except its top. The truth: the cube&#x27;s top half shows above the board, the board covers its bottom half." loading="lazy"><figcaption><span class="fignum">Fig 10.1.3</span>Try every order of whole faces: none matches the truth on the right. The right answer changes halfway across one face.<span class="panels">Panels: <b>10.1.3a</b> (left) board first · <b>10.1.3b</b> (middle) cube first · <b>10.1.3c</b> (right) the truth</span></figcaption></figure>
+<div class="keyconcept" role="note" aria-label="Key concept">
+<span class="kc-label">KEY CONCEPT</span>
+<pre><code>Don't ask which FACE is closer.
+Ask which face is closer at EACH SPOT on the screen.</code></pre>
+<p>The painter's order gives one answer per face. A depth buffer gives one answer per small spot of the window, so a face can be in front at one spot and behind at the next.</p>
+</div>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q1</span><span>In Cube Hunt, a new gold cube appears at a random spot. Lesson 8's <code>far_from_rocks()</code> keeps it out of the rocks, but nothing keeps two gold cubes apart. What could the painter's order draw wrong?</span></p><details><summary>Show answer</summary><div class="ans"><p>If two gold cubes overlap, part of each is inside the other, just like the board and the cube. The painter paints one cube's faces wholly over the other's, so you could see a cube's face that should be hidden inside its neighbour. The depth buffer gets it right block by block.</p></div></details></div>
+</div>
+
+<h2>Part 2: Pixels and blocks <span class="mins">9 MIN</span></h2>
+<p>"Each spot of the screen" needs a meaning. The window is a grid of <em>pixels</em>: tiny squares that each show one colour.</p>
+<figure id="fig-10-2-1"><img src="images/z05_pixels.png" alt="Left: the whole 800 by 600 window with a small pink box where the board meets the cube. Right: that 40 by 30 pixel patch blown up so every pixel is a square: gold above, blue below, with a staircase edge." loading="lazy"><figcaption><span class="fignum">Fig 10.2.1</span>SCREEN coordinates. The zoom shows 40 × 30 = 1,200 pixels. Look closely: the squares come in 4 × 4 groups. That is today's speed trick, explained below.<span class="panels">Panels: <b>10.2.1a</b> (left) the whole window · <b>10.2.1b</b> (right) zoomed</span></figcaption></figure>
+<p>The window has <code>(800 * 600)</code> = 480,000 pixels. For each one, the depth buffer has to ask: is it inside this face? How far away is the face there? Is that closer than what is already painted? <code>pygame.draw.polygon()</code> did this inside pygame, in fast compiled code. We now do it in Python, so we can add the depth check, and Python is much slower. We measured it:</p>
+<figure id="fig-10-2-2"><img src="images/z06_cost_bars.png" alt="Bar chart. Checking every block once: BLOCK 1, 480,000 blocks, 772 ms. BLOCK 2, 120,000 blocks, 205 ms. BLOCK 4, 30,000 blocks, 57 ms. BLOCK 8, 7,500 blocks, 12 ms. A dashed line marks 16.7 ms, one frame at 60 a second." loading="lazy"><figcaption><span class="fignum">Fig 10.2.2</span>Measured on our test computer, about 1.7 microseconds per check. Yours may be faster or slower, but the pattern is the same: the time is the number of checks times the cost of one.</figcaption></figure>
+<p>One frame at 60 frames a second must take less than <code>(1000 / 60)</code> = 16.7 ms. Checking all 480,000 pixels would take 772 ms: well under 2 frames a second. So we don't check single pixels. We check <em>blocks</em> of 4 × 4 pixels, and paint each block in one colour:</p>
+<pre><code>BLOCK = 4
+BLOCKS_ACROSS = (WIDTH // BLOCK)    # (800 // 4) = 200
+BLOCKS_DOWN = (HEIGHT // BLOCK)     # (600 // 4) = 150
+small = pygame.Surface((BLOCKS_ACROSS, BLOCKS_DOWN))
+small.set_colorkey(BLACK)</code></pre>
+<p>That is <code>(200 * 150)</code> = 30,000 checks: 16 times fewer. Even a face that covers the whole window costs 57 ms, and most frames cover far less (Part 5 has whole-frame numbers). <code>//</code> divides and drops the remainder, so the answers are whole numbers. We paint into <code>small</code>, a 200 × 150 picture with one pixel per block, and at the end of the frame <code>pygame.transform.scale()</code> stretches it 4 times bigger onto the window. <code>set_colorkey(BLACK)</code> makes its black pixels see-through, so the floor lines drawn on the window first show between the shapes.</p>
+<p>Why 4? Here is the same patch of the window at four sizes:</p>
+<figure id="fig-10-2-3"><img src="images/z07_block_sizes.png" alt="Four zooms of the cube&#x27;s top-right corner at BLOCK 1, 2, 4 and 8: 800 by 600, 400 by 300, 200 by 150 and 100 by 75 blocks, with start-view frame times 131, 36, 11 and 4 ms. Edges get more jagged as blocks get bigger." loading="lazy"><figcaption><span class="fignum">Fig 10.2.3</span>Real screenshots of the same 120 × 90 pixel patch. BLOCK 4 is the biggest size whose edges still look like edges, and the smallest that keeps the start view under 16.7 ms.<span class="panels">Panels: <b>10.2.3a</b> (1st) BLOCK 1 · <b>10.2.3b</b> (2nd) BLOCK 2 · <b>10.2.3c</b> (3rd) BLOCK 4 · <b>10.2.3d</b> (4th) BLOCK 8</span></figcaption></figure>
+<h3>BLOCK coordinates</h3>
+<p>This gives us one more kind of coordinate. BLOCK coordinates count blocks instead of pixels: same top-left corner (0, 0), x to the right, y <em>down</em>, just 4 times smaller numbers.</p>
+<figure id="fig-10-2-4"><img src="images/z08_block_coords.png" alt="Left: SCREEN, 800 by 600, with the cube&#x27;s front face and corner 5 at (497.0, 229.0). Right: BLOCK, 200 by 150, the same face with corner 5 at (124.25, 57.25). Below, the worked sums and a close-up of block (124, 57), 4 by 4 pixels with its centre (124.5, 57.5)." loading="lazy"><figcaption><span class="fignum">Fig 10.2.4</span>SCREEN and BLOCK coordinates of the cube's corner 5 in the test scene. A block number is the whole part; its centre is the number + 0.5. Part 3 tests each block at its centre.<span class="panels">Panels: <b>10.2.4a</b> (top left) SCREEN · <b>10.2.4b</b> (top right) BLOCK · <b>10.2.4c</b> (bottom left) worked example · <b>10.2.4d</b> (bottom right) one block up close</span></figcaption></figure>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q2</span><span>The board's corner 0 is at SCREEN (128.6, 403.0). Which block is it in?</span></p><details><summary>Show answer</summary><div class="ans"><p>block_x = <code>(128.6 / 4)</code> = 32.15, block_y = <code>(403.0 / 4)</code> = 100.75. <code>int()</code> chops the decimals: block (32, 100).</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q3</span><span>With <code>BLOCK = 5</code>, how many blocks would there be, and roughly how long would checking all of them take at 1.7 microseconds each?</span></p><details><summary>Show answer</summary><div class="ans"><p><code>(800 // 5)</code> = 160 across, <code>(600 // 5)</code> = 120 down, <code>(160 * 120)</code> = 19,200 blocks. <code>(19,200 * 1.7)</code> = 32,640 microseconds, about 33 ms.</p></div></details></div>
+</div>
+
+<h2>Part 3: Filling a triangle yourself <span class="mins">12 MIN</span></h2>
+<p>To fill a face block by block, we cut it into triangles first: a triangle is the simplest shape to test. A 4-corner face makes two triangles. Both start at the first corner in the face's list (list place 0):</p>
+<figure id="fig-10-3-1"><img src="images/z09_two_triangles.png" alt="The cube&#x27;s front face in BLOCK coordinates with corners labelled by list place and cube corner number: place 0 corner 4 (92.10, 53.42), place 1 corner 5 (124.25, 57.25), place 2 corner 1 (124.25, 92.75), place 3 corner 0 (92.10, 96.58). Left, triangle A uses places 0, 1, 2; right, triangle B uses places 0, 2, 3." loading="lazy"><figcaption><span class="fignum">Fig 10.3.1</span>BLOCK coordinates. The face's list is <code>(4, 5, 1, 0)</code>: those are cube corner numbers (Lesson 3), clockwise from outside. Places 0, 1, 2 and 0, 2, 3 keep both triangles clockwise.<span class="panels">Panels: <b>10.3.1a</b> (left) triangle A · <b>10.3.1b</b> (right) triangle B</span></figcaption></figure>
+<pre><code>def draw_face(face_points, colour):
+    blocks = []
+    for screen_x, screen_y in face_points:
+        blocks.append( ((screen_x / BLOCK), (screen_y / BLOCK)) )
+    fill_triangle(blocks[0], blocks[1], blocks[2], colour)
+    if len(blocks) == 4:
+        fill_triangle(blocks[0], blocks[2], blocks[3], colour)</code></pre>
+<h3>Which side of an edge?</h3>
+<p>Lesson 3's clock test took three corners and worked out one number: more than 0 meant clockwise. The same sum answers a second question. Walk along an edge from its start to its end: is a point on your right-hand side, or your left?</p>
+<figure id="fig-10-3-2"><img src="images/z10_side_of_edge.png" alt="BLOCK coordinates with x right and y down. An edge from (100, 50) to (125, 50). P at (110.5, 60.5) is below it, on your right hand: +262.5. Q at (110.5, 44.5) is above, on your left: -137.5. A point on the edge gives 0. The worked sums are on the right." loading="lazy"><figcaption><span class="fignum">Fig 10.3.2</span>BLOCK coordinates, y down. Walking left to right along this edge, your right hand points down the screen. A clockwise face has its inside on your right on every edge.<span class="panels">Panels: <b>10.3.2a</b> (left) the edge and three points · <b>10.3.2b</b> (right) worked, step by step</span></figcaption></figure>
+<pre><code>def side_of_edge(start, end, point):
+    start_x, start_y = start
+    end_x, end_y = end
+    point_x, point_y = point
+    arrow_a_x = (end_x - start_x)
+    arrow_a_y = (end_y - start_y)
+    arrow_b_x = (point_x - start_x)
+    arrow_b_y = (point_y - start_y)
+    return ( (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x) )
+
+def is_facing_you(face_points):
+    return (side_of_edge(face_points[0], face_points[1], face_points[2]) &gt; 0)</code></pre>
+<p><code>is_facing_you()</code> is now one line: it is <code>side_of_edge()</code> with the face's third corner as the point.</p>
+<h3>Inside all three edges</h3>
+<p>Walk round a clockwise triangle a → b → c → a. A point is inside when it is on your right (0 or more) for all three edges. One "no" is enough to skip it:</p>
+<figure id="fig-10-3-3"><img src="images/z11_inside_test.png" alt="Triangle A in BLOCK coordinates with edges a-&gt;b pink, b-&gt;c teal and c-&gt;a purple. P, block (110, 60), gives 157.11, 487.98 and 496.03: all positive, inside. Q, block (100, 85), gives 999.03, 842.96 and -700.89: one negative, outside." loading="lazy"><figcaption><span class="fignum">Fig 10.3.3</span>BLOCK coordinates. a = corner 4, b = corner 5, c = corner 1 of the cube's front face. Each block is tested at its centre, (block_x + 0.5, block_y + 0.5).<span class="panels">Panels: <b>10.3.3a</b> (left) the triangle and two blocks · <b>10.3.3b</b> (right) the three numbers for each</span></figcaption></figure>
+<h3>Only look near the triangle</h3>
+<p>Testing all 30,000 blocks for every triangle would waste time on blocks nowhere near it. So we first find the triangle's <em>bounding box</em>: the smallest and biggest x and y of its three corners:</p>
+<figure id="fig-10-3-4"><img src="images/z12_bounding_box.png" alt="Triangle A drawn over a grid of blocks from 92 to 124 across and 53 to 92 down. The bounding box is yellow; 561 gold blocks are inside the triangle, the rest of the 1,320 tested are grey." loading="lazy"><figcaption><span class="fignum">Fig 10.3.4</span>BLOCK coordinates. The box is 33 × 40 = 1,320 blocks; 561 of them pass the inside test and are painted. See the staircase edge: each block is all in or all out.</figcaption></figure>
+<pre><code>def fill_triangle(a, b, c, colour):
+    total = side_of_edge(a, b, c)
+    if total &lt;= 0:
+        return                       # a sliver with no area: nothing to fill
+    a_x, a_y = a
+    b_x, b_y = b
+    c_x, c_y = c
+    left = int(min(a_x, b_x, c_x))
+    right = int(max(a_x, b_x, c_x))
+    top = int(min(a_y, b_y, c_y))
+    bottom = int(max(a_y, b_y, c_y))
+    # (the full code also keeps the box inside 0..199 and 0..149)
+
+    for block_y in range(top, (bottom + 1)):
+        for block_x in range(left, (right + 1)):
+            centre = ( (block_x + 0.5), (block_y + 0.5) )
+            weight_a = side_of_edge(b, c, centre)
+            weight_b = side_of_edge(c, a, centre)
+            weight_c = side_of_edge(a, b, centre)
+            if (weight_a &lt; 0) or (weight_b &lt; 0) or (weight_c &lt; 0):
+                continue                         # outside: next block
+            small.set_at((block_x, block_y), colour)</code></pre>
+<p><code>continue</code> jumps straight to the next block. <code>small.set_at()</code> colours one pixel of the small picture, which becomes one 4 × 4 block on the window. The three side numbers are called <code>weight_a</code>, <code>weight_b</code> and <code>weight_c</code> because Part 4 uses them again for something else.</p>
+<h3>Run it: step 1</h3>
+<p>Run <code>step1_fill_by_hand.py</code>. It is Lesson 8's game with the game parts taken out, the test scene put in, and every face filled by <code>fill_triangle()</code>. The faces are still sorted in the painter's order, so the picture is still wrong. Press F to compare with <code>pygame.draw.polygon()</code>, and fly round the board: it is always all in front of the cube or all behind it.</p>
+<figure id="fig-10-3-5"><img src="images/run_step1_fill_by_hand.png" alt="Output of step 1: the blue board and gold cube in 4 by 4 blocks, with the cube drawn entirely over the board. HUD: our own fill, 4 x 4 blocks, frames a second 60." loading="lazy"><figcaption><span class="fignum">Fig 10.3.5</span>Our own fill, still in the painter's order: the same mistake as Fig 10.0.3a, now made of blocks.</figcaption></figure>
+<details class="full"><summary>Full code: <code>step1_fill_by_hand.py</code> (about 640 lines)</summary><pre><code># ======================================================================
+# LESSON 10 - STEP 1: FILLING FACES YOURSELF, BLOCK BY BLOCK
+# ----------------------------------------------------------------------
+# Goal: stop asking pygame.draw.polygon() to fill our faces, and fill
+# them ourselves, one small block at a time. Then look at a scene the
+# painter&#x27;s order can NOT draw: a board pushed through a gold cube.
+#
+# This starts from Lesson 7&#x27;s finished game (step3_cube_hunt.py). The
+# game parts (score, clock, collecting) are taken out for now, so we
+# can look closely at two shapes. They come back in step 3.
+#
+# What is new since Lesson 7:
+#
+#   1. THE TEST SCENE (lesson Part 1)
+#        A flat blue board (a squashed cube model) and a gold cube that
+#        share the same centre, WORLD (0, 0, 6). The board cuts through
+#        the middle of the cube.
+#
+#   2. THE SMALL PICTURE (lesson Part 2)
+#        BLOCK = 4. We fill a 200 x 150 picture (one pixel per 4 x 4
+#        block of the window) and stretch it to 800 x 600 at the end.
+#        200 x 150 = 30,000 blocks instead of 480,000 pixels.
+#
+#   3. side_of_edge() (lesson Part 3)
+#        Lesson 3&#x27;s clock test, for any 3 points. is_facing_you() now
+#        uses it too.
+#
+#   4. fill_triangle() and draw_face() (lesson Part 3)
+#        A face is cut into triangles. A block is inside a triangle
+#        when side_of_edge() says &quot;inside&quot; for all 3 of its edges.
+#
+#   Still the painter&#x27;s order: faces are sorted far to near, as in
+#   Lesson 7. Fly round the board and the cube: the board is always
+#   drawn ALL in front of the cube or ALL behind it. Step 2 fixes that.
+#
+# Controls:  LEFT / RIGHT = turn,   UP / DOWN = look up / down
+#            W / S = fly forward / back,   A / D = slide left / right
+#            Q / E = straight down / up
+#            F = our own fill / pygame.draw.polygon (Lesson 7)
+#            SPACE = pause the cube&#x27;s spin
+#            G = floor grid on / off,   L = light on / off
+# Run:  python step1_fill_by_hand.py
+# ======================================================================
+
+import math
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption(&quot;Lesson 10, step 1 - filling faces yourself&quot;)
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+PINK = (255, 105, 200)        # the colour we use for YOU (the camera)
+MAP_BACK = (25, 30, 36)       # dark grey-blue behind the mini-map
+GRID_COLOUR = (40, 90, 70)    # (Lesson 5) dim green for the floor lines
+SUN_GOLD = (250, 200, 70)     # (Lesson 7) the gold cube
+BOARD_BLUE = (70, 150, 255)   # NEW: the board
+
+# ---- One colour for each face direction (from Lesson 3) ---------------
+RED = (235, 80, 80)          # front (-z)
+PURPLE = (160, 100, 230)     # back  (+z)
+BLUE = (70, 150, 255)        # left  (-x)
+GREEN = (70, 210, 120)       # right (+x)
+GOLD = (245, 200, 60)        # top   (+y)
+ORANGE = (245, 140, 50)      # bottom (-y)
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400
+
+
+# ======================================================================
+# NEW: THE SMALL PICTURE (lesson Part 2)
+# ======================================================================
+# BLOCK = 4: we fill the window in 4 x 4 squares of real pixels, called
+# BLOCKS. Python checks about 1 block in a microsecond or two, so:
+#     full size: (800 * 600) = 480,000 checks   -&gt; far too slow
+#     blocks:    (200 * 150) =  30,000 checks   -&gt; 16 times fewer
+# We paint the blocks into a SMALL picture, 200 x 150 pixels, and
+# stretch it 4 times bigger onto the window at the end of the frame.
+BLOCK = 4
+BLOCKS_ACROSS = (WIDTH // BLOCK)    # (800 // 4) = 200
+BLOCKS_DOWN = (HEIGHT // BLOCK)     # (600 // 4) = 150
+small = pygame.Surface((BLOCKS_ACROSS, BLOCKS_DOWN))
+# Black blocks are see-through, so the floor lines (drawn on the
+# window first) show between the shapes.
+small.set_colorkey(BLACK)
+
+
+# ======================================================================
+# MODELS
+# ======================================================================
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+# (corners clockwise from outside,  colour,  pointer)
+cube_faces = [
+    ((4, 5, 1, 0), RED,    ( 0,  0, -1)),   # front
+    ((6, 7, 3, 2), PURPLE, ( 0,  0,  1)),   # back
+    ((7, 4, 0, 3), BLUE,   (-1,  0,  0)),   # left
+    ((5, 6, 2, 1), GREEN,  ( 1,  0,  0)),   # right
+    ((7, 6, 5, 4), GOLD,   ( 0,  1,  0)),   # top
+    ((2, 3, 0, 1), ORANGE, ( 0, -1,  0)),   # bottom
+]
+cube_model = {&quot;points&quot;: cube_points, &quot;faces&quot;: cube_faces}
+
+# NEW: THE BOARD: a flat box 5 wide, 0.2 thick and 5 deep.
+# It has the SAME 8 corner numbers as the cube, in the same places, just
+# squashed: x and z go to 2.5, y only to 0.1. So it can use cube_faces
+# exactly as they are (Lesson 5: a model is just points + faces).
+board_points = [
+    (-2.5, -0.1, -2.5),   # 0
+    ( 2.5, -0.1, -2.5),   # 1
+    ( 2.5, -0.1,  2.5),   # 2
+    (-2.5, -0.1,  2.5),   # 3
+    (-2.5,  0.1, -2.5),   # 4
+    ( 2.5,  0.1, -2.5),   # 5
+    ( 2.5,  0.1,  2.5),   # 6
+    (-2.5,  0.1,  2.5),   # 7
+]
+board_model = {&quot;points&quot;: board_points, &quot;faces&quot;: cube_faces}
+
+# NEW: THE TEST SCENE, in WORLD coordinates.
+# Both things share the centre (0, 0, 6): 6 in front of where you start.
+# The board is tipped -20 degrees (front edge DOWN, back edge UP), so
+# from the start you look down onto its top. It cuts right through the
+# middle of the gold cube.
+things = [
+    {&quot;model&quot;: board_model, &quot;position&quot;: (0, 0, 6), &quot;size&quot;: 1,
+     &quot;angles&quot;: [-20, 0, 0], &quot;speeds&quot;: (0, 0, 0), &quot;colour&quot;: BOARD_BLUE},
+    {&quot;model&quot;: cube_model, &quot;position&quot;: (0, 0, 6), &quot;size&quot;: 1,
+     &quot;angles&quot;: [0, 30, 0], &quot;speeds&quot;: (0, 0.5, 0), &quot;colour&quot;: SUN_GOLD},
+]
+
+# ---- The floor (from Lesson 5) ----------------------------------------
+FLOOR_Y = -2                  # NEW: lower, so the board clears it
+GRID_LEFT = -8
+GRID_RIGHT = 8
+GRID_NEAR = -3
+GRID_FAR = 13
+
+# ---- Where YOU are (from Lesson 4) ------------------------------------
+cam_x = 0
+cam_y = 0
+cam_z = 0
+cam_turn = 0        # degrees, positive = turned LEFT
+cam_tip = 0         # degrees, positive = looking DOWN
+TIP_LIMIT = 60
+MOVE_SPEED = 0.05   # (0.05 * 60) = 3 units a second
+TURN_SPEED = 1.5    # (1.5 * 60) = 90 degrees a second
+NEAR = 0.1          # closer than this (CAMERA z) is not drawn
+
+# ---- The light (from Lesson 3, unchanged) -----------------------------
+LIGHT = (0.48, 0.6, -0.64)
+AMBIENT = 0.2
+use_light = True
+show_grid = True
+spinning = True
+
+# ---- NEW: F switches between our fill and pygame&#x27;s ---------------------
+fill_by_hand = True
+
+# ---- The mini-map (from Lesson 4) -------------------------------------
+MAP_LEFT = 630
+MAP_TOP = 430
+MAP_SIZE = 160
+MAP_CX = (MAP_LEFT + (MAP_SIZE / 2))    # (630 + 80) = 710
+MAP_CY = (MAP_TOP + (MAP_SIZE / 2))     # (430 + 80) = 510
+MAP_SCALE = 10
+
+
+# ======================================================================
+# MATRIX TOOLS (from Lesson 6, unchanged)
+# ======================================================================
+
+def matrix_times_point(matrix, point_3d):
+    &quot;&quot;&quot;Put one point through a matrix: each ROW dotted with the point.&quot;&quot;&quot;
+    row_0, row_1, row_2 = matrix
+    new_x = dot(row_0, point_3d)
+    new_y = dot(row_1, point_3d)
+    new_z = dot(row_2, point_3d)
+    return (new_x, new_y, new_z)
+
+
+def tip_matrix(angle_degrees):
+    &quot;&quot;&quot;Lesson 2B&#x27;s TIP as a grid. x is the skewer.&quot;&quot;&quot;
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (1, 0,     0         ),
+        (0, cos_a, (-sin_a)  ),
+        (0, sin_a, cos_a     ),
+    )
+
+
+def turn_matrix(angle_degrees):
+    &quot;&quot;&quot;Lesson 2&#x27;s TURN as a grid. y is the skewer.&quot;&quot;&quot;
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, 0, (-sin_a)),
+        (0,     1, 0       ),
+        (sin_a, 0, cos_a   ),
+    )
+
+
+def roll_matrix(angle_degrees):
+    &quot;&quot;&quot;Lesson 2B&#x27;s ROLL as a grid. z is the skewer.&quot;&quot;&quot;
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, (-sin_a), 0),
+        (sin_a, cos_a,    0),
+        (0,     0,        1),
+    )
+
+
+def column(matrix, column_number):
+    &quot;&quot;&quot;One COLUMN of a matrix = where that axis arrow lands.&quot;&quot;&quot;
+    row_0, row_1, row_2 = matrix
+    return (row_0[column_number], row_1[column_number], row_2[column_number])
+
+
+def combine(first, second):
+    &quot;&quot;&quot;ONE matrix that does &#x27;first&#x27;, then &#x27;second&#x27; (Lesson 6).&quot;&quot;&quot;
+    new_col_0 = matrix_times_point(second, column(first, 0))
+    new_col_1 = matrix_times_point(second, column(first, 1))
+    new_col_2 = matrix_times_point(second, column(first, 2))
+    return (
+        (new_col_0[0], new_col_1[0], new_col_2[0]),
+        (new_col_0[1], new_col_1[1], new_col_2[1]),
+        (new_col_0[2], new_col_1[2], new_col_2[2]),
+    )
+
+
+def spin_matrix(angles):
+    &quot;&quot;&quot;A thing&#x27;s whole spin as ONE matrix: tip, then turn, then roll.&quot;&quot;&quot;
+    tip_then_turn = combine(tip_matrix(angles[0]), turn_matrix(angles[1]))
+    return combine(tip_then_turn, roll_matrix(angles[2]))
+
+
+# ======================================================================
+# THE 3D PIPELINE (Lessons 1 to 6, unchanged)
+# ======================================================================
+
+def to_world(shape_point, thing):
+    &quot;&quot;&quot;(Lesson 5) SHAPE -&gt; WORLD: size, then spin, then place.&quot;&quot;&quot;
+    x, y, z = shape_point
+    size = thing[&quot;size&quot;]
+    sized = ( (x * size), (y * size), (z * size) )
+    spun = matrix_times_point(thing[&quot;matrix&quot;], sized)
+    pos_x, pos_y, pos_z = thing[&quot;position&quot;]
+    sx, sy, sz = spun
+    return ( (sx + pos_x), (sy + pos_y), (sz + pos_z) )
+
+
+def to_camera(world_point):
+    &quot;&quot;&quot;(Lessons 4 and 6) WORLD -&gt; CAMERA: subtract you, then camera_matrix.&quot;&quot;&quot;
+    x, y, z = world_point
+    moved = ( (x - cam_x), (y - cam_y), (z - cam_z) )
+    return matrix_times_point(camera_matrix, moved)
+
+
+def project(point_3d):
+    &quot;&quot;&quot;(Lesson 1) CAMERA -&gt; SCREEN. Only call it with z &gt;= NEAR.&quot;&quot;&quot;
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+def average_z(corners, camera_points):
+    &quot;&quot;&quot;(Lesson 3) how far away is this face? Uses CAMERA z.&quot;&quot;&quot;
+    total = 0
+    for corner_number in corners:
+        x, y, z = camera_points[corner_number]
+        total = (total + z)
+    return (total / len(corners))
+
+
+def side_of_edge(start, end, point):
+    &quot;&quot;&quot;NEW (lesson Part 3): Lesson 3&#x27;s clock test, for ANY 3 points.
+
+    Walk along the edge from &#x27;start&#x27; to &#x27;end&#x27;. Is &#x27;point&#x27; on your
+    right-hand side (the inside of a clockwise face)?
+        bigger than 0  -&gt; yes, inside this edge
+        exactly 0      -&gt; right on the edge
+        less than 0    -&gt; no, outside
+
+    The number is also TWICE the area of the triangle start, end, point
+    (in pixels or blocks squared). Step 2 uses that.
+
+    Worked example (lesson Part 3), in BLOCK coordinates:
+        side_of_edge((100, 50), (125, 50), (110.5, 60.5))
+        = ( ((125 - 100) * (60.5 - 50)) - ((50 - 50) * (110.5 - 100)) )
+        = ( (25 * 10.5) - (0 * 10.5) ) = 262.5      -&gt; inside
+    &quot;&quot;&quot;
+    start_x, start_y = start
+    end_x, end_y = end
+    point_x, point_y = point
+    arrow_a_x = (end_x - start_x)
+    arrow_a_y = (end_y - start_y)
+    arrow_b_x = (point_x - start_x)
+    arrow_b_y = (point_y - start_y)
+    return ( (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x) )
+
+
+def is_facing_you(face_points):
+    &quot;&quot;&quot;(Lesson 3) the clock test: True if clockwise on the screen.
+    NEW: now just side_of_edge() on the face&#x27;s first 3 corners.&quot;&quot;&quot;
+    return (side_of_edge(face_points[0], face_points[1], face_points[2]) &gt; 0)
+
+
+def dot(arrow_1, arrow_2):
+    &quot;&quot;&quot;(Lesson 3) the dot product.&quot;&quot;&quot;
+    x1, y1, z1 = arrow_1
+    x2, y2, z2 = arrow_2
+    return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
+
+
+def shade_colour(colour, pointer):
+    &quot;&quot;&quot;(Lesson 3) brighter when the face points at the light.&quot;&quot;&quot;
+    brightness = dot(pointer, LIGHT)
+    if brightness &lt; 0:
+        brightness = 0
+    shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )
+    red, green, blue = colour
+    return ( round(red * shade), round(green * shade), round(blue * shade) )
+
+
+def keep_under_360(angle):
+    &quot;&quot;&quot;Keep an angle between 0 and 360.&quot;&quot;&quot;
+    if angle &gt;= 360:
+        angle = (angle - 360)
+    if angle &lt; 0:
+        angle = (angle + 360)
+    return angle
+
+
+def add_faces_of(thing, faces_to_draw):
+    &quot;&quot;&quot;(Lesson 5) work out every face of ONE thing and add the ones to
+    paint to the shared list (unchanged from Lesson 7).&quot;&quot;&quot;
+    model = thing[&quot;model&quot;]
+    camera_points = []
+    screen_points = []
+    for p in model[&quot;points&quot;]:
+        world = to_world(p, thing)                     # WORLD
+        camera = to_camera(world)                      # CAMERA
+        camera_points.append(camera)
+        if camera[2] &gt;= NEAR:
+            screen_points.append(project(camera))      # SCREEN
+        else:
+            screen_points.append(None)
+
+    for corners, face_colour, pointer in model[&quot;faces&quot;]:
+        too_close = False
+        for corner_number in corners:
+            if camera_points[corner_number][2] &lt; NEAR:
+                too_close = True
+        if too_close:
+            continue
+        face_points = []
+        for corner_number in corners:
+            face_points.append(screen_points[corner_number])
+        if not is_facing_you(face_points):
+            continue
+        distance = average_z(corners, camera_points)
+        colour = thing[&quot;colour&quot;]
+        if use_light:
+            spun_pointer = matrix_times_point(thing[&quot;matrix&quot;], pointer)
+            colour = shade_colour(colour, spun_pointer)
+        faces_to_draw.append( (distance, face_points, colour) )
+
+
+# ======================================================================
+# NEW: FILLING FACES YOURSELF (lesson Part 3)
+# ======================================================================
+
+def fill_triangle(a, b, c, colour):
+    &quot;&quot;&quot;NEW (lesson Part 3): fill one triangle, block by block.
+
+    a, b, c : the corners in BLOCK coordinates (block_x, block_y),
+              clockwise on the screen
+    colour  : the shaded colour of the face
+
+    1. Only look at blocks inside the triangle&#x27;s bounding box.
+    2. For each block, test its CENTRE (block_x + 0.5, block_y + 0.5)
+       against the 3 edges, a-&gt;b, b-&gt;c and c-&gt;a.
+    3. Inside all 3?  Paint it.
+    &quot;&quot;&quot;
+    # Twice the area of the whole triangle. Corners in a line (a thin
+    # sliver) give 0: nothing to fill.
+    total = side_of_edge(a, b, c)
+    if total &lt;= 0:
+        return
+
+    a_x, a_y = a
+    b_x, b_y = b
+    c_x, c_y = c
+    # ---- 1. the bounding box, kept inside the 200 x 150 picture ------
+    # int() chops off the decimals: block 37.8 is in block 37.
+    left = int(min(a_x, b_x, c_x))
+    right = int(max(a_x, b_x, c_x))
+    top = int(min(a_y, b_y, c_y))
+    bottom = int(max(a_y, b_y, c_y))
+    if left &lt; 0:
+        left = 0
+    if top &lt; 0:
+        top = 0
+    if right &gt; (BLOCKS_ACROSS - 1):
+        right = (BLOCKS_ACROSS - 1)
+    if bottom &gt; (BLOCKS_DOWN - 1):
+        bottom = (BLOCKS_DOWN - 1)
+
+    for block_y in range(top, (bottom + 1)):
+        for block_x in range(left, (right + 1)):
+            # ---- 2. the inside test, on the block&#x27;s centre ------------
+            # (Step 2 will call these three numbers &quot;weights&quot;.)
+            centre = ( (block_x + 0.5), (block_y + 0.5) )
+            weight_a = side_of_edge(b, c, centre)   # the edge b -&gt; c
+            weight_b = side_of_edge(c, a, centre)   # the edge c -&gt; a
+            weight_c = side_of_edge(a, b, centre)   # the edge a -&gt; b
+            if (weight_a &lt; 0) or (weight_b &lt; 0) or (weight_c &lt; 0):
+                continue                            # outside: next block
+            # ---- 3. inside all three edges: paint it -----------------
+            small.set_at((block_x, block_y), colour)
+
+
+def draw_face(face_points, colour):
+    &quot;&quot;&quot;NEW (lesson Part 3): fill one face. A 4-corner face is cut into
+    2 triangles, both starting at corner 0:
+        corners 0, 1, 2   and   corners 0, 2, 3
+    Both stay clockwise, like the face.
+
+    The face&#x27;s corners come in SCREEN pixels. Dividing by BLOCK (4)
+    turns them into BLOCK coordinates: SCREEN (500, 200) -&gt; (125, 50).
+    &quot;&quot;&quot;
+    blocks = []
+    for screen_x, screen_y in face_points:
+        blocks.append( ((screen_x / BLOCK), (screen_y / BLOCK)) )
+    fill_triangle(blocks[0], blocks[1], blocks[2], colour)
+    if len(blocks) == 4:
+        fill_triangle(blocks[0], blocks[2], blocks[3], colour)
+
+
+def draw_floor():
+    &quot;&quot;&quot;(Lesson 5) the floor grid, in 1-unit pieces.&quot;&quot;&quot;
+    for x in range(GRID_LEFT, (GRID_RIGHT + 1)):
+        for z in range(GRID_NEAR, GRID_FAR):
+            draw_floor_piece( (x, FLOOR_Y, z), (x, FLOOR_Y, (z + 1)) )
+    for z in range(GRID_NEAR, (GRID_FAR + 1)):
+        for x in range(GRID_LEFT, GRID_RIGHT):
+            draw_floor_piece( (x, FLOOR_Y, z), ((x + 1), FLOOR_Y, z) )
+
+
+def draw_floor_piece(world_start, world_end):
+    &quot;&quot;&quot;(Lesson 5) one 1-unit piece of floor line, straight onto the
+    window. The floor is below everything, so nothing ever hides
+    behind it: it can be drawn first, straight onto the window.&quot;&quot;&quot;
+    start = to_camera(world_start)
+    end = to_camera(world_end)
+    if (start[2] &lt; NEAR) or (end[2] &lt; NEAR):
+        return
+    pygame.draw.line(screen, GRID_COLOUR, project(start), project(end), 1)
+
+
+def to_map(x, z):
+    &quot;&quot;&quot;A WORLD (x, z) -&gt; a pixel on the mini-map (from Lesson 4).&quot;&quot;&quot;
+    map_x = MAP_CX + (x * MAP_SCALE)
+    map_y = MAP_CY - (z * MAP_SCALE)
+    return (map_x, map_y)
+
+
+def draw_map():
+    &quot;&quot;&quot;The mini-map: every thing, and you, from above (Lesson 4).&quot;&quot;&quot;
+    box = pygame.Rect(MAP_LEFT, MAP_TOP, MAP_SIZE, MAP_SIZE)
+    pygame.draw.rect(screen, MAP_BACK, box)
+    screen.set_clip(box)
+    for thing in things:
+        outline = []
+        for corner_number in (0, 1, 2, 3):
+            corner = thing[&quot;model&quot;][&quot;points&quot;][corner_number]
+            x, y, z = to_world(corner, thing)
+            outline.append(to_map(x, z))
+        pygame.draw.polygon(screen, thing[&quot;colour&quot;], outline, 2)
+    forward_x, forward_y, forward_z = column(turn_matrix(cam_turn), 2)
+    you = to_map(cam_x, cam_z)
+    nose = to_map( (cam_x + (forward_x * 1.5)), (cam_z + (forward_z * 1.5)) )
+    pygame.draw.line(screen, PINK, you, nose, 2)
+    pygame.draw.circle(screen, PINK, you, 4)
+    screen.set_clip(None)
+    pygame.draw.rect(screen, WHITE, box, 1)
+
+
+# ======================================================================
+# THE MAIN LOOP
+# ======================================================================
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_l:
+                use_light = not use_light
+            if event.key == pygame.K_g:
+                show_grid = not show_grid
+            if event.key == pygame.K_SPACE:
+                spinning = not spinning
+            if event.key == pygame.K_f:              # NEW
+                fill_by_hand = not fill_by_hand
+
+    keys = pygame.key.get_pressed()
+
+    # ---- Turning and looking (from Lesson 4, unchanged) ----------------
+    if keys[pygame.K_LEFT]:
+        cam_turn = (cam_turn + TURN_SPEED)
+    if keys[pygame.K_RIGHT]:
+        cam_turn = (cam_turn - TURN_SPEED)
+    if keys[pygame.K_UP]:
+        cam_tip = (cam_tip - TURN_SPEED)
+    if keys[pygame.K_DOWN]:
+        cam_tip = (cam_tip + TURN_SPEED)
+    if cam_tip &gt; TIP_LIMIT:
+        cam_tip = TIP_LIMIT
+    if cam_tip &lt; (-TIP_LIMIT):
+        cam_tip = (-TIP_LIMIT)
+
+    # ---- Fly where you look (from Lesson 7, unchanged) -----------------
+    look = combine(tip_matrix(cam_tip), turn_matrix(cam_turn))
+    forward_x, forward_y, forward_z = column(look, 2)
+    right_x, right_y, right_z = column(turn_matrix(cam_turn), 0)
+    if keys[pygame.K_w]:
+        cam_x = (cam_x + (forward_x * MOVE_SPEED))
+        cam_y = (cam_y + (forward_y * MOVE_SPEED))
+        cam_z = (cam_z + (forward_z * MOVE_SPEED))
+    if keys[pygame.K_s]:
+        cam_x = (cam_x - (forward_x * MOVE_SPEED))
+        cam_y = (cam_y - (forward_y * MOVE_SPEED))
+        cam_z = (cam_z - (forward_z * MOVE_SPEED))
+    if keys[pygame.K_d]:
+        cam_x = (cam_x + (right_x * MOVE_SPEED))
+        cam_z = (cam_z + (right_z * MOVE_SPEED))
+    if keys[pygame.K_a]:
+        cam_x = (cam_x - (right_x * MOVE_SPEED))
+        cam_z = (cam_z - (right_z * MOVE_SPEED))
+    if keys[pygame.K_e]:
+        cam_y = (cam_y + MOVE_SPEED)
+    if keys[pygame.K_q]:
+        cam_y = (cam_y - MOVE_SPEED)
+
+    # ---- Every thing spins (Lesson 5), unless paused --------------------
+    for thing in things:
+        angles = thing[&quot;angles&quot;]
+        speeds = thing[&quot;speeds&quot;]
+        if spinning:
+            angles[0] = keep_under_360( (angles[0] + speeds[0]) )
+            angles[1] = keep_under_360( (angles[1] + speeds[1]) )
+            angles[2] = keep_under_360( (angles[2] + speeds[2]) )
+        thing[&quot;matrix&quot;] = spin_matrix(angles)
+
+    # ---- The camera&#x27;s matrix, once a frame (Lesson 6) ------------------
+    camera_matrix = combine(turn_matrix(-cam_turn), tip_matrix(-cam_tip))
+
+    # ==================================================================
+    # DRAW
+    # ==================================================================
+    screen.fill(BLACK)
+    if show_grid:
+        draw_floor()                       # straight onto the window
+
+    # The painter&#x27;s order (Lesson 3): sort far to near, paint in turn.
+    faces_to_draw = []
+    for thing in things:
+        add_faces_of(thing, faces_to_draw)
+    faces_to_draw.sort(reverse=True)
+
+    if fill_by_hand:
+        # NEW: fill every face ourselves into the small 200 x 150
+        # picture, then stretch it 4 times to 800 x 600 and put it on
+        # top of the floor lines (black blocks are see-through).
+        small.fill(BLACK)
+        for distance, face_points, colour in faces_to_draw:
+            draw_face(face_points, colour)
+        big = pygame.transform.scale(small, (WIDTH, HEIGHT))
+        screen.blit(big, (0, 0))
+    else:
+        # F pressed: Lesson 7&#x27;s way, pygame fills each face for us.
+        for distance, face_points, colour in faces_to_draw:
+            pygame.draw.polygon(screen, colour, face_points)
+
+    draw_map()
+
+    # ---- The HUD ---------------------------------------------------------
+    if fill_by_hand:
+        mode = &quot;OUR OWN FILL, 4 x 4 BLOCKS   (F = pygame&#x27;s fill)&quot;
+    else:
+        mode = &quot;PYGAME&#x27;S FILL   (F = our own fill)&quot;
+    screen.blit(font.render(mode, True, YELLOW), (20, 20))
+    # clock.get_fps() = frames per second, averaged over the last few.
+    text = (&quot;frames a second &quot; + str(round(clock.get_fps())))
+    screen.blit(font.render(text, True, WHITE), (20, 50))
+    screen.blit(font.render(&quot;painter&#x27;s order: always ALL in front or ALL behind&quot;, True, PINK),
+                (20, 570))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Fly round the board (A / D and the arrows). Is the board EVER
+#     drawn partly in front of the cube and partly behind it?
+#   * Press F to compare our fill with pygame&#x27;s. Same colours, but ours
+#     is made of 4 x 4 blocks.
+#   * Change BLOCK to 8. The blocks are bigger. Are the frames a second
+#     higher or lower? Then try 2.
+#   * Paint only the blocks where (block_x + block_y) is even. What do
+#     you see, and why?
+# ----------------------------------------------------------------------
+</code></pre></details>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q4</span><span>Walk the edge from (0, 0) to (10, 0) in BLOCK coordinates. Is the point (4, −3) inside or outside?</span></p><details><summary>Show answer</summary><div class="ans"><p><code>( ((10 - 0) * (-3 - 0)) - ((0 - 0) * (4 - 0)) )</code> = <code>( (10 * -3) - 0 )</code> = −30. Less than 0: outside. In BLOCK coordinates y goes down, so −3 is above the edge, on your left hand.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q5</span><span>A triangle has corners (10.2, 4.7), (20.9, 6.1) and (12.5, 15.8) in BLOCK coordinates. How many blocks are in its bounding box?</span></p><details><summary>Show answer</summary><div class="ans"><p>left = <code>int(10.2)</code> = 10, right = <code>int(20.9)</code> = 20, top = <code>int(4.7)</code> = 4, bottom = <code>int(15.8)</code> = 15. <code>((20 - 10) + 1)</code> = 11 across, <code>((15 - 4) + 1)</code> = 12 down: <code>(11 * 12)</code> = 132 blocks tested.</p></div></details></div>
+</div>
+
+<h2>Part 4: The depth buffer <span class="mins">14 MIN</span></h2>
+<p>Now the real idea. Next to the small picture, we keep a list of numbers: one number for each of its 30,000 blocks. Each number is the CAMERA z of the closest thing painted on that block so far. That list is the <em>depth buffer</em>.</p>
+<pre><code>FAR = 1000
+
+def clear_depth():
+    global depth
+    depth = []
+    for row in range(BLOCKS_DOWN):
+        depth.append([FAR] * BLOCKS_ACROSS)</code></pre>
+<p><code>depth</code> is a list of 150 rows, each a list of 200 numbers, so <code>depth[57][124]</code> is the block 124 across and 57 down: row first, like reading a page. <code>[FAR] * 200</code> makes a list of 200 copies of FAR in one go. At the start of every frame every block holds FAR = 1000, which means "nothing painted here yet". Everything in our world is much closer than 1000 (the walls are 12 away), so the first face to reach a block always wins it. Lesson 7 used the same trick for the nearest cube: start with a huge number and keep the smallest. <code>global depth</code> lets the function replace the <code>depth</code> list the rest of the program uses.</p>
+<h3>The rule</h3>
+<p>For each block a triangle covers, we work out how far away the triangle is at that block (its z: below, we see how). Then:</p>
+<pre><code>if z &lt; depth[block_y][block_x]:
+    depth[block_y][block_x] = z                  # remember the new closest
+    small.set_at((block_x, block_y), colour)      # and paint it
+# otherwise do nothing: something closer is already there</code></pre>
+<p>Here it is on a real patch of the test scene, 8 × 6 blocks right where the board's top crosses the cube's front:</p>
+<figure id="fig-10-4-1"><img src="images/z13_depth_grid.png" alt="Three 8 by 6 grids of numbers. 1: all 1000. 2: after the board&#x27;s top, rows read 5.48, 5.34, 5.21, 5.08, 4.96, 4.84. 3: after the cube&#x27;s front, the top rows hold the cube&#x27;s 4.97 to 5.19 in gold, the bottom rows keep the board&#x27;s numbers in blue. Below, block (104, 78): 4.97 &lt; 5.21 so paint gold; block (110, 80): 5.16 &lt; 4.96 is false so it stays blue." loading="lazy"><figcaption><span class="fignum">Fig 10.4.1</span>BLOCK coordinates 104 to 111 across, 76 to 81 down. The board's z changes down the rows (it is tipped); the cube's front face changes across (it is turned). Where the cube's number is smaller, gold wins.<span class="panels">Panels: <b>10.4.1a</b> (top left) start of the frame · <b>10.4.1b</b> (top middle) after the board's top · <b>10.4.1c</b> (top right) after the cube's front · <b>10.4.1d</b> (bottom left) block (104, 78) · <b>10.4.1e</b> (bottom right) block (110, 80)</span></figcaption></figure>
+<div class="keyconcept" role="note" aria-label="Key concept">
+<span class="kc-label">KEY CONCEPT</span>
+<pre><code>if z &lt; depth[block_y][block_x]:
+    depth[block_y][block_x] = z
+    paint the block</code></pre>
+<p>One comparison per block. A face can only paint where it is closer than everything painted so far, so whatever order the faces arrive in, the closest one is always what you see.</p>
+</div>
+<h3>Any order works</h3>
+<p>That last sentence is the big win: we no longer need to sort. Here are the same blocks filled the other way round, cube first:</p>
+<figure id="fig-10-4-2"><img src="images/z14_any_order.png" alt="Block (110, 80): cube first 5.16 is painted, then the board&#x27;s 4.96 is smaller so blue wins. Block (104, 78): cube first 4.97, then the board&#x27;s 5.21 is not smaller so it is skipped and gold stays. Below, the whole picture in both orders, identical." loading="lazy"><figcaption><span class="fignum">Fig 10.4.2</span>The same scene filled in both orders. We checked all 30,000 blocks: the two pictures are identical.<span class="panels">Panels: <b>10.4.2a</b> (top left) block (110, 80) · <b>10.4.2b</b> (top right) block (104, 78) · <b>10.4.2c</b> (bottom) both whole pictures</span></figcaption></figure>
+<h3>The z of one block: weights</h3>
+<p>We only know z at a triangle's three corners. For a block inside, we blend the three corners: the closer the block is to a corner, the more of that corner's z it gets. The amounts are the three numbers the inside test already worked out. Each one is the area (times 2) of the piece of the triangle <em>opposite</em> one corner:</p>
+<figure id="fig-10-4-3"><img src="images/z15_weights.png" alt="Triangle A with block (110, 60)&#x27;s centre P splitting it into three coloured pieces: teal opposite a, purple opposite b, pink opposite c. weight_a 487.98, weight_b 496.03, weight_c 157.11, total 1141.11. Shares 0.428, 0.435 and 0.138 add up to 1. The blend of (1 / z) gives one_over_z 0.1939 and z 5.158." loading="lazy"><figcaption><span class="fignum">Fig 10.4.3</span>BLOCK coordinates for the triangle, CAMERA z for the corners: a = corner 4 at z 4.634, b = corner 5 and c = corner 1 both at z 5.634. P is the centre of block (110, 60).<span class="panels">Panels: <b>10.4.3a</b> (left) the three pieces · <b>10.4.3b</b> (right) the numbers</span></figcaption></figure>
+<p>When P sits right on corner a, the piece opposite a is the whole triangle and the other two pieces are nothing, so we get exactly corner a's z. In the middle, we get a mix. Divided by the total, the three shares always add up to 1.</p>
+<h3>Blend (1 / z), not z</h3>
+<p>You might expect <code>z = ( ( (weight_a * z_a) + (weight_b * z_b) + (weight_c * z_c) ) / total )</code>. It looks right, but it is wrong for any face that goes away from you, and the board does. The reason is Lesson 1: screen positions are made by <em>dividing</em> by z. Lesson 5's floor shows it best:</p>
+<figure id="fig-10-4-4"><img src="images/z16_one_over_z.png" alt="Side view: your eye at y 0, the floor at y -1, rays to floor points at z 2, 3.2, 5 and 8. z 2 lands on screen_y 500, z 8 on 350. Halfway on the screen, 425, is the floor at z 3.2, not 5. Blending z gives 5, wrong. Blending (1 / z) gives 0.3125, and (1 / 0.3125) = 3.2, right." loading="lazy"><figcaption><span class="fignum">Fig 10.4.4</span>CAMERA coordinates from the side, and SCREEN y. Equal steps down the screen are equal steps of (1 / z), so that is what we blend.<span class="panels">Panels: <b>10.4.4a</b> (left) from the side · <b>10.4.4b</b> (top right) the two blends · <b>10.4.4c</b> (bottom right) why</span></figcaption></figure>
+<p>So the code blends <code>(1 / z)</code> and turns the answer back into z at the end. <code>(weight_a / z_a)</code> is just <code>(weight_a * (1 / z_a))</code> written shorter:</p>
+<pre><code>one_over_z = ( ( (weight_a / z_a) + (weight_b / z_b) + (weight_c / z_c) ) / total )
+z = (1 / one_over_z)</code></pre>
+<p>How much does it matter? We checked every block of the test scene against the exact answer. Blending (1 / z) is exact. Blending plain z is off by up to 0.96 on the board's top (6.446 instead of 5.482), and that is enough to change the winner on 270 blocks near the line where the board meets the cube: the crossing comes out in the wrong place.</p>
+<h3>See the depth buffer</h3>
+<p>The numbers are invisible, so step 2 has a key to show them. Z paints every block a grey made from its depth:</p>
+<figure id="fig-10-4-5"><img src="images/z17_depth_view.png" alt="Left: the colour view. Right: the depth buffer as greys, near parts of the board almost white, the cube mid grey, the background black. Below, a grey scale: z 3 is 255, z 4 is 191, z 5 is 153, z 6 is 128, z 7 is 109, z 8 is 96, z 9 is 85; FAR gives 1, black." loading="lazy"><figcaption><span class="fignum">Fig 10.4.5</span><code>grey = (765 / z)</code>, at most 255. 765 is <code>(255 * 3)</code>, so anything 3 or closer is white. The board's crossing line is where the grey of the board and the grey of the cube are equal.<span class="panels">Panels: <b>10.4.5a</b> (left) colours · <b>10.4.5b</b> (right) depth as greys · <b>10.4.5c</b> (bottom) the grey scale</span></figcaption></figure>
+<h3>Run it: step 2</h3>
+<p>Run <code>step2_depth_buffer.py</code>. The board and cube are now drawn correctly from every side. P switches back to the painter's order to compare, Z shows the depth buffer, and SPACE pauses the cube's spin so you can study one pose. As the cube turns, watch the line where it meets the board change shape: no sort could ever do that.</p>
+<figure id="fig-10-4-6"><img src="images/run_step2_depth_buffer.png" alt="Output of step 2: the board&#x27;s front half hides the bottom of the gold cube. HUD: DEPTH BUFFER (P = painter&#x27;s order), frames a second 60, mini-map." loading="lazy"><figcaption><span class="fignum">Fig 10.4.6</span>The depth buffer on. Compare with Fig 10.3.5.</figcaption></figure>
+<details class="full"><summary>Full code: <code>step2_depth_buffer.py</code> (about 720 lines)</summary><pre><code># ======================================================================
+# LESSON 10 - STEP 2: THE DEPTH BUFFER
+# ----------------------------------------------------------------------
+# Goal: draw the board-through-a-cube scene CORRECTLY. The board cuts
+# right through the gold cube, and you can see the line where they
+# cross, from every side.
+#
+# This starts from step 1 (step1_fill_by_hand.py), which filled every
+# face block by block but still painted them in the painter&#x27;s order.
+#
+# What is new since step 1:
+#
+#   1. THE DEPTH BUFFER (lesson Part 4)
+#        depth is a list of 150 rows of 200 numbers, one number for
+#        every block of the small picture. Each number is the CAMERA z
+#        of the closest thing painted on that block so far.
+#        At the start of every frame they are all FAR (1000): &quot;nothing
+#        here yet, so anything is closer&quot;.
+#
+#   2. THE ONE NEW RULE, for every block of every triangle (Part 4):
+#            if z &lt; depth[block_y][block_x]:
+#                depth[block_y][block_x] = z      # remember the new closest
+#                paint the block                   # and paint it
+#            otherwise: do nothing, something closer is already there
+#
+#   3. z FOR EVERY BLOCK (lesson Part 4)
+#        We only know z at the 3 corners. For a block inside, we blend
+#        the 3 corners. The 3 side_of_edge() numbers we already work
+#        out for the inside test say how much of each corner to use.
+#        We blend (1 / z), not z, because on the screen (1 / z) changes
+#        evenly across a flat face and z does not (Lesson 5&#x27;s floor
+#        rows bunch up for the same reason).
+#
+#   4. NO MORE SORTING
+#        The faces can now be drawn in ANY order. Press P to switch back
+#        to the painter&#x27;s order and compare.
+#
+#   5. SEE THE DEPTH BUFFER (lesson Part 4)
+#        Press Z to see the numbers in &quot;depth&quot; as greys:
+#        near = bright, far = dark, FAR (nothing there) = black.
+#
+# Controls:  LEFT / RIGHT = turn,   UP / DOWN = look up / down
+#            W / S = fly forward / back,   A / D = slide left / right
+#            Q / E = straight down / up
+#            P = painter&#x27;s order (old) / depth buffer (new)
+#            Z = show the depth buffer as greys
+#            SPACE = pause the cube&#x27;s spin
+#            G = floor grid on / off,   L = light on / off
+# Run:  python step2_depth_buffer.py
+# ======================================================================
+
+import math
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption(&quot;Lesson 10, step 2 - the depth buffer&quot;)
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+PINK = (255, 105, 200)        # the colour we use for YOU (the camera)
+MAP_BACK = (25, 30, 36)       # dark grey-blue behind the mini-map
+GRID_COLOUR = (40, 90, 70)    # (Lesson 5) dim green for the floor lines
+SUN_GOLD = (250, 200, 70)     # (Lesson 7) the gold cube
+BOARD_BLUE = (70, 150, 255)   # (step 1) the board
+
+# ---- One colour for each face direction (from Lesson 3) ---------------
+RED = (235, 80, 80)          # front (-z)
+PURPLE = (160, 100, 230)     # back  (+z)
+BLUE = (70, 150, 255)        # left  (-x)
+GREEN = (70, 210, 120)       # right (+x)
+GOLD = (245, 200, 60)        # top   (+y)
+ORANGE = (245, 140, 50)      # bottom (-y)
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400
+
+
+# ======================================================================
+# THE SMALL PICTURE (from step 1, lesson Part 2)
+# ======================================================================
+# BLOCK = 4: we fill the window in 4 x 4 squares of real pixels, called
+# BLOCKS. Python checks about 1 block in a microsecond or two, so:
+#     full size: (800 * 600) = 480,000 checks   -&gt; far too slow
+#     blocks:    (200 * 150) =  30,000 checks   -&gt; 16 times fewer
+# We paint the blocks into a SMALL picture, 200 x 150 pixels, and
+# stretch it 4 times bigger onto the window at the end of the frame.
+BLOCK = 4
+BLOCKS_ACROSS = (WIDTH // BLOCK)    # (800 // 4) = 200
+BLOCKS_DOWN = (HEIGHT // BLOCK)     # (600 // 4) = 150
+small = pygame.Surface((BLOCKS_ACROSS, BLOCKS_DOWN))
+# Black blocks are see-through, so the floor lines (drawn on the
+# window first) show between the shapes.
+small.set_colorkey(BLACK)
+
+# ---- NEW: the depth buffer (lesson Part 4) -----------------------------
+# FAR = 1000: &quot;nothing painted here yet&quot;. Every real face is much closer
+# than 1000 (the walls of Lesson 7 are only 12 away), so the first face
+# to reach a block always wins it. Lesson 7 used the same trick for the
+# nearest cube: start with a huge number, keep the smallest.
+FAR = 1000
+depth = []                      # filled in by clear_depth(), every frame
+
+
+# ======================================================================
+# MODELS
+# ======================================================================
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+# (corners clockwise from outside,  colour,  pointer)
+cube_faces = [
+    ((4, 5, 1, 0), RED,    ( 0,  0, -1)),   # front
+    ((6, 7, 3, 2), PURPLE, ( 0,  0,  1)),   # back
+    ((7, 4, 0, 3), BLUE,   (-1,  0,  0)),   # left
+    ((5, 6, 2, 1), GREEN,  ( 1,  0,  0)),   # right
+    ((7, 6, 5, 4), GOLD,   ( 0,  1,  0)),   # top
+    ((2, 3, 0, 1), ORANGE, ( 0, -1,  0)),   # bottom
+]
+cube_model = {&quot;points&quot;: cube_points, &quot;faces&quot;: cube_faces}
+
+# (step 1) THE BOARD: a flat box 5 wide, 0.2 thick and 5 deep.
+# It has the SAME 8 corner numbers as the cube, in the same places, just
+# squashed: x and z go to 2.5, y only to 0.1. So it can use cube_faces
+# exactly as they are (Lesson 5: a model is just points + faces).
+board_points = [
+    (-2.5, -0.1, -2.5),   # 0
+    ( 2.5, -0.1, -2.5),   # 1
+    ( 2.5, -0.1,  2.5),   # 2
+    (-2.5, -0.1,  2.5),   # 3
+    (-2.5,  0.1, -2.5),   # 4
+    ( 2.5,  0.1, -2.5),   # 5
+    ( 2.5,  0.1,  2.5),   # 6
+    (-2.5,  0.1,  2.5),   # 7
+]
+board_model = {&quot;points&quot;: board_points, &quot;faces&quot;: cube_faces}
+
+# (step 1) THE TEST SCENE, in WORLD coordinates.
+# Both things share the centre (0, 0, 6): 6 in front of where you start.
+# The board is tipped -20 degrees (front edge DOWN, back edge UP), so
+# from the start you look down onto its top. It cuts right through the
+# middle of the gold cube.
+things = [
+    {&quot;model&quot;: board_model, &quot;position&quot;: (0, 0, 6), &quot;size&quot;: 1,
+     &quot;angles&quot;: [-20, 0, 0], &quot;speeds&quot;: (0, 0, 0), &quot;colour&quot;: BOARD_BLUE},
+    {&quot;model&quot;: cube_model, &quot;position&quot;: (0, 0, 6), &quot;size&quot;: 1,
+     &quot;angles&quot;: [0, 30, 0], &quot;speeds&quot;: (0, 0.5, 0), &quot;colour&quot;: SUN_GOLD},
+]
+
+# ---- The floor (from Lesson 5) ----------------------------------------
+FLOOR_Y = -2                  # (step 1) lower, so the board clears it
+GRID_LEFT = -8
+GRID_RIGHT = 8
+GRID_NEAR = -3
+GRID_FAR = 13
+
+# ---- Where YOU are (from Lesson 4) ------------------------------------
+cam_x = 0
+cam_y = 0
+cam_z = 0
+cam_turn = 0        # degrees, positive = turned LEFT
+cam_tip = 0         # degrees, positive = looking DOWN
+TIP_LIMIT = 60
+MOVE_SPEED = 0.05   # (0.05 * 60) = 3 units a second
+TURN_SPEED = 1.5    # (1.5 * 60) = 90 degrees a second
+NEAR = 0.1          # closer than this (CAMERA z) is not drawn
+
+# ---- The light (from Lesson 3, unchanged) -----------------------------
+LIGHT = (0.48, 0.6, -0.64)
+AMBIENT = 0.2
+use_light = True
+show_grid = True
+spinning = True
+
+# ---- NEW: switches for this step ---------------------------------------
+use_depth = True              # P: True = depth buffer, False = painter&#x27;s
+show_depth = False            # Z: show the depth buffer as greys
+
+# ---- The mini-map (from Lesson 4) -------------------------------------
+MAP_LEFT = 630
+MAP_TOP = 430
+MAP_SIZE = 160
+MAP_CX = (MAP_LEFT + (MAP_SIZE / 2))    # (630 + 80) = 710
+MAP_CY = (MAP_TOP + (MAP_SIZE / 2))     # (430 + 80) = 510
+MAP_SCALE = 10
+
+
+# ======================================================================
+# MATRIX TOOLS (from Lesson 6, unchanged)
+# ======================================================================
+
+def matrix_times_point(matrix, point_3d):
+    &quot;&quot;&quot;Put one point through a matrix: each ROW dotted with the point.&quot;&quot;&quot;
+    row_0, row_1, row_2 = matrix
+    new_x = dot(row_0, point_3d)
+    new_y = dot(row_1, point_3d)
+    new_z = dot(row_2, point_3d)
+    return (new_x, new_y, new_z)
+
+
+def tip_matrix(angle_degrees):
+    &quot;&quot;&quot;Lesson 2B&#x27;s TIP as a grid. x is the skewer.&quot;&quot;&quot;
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (1, 0,     0         ),
+        (0, cos_a, (-sin_a)  ),
+        (0, sin_a, cos_a     ),
+    )
+
+
+def turn_matrix(angle_degrees):
+    &quot;&quot;&quot;Lesson 2&#x27;s TURN as a grid. y is the skewer.&quot;&quot;&quot;
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, 0, (-sin_a)),
+        (0,     1, 0       ),
+        (sin_a, 0, cos_a   ),
+    )
+
+
+def roll_matrix(angle_degrees):
+    &quot;&quot;&quot;Lesson 2B&#x27;s ROLL as a grid. z is the skewer.&quot;&quot;&quot;
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, (-sin_a), 0),
+        (sin_a, cos_a,    0),
+        (0,     0,        1),
+    )
+
+
+def column(matrix, column_number):
+    &quot;&quot;&quot;One COLUMN of a matrix = where that axis arrow lands.&quot;&quot;&quot;
+    row_0, row_1, row_2 = matrix
+    return (row_0[column_number], row_1[column_number], row_2[column_number])
+
+
+def combine(first, second):
+    &quot;&quot;&quot;ONE matrix that does &#x27;first&#x27;, then &#x27;second&#x27; (Lesson 6).&quot;&quot;&quot;
+    new_col_0 = matrix_times_point(second, column(first, 0))
+    new_col_1 = matrix_times_point(second, column(first, 1))
+    new_col_2 = matrix_times_point(second, column(first, 2))
+    return (
+        (new_col_0[0], new_col_1[0], new_col_2[0]),
+        (new_col_0[1], new_col_1[1], new_col_2[1]),
+        (new_col_0[2], new_col_1[2], new_col_2[2]),
+    )
+
+
+def spin_matrix(angles):
+    &quot;&quot;&quot;A thing&#x27;s whole spin as ONE matrix: tip, then turn, then roll.&quot;&quot;&quot;
+    tip_then_turn = combine(tip_matrix(angles[0]), turn_matrix(angles[1]))
+    return combine(tip_then_turn, roll_matrix(angles[2]))
+
+
+# ======================================================================
+# THE 3D PIPELINE (Lessons 1 to 6, unchanged)
+# ======================================================================
+
+def to_world(shape_point, thing):
+    &quot;&quot;&quot;(Lesson 5) SHAPE -&gt; WORLD: size, then spin, then place.&quot;&quot;&quot;
+    x, y, z = shape_point
+    size = thing[&quot;size&quot;]
+    sized = ( (x * size), (y * size), (z * size) )
+    spun = matrix_times_point(thing[&quot;matrix&quot;], sized)
+    pos_x, pos_y, pos_z = thing[&quot;position&quot;]
+    sx, sy, sz = spun
+    return ( (sx + pos_x), (sy + pos_y), (sz + pos_z) )
+
+
+def to_camera(world_point):
+    &quot;&quot;&quot;(Lessons 4 and 6) WORLD -&gt; CAMERA: subtract you, then camera_matrix.&quot;&quot;&quot;
+    x, y, z = world_point
+    moved = ( (x - cam_x), (y - cam_y), (z - cam_z) )
+    return matrix_times_point(camera_matrix, moved)
+
+
+def project(point_3d):
+    &quot;&quot;&quot;(Lesson 1) CAMERA -&gt; SCREEN. Only call it with z &gt;= NEAR.&quot;&quot;&quot;
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+def average_z(corners, camera_points):
+    &quot;&quot;&quot;(Lesson 3) how far away is this face? Uses CAMERA z.
+    Only the painter&#x27;s order (P) still needs it.&quot;&quot;&quot;
+    total = 0
+    for corner_number in corners:
+        x, y, z = camera_points[corner_number]
+        total = (total + z)
+    return (total / len(corners))
+
+
+def side_of_edge(start, end, point):
+    &quot;&quot;&quot;(step 1, lesson Part 3) Lesson 3&#x27;s clock test, for ANY 3 points.
+
+    Walk along the edge from &#x27;start&#x27; to &#x27;end&#x27;. Is &#x27;point&#x27; on your
+    right-hand side (the inside of a clockwise face)?
+        bigger than 0  -&gt; yes, inside this edge
+        exactly 0      -&gt; right on the edge
+        less than 0    -&gt; no, outside
+
+    The number is also TWICE the area of the triangle start, end, point
+    (in pixels or blocks squared). Part 4 uses that.
+
+    Worked example (lesson Part 3), in BLOCK coordinates:
+        side_of_edge((100, 50), (125, 50), (110.5, 60.5))
+        = ( ((125 - 100) * (60.5 - 50)) - ((50 - 50) * (110.5 - 100)) )
+        = ( (25 * 10.5) - (0 * 10.5) ) = 262.5      -&gt; inside
+    &quot;&quot;&quot;
+    start_x, start_y = start
+    end_x, end_y = end
+    point_x, point_y = point
+    arrow_a_x = (end_x - start_x)
+    arrow_a_y = (end_y - start_y)
+    arrow_b_x = (point_x - start_x)
+    arrow_b_y = (point_y - start_y)
+    return ( (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x) )
+
+
+def is_facing_you(face_points):
+    &quot;&quot;&quot;(Lesson 3) the clock test: True if clockwise on the screen.
+    (step 1) Now just side_of_edge() on the face&#x27;s first 3 corners.&quot;&quot;&quot;
+    return (side_of_edge(face_points[0], face_points[1], face_points[2]) &gt; 0)
+
+
+def dot(arrow_1, arrow_2):
+    &quot;&quot;&quot;(Lesson 3) the dot product.&quot;&quot;&quot;
+    x1, y1, z1 = arrow_1
+    x2, y2, z2 = arrow_2
+    return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
+
+
+def shade_colour(colour, pointer):
+    &quot;&quot;&quot;(Lesson 3) brighter when the face points at the light.&quot;&quot;&quot;
+    brightness = dot(pointer, LIGHT)
+    if brightness &lt; 0:
+        brightness = 0
+    shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )
+    red, green, blue = colour
+    return ( round(red * shade), round(green * shade), round(blue * shade) )
+
+
+def keep_under_360(angle):
+    &quot;&quot;&quot;Keep an angle between 0 and 360.&quot;&quot;&quot;
+    if angle &gt;= 360:
+        angle = (angle - 360)
+    if angle &lt; 0:
+        angle = (angle + 360)
+    return angle
+
+
+def add_faces_of(thing, faces_to_draw):
+    &quot;&quot;&quot;(Lesson 5) work out every face of ONE thing and add the ones to
+    paint to the shared list.
+
+    (step 1) Each face now also keeps its corners&#x27; CAMERA z numbers
+    (face_depths), because filling and the depth buffer need them.
+    &quot;&quot;&quot;
+    model = thing[&quot;model&quot;]
+    camera_points = []
+    screen_points = []
+    for p in model[&quot;points&quot;]:
+        world = to_world(p, thing)                     # WORLD
+        camera = to_camera(world)                      # CAMERA
+        camera_points.append(camera)
+        if camera[2] &gt;= NEAR:
+            screen_points.append(project(camera))      # SCREEN
+        else:
+            screen_points.append(None)
+
+    for corners, face_colour, pointer in model[&quot;faces&quot;]:
+        too_close = False
+        for corner_number in corners:
+            if camera_points[corner_number][2] &lt; NEAR:
+                too_close = True
+        if too_close:
+            continue
+        face_points = []
+        face_depths = []                               # (step 1)
+        for corner_number in corners:
+            face_points.append(screen_points[corner_number])
+            face_depths.append(camera_points[corner_number][2])
+        if not is_facing_you(face_points):
+            continue
+        distance = average_z(corners, camera_points)
+        colour = thing[&quot;colour&quot;]
+        if use_light:
+            spun_pointer = matrix_times_point(thing[&quot;matrix&quot;], pointer)
+            colour = shade_colour(colour, spun_pointer)
+        faces_to_draw.append( (distance, face_points, face_depths, colour) )
+
+
+# ======================================================================
+# FILLING FACES YOURSELF (step 1) AND THE DEPTH BUFFER (NEW)
+# ======================================================================
+
+def clear_depth():
+    &quot;&quot;&quot;NEW (lesson Part 4): a fresh depth buffer for a new frame.
+
+    150 rows, each a list of 200 copies of FAR:
+        depth[0]       is the top row of blocks
+        depth[149]     is the bottom row
+        depth[50][125] is the block 125 across and 50 down
+    [FAR] * 200 makes a list of 200 FARs in one go (lists course).
+    &quot;&quot;&quot;
+    global depth
+    depth = []
+    for row in range(BLOCKS_DOWN):
+        depth.append([FAR] * BLOCKS_ACROSS)
+
+
+def fill_triangle(a, b, c, z_a, z_b, z_c, colour):
+    &quot;&quot;&quot;Fill one triangle, block by block (step 1, lesson Part 3), with
+    the depth buffer check (NEW, lesson Part 4).
+
+    a, b, c        : the corners in BLOCK coordinates (block_x, block_y),
+                     clockwise on the screen
+    z_a, z_b, z_c  : the CAMERA z of each corner (how far away it is)
+    colour         : the shaded colour of the face
+
+    1. Only look at blocks inside the triangle&#x27;s bounding box.
+    2. For each block, test its CENTRE (block_x + 0.5, block_y + 0.5)
+       against the 3 edges, a-&gt;b, b-&gt;c and c-&gt;a.
+    3. Inside all 3?  Blend the corners&#x27; z to get this block&#x27;s z.
+    4. Closer than what the depth buffer holds?  Paint it, remember z.
+    &quot;&quot;&quot;
+    # Twice the area of the whole triangle. Corners in a line (a thin
+    # sliver) give 0: nothing to fill, and we must not divide by 0.
+    total = side_of_edge(a, b, c)
+    if total &lt;= 0:
+        return
+
+    a_x, a_y = a
+    b_x, b_y = b
+    c_x, c_y = c
+    # ---- 1. the bounding box, kept inside the 200 x 150 picture ------
+    # int() chops off the decimals: block 37.8 is in block 37.
+    left = int(min(a_x, b_x, c_x))
+    right = int(max(a_x, b_x, c_x))
+    top = int(min(a_y, b_y, c_y))
+    bottom = int(max(a_y, b_y, c_y))
+    if left &lt; 0:
+        left = 0
+    if top &lt; 0:
+        top = 0
+    if right &gt; (BLOCKS_ACROSS - 1):
+        right = (BLOCKS_ACROSS - 1)
+    if bottom &gt; (BLOCKS_DOWN - 1):
+        bottom = (BLOCKS_DOWN - 1)
+
+    for block_y in range(top, (bottom + 1)):
+        for block_x in range(left, (right + 1)):
+            # ---- 2. the inside test, on the block&#x27;s centre ------------
+            centre = ( (block_x + 0.5), (block_y + 0.5) )
+            weight_a = side_of_edge(b, c, centre)   # the piece opposite a
+            weight_b = side_of_edge(c, a, centre)   # the piece opposite b
+            weight_c = side_of_edge(a, b, centre)   # the piece opposite c
+            if (weight_a &lt; 0) or (weight_b &lt; 0) or (weight_c &lt; 0):
+                continue                            # outside: next block
+
+            # ---- 3. NEW: this block&#x27;s z, blended from the corners -----
+            # Each weight is the area of the piece of triangle OPPOSITE
+            # that corner. Divided by the whole area, the three always
+            # add up to 1. Right on corner a: weight_a = total, so the
+            # blend gives exactly corner a&#x27;s number.
+            # We blend (1 / z) and turn the answer back into z. Blending
+            # z itself puts some blocks of a tipped face nearly 1 unit
+            # too far away (lesson Part 4 has the numbers).
+            #   (weight_a / z_a) is the same as (weight_a * (1 / z_a)).
+            one_over_z = ( ( (weight_a / z_a) + (weight_b / z_b) + (weight_c / z_c) ) / total )
+            z = (1 / one_over_z)
+
+            # ---- 4. NEW: the depth buffer rule --------------------------
+            if use_depth:
+                if z &lt; depth[block_y][block_x]:
+                    depth[block_y][block_x] = z
+                    small.set_at((block_x, block_y), colour)
+            else:
+                # P pressed: the old way. Paint over whatever is there.
+                small.set_at((block_x, block_y), colour)
+
+
+def draw_face(face_points, face_depths, colour):
+    &quot;&quot;&quot;(step 1, lesson Part 3) fill one face: a 4-corner face is cut
+    into 2 triangles, both starting at corner 0:
+        corners 0, 1, 2   and   corners 0, 2, 3
+    Both stay clockwise, like the face.
+
+    The face&#x27;s corners come in SCREEN pixels. Dividing by BLOCK (4)
+    turns them into BLOCK coordinates: SCREEN (500, 200) -&gt; (125, 50).
+    &quot;&quot;&quot;
+    blocks = []
+    for screen_x, screen_y in face_points:
+        blocks.append( ((screen_x / BLOCK), (screen_y / BLOCK)) )
+    fill_triangle(blocks[0], blocks[1], blocks[2],
+                  face_depths[0], face_depths[1], face_depths[2], colour)
+    if len(blocks) == 4:
+        fill_triangle(blocks[0], blocks[2], blocks[3],
+                      face_depths[0], face_depths[2], face_depths[3], colour)
+
+
+def draw_depth_as_grey():
+    &quot;&quot;&quot;NEW (Z key, lesson Part 4): paint every block a grey that shows
+    the number in the depth buffer. Closer = brighter:
+        grey = (765 / z), at most 255
+        z 3 -&gt; 255 (white),  z 6 -&gt; 128,  z 12 -&gt; 64,  FAR -&gt; 1 (black)
+    765 = (255 * 3): anything 3 or closer is full white. The test
+    scene is 3.6 to 8.4 away, so it comes out from 213 down to 91.
+    &quot;&quot;&quot;
+    for block_y in range(BLOCKS_DOWN):
+        for block_x in range(BLOCKS_ACROSS):
+            z = depth[block_y][block_x]
+            grey = round(765 / z)
+            if grey &gt; 255:
+                grey = 255
+            small.set_at((block_x, block_y), (grey, grey, grey))
+
+
+def draw_floor():
+    &quot;&quot;&quot;(Lesson 5) the floor grid, in 1-unit pieces.&quot;&quot;&quot;
+    for x in range(GRID_LEFT, (GRID_RIGHT + 1)):
+        for z in range(GRID_NEAR, GRID_FAR):
+            draw_floor_piece( (x, FLOOR_Y, z), (x, FLOOR_Y, (z + 1)) )
+    for z in range(GRID_NEAR, (GRID_FAR + 1)):
+        for x in range(GRID_LEFT, GRID_RIGHT):
+            draw_floor_piece( (x, FLOOR_Y, z), ((x + 1), FLOOR_Y, z) )
+
+
+def draw_floor_piece(world_start, world_end):
+    &quot;&quot;&quot;(Lesson 5) one 1-unit piece of floor line, straight onto the
+    window. The floor is below everything, so nothing ever hides
+    behind it: it can be drawn first, outside the depth buffer.&quot;&quot;&quot;
+    start = to_camera(world_start)
+    end = to_camera(world_end)
+    if (start[2] &lt; NEAR) or (end[2] &lt; NEAR):
+        return
+    pygame.draw.line(screen, GRID_COLOUR, project(start), project(end), 1)
+
+
+def to_map(x, z):
+    &quot;&quot;&quot;A WORLD (x, z) -&gt; a pixel on the mini-map (from Lesson 4).&quot;&quot;&quot;
+    map_x = MAP_CX + (x * MAP_SCALE)
+    map_y = MAP_CY - (z * MAP_SCALE)
+    return (map_x, map_y)
+
+
+def draw_map():
+    &quot;&quot;&quot;The mini-map: every thing, and you, from above (Lesson 4).&quot;&quot;&quot;
+    box = pygame.Rect(MAP_LEFT, MAP_TOP, MAP_SIZE, MAP_SIZE)
+    pygame.draw.rect(screen, MAP_BACK, box)
+    screen.set_clip(box)
+    for thing in things:
+        outline = []
+        for corner_number in (0, 1, 2, 3):
+            corner = thing[&quot;model&quot;][&quot;points&quot;][corner_number]
+            x, y, z = to_world(corner, thing)
+            outline.append(to_map(x, z))
+        pygame.draw.polygon(screen, thing[&quot;colour&quot;], outline, 2)
+    forward_x, forward_y, forward_z = column(turn_matrix(cam_turn), 2)
+    you = to_map(cam_x, cam_z)
+    nose = to_map( (cam_x + (forward_x * 1.5)), (cam_z + (forward_z * 1.5)) )
+    pygame.draw.line(screen, PINK, you, nose, 2)
+    pygame.draw.circle(screen, PINK, you, 4)
+    screen.set_clip(None)
+    pygame.draw.rect(screen, WHITE, box, 1)
+
+
+# ======================================================================
+# THE MAIN LOOP
+# ======================================================================
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_l:
+                use_light = not use_light
+            if event.key == pygame.K_g:
+                show_grid = not show_grid
+            if event.key == pygame.K_SPACE:
+                spinning = not spinning
+            if event.key == pygame.K_p:              # NEW
+                use_depth = not use_depth
+            if event.key == pygame.K_z:              # NEW
+                show_depth = not show_depth
+
+    keys = pygame.key.get_pressed()
+
+    # ---- Turning and looking (from Lesson 4, unchanged) ----------------
+    if keys[pygame.K_LEFT]:
+        cam_turn = (cam_turn + TURN_SPEED)
+    if keys[pygame.K_RIGHT]:
+        cam_turn = (cam_turn - TURN_SPEED)
+    if keys[pygame.K_UP]:
+        cam_tip = (cam_tip - TURN_SPEED)
+    if keys[pygame.K_DOWN]:
+        cam_tip = (cam_tip + TURN_SPEED)
+    if cam_tip &gt; TIP_LIMIT:
+        cam_tip = TIP_LIMIT
+    if cam_tip &lt; (-TIP_LIMIT):
+        cam_tip = (-TIP_LIMIT)
+
+    # ---- Fly where you look (from Lesson 7, unchanged) -----------------
+    look = combine(tip_matrix(cam_tip), turn_matrix(cam_turn))
+    forward_x, forward_y, forward_z = column(look, 2)
+    right_x, right_y, right_z = column(turn_matrix(cam_turn), 0)
+    if keys[pygame.K_w]:
+        cam_x = (cam_x + (forward_x * MOVE_SPEED))
+        cam_y = (cam_y + (forward_y * MOVE_SPEED))
+        cam_z = (cam_z + (forward_z * MOVE_SPEED))
+    if keys[pygame.K_s]:
+        cam_x = (cam_x - (forward_x * MOVE_SPEED))
+        cam_y = (cam_y - (forward_y * MOVE_SPEED))
+        cam_z = (cam_z - (forward_z * MOVE_SPEED))
+    if keys[pygame.K_d]:
+        cam_x = (cam_x + (right_x * MOVE_SPEED))
+        cam_z = (cam_z + (right_z * MOVE_SPEED))
+    if keys[pygame.K_a]:
+        cam_x = (cam_x - (right_x * MOVE_SPEED))
+        cam_z = (cam_z - (right_z * MOVE_SPEED))
+    if keys[pygame.K_e]:
+        cam_y = (cam_y + MOVE_SPEED)
+    if keys[pygame.K_q]:
+        cam_y = (cam_y - MOVE_SPEED)
+
+    # ---- Every thing spins (Lesson 5), unless paused --------------------
+    for thing in things:
+        angles = thing[&quot;angles&quot;]
+        speeds = thing[&quot;speeds&quot;]
+        if spinning:
+            angles[0] = keep_under_360( (angles[0] + speeds[0]) )
+            angles[1] = keep_under_360( (angles[1] + speeds[1]) )
+            angles[2] = keep_under_360( (angles[2] + speeds[2]) )
+        thing[&quot;matrix&quot;] = spin_matrix(angles)
+
+    # ---- The camera&#x27;s matrix, once a frame (Lesson 6) ------------------
+    camera_matrix = combine(turn_matrix(-cam_turn), tip_matrix(-cam_tip))
+
+    # ==================================================================
+    # DRAW
+    # ==================================================================
+    screen.fill(BLACK)
+    if show_grid:
+        draw_floor()                       # straight onto the window
+
+    small.fill(BLACK)                      # a clean small picture...
+    clear_depth()                          # NEW: ...and a clean depth buffer
+
+    faces_to_draw = []
+    for thing in things:
+        add_faces_of(thing, faces_to_draw)
+    if not use_depth:
+        # The old painter&#x27;s order: far faces first. With the depth
+        # buffer on we SKIP this: the order no longer matters.
+        faces_to_draw.sort(reverse=True)
+    for distance, face_points, face_depths, colour in faces_to_draw:
+        draw_face(face_points, face_depths, colour)
+
+    if show_depth:
+        draw_depth_as_grey()               # NEW: Z key
+
+    # Stretch the 200 x 150 picture to 800 x 600 and put it on top.
+    big = pygame.transform.scale(small, (WIDTH, HEIGHT))
+    screen.blit(big, (0, 0))
+
+    draw_map()
+
+    # ---- The HUD ---------------------------------------------------------
+    if use_depth:
+        mode = &quot;DEPTH BUFFER   (P = painter&#x27;s order)&quot;
+    else:
+        mode = &quot;PAINTER&#x27;S ORDER   (P = depth buffer)&quot;
+    screen.blit(font.render(mode, True, YELLOW), (20, 20))
+    # clock.get_fps() = frames per second, averaged over the last few.
+    text = (&quot;frames a second &quot; + str(round(clock.get_fps())))
+    screen.blit(font.render(text, True, WHITE), (20, 50))
+    screen.blit(font.render(&quot;Z = see depth buffer   SPACE = pause spin&quot;, True, PINK),
+                (20, 570))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Press P with the board through the cube, and fly round. In the
+#     painter&#x27;s order the board is always ALL in front or ALL behind.
+#   * Change BLOCK to 8 or 2. How many blocks is that? What happens to
+#     &quot;frames a second&quot;? (lesson Part 5 has our numbers)
+#   * Make the board tip more: angles [-40, 0, 0].
+#   * Press Z and fly close to the cube. Watch the grey get brighter.
+#   * In draw_depth_as_grey(), try (1530 / z) instead of (765 / z).
+# ----------------------------------------------------------------------
+</code></pre></details>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q6</span><span>A block's depth buffer holds 6.2. Triangle X reaches it with z 6.5, then triangle Y with z 5.9. What does the block end up holding, and which colour?</span></p><details><summary>Show answer</summary><div class="ans"><p>X: is 6.5 &lt; 6.2? No, so skip. Y: is 5.9 &lt; 6.2? Yes, so store 5.9 and paint Y's colour. The block holds 5.9 and shows Y.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q7</span><span>A block has shares 0.5, 0.25 and 0.25 of corners with z 4, 8 and 8. What is its z? What would blending plain z give?</span></p><details><summary>Show answer</summary><div class="ans"><p>1 / z: <code>(1 / 4)</code> = 0.25, <code>(1 / 8)</code> = 0.125, 0.125. Blend: <code>( (0.5 * 0.25) + (0.25 * 0.125) + (0.25 * 0.125) )</code> = <code>(0.125 + 0.03125 + 0.03125)</code> = 0.1875. z = <code>(1 / 0.1875)</code> = 5.333.</p><p>Plain z: <code>( (0.5 * 4) + (0.25 * 8) + (0.25 * 8) )</code> = <code>(2 + 2 + 2)</code> = 6, two thirds of a unit too far.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q8</span><span>Why does every block start at FAR = 1000 and not at 0?</span></p><details><summary>Show answer</summary><div class="ans"><p>The rule only paints when the new z is <em>smaller</em> than the stored one. Nothing in front of you has z below <code>NEAR</code> = 0.1, so with 0 stored no face could ever be smaller, and nothing would be painted. 1000 is bigger than anything in the world, so the first face always wins.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q9</span><span>In the Z view, what grey is a block with depth 7.5? And one with depth 2?</span></p><details><summary>Show answer</summary><div class="ans"><p><code>(765 / 7.5)</code> = 102. <code>(765 / 2)</code> = 382.5, which is more than 255, so it is kept at 255: white.</p></div></details></div>
+</div>
+
+<h2>Part 5: The depth buffer in Cube Hunt <span class="mins">6 MIN</span></h2>
+<p>Step 3 puts the depth buffer into Lesson 8's finished game. There is one thing Lesson 8 adds that step 1 did not need: after clipping, a face can have 3, 4 or 5 corners. So <code>draw_face()</code> cuts any face into a fan of triangles, all starting at list place 0:</p>
+<figure id="fig-10-5-1"><img src="images/z18_fan.png" alt="A triangle, a 4-corner face and a 5-corner face with their corners numbered by list place. The triangle needs one triangle 0,1,2. The 4-corner face needs 0,1,2 and 0,2,3. The 5-corner face needs 0,1,2, 0,2,3 and 0,3,4." loading="lazy"><figcaption><span class="fignum">Fig 10.5.1</span>A face with N corners makes <code>(N - 2)</code> triangles. Lesson 8's <code>clip_face()</code> keeps the corners clockwise, so every triangle stays clockwise.<span class="panels">Panels: <b>10.5.1a</b> (left) 3 corners · <b>10.5.1b</b> (middle) 4 corners · <b>10.5.1c</b> (right) 5 corners</span></figcaption></figure>
+<pre><code>for corner_number in range(1, (len(blocks) - 1)):
+    next_number = (corner_number + 1)
+    fill_triangle(blocks[0], blocks[corner_number], blocks[next_number],
+                  face_depths[0], face_depths[corner_number],
+                  face_depths[next_number], colour)</code></pre>
+<p>For a 5-corner face, <code>range(1, 4)</code> gives 1, 2, 3: triangles 0,1,2 then 0,2,3 then 0,3,4. <code>face_depths</code> is the CAMERA z of each corner, which <code>add_faces_of()</code> now keeps next to the SCREEN points. Everything else in the frame is as before, except the sort is gone:</p>
+<figure id="fig-10-5-2"><img src="images/z19_frame.png" alt="Seven boxes: 1 floor lines, 2 clear (new), 3 each thing&#x27;s faces, 4 fill every face in any order (new), 5 depth check (new), 6 stretch 200 by 150 to 800 by 600 (new), 7 map and HUD." loading="lazy"><figcaption><span class="fignum">Fig 10.5.2</span>One frame of <code>step3_cube_hunt_depth.py</code>. Steps 3 and 7 are Lessons 1 to 8 unchanged.</figcaption></figure>
+<pre><code>screen.fill(BLACK)
+if show_grid:
+    draw_floor()                  # straight onto the window
+small.fill(BLACK)                 # a clean small picture
+clear_depth()                     # a clean depth buffer
+faces_to_draw = []
+for thing in things:
+    add_faces_of(thing, faces_to_draw)
+for distance, face_points, face_depths, colour in faces_to_draw:
+    draw_face(face_points, face_depths, colour)       # no sort!
+big = pygame.transform.scale(small, (WIDTH, HEIGHT))
+screen.blit(big, (0, 0))</code></pre>
+<p>The floor is drawn first, straight onto the window, outside the depth buffer. That is safe because the floor is below every cube and rock, and you can never fly below it (Lesson 7's <code>GROUND</code>), so nothing is ever hidden behind it. The black outlines Lesson 7 drew round each face are gone: <code>pygame.draw.polygon()</code> knows nothing about our depth buffer, so outlines would show through rocks.</p>
+<h3>What it costs</h3>
+<figure id="fig-10-5-3"><img src="images/z20_frame_cost.png" alt="Bars of whole-frame time in step 2 for BLOCK 1, 2, 4 and 8. Start view: 131, 36, 11 and 4 ms. Close up: 735, 207, 42 and 19 ms. A dashed line at 16.7 ms marks 60 frames a second." loading="lazy"><figcaption><span class="fignum">Fig 10.5.3</span>Measured on our test computer. Close up, the cube and board cover most of the window, so far more blocks are tested, and some blocks are painted twice (once by the board, once by the cube).</figcaption></figure>
+<p>With <code>BLOCK = 4</code> the start view takes 11 ms, inside the 16.7 ms budget, so it runs at the full 60 frames a second. Close up it takes 42 ms, about 23 frames a second. In the game, with a rock filling most of the window, we measured about 31 ms (32 a second): still playable. Step 3 shows "frames a second" on the HUD so you can watch it happen. This is why real games do the depth buffer in the graphics card, which checks millions of pixels at once.</p>
+<p>What about Lesson 9's teapot? It has 6,320 triangles, which is a lot for a painter's sort, and its spout and handle sit in front of its body in places and behind it in others: exactly the kind of crossing the painter gets wrong. For the depth buffer, the cost is mostly blocks, not triangles. In a test with the teapot 8 units long, 2,558 of its triangles faced us; filling them took 9 ms at 12 units away and 22 ms at 7 away, on top of Lesson 9's own work.</p>
+<h3>Run it: step 3</h3>
+<p>Run <code>step3_cube_hunt_depth.py</code> and play. It is Lesson 8's Cube Hunt with every face filled through the depth buffer.</p>
+<figure id="fig-10-5-4"><img src="images/run_step3_cube_hunt_depth.png" alt="Output of step 3: rock 0 straight ahead in grey blocks, a gold cube half hidden behind its right edge, the floor grid, score 0, nearest cube 6.2, clipping ON, frames a second 47, time 60 and the mini-map." loading="lazy"><figcaption><span class="fignum">Fig 10.5.4</span>The start of a game. The gold cube on the right is partly behind rock 0: the depth buffer decides that block by block.</figcaption></figure>
+<details class="full"><summary>Full code: <code>step3_cube_hunt_depth.py</code> (about 1100 lines)</summary><pre><code># ======================================================================
+# LESSON 10 - STEP 3: CUBE HUNT WITH A DEPTH BUFFER
+# ----------------------------------------------------------------------
+# Goal: put the depth buffer into the real game. Cube Hunt plays
+# exactly as in Lesson 8 (gold cubes, stone rocks, clipped faces), but
+# every face is now filled block by block and checked against the depth
+# buffer, so it can never be drawn in the wrong order.
+#
+# This is Lesson 8&#x27;s finished game (step3_clipped_hunt.py) plus the
+# drawing tools from steps 1 and 2 of this lesson.
+#
+# What is new since Lesson 8:
+#
+#   1. THE SMALL PICTURE (lesson Part 2)
+#        BLOCK = 4: faces are filled into a 200 x 150 picture, which is
+#        stretched to 800 x 600 at the end of the frame.
+#
+#   2. FILLING FACES YOURSELF (lesson Part 3)
+#        side_of_edge(), fill_triangle() and draw_face() from step 1.
+#        A clipped face can have 3, 4 or 5 corners (Lesson 8), so
+#        draw_face() now cuts ANY face into triangles, all starting
+#        at corner 0 (lesson Part 5).
+#
+#   3. THE DEPTH BUFFER (lesson Part 4)
+#        depth = 150 rows of 200 numbers, all FAR (1000) at the start of
+#        a frame. A block is only painted if its z is SMALLER (closer)
+#        than the number already there.
+#
+#   4. NO SORT, NO OUTLINES (lesson Part 5)
+#        faces_to_draw.sort() is gone: the order no longer matters.
+#        The black outlines are gone too (pygame drew them with no
+#        depth check, so they would show through rocks).
+#
+#   5. FRAMES A SECOND on the HUD (lesson Part 5)
+#        Filling in Python is slow. Watch this number when a rock fills
+#        the window.
+#
+# The game, every frame:
+#
+#   keys -&gt; fly -&gt; walls -&gt; collect? -&gt; clock
+#        -&gt; floor lines -&gt; clear depth -&gt; fill every face -&gt; stretch -&gt; HUD
+#
+# Controls:  LEFT / RIGHT = turn,   UP / DOWN = look up / down
+#            W / S = fly forward / back (the way you LOOK)
+#            A / D = slide left / right,   Q / E = straight down / up
+#            R = play again (after TIME UP),   K = clipping on / off
+#            G = floor grid on / off,   L = light on / off
+# Run:  python step3_cube_hunt_depth.py
+# ======================================================================
+
+import math
+import random                 # (Lesson 7) for random.uniform
+import pygame
+
+pygame.init()
+WIDTH = 800
+HEIGHT = 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption(&quot;Lesson 10, step 3 - Cube Hunt with a depth buffer&quot;)
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+big_font = pygame.font.SysFont(None, 96)    # (Lesson 7) for &quot;TIME UP&quot;
+
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+PINK = (255, 105, 200)        # the colour we use for YOU (the camera)
+MAP_BACK = (25, 30, 36)       # dark grey-blue behind the mini-map
+GRID_COLOUR = (40, 90, 70)    # (Lesson 5) dim green for the floor lines
+WALL_RED = (235, 80, 80)      # (Lesson 7) the wall square on the mini-map
+SUN_GOLD = (250, 200, 70)     # (Lesson 7) the colour of every pickup cube
+STONE = (150, 150, 160)       # (Lesson 8): the colour of every rock
+
+# ---- One colour for each face direction (from Lesson 3) ---------------
+RED = (235, 80, 80)          # front (-z)
+PURPLE = (160, 100, 230)     # back  (+z)
+BLUE = (70, 150, 255)        # left  (-x)
+GREEN = (70, 210, 120)       # right (+x)
+GOLD = (245, 200, 60)        # top   (+y)
+ORANGE = (245, 140, 50)      # bottom (-y)
+
+CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
+CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
+FOCAL = 400
+
+
+# ======================================================================
+# NEW: THE SMALL PICTURE (step 1, lesson Part 2)
+# ======================================================================
+# BLOCK = 4: we fill the window in 4 x 4 squares of real pixels, called
+# BLOCKS. Python checks about 1 block in a microsecond or two, so:
+#     full size: (800 * 600) = 480,000 checks   -&gt; far too slow
+#     blocks:    (200 * 150) =  30,000 checks   -&gt; 16 times fewer
+# We paint the blocks into a SMALL picture, 200 x 150 pixels, and
+# stretch it 4 times bigger onto the window at the end of the frame.
+BLOCK = 4
+BLOCKS_ACROSS = (WIDTH // BLOCK)    # (800 // 4) = 200
+BLOCKS_DOWN = (HEIGHT // BLOCK)     # (600 // 4) = 150
+small = pygame.Surface((BLOCKS_ACROSS, BLOCKS_DOWN))
+# Black blocks are see-through, so the floor lines (drawn on the
+# window first) show between the shapes.
+small.set_colorkey(BLACK)
+
+# ---- NEW: the depth buffer (step 2, lesson Part 4) ---------------------
+# FAR = 1000: &quot;nothing painted here yet&quot;. Every real face is much closer
+# than 1000 (the walls are only 12 away), so the first face
+# to reach a block always wins it. The nearest-cube check below uses the
+# same trick: start with a huge number, keep the smallest.
+FAR = 1000
+depth = []                      # filled in by clear_depth(), every frame
+
+
+# ======================================================================
+# MODELS (from Lesson 5, unchanged)
+# ======================================================================
+cube_points = [
+    (-1, -1, -1),   # 0  bottom-left-front
+    ( 1, -1, -1),   # 1  bottom-right-front
+    ( 1, -1,  1),   # 2  bottom-right-back
+    (-1, -1,  1),   # 3  bottom-left-back
+    (-1,  1, -1),   # 4  top-left-front
+    ( 1,  1, -1),   # 5  top-right-front
+    ( 1,  1,  1),   # 6  top-right-back
+    (-1,  1,  1),   # 7  top-left-back
+]
+# (corners clockwise from outside,  colour,  pointer)
+cube_faces = [
+    ((4, 5, 1, 0), RED,    ( 0,  0, -1)),   # front
+    ((6, 7, 3, 2), PURPLE, ( 0,  0,  1)),   # back
+    ((7, 4, 0, 3), BLUE,   (-1,  0,  0)),   # left
+    ((5, 6, 2, 1), GREEN,  ( 1,  0,  0)),   # right
+    ((7, 6, 5, 4), GOLD,   ( 0,  1,  0)),   # top
+    ((2, 3, 0, 1), ORANGE, ( 0, -1,  0)),   # bottom
+]
+cube_model = {&quot;points&quot;: cube_points, &quot;faces&quot;: cube_faces}
+
+
+# ======================================================================
+# THE PLAYING FIELD (Lesson 7 Part 1)
+# ======================================================================
+
+# ---- (Lesson 7) the sizes of the field ------------------------------------
+# FIELD = 10: new cubes appear with x and z from -10 to 10, a 20 x 20
+#   square. You fly 3 units a second, so edge to edge is
+#   (20 / 3) = 6.7 seconds: some flying, but never boring.
+# WALL = 12: you can&#x27;t fly further than 12 from the centre, 2 more than
+#   FIELD, so you can always fly round a cube at the edge.
+FIELD = 10
+WALL = 12
+
+# ---- (Lesson 7) the floor (from Lesson 5), now as big as the walls --------
+FLOOR_Y = -1
+GRID_LEFT = (-WALL)       # -12
+GRID_RIGHT = WALL         # 12
+GRID_NEAR = (-WALL)       # -12
+GRID_FAR = WALL           # 12
+
+# ---- (Lesson 7) the pickups ------------------------------------------------
+# PICKUP_SIZE = 0.5: Lesson 5&#x27;s &quot;size&quot;, so each cube is 1 unit wide
+#   (its corners are at -0.5 and 0.5). A 1-unit face 5 away is
+#   ((1 * 400) / 5) = 80 px wide; 20 away it is 20 px (Lesson 7 Part 1).
+PICKUP_SIZE = 0.5
+
+# (Lesson 7) cube heights: their centres float from y = 0 to y = 2.
+#   0 is your eye height at the start; the lowest cube&#x27;s bottom is then
+#   at (0 - 0.5) = -0.5, half a unit above the floor (FLOOR_Y = -1).
+PICKUP_LOW = 0
+PICKUP_HIGH = 2
+
+# (Lesson 7) the 8 spots the cubes start at, in WORLD coordinates.
+# The same every game, so you can learn a good route. Cube 0 at
+# (3, 1, 5) is the lesson&#x27;s worked example.
+START_SPOTS = [
+    (3, 1, 5),      # 0  ahead and to the right: the first one you see
+    (-2, 0, 8),     # 1
+    (0, 0, 10),     # 2  straight ahead, at the far edge
+    (-6, 1, 3),     # 3
+    (6, 0, -2),     # 4  behind you, to the right
+    (-4, 2, -7),    # 5  behind you, up high
+    (8, 0, 7),      # 6
+    (2, 1, -9),     # 7  far behind you
+]
+
+# (Lesson 7) COLLECT_RADIUS = 1.0: you collect a cube when your eye is
+#   1 unit or less from its CENTRE. Its faces are 0.5 from the centre,
+#   so your nose is then 0.5 from a face, which fills the window:
+#   ((1 * 400) / 0.5) = 800 px wide (Lesson 7 Part 3).
+COLLECT_RADIUS = 1.0
+
+# (Lesson 7) MIN_SPAWN_DISTANCE = 5: a new cube never appears closer than
+#   5 to you, so it is at least (5 / 3) = 1.7 seconds of flying away.
+MIN_SPAWN_DISTANCE = 5
+
+# ---- (Lesson 8): ROCKS, big scenery cubes (Lesson 8 Part 1) -------------------
+# ROCK_SIZE = 1.5: Lesson 5&#x27;s &quot;size&quot;, so a rock is (2 * 1.5) = 3 units
+#   wide, 3 times a gold cube. Big enough that you can fly right up
+#   beside one while most of it is still on the screen: its front face,
+#   2.5 away, is ((3 * 400) / 2.5) = 480 px wide.
+ROCK_SIZE = 1.5
+
+# Each rock SITS on the floor: its centre is ROCK_SIZE above FLOOR_Y,
+#   so centre y = (-1 + 1.5) = 0.5, bottom at -1, top at 2.
+ROCK_Y = (FLOOR_Y + ROCK_SIZE)
+
+# Where the 4 rocks are, in WORLD coordinates. Rock 0 is straight ahead
+# of where you start: the lesson&#x27;s worked example.
+ROCK_SPOTS = [
+    (0, ROCK_Y, 4),       # 0  straight ahead, its front face at z = 2.5
+    (-5, ROCK_Y, -3),     # 1  behind you, to the left
+    (5, ROCK_Y, 10),      # 2  far ahead, to the right
+    (7, ROCK_Y, -7),      # 3  behind you, to the right
+]
+
+# ROCK_CLEARANCE = 3: a new gold cube must be at least 3 from every
+#   rock&#x27;s centre: 1.5 (half a rock) + 0.5 (half a gold cube) + 1 (your
+#   COLLECT_RADIUS, so you can always reach it) = 3.
+ROCK_CLEARANCE = ( (ROCK_SIZE + PICKUP_SIZE) + COLLECT_RADIUS )
+
+# ---- (Lesson 7) how high and low you can fly (Lesson 7 Part 5) -----------------
+# GROUND = -0.5: your eye stays half a unit above the floor (y = -1).
+# CEILING = 4: two more than PICKUP_HIGH, so you can look down on every
+#   cube but never fly off where none could be.
+GROUND = (FLOOR_Y + 0.5)     # (-1 + 0.5) = -0.5
+CEILING = 4
+
+# ---- (Lesson 7) the clock (Lesson 7 Part 6) -------------------------------------
+# 60 seconds: at 3 units a second that is (3 * 60) = 180 units of
+# flying, enough for a good handful of cubes, short enough to retry.
+GAME_SECONDS = 60
+
+
+def make_pickups():
+    &quot;&quot;&quot;(Lesson 7) build a fresh list of 8 pickup THINGS (Lesson 5&#x27;s
+    dictionaries), one at each START_SPOTS position.
+
+    Each one is a small gold cube (size 0.5) that spins slowly so it
+    catches your eye: 1 degree a frame of turn = one turn in 6 seconds,
+    and 0.5 of tip so it wobbles a little too.
+    &quot;&quot;&quot;
+    pickups = []
+    for spot in START_SPOTS:
+        pickups.append({&quot;model&quot;: cube_model, &quot;position&quot;: spot,
+                        &quot;size&quot;: PICKUP_SIZE, &quot;angles&quot;: [0, 0, 0],
+                        &quot;speeds&quot;: (0.5, 1, 0), &quot;colour&quot;: SUN_GOLD,
+                        &quot;pickup&quot;: True})          # (Lesson 8)
+    return pickups
+
+
+def make_rocks():
+    &quot;&quot;&quot;(Lesson 8): build a list of 4 rock THINGS, one at each ROCK_SPOTS position.
+
+    Same dictionary keys as a gold cube, with three differences:
+    size 1.5, speeds (0, 0, 0) so they never spin, and &quot;pickup&quot;: False
+    so you can&#x27;t collect them.
+    &quot;&quot;&quot;
+    rocks = []
+    for spot in ROCK_SPOTS:
+        rocks.append({&quot;model&quot;: cube_model, &quot;position&quot;: spot,
+                      &quot;size&quot;: ROCK_SIZE, &quot;angles&quot;: [0, 0, 0],
+                      &quot;speeds&quot;: (0, 0, 0), &quot;colour&quot;: STONE,
+                      &quot;pickup&quot;: False})
+    return rocks
+
+
+def make_world():
+    &quot;&quot;&quot;(Lesson 8): the whole world = 8 gold cubes + 4 rocks.
+
+    &quot;+&quot; joins two lists into one longer list: (8 + 4) = 12 things.
+    The gold cubes come first, so things[0] is still cube 0.
+    &quot;&quot;&quot;
+    return (make_pickups() + make_rocks())
+
+
+# &quot;things&quot; is Lesson 5&#x27;s list of everything in the world.
+# (Lesson 8): 8 gold cubes AND 4 rocks.
+things = make_world()
+
+# ---- Where YOU are (from Lesson 4) ------------------------------------
+cam_x = 0
+cam_y = 0
+cam_z = 0
+cam_turn = 0        # degrees, positive = turned LEFT
+cam_tip = 0         # degrees, positive = looking DOWN
+TIP_LIMIT = 60
+MOVE_SPEED = 0.05   # (0.05 * 60) = 3 units a second
+TURN_SPEED = 1.5    # (1.5 * 60) = 90 degrees a second
+NEAR = 0.1          # closer than this (CAMERA z) is not drawn
+
+# ---- The light (from Lesson 3, unchanged) -----------------------------
+LIGHT = (0.48, 0.6, -0.64)
+AMBIENT = 0.2
+use_light = True
+show_grid = True
+# (Lesson 8): K turns clipping on / off, so you can see the difference.
+use_clipping = True
+
+# ---- (Lesson 7) the score ------------------------------------------------
+score = 0
+# ---- (Lesson 7) the clock and the game&#x27;s two states (Lesson 7 Part 6) ----------
+best_score = 0                         # NOT reset by R
+frames_left = (GAME_SECONDS * 60)      # (60 * 60) = 3600
+game_over = False                      # False = PLAYING, True = TIME UP
+
+# ---- The mini-map (Lesson 7 Part 1: resized for the whole field) ---------
+MAP_LEFT = 630
+MAP_TOP = 430
+MAP_SIZE = 160
+# (Lesson 7) the WORLD centre now sits in the MIDDLE of the box, because
+# the field goes the same distance every way (-12 to 12).
+MAP_CX = (MAP_LEFT + (MAP_SIZE / 2))    # (630 + 80) = 710
+MAP_CY = (MAP_TOP + (MAP_SIZE / 2))     # (430 + 80) = 510
+# (Lesson 7) 6 px per unit: the walls are 24 units across, and
+# (24 * 6) = 144 px fits the 160 px box with 8 px to spare.
+MAP_SCALE = 6
+
+
+# ======================================================================
+# MATRIX TOOLS (from Lesson 6, unchanged)
+# ======================================================================
+
+def matrix_times_point(matrix, point_3d):
+    &quot;&quot;&quot;Put one point through a matrix: each ROW dotted with the point.&quot;&quot;&quot;
+    row_0, row_1, row_2 = matrix
+    new_x = dot(row_0, point_3d)
+    new_y = dot(row_1, point_3d)
+    new_z = dot(row_2, point_3d)
+    return (new_x, new_y, new_z)
+
+
+def tip_matrix(angle_degrees):
+    &quot;&quot;&quot;Lesson 2B&#x27;s TIP as a grid. x is the skewer.&quot;&quot;&quot;
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (1, 0,     0         ),
+        (0, cos_a, (-sin_a)  ),
+        (0, sin_a, cos_a     ),
+    )
+
+
+def turn_matrix(angle_degrees):
+    &quot;&quot;&quot;Lesson 2&#x27;s TURN as a grid. y is the skewer.&quot;&quot;&quot;
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, 0, (-sin_a)),
+        (0,     1, 0       ),
+        (sin_a, 0, cos_a   ),
+    )
+
+
+def roll_matrix(angle_degrees):
+    &quot;&quot;&quot;Lesson 2B&#x27;s ROLL as a grid. z is the skewer.&quot;&quot;&quot;
+    angle_radians = math.radians(angle_degrees)
+    cos_a = math.cos(angle_radians)
+    sin_a = math.sin(angle_radians)
+    return (
+        (cos_a, (-sin_a), 0),
+        (sin_a, cos_a,    0),
+        (0,     0,        1),
+    )
+
+
+def column(matrix, column_number):
+    &quot;&quot;&quot;One COLUMN of a matrix = where that axis arrow lands.&quot;&quot;&quot;
+    row_0, row_1, row_2 = matrix
+    return (row_0[column_number], row_1[column_number], row_2[column_number])
+
+
+def combine(first, second):
+    &quot;&quot;&quot;ONE matrix that does &#x27;first&#x27;, then &#x27;second&#x27; (Lesson 6).&quot;&quot;&quot;
+    new_col_0 = matrix_times_point(second, column(first, 0))
+    new_col_1 = matrix_times_point(second, column(first, 1))
+    new_col_2 = matrix_times_point(second, column(first, 2))
+    return (
+        (new_col_0[0], new_col_1[0], new_col_2[0]),
+        (new_col_0[1], new_col_1[1], new_col_2[1]),
+        (new_col_0[2], new_col_1[2], new_col_2[2]),
+    )
+
+
+def spin_matrix(angles):
+    &quot;&quot;&quot;A thing&#x27;s whole spin as ONE matrix: tip, then turn, then roll.&quot;&quot;&quot;
+    tip_then_turn = combine(tip_matrix(angles[0]), turn_matrix(angles[1]))
+    return combine(tip_then_turn, roll_matrix(angles[2]))
+
+
+# ======================================================================
+# THE 3D PIPELINE (Lessons 1 to 6, unchanged)
+# ======================================================================
+
+def to_world(shape_point, thing):
+    &quot;&quot;&quot;(Lesson 5) SHAPE -&gt; WORLD: size, then spin, then place.&quot;&quot;&quot;
+    x, y, z = shape_point
+    size = thing[&quot;size&quot;]
+    sized = ( (x * size), (y * size), (z * size) )
+    spun = matrix_times_point(thing[&quot;matrix&quot;], sized)
+    pos_x, pos_y, pos_z = thing[&quot;position&quot;]
+    sx, sy, sz = spun
+    return ( (sx + pos_x), (sy + pos_y), (sz + pos_z) )
+
+
+def to_camera(world_point):
+    &quot;&quot;&quot;(Lessons 4 and 6) WORLD -&gt; CAMERA: subtract you, then camera_matrix.&quot;&quot;&quot;
+    x, y, z = world_point
+    moved = ( (x - cam_x), (y - cam_y), (z - cam_z) )
+    return matrix_times_point(camera_matrix, moved)
+
+
+def project(point_3d):
+    &quot;&quot;&quot;(Lesson 1) CAMERA -&gt; SCREEN. Only call it with z &gt;= NEAR.&quot;&quot;&quot;
+    x, y, z = point_3d
+    screen_x = CENTRE_X + ( (x * FOCAL) / z )
+    screen_y = CENTRE_Y - ( (y * FOCAL) / z )
+    return (screen_x, screen_y)
+
+
+def average_z(corners, camera_points):
+    &quot;&quot;&quot;(Lesson 3) how far away is this face? Uses CAMERA z.
+    NEW: nothing is sorted by it any more. It is kept so that you
+    can put faces_to_draw.sort(reverse=True) back in to compare.&quot;&quot;&quot;
+    total = 0
+    for corner_number in corners:
+        x, y, z = camera_points[corner_number]
+        total = (total + z)
+    return (total / len(corners))
+
+
+def side_of_edge(start, end, point):
+    &quot;&quot;&quot;NEW (step 1, lesson Part 3): Lesson 3&#x27;s clock test, for ANY 3 points.
+
+    Walk along the edge from &#x27;start&#x27; to &#x27;end&#x27;. Is &#x27;point&#x27; on your
+    right-hand side (the inside of a clockwise face)?
+        bigger than 0  -&gt; yes, inside this edge
+        exactly 0      -&gt; right on the edge
+        less than 0    -&gt; no, outside
+
+    The number is also TWICE the area of the triangle start, end, point
+    (in pixels or blocks squared). lesson Part 4 uses that.
+
+    Worked example (lesson Part 3), in BLOCK coordinates:
+        side_of_edge((100, 50), (125, 50), (110.5, 60.5))
+        = ( ((125 - 100) * (60.5 - 50)) - ((50 - 50) * (110.5 - 100)) )
+        = ( (25 * 10.5) - (0 * 10.5) ) = 262.5      -&gt; inside
+    &quot;&quot;&quot;
+    start_x, start_y = start
+    end_x, end_y = end
+    point_x, point_y = point
+    arrow_a_x = (end_x - start_x)
+    arrow_a_y = (end_y - start_y)
+    arrow_b_x = (point_x - start_x)
+    arrow_b_y = (point_y - start_y)
+    return ( (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x) )
+
+
+def is_facing_you(face_points):
+    &quot;&quot;&quot;(Lesson 3) the clock test: True if clockwise on the screen.
+    NEW: now just side_of_edge() on the face&#x27;s first 3 corners.&quot;&quot;&quot;
+    return (side_of_edge(face_points[0], face_points[1], face_points[2]) &gt; 0)
+
+
+def dot(arrow_1, arrow_2):
+    &quot;&quot;&quot;(Lesson 3) the dot product.&quot;&quot;&quot;
+    x1, y1, z1 = arrow_1
+    x2, y2, z2 = arrow_2
+    return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
+
+
+def shade_colour(colour, pointer):
+    &quot;&quot;&quot;(Lesson 3) brighter when the face points at the light.&quot;&quot;&quot;
+    brightness = dot(pointer, LIGHT)
+    if brightness &lt; 0:
+        brightness = 0
+    shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )
+    red, green, blue = colour
+    return ( round(red * shade), round(green * shade), round(blue * shade) )
+
+
+def keep_under_360(angle):
+    &quot;&quot;&quot;Keep an angle between 0 and 360.&quot;&quot;&quot;
+    if angle &gt;= 360:
+        angle = (angle - 360)
+    if angle &lt; 0:
+        angle = (angle + 360)
+    return angle
+
+
+def add_faces_of(thing, faces_to_draw):
+    &quot;&quot;&quot;(Lesson 5) work out every face of ONE thing and add the ones to
+    paint to the shared list.
+
+    NEW (Lesson 10): each face also keeps the CAMERA z of every corner
+    left after clipping (face_depths): the depth buffer needs them.
+
+    (Lesson 8) each face is CLIPPED in CAMERA coordinates first,
+    and only then projected. So we no longer project every corner up
+    front: a face&#x27;s cut points only exist once that face is clipped.
+    &quot;&quot;&quot;
+    model = thing[&quot;model&quot;]
+    camera_points = []
+    for p in model[&quot;points&quot;]:
+        world = to_world(p, thing)                     # WORLD
+        camera_points.append(to_camera(world))         # CAMERA
+
+    for corners, face_colour, pointer in model[&quot;faces&quot;]:
+        # (Lesson 8) this face&#x27;s corners in CAMERA coordinates, clockwise.
+        face_camera = []
+        for corner_number in corners:
+            face_camera.append(camera_points[corner_number])
+
+        if use_clipping:
+            # (Lesson 8) cut the face at the NEAR wall (Lesson 8 Part 3).
+            face_camera = clip_face(face_camera)
+            # Fewer than 3 corners left: nothing to paint.
+            if len(face_camera) &lt; 3:
+                continue
+        else:
+            # Lesson 4&#x27;s old rule, for comparing (K): any corner behind
+            # the NEAR wall? Skip the whole face.
+            too_close = False
+            for camera in face_camera:
+                if camera[2] &lt; NEAR:
+                    too_close = True
+            if too_close:
+                continue
+
+        # Every corner left is now in front of NEAR, so project() is safe.
+        face_points = []
+        face_depths = []                               # NEW
+        for camera in face_camera:
+            face_points.append(project(camera))        # SCREEN
+            face_depths.append(camera[2])              # NEW: its CAMERA z
+        # The clock test works on any number of corners (it only looks
+        # at the first 3), and clipping keeps them clockwise.
+        if not is_facing_you(face_points):
+            continue
+        distance = average_z(corners, camera_points)
+        colour = thing[&quot;colour&quot;]
+        if use_light:
+            spun_pointer = matrix_times_point(thing[&quot;matrix&quot;], pointer)
+            colour = shade_colour(colour, spun_pointer)
+        faces_to_draw.append( (distance, face_points, face_depths, colour) )
+
+
+# ======================================================================
+# NEW: FILLING FACES AND THE DEPTH BUFFER (steps 1 and 2)
+# ======================================================================
+
+def clear_depth():
+    &quot;&quot;&quot;(step 2, lesson Part 4) a fresh depth buffer for a new frame.
+
+    150 rows, each a list of 200 copies of FAR:
+        depth[0]       is the top row of blocks
+        depth[149]     is the bottom row
+        depth[50][125] is the block 125 across and 50 down
+    [FAR] * 200 makes a list of 200 FARs in one go (lists course).
+    &quot;&quot;&quot;
+    global depth
+    depth = []
+    for row in range(BLOCKS_DOWN):
+        depth.append([FAR] * BLOCKS_ACROSS)
+
+
+def fill_triangle(a, b, c, z_a, z_b, z_c, colour):
+    &quot;&quot;&quot;Fill one triangle, block by block (step 1, lesson Part 3), with
+    the depth buffer check (step 2, lesson Part 4).
+
+    a, b, c        : the corners in BLOCK coordinates (block_x, block_y),
+                     clockwise on the screen
+    z_a, z_b, z_c  : the CAMERA z of each corner (how far away it is)
+    colour         : the shaded colour of the face
+
+    1. Only look at blocks inside the triangle&#x27;s bounding box.
+    2. For each block, test its CENTRE (block_x + 0.5, block_y + 0.5)
+       against the 3 edges, a-&gt;b, b-&gt;c and c-&gt;a.
+    3. Inside all 3?  Blend the corners&#x27; z to get this block&#x27;s z.
+    4. Closer than what the depth buffer holds?  Paint it, remember z.
+    &quot;&quot;&quot;
+    # Twice the area of the whole triangle. Corners in a line (a thin
+    # sliver) give 0: nothing to fill, and we must not divide by 0.
+    total = side_of_edge(a, b, c)
+    if total &lt;= 0:
+        return
+
+    a_x, a_y = a
+    b_x, b_y = b
+    c_x, c_y = c
+    # ---- 1. the bounding box, kept inside the 200 x 150 picture ------
+    # int() chops off the decimals: block 37.8 is in block 37.
+    left = int(min(a_x, b_x, c_x))
+    right = int(max(a_x, b_x, c_x))
+    top = int(min(a_y, b_y, c_y))
+    bottom = int(max(a_y, b_y, c_y))
+    if left &lt; 0:
+        left = 0
+    if top &lt; 0:
+        top = 0
+    if right &gt; (BLOCKS_ACROSS - 1):
+        right = (BLOCKS_ACROSS - 1)
+    if bottom &gt; (BLOCKS_DOWN - 1):
+        bottom = (BLOCKS_DOWN - 1)
+
+    for block_y in range(top, (bottom + 1)):
+        for block_x in range(left, (right + 1)):
+            # ---- 2. the inside test, on the block&#x27;s centre ------------
+            centre = ( (block_x + 0.5), (block_y + 0.5) )
+            weight_a = side_of_edge(b, c, centre)   # the piece opposite a
+            weight_b = side_of_edge(c, a, centre)   # the piece opposite b
+            weight_c = side_of_edge(a, b, centre)   # the piece opposite c
+            if (weight_a &lt; 0) or (weight_b &lt; 0) or (weight_c &lt; 0):
+                continue                            # outside: next block
+
+            # ---- 3. this block&#x27;s z, blended from the corners -----
+            # Each weight is the area of the piece of triangle OPPOSITE
+            # that corner. Divided by the whole area, the three always
+            # add up to 1. Right on corner a: weight_a = total, so the
+            # blend gives exactly corner a&#x27;s number.
+            # We blend (1 / z) and turn the answer back into z. Blending
+            # z itself puts some blocks of a tipped face nearly 1 unit
+            # too far away (lesson Part 4 has the numbers).
+            #   (weight_a / z_a) is the same as (weight_a * (1 / z_a)).
+            one_over_z = ( ( (weight_a / z_a) + (weight_b / z_b) + (weight_c / z_c) ) / total )
+            z = (1 / one_over_z)
+
+            # ---- 4. the depth buffer rule -------------------------------
+            if z &lt; depth[block_y][block_x]:
+                depth[block_y][block_x] = z
+                small.set_at((block_x, block_y), colour)
+
+
+def draw_face(face_points, face_depths, colour):
+    &quot;&quot;&quot;(step 1, lesson Part 3) fill one face, as triangles.
+
+    NEW (lesson Part 5): after Lesson 8&#x27;s clipping a face can have 3, 4
+    or 5 corners, so we cut it like a fan, every triangle starting at
+    corner 0:
+        3 corners: 0,1,2
+        4 corners: 0,1,2   0,2,3
+        5 corners: 0,1,2   0,2,3   0,3,4
+    A face with N corners makes (N - 2) triangles, all clockwise.
+
+    The corners come in SCREEN pixels. Dividing by BLOCK (4) turns them
+    into BLOCK coordinates: SCREEN (500, 200) -&gt; (125, 50).
+    &quot;&quot;&quot;
+    blocks = []
+    for screen_x, screen_y in face_points:
+        blocks.append( ((screen_x / BLOCK), (screen_y / BLOCK)) )
+    # corner_number goes 1, 2, ... up to (N - 2): one triangle each.
+    for corner_number in range(1, (len(blocks) - 1)):
+        next_number = (corner_number + 1)
+        fill_triangle(blocks[0], blocks[corner_number], blocks[next_number],
+                      face_depths[0], face_depths[corner_number],
+                      face_depths[next_number], colour)
+
+
+def draw_floor():
+    &quot;&quot;&quot;(Lesson 8): the floor grid as LONG lines, right across the field.
+
+    25 lines running away from you (x = -12 to 12) and 25 lines running
+    across (z = -12 to 12): (25 + 25) = 50 lines a frame. Lesson 5 had
+    to cut them into 1-unit pieces, (25 * 24) * 2 = 1,200 of them, so
+    that only the pieces behind you were lost. Clipping keeps the part
+    of a long line in front of you, so the pieces are not needed.
+
+    A long line is still exactly right on the screen: a straight line
+    in 3D projects to a straight line on the screen, so its two ends
+    are all we need (Lesson 8 Part 2).
+    &quot;&quot;&quot;
+    for x in range(GRID_LEFT, (GRID_RIGHT + 1)):
+        draw_floor_line( (x, FLOOR_Y, GRID_NEAR), (x, FLOOR_Y, GRID_FAR) )
+    for z in range(GRID_NEAR, (GRID_FAR + 1)):
+        draw_floor_line( (GRID_LEFT, FLOOR_Y, z), (GRID_RIGHT, FLOOR_Y, z) )
+
+
+def draw_floor_line(world_start, world_end):
+    &quot;&quot;&quot;(Lesson 8): one long floor line, WORLD -&gt; CAMERA -&gt; clip -&gt; SCREEN.&quot;&quot;&quot;
+    start = to_camera(world_start)
+    end = to_camera(world_end)
+    if use_clipping:
+        clipped = clip_line(start, end)
+        if clipped is None:              # both ends behind you
+            return
+        start, end = clipped
+    else:
+        # Lesson 4&#x27;s old rule, for comparing (K): any end behind? skip.
+        if (start[2] &lt; NEAR) or (end[2] &lt; NEAR):
+            return
+    pygame.draw.line(screen, GRID_COLOUR, project(start), project(end), 1)
+
+# ======================================================================
+# CLIPPING (Lesson 8)
+# ======================================================================
+# Everything here works in CAMERA coordinates: (0, 0, 0) is your eye,
+# +x is right, +y is up, +z is straight ahead. The NEAR wall is the
+# flat sheet z = NEAR (0.1) just in front of your eye.
+#   &quot;in&quot;  = in front of the wall:  z &gt;= NEAR   (safe to project)
+#   &quot;out&quot; = behind the wall:       z &lt;  NEAR   (must never be projected)
+
+def cut_at_near(point_a, point_b):
+    &quot;&quot;&quot;(Lesson 8): the CAMERA point where the line from point_a to point_b
+    crosses the NEAR wall. One end must be in, the other out.
+
+    t says how far along the line the wall is: 0 = at point_a,
+    1 = at point_b, 0.5 = halfway (Lesson 8 Part 2).
+
+        t = ( (NEAR - a_z) / (b_z - a_z) )
+
+    Then each of x and y moves the same fraction t of its own gap:
+
+        x = ( a_x + (t * (b_x - a_x)) )
+
+    Worked example (Lesson 8 Part 2): a = (-2, -1, -1), b = (2, -1, 3)
+        t = ( (0.1 - (-1)) / (3 - (-1)) ) = (1.1 / 4) = 0.275
+        x = ( -2 + (0.275 * (2 - (-2))) ) = ( -2 + 1.1 ) = -0.9
+        y = ( -1 + (0.275 * (-1 - (-1))) ) = -1
+        z = NEAR = 0.1          -&gt; (-0.9, -1, 0.1)
+    &quot;&quot;&quot;
+    a_x, a_y, a_z = point_a
+    b_x, b_y, b_z = point_b
+    t = ( (NEAR - a_z) / (b_z - a_z) )
+    cut_x = ( a_x + (t * (b_x - a_x)) )
+    cut_y = ( a_y + (t * (b_y - a_y)) )
+    # The same sum for z would give exactly NEAR, which is the whole
+    # point of t, so we just use NEAR.
+    return (cut_x, cut_y, NEAR)
+
+
+def clip_line(start, end):
+    &quot;&quot;&quot;(Lesson 8): keep the part of a CAMERA line that is in front of NEAR.
+
+    Gives back (start, end) with any end behind you swapped for the
+    cut point, or None (&quot;nothing to draw&quot;) if both ends are behind.
+    &quot;&quot;&quot;
+    start_in = (start[2] &gt;= NEAR)
+    end_in = (end[2] &gt;= NEAR)
+    if start_in and end_in:
+        return (start, end)                       # all in front: keep it all
+    if (not start_in) and (not end_in):
+        return None                               # all behind: nothing
+    cut = cut_at_near(start, end)
+    if start_in:
+        return (start, cut)                       # end was behind
+    return (cut, end)                             # start was behind
+
+
+def clip_face(face_corners):
+    &quot;&quot;&quot;(Lesson 8) cut one face at the NEAR wall (Lesson 8 Part 3).
+
+    face_corners: the face&#x27;s corners in CAMERA coordinates, clockwise.
+    Gives back the corners of the part in front of NEAR, still in
+    clockwise order. That can be 3, 4 or 5 corners, or an empty list
+    if the whole face is behind you.
+
+    We walk round the face one edge at a time. Each edge goes from the
+    PREVIOUS corner to the CURRENT one, and there are only 4 cases:
+
+        previous  current   keep
+        in        in        current
+        in        out       the cut point
+        out       in        the cut point, then current
+        out       out       nothing
+
+    face_corners[-1] means &quot;the LAST item in the list&quot;. Starting with
+    it as &quot;previous&quot; makes the first edge go last corner -&gt; first
+    corner, so the walk goes all the way round and closes the face.
+
+    Worked example (Lesson 8 Part 3): the right face of rock 0, seen from
+    WORLD (2.5, 0, 3). CAMERA corners in clockwise order:
+        5 (-1, 2, -0.5) out    6 (-1, 2, 2.5) in
+        2 (-1, -1, 2.5) in     1 (-1, -1, -0.5) out
+    Edges 1-&gt;5 nothing,  5-&gt;6 cut (-1, 2, 0.1) then 6,
+          6-&gt;2 keep 2,    2-&gt;1 cut (-1, -1, 0.1)
+    Result: 4 corners  (-1, 2, 0.1) (-1, 2, 2.5) (-1, -1, 2.5) (-1, -1, 0.1)
+    &quot;&quot;&quot;
+    kept = []
+    previous = face_corners[-1]
+    for current in face_corners:
+        previous_in = (previous[2] &gt;= NEAR)
+        current_in = (current[2] &gt;= NEAR)
+        if previous_in and current_in:
+            kept.append(current)
+        elif previous_in and (not current_in):
+            kept.append(cut_at_near(previous, current))
+        elif (not previous_in) and current_in:
+            kept.append(cut_at_near(previous, current))
+            kept.append(current)
+        # out -&gt; out: keep nothing
+        previous = current
+    return kept
+
+
+# ======================================================================
+# THE GAME TOOLS (Lesson 7)
+# ======================================================================
+
+def distance_3d(point_a, point_b):
+    &quot;&quot;&quot;(Lesson 7) how far apart are two WORLD points? (Lesson 7 Part 2)
+
+    Subtract, square each part, add them up, square-root the total:
+    Pythagoras done twice, in one line.
+
+    Worked example (Lesson 7 Part 2): you at (1, 0, 3), cube 0 at (3, 1, 5)
+        dx = (3 - 1) = 2,  dy = (1 - 0) = 1,  dz = (5 - 3) = 2
+        math.sqrt( (2 * 2) + (1 * 1) + (2 * 2) ) = math.sqrt(9) = 3
+    &quot;&quot;&quot;
+    ax, ay, az = point_a
+    bx, by, bz = point_b
+    dx = (bx - ax)
+    dy = (by - ay)
+    dz = (bz - az)
+    return math.sqrt( (dx * dx) + (dy * dy) + (dz * dz) )
+
+
+def far_from_rocks(spot):
+    &quot;&quot;&quot;(Lesson 8): True if this WORLD spot is at least ROCK_CLEARANCE (3) from
+    the centre of every rock, so a new gold cube never hides inside one.
+
+    Worked example (Lesson 8 Part 1): spot (1, 1, 5) and rock 0 at
+    (0, 0.5, 4): math.sqrt( (1 * 1) + (0.5 * 0.5) + (1 * 1) ) = 1.5,
+    less than 3, so False: try again.
+    &quot;&quot;&quot;
+    for rock_spot in ROCK_SPOTS:
+        if distance_3d(spot, rock_spot) &lt; ROCK_CLEARANCE:
+            return False
+    return True
+
+
+def new_pickup_spot():
+    &quot;&quot;&quot;(Lesson 7) a random WORLD spot for a cube, at least
+    MIN_SPAWN_DISTANCE from you (Lesson 7 Part 4).
+
+    &quot;while True&quot; repeats for ever, until &quot;return&quot; jumps out. Usually the
+    first try is far enough; about 1 try in 5 is too close and we
+    simply pick again.
+    &quot;&quot;&quot;
+    you = (cam_x, cam_y, cam_z)
+    while True:
+        new_x = random.uniform((-FIELD), FIELD)
+        new_y = random.uniform(PICKUP_LOW, PICKUP_HIGH)
+        new_z = random.uniform((-FIELD), FIELD)
+        spot = (new_x, new_y, new_z)
+        # (Lesson 8): &quot;and far_from_rocks(spot)&quot;: BOTH must be True.
+        if (distance_3d(you, spot) &gt;= MIN_SPAWN_DISTANCE) and far_from_rocks(spot):
+            return spot
+
+
+def to_map(x, z):
+    &quot;&quot;&quot;A WORLD (x, z) -&gt; a pixel on the mini-map (from Lesson 4).&quot;&quot;&quot;
+    map_x = MAP_CX + (x * MAP_SCALE)
+    map_y = MAP_CY - (z * MAP_SCALE)
+    return (map_x, map_y)
+
+
+def draw_map():
+    &quot;&quot;&quot;The mini-map: the wall square, every cube, and you, from above.&quot;&quot;&quot;
+    box = pygame.Rect(MAP_LEFT, MAP_TOP, MAP_SIZE, MAP_SIZE)
+    pygame.draw.rect(screen, MAP_BACK, box)
+    screen.set_clip(box)
+    # (Lesson 7) the walls: from map (-12, 12) to map (12, -12)
+    wall_left, wall_top = to_map((-WALL), WALL)          # (638, 438)
+    wall_size = ( (2 * WALL) * MAP_SCALE )                # (24 * 6) = 144
+    pygame.draw.rect(screen, WALL_RED,
+                     pygame.Rect(wall_left, wall_top, wall_size, wall_size), 1)
+    # Each cube&#x27;s 4 bottom corners (from Lesson 5): a small gold square.
+    for thing in things:
+        outline = []
+        for corner_number in (0, 1, 2, 3):
+            corner = thing[&quot;model&quot;][&quot;points&quot;][corner_number]
+            x, y, z = to_world(corner, thing)
+            outline.append(to_map(x, z))
+        pygame.draw.polygon(screen, thing[&quot;colour&quot;], outline, 2)
+    # You: pink dot and a line the way your BODY faces.
+    forward_x, forward_y, forward_z = column(turn_matrix(cam_turn), 2)
+    you = to_map(cam_x, cam_z)
+    nose = to_map( (cam_x + (forward_x * 1.5)), (cam_z + (forward_z * 1.5)) )
+    pygame.draw.line(screen, PINK, you, nose, 2)
+    pygame.draw.circle(screen, PINK, you, 4)
+    screen.set_clip(None)
+    pygame.draw.rect(screen, WHITE, box, 1)
+
+
+# ======================================================================
+# THE MAIN LOOP
+# ======================================================================
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_l:
+                use_light = not use_light
+            if event.key == pygame.K_g:
+                show_grid = not show_grid
+            if event.key == pygame.K_k:                  # (Lesson 8)
+                use_clipping = not use_clipping
+            # (Lesson 7) R only works after TIME UP, so you can&#x27;t restart by
+            # accident in the middle of a good game.
+            if (event.key == pygame.K_r) and game_over:
+                # Every game number back to its start value...
+                cam_x = 0
+                cam_y = 0
+                cam_z = 0
+                cam_turn = 0
+                cam_tip = 0
+                things = make_world()      # (Lesson 8): cubes AND rocks
+                score = 0
+                frames_left = (GAME_SECONDS * 60)
+                game_over = False
+                # ...but NOT best_score: it remembers your best.
+
+    # ==================================================================
+    # PLAYING: everything in this &quot;if&quot; stops when game_over is True.
+    # ==================================================================
+    if not game_over:
+        keys = pygame.key.get_pressed()
+
+        # ---- Turning and looking (from Lesson 4, unchanged) ----------
+        if keys[pygame.K_LEFT]:
+            cam_turn = (cam_turn + TURN_SPEED)
+        if keys[pygame.K_RIGHT]:
+            cam_turn = (cam_turn - TURN_SPEED)
+        if keys[pygame.K_UP]:
+            cam_tip = (cam_tip - TURN_SPEED)
+        if keys[pygame.K_DOWN]:
+            cam_tip = (cam_tip + TURN_SPEED)
+        if cam_tip &gt; TIP_LIMIT:
+            cam_tip = TIP_LIMIT
+        if cam_tip &lt; (-TIP_LIMIT):
+            cam_tip = (-TIP_LIMIT)
+
+        # ---- (Lesson 7) fly where you LOOK (Lesson 7 Part 5) -----------------
+        # Build the arrow the way your head points: tip first (the head
+        # nods), then turn (the body turns), and read off column 2,
+        # where the +z arrow lands (Lesson 6).
+        #   cam_tip -30, cam_turn 0:   forward = (0, 0.5, 0.866)   climbing
+        #   cam_tip -30, cam_turn 90:  forward = (-0.866, 0.5, 0)  left + up
+        # Right stays level (from your body only), so A and D slide
+        # sideways without climbing.
+        look = combine(tip_matrix(cam_tip), turn_matrix(cam_turn))
+        forward_x, forward_y, forward_z = column(look, 2)
+        right_x, right_y, right_z = column(turn_matrix(cam_turn), 0)
+        if keys[pygame.K_w]:
+            cam_x = (cam_x + (forward_x * MOVE_SPEED))
+            cam_y = (cam_y + (forward_y * MOVE_SPEED))   # (Lesson 7) y too
+            cam_z = (cam_z + (forward_z * MOVE_SPEED))
+        if keys[pygame.K_s]:
+            cam_x = (cam_x - (forward_x * MOVE_SPEED))
+            cam_y = (cam_y - (forward_y * MOVE_SPEED))   # (Lesson 7) y too
+            cam_z = (cam_z - (forward_z * MOVE_SPEED))
+        if keys[pygame.K_d]:
+            cam_x = (cam_x + (right_x * MOVE_SPEED))
+            cam_z = (cam_z + (right_z * MOVE_SPEED))
+        if keys[pygame.K_a]:
+            cam_x = (cam_x - (right_x * MOVE_SPEED))
+            cam_z = (cam_z - (right_z * MOVE_SPEED))
+        if keys[pygame.K_e]:
+            cam_y = (cam_y + MOVE_SPEED)
+        if keys[pygame.K_q]:
+            cam_y = (cam_y - MOVE_SPEED)
+
+        # ---- (Lesson 7) walls, ground and ceiling (Lesson 7 Part 5) ----------
+        # Past a limit? Put it back ON the limit. You slide along the
+        # wall instead of going through it.
+        if cam_x &gt; WALL:
+            cam_x = WALL
+        if cam_x &lt; (-WALL):
+            cam_x = (-WALL)
+        if cam_z &gt; WALL:
+            cam_z = WALL
+        if cam_z &lt; (-WALL):
+            cam_z = (-WALL)
+        if cam_y &gt; CEILING:
+            cam_y = CEILING
+        if cam_y &lt; GROUND:
+            cam_y = GROUND
+
+        # ---- (Lesson 7) collect any cube you are touching (Part 3) -----
+        you = (cam_x, cam_y, cam_z)
+        for thing in things:
+            # (Lesson 8): rocks have &quot;pickup&quot;: False, so they are never collected.
+            if not thing[&quot;pickup&quot;]:
+                continue
+            if distance_3d(you, thing[&quot;position&quot;]) &lt;= COLLECT_RADIUS:
+                score = (score + 1)
+                # (Lesson 7) the same cube jumps to a new spot (Part 4):
+                # there are always exactly 8 cubes to find.
+                thing[&quot;position&quot;] = new_pickup_spot()
+
+        # ---- (Lesson 7) tick the clock (Lesson 7 Part 6) ---------------------
+        frames_left = (frames_left - 1)
+        if frames_left &lt;= 0:
+            frames_left = 0
+            game_over = True
+            if score &gt; best_score:
+                best_score = score
+
+    # ---- Every pickup spins (Lesson 5), even after TIME UP -------------
+    for thing in things:
+        angles = thing[&quot;angles&quot;]
+        speeds = thing[&quot;speeds&quot;]
+        angles[0] = keep_under_360( (angles[0] + speeds[0]) )
+        angles[1] = keep_under_360( (angles[1] + speeds[1]) )
+        angles[2] = keep_under_360( (angles[2] + speeds[2]) )
+        thing[&quot;matrix&quot;] = spin_matrix(angles)
+
+    # ---- The camera&#x27;s matrix, once a frame (Lesson 6) ------------------
+    camera_matrix = combine(turn_matrix(-cam_turn), tip_matrix(-cam_tip))
+
+    # ==================================================================
+    # DRAW: the world first, then the HUD on top (Lesson 7 Part 2)
+    # ==================================================================
+    screen.fill(BLACK)
+    if show_grid:
+        draw_floor()
+
+    # NEW: a clean small picture and a clean depth buffer
+    small.fill(BLACK)
+    clear_depth()
+    # NEW: no sort! Fill every face, in any order. The depth buffer
+    # keeps the closest one at every block.
+    faces_to_draw = []
+    for thing in things:
+        add_faces_of(thing, faces_to_draw)
+    for distance, face_points, face_depths, colour in faces_to_draw:
+        draw_face(face_points, face_depths, colour)
+    # NEW: stretch the 200 x 150 picture to 800 x 600 and put it on top
+    # of the floor lines (black blocks are see-through).
+    big = pygame.transform.scale(small, (WIDTH, HEIGHT))
+    screen.blit(big, (0, 0))
+
+    draw_map()
+
+    # ---- (Lesson 7) how far is the nearest cube? -------------------------
+    # Start with a huge number, then keep the smallest distance found.
+    nearest = 1000
+    for thing in things:
+        if not thing[&quot;pickup&quot;]:          # (Lesson 8): rocks don&#x27;t count
+            continue
+        d = distance_3d((cam_x, cam_y, cam_z), thing[&quot;position&quot;])
+        if d &lt; nearest:
+            nearest = d
+
+    # ---- The HUD: words drawn LAST, so no cube can hide them -----------
+    # str() turns a number into letters so + can join it to words.
+    text = (&quot;score &quot; + str(score) + &quot;   best &quot; + str(best_score))
+    screen.blit(font.render(text, True, SUN_GOLD), (20, 20))
+    text = (&quot;nearest cube &quot; + str(round(nearest, 1)))
+    screen.blit(font.render(text, True, PINK), (20, 50))
+    # (Lesson 8): say whether clipping is on, so screenshots are never confusing.
+    if use_clipping:
+        text = &quot;clipping ON (K)&quot;
+    else:
+        text = &quot;clipping OFF (K)&quot;
+    screen.blit(font.render(text, True, WHITE), (20, 80))
+    # (Lesson 7) math.ceil rounds UP, so the clock never shows 0 while you
+    # can still play: 59.98 seconds left shows as 60.
+    seconds = math.ceil(frames_left / 60)
+    screen.blit(font.render(&quot;time &quot; + str(seconds), True, WHITE), (680, 20))
+    # NEW: frames a second, averaged over the last few frames.
+    text = (&quot;frames a second &quot; + str(round(clock.get_fps())))
+    screen.blit(font.render(text, True, WHITE), (20, 110))
+    screen.blit(font.render(&quot;ARROWS look,  W / S fly,  A / D slide,  Q / E down / up&quot;,
+                            True, YELLOW), (20, 570))
+
+    # ---- (Lesson 7) TIME UP on top of everything -------------------------
+    if game_over:
+        words = big_font.render(&quot;TIME UP&quot;, True, WHITE)
+        # Centre it: half its width to the left of the screen&#x27;s middle.
+        # get_width() is how many pixels wide the words came out.
+        left = (CENTRE_X - (words.get_width() / 2))
+        screen.blit(words, (left, 200))
+        words = font.render(&quot;score &quot; + str(score) + &quot;   best &quot; + str(best_score) +
+                            &quot;      press R to play again&quot;, True, YELLOW)
+        left = (CENTRE_X - (words.get_width() / 2))
+        screen.blit(words, (left, 290))
+
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+
+# ----------------------------------------------------------------------
+# TRY THIS:
+#   * Fly right up to a rock until it fills the window. What happens to
+#     &quot;frames a second&quot;? (lesson Part 5 explains why)
+#   * Set BLOCK = 8 (7,500 blocks) or BLOCK = 2 (120,000 blocks). Which
+#     would you choose, and why?
+#   * Delete far_from_rocks() from new_pickup_spot(), so gold cubes can
+#     appear half inside a rock. Lesson 8 drew those wrong; does this?
+#   * Put step 2&#x27;s board into the field as a tipped platform at
+#     (0, 0, 4), and fly through it.
+#   * Add step 2&#x27;s Z key and draw_depth_as_grey() to see the game&#x27;s
+#     depth buffer.
+# ----------------------------------------------------------------------
+</code></pre></details>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q10</span><span>A clipped face comes back from <code>clip_face()</code> with 6 corners. How many triangles does <code>draw_face()</code> make, and which?</span></p><details><summary>Show answer</summary><div class="ans"><p><code>(6 - 2)</code> = 4 triangles: <code>range(1, 5)</code> gives 1, 2, 3, 4, so 0,1,2 then 0,2,3 then 0,3,4 then 0,4,5.</p></div></details></div>
+</div>
+
+<h2>Wrap up <span class="mins">3 MIN</span></h2>
+<p class="tabcap" id="fig-10-w-1"><span class="fignum">Table 10.W.1</span>The painter's order and the depth buffer, side by side</p>
+<div class="tablewrap"><table>
+<tr><th></th><th>Painter's order (Lessons 3 to 8)</th><th>Depth buffer (today)</th></tr>
+<tr><td>Decides</td><td>once per face</td><td>once per block</td></tr>
+<tr><td>Needs a sort</td><td>yes, far to near</td><td>no, any order</td></tr>
+<tr><td>Crossing shapes</td><td>wrong (Fig 10.1.3)</td><td>right (Fig 10.4.1)</td></tr>
+<tr><td>Fills faces with</td><td><code>pygame.draw.polygon()</code></td><td>our own <code>fill_triangle()</code></td></tr>
+<tr><td>Extra memory</td><td>none</td><td>30,000 numbers</td></tr>
+<tr><td>Speed in Python</td><td>fast</td><td>slower: in step 2, 11 ms at the start and 42 ms close up</td></tr>
+</table></div>
+<ul>
+  <li>The painter's order sorts whole faces, so it can never draw two shapes that cross.</li>
+  <li>We fill faces ourselves in 4 × 4 blocks: <code>(200 * 150)</code> = 30,000 blocks instead of 480,000 pixels. BLOCK coordinates = SCREEN coordinates / 4.</li>
+  <li>A block is inside a triangle when <code>side_of_edge()</code> is 0 or more for all 3 edges. Only blocks in the bounding box are tested.</li>
+  <li>The depth buffer holds the closest z for every block, starting at FAR = 1000. Paint only if <code>z &lt; depth[block_y][block_x]</code>.</li>
+  <li>A block's z comes from the 3 weights: blend <code>(1 / z)</code>, then turn it back.</li>
+</ul>
+<div class="check">
+<div class="q"><p class="qq"><span class="qn">Q11</span><span>Final check. A gold cube's face covers a patch 200 × 100 SCREEN pixels. How many blocks is that? Roughly how long does filling it take at 1.7 microseconds a block? And how many of today's 16.7 ms is that?</span></p><details><summary>Show answer</summary><div class="ans"><p><code>(200 / 4)</code> = 50 blocks across, <code>(100 / 4)</code> = 25 down, <code>(50 * 25)</code> = 1,250 blocks.</p><p><code>(1,250 * 1.7)</code> = 2,125 microseconds, about 2.1 ms (a little more, because the bounding box also tests some blocks outside the face).</p><p><code>((2.1 / 16.7) * 100)</code> = about 13% of one frame: you could draw 7 faces that size and still keep 60 frames a second.</p></div></details></div>
+</div>
+<h3>What comes next</h3>
+<p>With clipping (Lesson 8), models from files (Lesson 9) and now a depth buffer, the engine draws anything correctly, however close and however tangled. Lesson 11 makes the world feel solid: speed, gravity and bumping into things. Some ideas to try first (the scripts' TRY THIS boxes have more):</p>
+<ul>
+  <li>Change <code>BLOCK</code> to 2 or 8 and watch "frames a second".</li>
+  <li>In step 3, remove <code>far_from_rocks()</code> from <code>new_pickup_spot()</code> so gold cubes can appear half inside a rock. The depth buffer draws them correctly.</li>
+  <li>Add step 2's Z key to step 3 to see the game's depth buffer.</li>
+</ul>
+
+<h2>Files</h2>
+<p>Download the code for this lesson (right-click a file and choose <em>Save link as</em>):</p>
+<ul class="files">
+  <li><a href="code/step1_fill_by_hand.py" download><code>code/step1_fill_by_hand.py</code></a>: the board-and-cube test scene, the small picture, <code>side_of_edge()</code>, <code>fill_triangle()</code> and <code>draw_face()</code>; still the painter's order (F = pygame's fill)</li>
+  <li><a href="code/step2_depth_buffer.py" download><code>code/step2_depth_buffer.py</code></a>: the depth buffer, z from the weights, no sort (P = painter's order, Z = see the depth buffer)</li>
+  <li><a href="code/step3_cube_hunt_depth.py" download><code>code/step3_cube_hunt_depth.py</code></a>: Lesson 8's Cube Hunt drawn with the depth buffer; fans for clipped faces, frames a second on the HUD</li>
+  <li><code>images/</code>: every diagram on this page as a PNG</li>
+  <li><a href="../figures/">Figure index</a>: every figure and table in the course, with its number. Numbers read <code>Fig lesson.part.figure</code>, plus a letter for one panel of a picture (for example <code>Fig 10.4.1c</code>).</li>
+</ul>
+</main>
+</body>
+</html>
