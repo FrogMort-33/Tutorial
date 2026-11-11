@@ -68,14 +68,14 @@ diamond_faces = [
 
 tank_faces = [
     ((0, 1, 2, 3), ORANGE),                                                                             # hull: underside
-    ((0, 1, 5, 4), BLUE), ((1, 2, 6, 5), BLUE), ((2, 3, 7, 6), BLUE), ((3, 0, 4, 7), BLUE),             # hull: base -> belt
-    ((4, 5, 9, 8), GREEN), ((5, 6, 10, 9), GREEN), ((6, 7, 11, 10), GREEN), ((7, 4, 8, 11), GREEN),     # hull: belt -> deck (front is the prow)
-    ((8, 9, 10, 11), GOLD),                                                                             # hull: deck
-    ((12, 13, 17, 16), PURPLE), ((13, 14, 18, 17), PURPLE),                                             # turret: sides
-    ((14, 15, 19, 18), PURPLE), ((15, 12, 16, 19), PURPLE),
-    ((16, 17, 18, 19), CYAN),                                                                           # turret: top
-    ((20, 21, 22, 23), RED), ((24, 25, 26, 27), RED),                                                   # barrel: bottom, top
-    ((21, 22, 26, 25), RED), ((23, 20, 24, 27), RED), ((22, 23, 27, 26), RED),                          # barrel: sides, muzzle
+    ((0, 4, 5, 1), BLUE), ((1, 5, 6, 2), BLUE), ((2, 6, 7, 3), BLUE), ((3, 7, 4, 0), BLUE),             # hull: base -> belt
+    ((4, 8, 9, 5), GREEN), ((5, 9, 10, 6), GREEN), ((6, 10, 11, 7), GREEN), ((7, 11, 8, 4), GREEN),     # hull: belt -> deck (front is the prow)
+    ((8, 11, 10, 9), GOLD),                                                                             # hull: deck
+    ((12, 16, 17, 13), PURPLE), ((13, 17, 18, 14), PURPLE),                                             # turret: sides
+    ((14, 18, 19, 15), PURPLE), ((15, 19, 16, 12), PURPLE),
+    ((16, 19, 18, 17), CYAN),                                                                           # turret: top
+    ((20, 21, 22, 23), RED), ((24, 27, 26, 25), RED),                                                   # barrel: bottom, top
+    ((21, 25, 26, 22), RED), ((23, 27, 24, 20), RED), ((22, 26, 27, 23), RED),                          # barrel: sides, muzzle
     ((30, 31, 32, 33), CYAN),                                                                           # radar dish
 ]
 
