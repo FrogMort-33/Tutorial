@@ -12,7 +12,7 @@
 #        ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
 #        How well two arrows line up: 1 same way, 0 side-on, -1 opposite.
 #
-#   3. brightness = dot(pointer, LIGHT), and never below 0
+#   3. brightness = dot(turned_normal, LIGHT), and never below 0
 #      colour     = each of (red, green, blue) times brightness
 #
 #   4. Each face shows its brightness number in its middle (N key).
@@ -83,13 +83,36 @@ cube_points = [
 #
 # We do NOT need cube_edges any more: the outline of each face
 # already includes all of the cube's edges.
+# ---- NEW in Lesson 3B: each face also stores its NORMAL --------------
+# A face's NORMAL is an arrow, exactly 1 long, pointing straight OUT of
+# the face.  It is written in SHAPE coordinates (cube not turned yet),
+# and it is stored here as DATA, just like the corners.
+#
+# Each face is now:   ( corners,  colour,  normal )
+#
+# How a normal is worked out (Lesson 3B, Part 3):
+#   a, b, c = the face's first 3 corners
+#   A = b - a        B = c - a                  (two edges of the face)
+#   cross = ( ((A_y * B_z) - (A_z * B_y)),
+#             ((A_z * B_x) - (A_x * B_z)),
+#             ((A_x * B_y) - (A_y * B_x)) )     (square-on to both edges)
+#   normal = cross divided by its length        (shrink it to 1 long)
+#
+# Worked example - FRONT face (4, 5, 1, 0):
+#   a = corner 4 = (-1, 1, -1)   b = corner 5 = (1, 1, -1)   c = corner 1 = (1, -1, -1)
+#   A = (2, 0, 0)                B = (2, -2, 0)
+#   cross = ( ((0 * 0) - (0 * -2)), ((0 * 2) - (2 * 0)), ((2 * -2) - (0 * 2)) )
+#         = (0, 0, -4)           length 4      normal = (0, 0, -1)
+#
+# For a cube every answer is one of the 6 axis arrows, so we just write
+# them in.  (Other shapes get less round numbers - see the lesson.)
 cube_faces = [
-    ((4, 5, 1, 0), RED),       # front  (all have z = -1)
-    ((6, 7, 3, 2), PURPLE),    # back   (all have z = +1)
-    ((7, 4, 0, 3), BLUE),      # left   (all have x = -1)
-    ((5, 6, 2, 1), GREEN),     # right  (all have x = +1)
-    ((7, 6, 5, 4), GOLD),      # top    (all have y = +1)
-    ((2, 3, 0, 1), ORANGE),    # bottom (all have y = -1)
+    ((4, 5, 1, 0), RED,    ( 0,  0, -1)),   # front  -> toward you  (-z)
+    ((6, 7, 3, 2), PURPLE, ( 0,  0,  1)),   # back   -> away        (+z)
+    ((7, 4, 0, 3), BLUE,   (-1,  0,  0)),   # left   -> left        (-x)
+    ((5, 6, 2, 1), GREEN,  ( 1,  0,  0)),   # right  -> right       (+x)
+    ((7, 6, 5, 4), GOLD,   ( 0,  1,  0)),   # top    -> up          (+y)
+    ((2, 3, 0, 1), ORANGE, ( 0, -1,  0)),   # bottom -> down        (-y)
 ]
 
 cube_distance = 5
@@ -235,45 +258,6 @@ def is_facing_you(face_points):
 
 
 
-def face_pointer(corners, turned_points):
-    """NEW: the POINTER of a face: an arrow straight OUT of the face.
-
-    The idea in one line:  the pointer is the MIDDLE of the face,
-    measured from the middle of the cube.
-
-    Why does that work?  The cube's middle is (0, 0, 0) in SHAPE
-    coordinates, and every face is exactly 1 step out from it.  So the
-    arrow from (0, 0, 0) to the face's middle:
-        * points straight out of the face, and
-        * is exactly 1 long.
-
-    How do we find the middle?  Average the 4 corners, one letter at a
-    time: add the 4 x's and divide by 4, then the same for y and for z.
-
-    Worked example (front face, cube NOT turned):
-        corners 4, 5, 1, 0 = (-1, 1, -1) (1, 1, -1) (1, -1, -1) (-1, -1, -1)
-        x: ( (-1 + 1 + 1 + -1) / 4 ) = ( 0 / 4 )  =  0
-        y: ( (1 + 1 + -1 + -1) / 4 ) = ( 0 / 4 )  =  0
-        z: ( (-1 + -1 + -1 + -1) / 4 ) = ( -4 / 4 ) = -1
-        pointer = (0, 0, -1)    -> straight at you
-
-    corners       - the face's 4 corner NUMBERS, e.g. (4, 5, 1, 0)
-    turned_points - all 8 corners AFTER tip/turn/roll, in SHAPE
-                    coordinates (BEFORE cube_distance is added!
-                    Adding 5 to z would move the arrow's start away
-                    from (0, 0, 0) and it would stop being 1 long.)
-    """
-    total_x = 0
-    total_y = 0
-    total_z = 0
-    for corner_number in corners:
-        x, y, z = turned_points[corner_number]
-        total_x = (total_x + x)
-        total_y = (total_y + y)
-        total_z = (total_z + z)
-    count = len(corners)                    # 4 corners
-    return ( (total_x / count), (total_y / count), (total_z / count) )
-
 def dot(arrow_1, arrow_2):
     """NEW: the DOT PRODUCT.  How well do two arrows line up?
 
@@ -287,7 +271,7 @@ def dot(arrow_1, arrow_2):
         -1   -> OPPOSITE ways                     (face looks away from the lamp)
 
     Worked example (front face, cube NOT turned):
-        pointer = (0, 0, -1),  LIGHT = (0.48, 0.6, -0.64)
+        normal = (0, 0, -1),  LIGHT = (0.48, 0.6, -0.64)
         dot = ( (0 * 0.48) + (0 * 0.6) + ((-1) * (-0.64)) )
             = ( 0 + 0 + 0.64 )
             = 0.64
@@ -296,14 +280,14 @@ def dot(arrow_1, arrow_2):
     x2, y2, z2 = arrow_2
     return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
 
-def brightness_of(pointer):
+def brightness_of(turned_normal):
     """NEW: how much light lands on a face, from 0 (none) to 1 (full).
 
-    dot(pointer, LIGHT) runs from -1 to 1.  Anything below 0 means the
+    dot(turned_normal, LIGHT) runs from -1 to 1.  Anything below 0 means the
     face looks AWAY from the lamp: it gets no light at all, so we
     change it to 0.  (Light can't be less than nothing.)
     """
-    brightness = dot(pointer, LIGHT)        # -1 .. 1
+    brightness = dot(turned_normal, LIGHT)  # -1 .. 1
     if brightness < 0:
         brightness = 0                      # facing away: no light
     return brightness                       # 0 .. 1
@@ -320,12 +304,19 @@ def shade_colour(colour, brightness):
     return ( round(red * brightness), round(green * brightness),
              round(blue * brightness) )
 
-def face_middle_on_screen(pointer):
-    """(From step 1) Where is the middle of a face on screen?
-    The face's middle in SHAPE coordinates IS its pointer.  Add
-    cube_distance to get WORLD, then project."""
-    x, y, z = pointer
-    return project( (x, y, (z + cube_distance)) )
+def face_middle(corners, world_points):
+    """(From step 1, for drawing only) The middle of a face, in WORLD:
+    the average of its 4 corners.  Used to place the brightness number."""
+    total_x = 0
+    total_y = 0
+    total_z = 0
+    for corner_number in corners:
+        x, y, z = world_points[corner_number]
+        total_x = (total_x + x)
+        total_y = (total_y + y)
+        total_z = (total_z + z)
+    count = len(corners)                    # 4 corners
+    return ( (total_x / count), (total_y / count), (total_z / count) )
 
 def keep_under_360(angle):
     """360 degrees is the same as 0, so start again after a full turn."""
@@ -360,24 +351,19 @@ while running:
     screen.fill(BLACK)
 
     # ---- turn -> move away -> project, for all 8 corners -------------
-    # We keep THREE lists, one for each kind of coordinates:
-    #   turned_points - SHAPE, turned  (NEW job: the face pointers)
-    #   world_points  - WORLD          (the painter's method)
-    #   screen_points - SCREEN         (the clock test and drawing)
-    turned_points = []
+    #   world_points  - WORLD   (the painter's method)
+    #   screen_points - SCREEN  (the clock test and drawing)
     world_points = []
     screen_points = []
     for p in cube_points:
-        turned = rotate_all(p)                       # SHAPE, turned
-        turned_points.append(turned)
-        x, y, z = turned
+        x, y, z = rotate_all(p)                      # SHAPE, turned
         moved = (x, y, (z + cube_distance))          # WORLD
         world_points.append(moved)
         screen_points.append(project(moved))         # SCREEN
 
     # ---- Make a list of the faces we will paint -----------------------
     faces_to_draw = []
-    for corners, colour in cube_faces:
+    for corners, colour, normal in cube_faces:       # NEW: 3rd item, the normal
         face_points = []
         for corner_number in corners:
             face_points.append(screen_points[corner_number])
@@ -389,22 +375,25 @@ while running:
         # 2. How far away is it? (Lesson 3, the painter's method)
         distance = average_z(corners, world_points)
 
-        # 3. NEW: which way does this face point?
-        pointer = face_pointer(corners, turned_points)
+        # 3. NEW: which way does this face point NOW?
+        #    Turn the stored normal with the SAME rotate_all as the corners.
+        #    Do NOT add cube_distance: a normal is a direction, not a place.
+        turned_normal = rotate_all(normal)
 
         if one_colour:
             colour = CUBE_GREEN
 
         # 4. NEW: how bright is it, and what colour does that give?
-        brightness = brightness_of(pointer)
+        brightness = brightness_of(turned_normal)
         colour = shade_colour(colour, brightness)
 
-        faces_to_draw.append( (distance, face_points, colour, pointer, brightness) )
+        faces_to_draw.append( (distance, face_points, colour, corners, brightness) )
 
     # ---- The painter's method (Lesson 3): furthest first ---------------
-    faces_to_draw.sort(reverse=True)
+    # key= : sort on the distance only (the 1st item of each tuple)
+    faces_to_draw.sort(key=lambda face: face[0], reverse=True)
 
-    for distance, face_points, colour, pointer, brightness in faces_to_draw:
+    for distance, face_points, colour, corners, brightness in faces_to_draw:
         pygame.draw.polygon(screen, colour, face_points)        # filled
         pygame.draw.polygon(screen, GREY, face_points, 2)       # outline
         # GREY, not black, outline: a black face on a black background
@@ -412,8 +401,8 @@ while running:
 
     # ---- NEW: write each face's brightness in its middle ---------------
     if show_numbers:
-        for distance, face_points, colour, pointer, brightness in faces_to_draw:
-            middle = face_middle_on_screen(pointer)
+        for distance, face_points, colour, corners, brightness in faces_to_draw:
+            middle = project(face_middle(corners, world_points))
             label = small_font.render(str(round(brightness, 3)), True, WHITE)
             # centre the text on the middle of the face
             screen.blit(label, ( (middle[0] - (label.get_width() / 2)),

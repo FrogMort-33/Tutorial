@@ -76,7 +76,7 @@ figure, .tabcap { scroll-margin-top:16px; }
 <nav style="font-family:var(--mono, monospace);font-size:14px;"><a style="color:var(--accent)" href="../">&larr; All lessons</a> &middot; <a style="color:var(--accent)" href="../figures/">Figure index</a></nav>
 
 <header style="display:flex;flex-direction:column;gap:12px">
-  <span class="eyebrow">Wireframe 3D course · Lesson 3B · about 60 minutes</span>
+  <span class="eyebrow">Wireframe 3D course · Lesson 3B · about an hour</span>
   <h1>Light and shade</h1>
   <p class="lede">Lesson 3 made the cube solid, but if you paint every face the same green it looks like a flat sticker. Today we add a lamp, so each face gets brighter or darker depending on which way it points. We go slowly: one small idea per part, with numbers you can check by hand, and a program to run after each big step.</p>
 </header>
@@ -94,7 +94,7 @@ figure, .tabcap { scroll-margin-top:16px; }
 <ol>
   <li>Explain, with a torch and a card, why a surface facing a lamp is brighter than one turned away.</li>
   <li>Read an arrow written as numbers, and work out its length.</li>
-  <li>Find a face's pointer by averaging its 4 corners, and say why it uses SHAPE coordinates.</li>
+  <li>Say what a face's normal is, work one out with the cross product, store it with the face, and turn it with the shape.</li>
   <li>Explain what <code>LIGHT = (0.48, 0.6, -0.64)</code> means and where those numbers came from.</li>
   <li>Work out a dot product by hand and turn it into a brightness from 0 to 1.</li>
   <li>Turn a brightness into a colour, using <code>AMBIENT</code> so shadows never go black.</li>
@@ -105,11 +105,11 @@ figure, .tabcap { scroll-margin-top:16px; }
 <tr><td class="t">0–4</td><td>Recap</td><td>Why one colour looks flat. The plan: four small questions. Q1.</td></tr>
 <tr><td class="t">4–12</td><td>1. The torch and the card</td><td>Count the rays that land on a card at 0°, 60°, 90° and 180°. Brightness as a number from 0 to 1. Q2–Q3.</td></tr>
 <tr><td class="t">12–20</td><td>2. Arrows as numbers</td><td>An arrow is (across, up). Its length. Shrinking an arrow to length 1. Adding z for 3D. Q4–Q6.</td></tr>
-<tr><td class="t">20–31</td><td>3. The face pointer</td><td>Six pointers on the unturned cube. Pointers turn with the cube. Finding one by averaging corners, top view, turn 30°. SHAPE, not WORLD. Run <code>step1_face_pointers.py</code>. Two ways to get a pointer. Q7–Q9.</td></tr>
-<tr><td class="t">31–37</td><td>4. The light arrow</td><td>LIGHT points toward the lamp. Building it from (12, 15, -16). Q10–Q11.</td></tr>
-<tr><td class="t">37–50</td><td>5. The dot product</td><td>Flat arrows first. It matches the ray count. 3D: all six faces. Negative means no light. The start pose. Run <code>step2_brightness.py</code>. Q12–Q15.</td></tr>
-<tr><td class="t">50–57</td><td>6. Brightness to colour</td><td>Multiply the colour. Black shadows. AMBIENT. Run <code>step3_lit_cube.py</code>. Q16–Q17.</td></tr>
-<tr><td class="t">57–60</td><td>Wrap up</td><td>The ideas from today. Final check Q18. Preview of Lesson 4.</td></tr>
+<tr><td class="t">20–33</td><td>3. The face normal</td><td>What a normal is. Working one out: two edges, the cross product, shrink to 1 long. The pyramid. Storing it in <code>cube_faces</code>. Turning it (but never moving it). Run <code>step1_face_normals.py</code>. Q7–Q9.</td></tr>
+<tr><td class="t">33–39</td><td>4. The light arrow</td><td>LIGHT points toward the lamp. Building it from (12, 15, -16). Q10–Q11.</td></tr>
+<tr><td class="t">39–52</td><td>5. The dot product</td><td>Flat arrows first. It matches the ray count. 3D: all six faces. Negative means no light. The start pose. Run <code>step2_brightness.py</code>. Q12–Q15.</td></tr>
+<tr><td class="t">52–59</td><td>6. Brightness to colour</td><td>Multiply the colour. Black shadows. AMBIENT. Run <code>step3_lit_cube.py</code>. Q16–Q17.</td></tr>
+<tr><td class="t">59–62</td><td>Wrap up</td><td>The ideas from today. Final check Q18. Preview of Lesson 4.</td></tr>
 </table></div>
 
 <h2>Recap: why one colour looks flat <span class="mins">4 MIN</span></h2>
@@ -117,7 +117,7 @@ figure, .tabcap { scroll-margin-top:16px; }
 <figure id="fig-3b-0-3"><img src="images/s01_flat_vs_lit.png" alt="Two pictures of the cube at the start pose. Left: all three visible faces the same green, no outlines: it looks like a flat six-sided shape. Right: the same green lit by a lamp: bright top, medium front, dark left side; it looks like a solid box." loading="lazy"><figcaption><span class="fignum">Fig 3B.0.3</span>Same cube, same pose, same green (70, 230, 120). On the left every face gets 100% of the green. On the right the top gets 93.4%, the front 51.0% and the left side 20.0%. Those three numbers are what this lesson works out.<span class="panels">Panels: <b>3B.0.3a</b> (left) one green, no light · <b>3B.0.3b</b> (right) the same green, lit</span></figcaption></figure>
 <p>Both pictures use Lesson 3's START POSE: tipped by -30° (the top comes toward you) and turned by 30°, so you see the front, the left and the top. Every worked example today uses either this pose or the cube not turned at all.</p>
 <p>To light one face, the computer answers four small questions, always in the same order. This picture is the map for the whole lesson; don't worry about the numbers yet, each one gets its own part.</p>
-<figure id="fig-3b-0-4"><img src="images/s02_plan.png" alt="Four boxes joined by arrows. 1 Part 3: which way does the face point? POINTER, top face (0.25, 0.866, -0.433). 2 Part 4: which way is the lamp? LIGHT (0.48, 0.6, -0.64). 3 Part 5: how well do the two arrows line up? DOT 0.917. 4 Part 6: how much colour does the face get? SHADE (65, 215, 112)." loading="lazy"><figcaption><span class="fignum">Fig 3B.0.4</span>The four questions, with the answers for the top face at the start pose. Parts 1 and 2 come first because they build the two ideas the four steps need: how light lands on a surface, and how an arrow is written as numbers.<span class="panels">Panels: <b>3B.0.4a</b> (1st) POINTER · <b>3B.0.4b</b> (2nd) LIGHT · <b>3B.0.4c</b> (3rd) DOT · <b>3B.0.4d</b> (4th) SHADE</span></figcaption></figure>
+<figure id="fig-3b-0-4"><img src="images/s02_plan.png" alt="Four boxes joined by arrows. 1 Part 3: which way does the face point? NORMAL, top face (0.25, 0.866, -0.433). 2 Part 4: which way is the lamp? LIGHT (0.48, 0.6, -0.64). 3 Part 5: how well do the two arrows line up? DOT 0.917. 4 Part 6: how much colour does the face get? SHADE (65, 215, 112)." loading="lazy"><figcaption><span class="fignum">Fig 3B.0.4</span>The four questions, with the answers for the top face at the start pose. Parts 1 and 2 come first because they build the two ideas the four steps need: how light lands on a surface, and how an arrow is written as numbers.<span class="panels">Panels: <b>3B.0.4a</b> (1st) NORMAL · <b>3B.0.4b</b> (2nd) LIGHT · <b>3B.0.4c</b> (3rd) DOT · <b>3B.0.4d</b> (4th) SHADE</span></figcaption></figure>
 <div class="check">
 <div class="q"><p class="qq"><span class="qn">Q1</span>In Fig 3B.0.3b, which face is brightest, and which is darkest? Where do you think the lamp is?</p><details><summary>Show answer</summary><div class="ans">The top is brightest and the left side is darkest. The lamp must be above the cube and over to the right, away from the left side. Part 4 shows exactly where we put it.</div></details></div>
 </div>
@@ -169,76 +169,84 @@ the brighter it is   (1 = full, 0 = none)</code></pre>
 <div class="q"><p class="qq"><span class="qn">Q6</span>In 3D, which way does (0, 0, 1) point?</p><details><summary>Show answer</summary><div class="ans">Straight away from you, into the screen (+z). Its length is <code>root( (0 * 0) + (0 * 0) + (1 * 1) ) = root( 1 ) = 1</code>.</div></details></div>
 </div>
 
-<h2>Part 3: The face pointer <span class="mins">11 MIN</span></h2>
-<p>The first of our four questions: which way does a face point? We answer it with an arrow called the face's <strong>pointer</strong>, like the white arrow on the card in Part 1.</p>
-<h3>3.1 Six pointers on the unturned cube</h3>
-<p>Each pointer starts at the middle of the cube, (0, 0, 0), and goes straight out through the middle of one face. Because the cube's corners are all at -1 or +1, the middle of each face is exactly 1 step away along one axis.</p>
-<figure id="fig-3b-3-1"><img src="images/c22_face_pointers.png" alt="The cube with an arrow coming out of each face. A table lists the pointers before turning: front (0, 0, -1) toward you, back (0, 0, 1) away, left (-1, 0, 0), right (1, 0, 0), top (0, 1, 0) up, bottom (0, -1, 0) down" loading="lazy"><figcaption><span class="fignum">Fig 3B.3.1</span>SHAPE coordinates, cube not turned. Every pointer is exactly 1 long and has a single non-zero number. (The grown-up name for a face pointer is the face's <em>normal</em>.)</figcaption></figure>
-<p>For example the front face is the side toward you, so its pointer points toward you: <code>(0, 0, -1)</code>. The top points up: <code>(0, 1, 0)</code>.</p>
+<h2>Part 3: The face normal <span class="mins">13 MIN</span></h2>
+<p>The first of our four questions: which way does a face point? We answer it with an arrow called the face's <strong>normal</strong>. It is the white arrow on the card in Part 1, and the arrow we have been calling the face's "pointer" so far. From now on we use its proper name.</p>
+<div class="keyconcept"><p><b>A face's normal</b> is an arrow, exactly 1 long, pointing straight out of the face. We work it out once, store it in the shape's data next to the face's corners and colour, and turn it every frame with the same turns as the corners.</p></div>
 
-<h3>3.2 The pointer turns with the cube</h3>
-<p>The pointers are glued to their faces. When the cube turns, they turn too. To see this clearly, look down on the cube from above (a top view), so only x and z show, and turn it with Lesson 2's turn (around y).</p>
-<figure id="fig-3b-3-2"><img src="images/s08_pointer_glued.png" alt="Three top views with +x right, -x left, +z away up the page and -z toward you down the page. The red front edge and the white pointer turn together: turn 0 gives (0, 0, -1), turn 30 gives (0.5, 0, -0.866), turn 90 gives (1, 0, 0)." loading="lazy"><figcaption><span class="fignum">Fig 3B.3.2</span>Top view in SHAPE coordinates; the cube's middle (0, 0, 0) is where the axes cross. Turn 30° moves the pointer 0.5 to the right and leaves it 0.866 toward you. Turn 90° makes the front face look straight right.<span class="panels">Panels: <b>3B.3.2a</b> (left) turn 0° · <b>3B.3.2b</b> (middle) turn 30° · <b>3B.3.2c</b> (right) turn 90°</span></figcaption></figure>
-<p>One way to get each pointer is to write it into the cube's data and turn it with <code>rotate_all</code>, the same way we turn the corners. For the cube there is also a shortcut that needs no extra data at all, and this lesson uses it. Section 3.7 compares the two ways.</p>
+<h3>3.1 What a normal is: six normals on the unturned cube</h3>
+<figure id="fig-3b-3-1"><img src="images/c22_face_pointers.png" alt="The cube with an arrow coming out of each face. A table lists the normals before turning: front (0, 0, -1) toward you, back (0, 0, 1) away, left (-1, 0, 0), right (1, 0, 0), top (0, 1, 0) up, bottom (0, -1, 0) down" loading="lazy"><figcaption><span class="fignum">Fig 3B.3.1</span>SHAPE coordinates, cube not turned. The picture says "pointer": that is the face's normal. Every normal is exactly 1 long, and on a cube each one has a single non-zero number.</figcaption></figure>
+<p>The front face is the side toward you, so its normal points toward you: <code>(0, 0, -1)</code>. The top points up: <code>(0, 1, 0)</code>. For a cube you can read all six off the picture. For other shapes you can't, so next we work one out with numbers.</p>
 
-<h3>3.3 The middle of a face is its pointer</h3>
-<p>The pointer goes from the cube's middle to the face's middle. The cube's middle is (0, 0, 0), so the pointer's tip IS the face's middle. And the middle of 4 corners is their average: add the four x values and divide by 4, then the same for y and for z. We already turn the corners every frame, so we just average the turned corners.</p>
-<figure id="fig-3b-3-3"><img src="images/s09_average.png" alt="Two top views of the front face with a table of its four corners and the averages worked out. Not turned: x ( (-1 + 1 + 1 + -1) / 4 ) = 0, y 0, z ( (-1 + -1 + -1 + -1) / 4 ) = -1, pointer (0, 0, -1). Turned 30 degrees: corners (-0.366, 1, -1.366), (1.366, 1, -0.366), (1.366, -1, -0.366), (-0.366, -1, -1.366); x ( 2 / 4 ) = 0.5, y 0, z ( -3.464 / 4 ) = -0.866, pointer (0.5, 0, -0.866)." loading="lazy"><figcaption><span class="fignum">Fig 3B.3.3</span>The turned corners come from Lesson 2: corner 5 at turn 30° is (1.366, 1, -0.366). The average in panel b, (0.5, 0, -0.866), is exactly the turned pointer of Fig 3B.3.2b.<span class="panels">Panels: <b>3B.3.3a</b> (left) not turned · <b>3B.3.3b</b> (right) turned 30°</span></figcaption></figure>
-<p>Panel b, column by column. x: <code>( (-0.366 + 1.366 + 1.366 + (-0.366)) / 4 ) = ( 2.0 / 4 ) = 0.5</code>. y: <code>( (1 + 1 + -1 + -1) / 4 ) = ( 0 / 4 ) = 0</code>. z: <code>( (-1.366 + -0.366 + -0.366 + -1.366) / 4 ) = ( -3.464 / 4 ) = -0.866</code>. The bits that stick out to each side cancel, and what is left is the way the face points.</p>
-<pre><code>def face_pointer(corners, turned_points):
-    total_x = 0
-    total_y = 0
-    total_z = 0
-    for corner_number in corners:           # the face's 4 corner numbers
-        x, y, z = turned_points[corner_number]
-        total_x = (total_x + x)
-        total_y = (total_y + y)
-        total_z = (total_z + z)
-    count = len(corners)                    # 4
-    return ( (total_x / count), (total_y / count), (total_z / count) )</code></pre>
+<h3>3.2 How a normal is calculated, step 1: two edges</h3>
+<p>Take the face's first 3 corners, call them a, b and c, and subtract to get two edges: <code>A = b - a</code> and <code>B = c - a</code>. Subtracting works one letter at a time, just like adding arrows in Part 2.</p>
+<figure id="fig-3b-3-2"><img src="images/s20_two_edges.png" alt="The cube's front face seen from in front, with +x right, -x left, +y up and -y down. a is corner 4 at the top left, b is corner 5 at the top right, c is corner 1 at the bottom right. Edge A, in teal, runs from a to b and is (2, 0, 0). Edge B, in pink, runs from a to c and is (2, -2, 0)." loading="lazy"><figcaption><span class="fignum">Fig 3B.3.2</span>Front view of the FRONT face, SHAPE coordinates; the face's middle is where the axes cross. A = (2, 0, 0) runs 2 to the right. B = (2, -2, 0) runs 2 right and 2 down. Both lie flat in the face.</figcaption></figure>
 
-<h3>3.4 SHAPE corners, not WORLD corners</h3>
-<p>Careful: average the corners <em>after turning but before adding</em> <code>cube_distance</code>. Those are the turned SHAPE points, measured from the cube's middle. The WORLD points have 5 added to every z, so they are measured from you.</p>
-<figure id="fig-3b-3-4"><img src="images/s10_shape_vs_world.png" alt="Two top views of the cube turned 30 degrees. Left, SHAPE: an arrow from the cube's middle (0, 0, 0) to the front face's middle, (0.5, 0, -0.866), 1 long: a pointer. Right, WORLD: you at (0, 0, 0), the cube's middle at (0, 0, 5), and an arrow from you to the face's middle, (0.5, 0, 4.134), about 4.16 long: a position." loading="lazy"><figcaption><span class="fignum">Fig 3B.3.4</span>Same face, two kinds of coordinates. Only the SHAPE average is a pointer: it starts at the cube's middle and is 1 long. The WORLD average says where the face is, not which way it faces.<span class="panels">Panels: <b>3B.3.4a</b> (left) SHAPE · <b>3B.3.4b</b> (right) WORLD</span></figcaption></figure>
-<p>That is why the code now keeps a third list, <code>turned_points</code>, beside <code>world_points</code> and <code>screen_points</code>. Each list has its own job: SHAPE for pointers, WORLD for the painter's sort, SCREEN for the clock test and drawing.</p>
+<h3>3.3 Step 2 and 3: the cross product, then shrink to 1 long</h3>
+<p>The <strong>cross product</strong> of A and B is a new arrow that is square-on (at 90°) to both of them. An arrow square-on to two edges of a flat face must stick straight out of it. That is exactly the normal, except it may not be 1 long yet, so we shrink it with Part 2's length rule.</p>
+<figure id="fig-3b-3-3"><img src="images/s21_cross_recipe.png" alt="The cross product recipe. cross_x = ( (A_y * B_z) - (A_z * B_y) ) = 0, cross_y = ( (A_z * B_x) - (A_x * B_z) ) = 0, cross_z = ( (A_x * B_y) - (A_y * B_x) ) = ( (2 * -2) - (0 * 2) ) = -4. cross = (0, 0, -4), length 4, normal (0, 0, -1). Side boxes: each line uses the other two letters; the z line is Lesson 3's clock test; swapping b and c gives (0, 0, 1), pointing into the cube." loading="lazy"><figcaption><span class="fignum">Fig 3B.3.3</span>The whole recipe worked for the front face. The answer, (0, 0, -1), is the front normal from Fig 3B.3.1. Listing the corners the other way round flips the arrow to point into the cube, which is why faces list their corners clockwise seen from outside.</figcaption></figure>
+<p>The three lines, fully bracketed:</p>
+<pre><code>cross_x = ( (A_y * B_z) - (A_z * B_y) )
+cross_y = ( (A_z * B_x) - (A_x * B_z) )
+cross_z = ( (A_x * B_y) - (A_y * B_x) )
 
-<h3>3.5 The start pose</h3>
-<p>The start pose has a tip as well as a turn, so the numbers are less round, but the method is exactly the same: average the 4 turned corners.</p>
-<figure id="fig-3b-3-5"><img src="images/c23_pointer_average.png" alt="Left: front face corners not turned, averaged column by column to give (0, 0, -1). Right: the same four corners at the start pose, averaged to give (0.433, -0.5, -0.75)" loading="lazy"><figcaption><span class="fignum">Fig 3B.3.5</span>Panel a is the same sum as Fig 3B.3.3a, written in 3D. Panel b uses the start pose (tip -30°, turn 30°): the front face's pointer is (0.433, -0.5, -0.75), a little right, a little down and mostly toward you.<span class="panels">Panels: <b>3B.3.5a</b> (left) FRONT face, not turned · <b>3B.3.5b</b> (right) FRONT face at the start pose</span></figcaption></figure>
-<p>The same sum for the other two faces you can see gives these pointers. You will meet all three again in Part 5:</p>
-<p class="tabcap" id="fig-3b-3-6"><span class="fignum">Table 3B.3.6</span>The three visible faces' pointers at the start pose (SHAPE coordinates)</p>
+length  = root( (cross_x * cross_x) + (cross_y * cross_y) + (cross_z * cross_z) )
+normal  = ( (cross_x / length), (cross_y / length), (cross_z / length) )</code></pre>
+
+<h3>3.4 A shape that isn't a cube</h3>
+<p>The same three steps work for any flat face. Here is the pyramid's sloping front face, the shape you meet in Lesson 5. The numbers are less round, but nothing else changes.</p>
+<figure id="fig-3b-3-4"><img src="images/s22_pyramid_normal.png" alt="Side view of the pyramid seen from the right, -z toward you on the left, +z away on the right, +y up. Its front face slopes from the tip, corner 4 at (0, 1, 0), down to corners 1 and 0 at the front of the base. The green normal sticks out of the slope, up a little and mostly toward you. Worked numbers: A = (1, -2, -1), B = (-1, -2, -1), cross = (0, 2, -4), length root(20) = 4.472, normal (0, 0.447, -0.894)." loading="lazy"><figcaption><span class="fignum">Fig 3B.3.4</span>Side view, SHAPE coordinates; the pyramid's middle (0, 0, 0) is where the axes cross. normal = (0, 0.447, -0.894): square-on to the slope.</figcaption></figure>
+
+<h3>3.5 Store the normal in the shape's data</h3>
+<p>We work each normal out once, by hand or with a few lines of Python, and write it into the face list as a third item. Each face is now <code>(corners, colour, normal)</code>:</p>
+<pre><code># Each face:  ( corners clockwise from outside,  colour,  NORMAL )
+# The normal is in SHAPE coordinates, 1 long, straight out of the face.
+cube_faces = [
+    ((4, 5, 1, 0), RED,    ( 0,  0, -1)),   # front  -> toward you  (-z)
+    ((6, 7, 3, 2), PURPLE, ( 0,  0,  1)),   # back   -> away        (+z)
+    ((7, 4, 0, 3), BLUE,   (-1,  0,  0)),   # left   -> left        (-x)
+    ((5, 6, 2, 1), GREEN,  ( 1,  0,  0)),   # right  -> right       (+x)
+    ((7, 6, 5, 4), GOLD,   ( 0,  1,  0)),   # top    -> up          (+y)
+    ((2, 3, 0, 1), ORANGE, ( 0, -1,  0)),   # bottom -> down        (-y)
+]</code></pre>
+<p>A pyramid face would look the same, with the less round numbers: <code>((4, 1, 0), RED, (0, 0.447, -0.894))</code>.</p>
+
+<h3>3.6 The normal turns with the shape</h3>
+<p>The normals are glued to their faces. When the cube turns, they must turn too. To see this clearly, look down on the cube from above (a top view), so only x and z show, and turn it with Lesson 2's turn (around y).</p>
+<figure id="fig-3b-3-5"><img src="images/s08_pointer_glued.png" alt="Three top views with +x right, -x left, +z away up the page and -z toward you down the page. The red front edge and the white normal turn together: turn 0 gives (0, 0, -1), turn 30 gives (0.5, 0, -0.866), turn 90 gives (1, 0, 0)." loading="lazy"><figcaption><span class="fignum">Fig 3B.3.5</span>Top view in SHAPE coordinates; the cube's middle (0, 0, 0) is where the axes cross. Turn 30° moves the normal 0.5 to the right and leaves it 0.866 toward you. Turn 90° makes the front face look straight right.<span class="panels">Panels: <b>3B.3.5a</b> (left) turn 0° · <b>3B.3.5b</b> (middle) turn 30° · <b>3B.3.5c</b> (right) turn 90°</span></figcaption></figure>
+<p>So every frame we put each stored normal through <code>rotate_all</code>, the very same function that turns the corners. But there is one difference. The corners are <em>places</em>, so after turning they also move away by <code>cube_distance</code>. A normal is a <em>direction</em>, so it only turns. It never moves.</p>
+<pre><code>for corners, colour, normal in cube_faces:
+    ...
+    turned_normal = rotate_all(normal)    # turn it, like the corners
+                                          # but do NOT add cube_distance</code></pre>
+<figure id="fig-3b-3-6"><img src="images/s10_shape_vs_world.png" alt="Two top views of the cube turned 30 degrees. Left: rotate_all(normal) gives (0.5, 0, -0.866), an arrow 1 long out of the front face. Right: if cube_distance is added as well, it becomes (0.5, 0, 4.134), an arrow from you about 4.16 long that points away from you: wrong." loading="lazy"><figcaption><span class="fignum">Fig 3B.3.6</span>Top views, turn 30°. Panel a: SHAPE coordinates, middle (0, 0, 0). Panel b: WORLD coordinates, you at (0, 0, 0), cube's middle at (0, 0, 5).<span class="panels">Panels: <b>3B.3.6a</b> (left) turned only: right · <b>3B.3.6b</b> (right) turned and moved: wrong</span></figcaption></figure>
+
+<h3>3.7 The start pose</h3>
+<p>The start pose has a tip as well as a turn, so the numbers are less round, but the method is exactly the same: <code>rotate_all</code> does the tip, then the turn, then the roll.</p>
+<figure id="fig-3b-3-7"><img src="images/s23_turn_start_pose.png" alt="Two worked cards. Tip -30 degrees with rotate_x turns (0, 0, -1) into (0, -0.5, -0.866). Turn 30 degrees with rotate_y turns that into (0.433, -0.5, -0.75). Roll 0 changes nothing." loading="lazy"><figcaption><span class="fignum">Fig 3B.3.7</span>The front face's stored normal (0, 0, -1), turned to the start pose (tip -30°, turn 30°). Every formula is Lesson 2B's, unchanged.<span class="panels">Panels: <b>3B.3.7a</b> (left) tip · <b>3B.3.7b</b> (right) turn</span></figcaption></figure>
+<p>The same two steps for the other two faces you can see give these turned normals. You will meet all three again in Part 5:</p>
+<p class="tabcap" id="fig-3b-3-8"><span class="fignum">Table 3B.3.8</span>The three visible faces' turned normals at the start pose</p>
 <div class="tablewrap"><table>
-<tr><th>Face</th><th>Pointer (x, y, z)</th><th>In words</th></tr>
-<tr><td>front</td><td><code>(0.433, -0.5, -0.75)</code></td><td>mostly toward you, a bit right and down</td></tr>
-<tr><td>left</td><td><code>(-0.866, 0, -0.5)</code></td><td>mostly left, a bit toward you</td></tr>
-<tr><td>top</td><td><code>(0.25, 0.866, -0.433)</code></td><td>mostly up, a bit toward you</td></tr>
+<tr><th>Face</th><th>Stored normal</th><th>Turned normal (x, y, z)</th><th>In words</th></tr>
+<tr><td>front</td><td><code>(0, 0, -1)</code></td><td><code>(0.433, -0.5, -0.75)</code></td><td>mostly toward you, a bit right and down</td></tr>
+<tr><td>left</td><td><code>(-1, 0, 0)</code></td><td><code>(-0.866, 0, -0.5)</code></td><td>mostly left, a bit toward you</td></tr>
+<tr><td>top</td><td><code>(0, 1, 0)</code></td><td><code>(0.25, 0.866, -0.433)</code></td><td>mostly up, a bit toward you</td></tr>
 </table></div>
 
-<h3>3.6 Run it: see the pointers</h3>
-<p><code>step1_face_pointers.py</code> starts from Lesson 3's last program. It paints the cube one green, with no light yet, and draws each visible face's pointer as a white arrow with its three numbers.</p>
-<figure id="fig-3b-3-7"><img src="images/run_step1_face_pointers.png" alt="Screenshot of step1_face_pointers.py at the start pose: a flat green cube with three white arrows sticking out of the top, left and front faces, labelled (0.25, 0.87, -0.43), (-0.87, 0.0, -0.5) and (0.43, -0.5, -0.75)." loading="lazy"><figcaption><span class="fignum">Fig 3B.3.7</span><code>step1_face_pointers.py</code> at the start pose. The labels match Table 3B.3.6 (rounded to 2 places). SPACE pauses, R goes back to the start pose, C swaps to six colours, P hides the arrows.</figcaption></figure>
-<p>Notice how flat the cube looks with no light: only the thin black outlines show the edges. Let it tumble and watch one arrow: its three numbers change all the time, but none ever goes above 1 or below -1, because the arrow is always 1 long.</p>
-<h3>3.7 Another way: store the pointer and turn it</h3>
-<p>Back in 3.2 we said we could turn every pointer the same way we turn the corners. That works, and for most shapes it is the better way. Here are the two ways side by side.</p>
-<figure id="fig-3b-3-8"><img src="images/s19_two_ways.png" alt="Two side views in SHAPE coordinates, -z toward you on the left, +z away on the right, +y up. Left: the cube; the average of the front face's corners is (0, 0, -1), square-on to the face. Right: the Lesson 5 pyramid; the average of its front face's three corners is (0, -0.333, -0.667), which points down and is only 0.745 long, while the true pointer is (0, 0.447, -0.894), pointing up and out. A box below explains Way 1 (store each pointer, turn it with the same tip and turn, never add cube_distance) and Way 2 (average the turned corners, cube only)." loading="lazy"><figcaption><span class="fignum">Fig 3B.3.8</span>Side view, SHAPE coordinates, middle (0, 0, 0) where the axes cross. The average trick only works when each face's middle sits straight out from the shape's middle, as on the cube.<span class="panels">Panels: <b>3B.3.8a</b> (left) cube · <b>3B.3.8b</b> (right) pyramid</span></figcaption></figure>
-<div class="tablewrap"><table>
-<tr><th></th><th>Way 1: store and turn</th><th>Way 2: average the corners (this lesson)</th></tr>
-<tr><td>Extra data</td><td>One pointer per face, written by hand, e.g. front <code>(0, 0, -1)</code></td><td>None</td></tr>
-<tr><td>Each frame</td><td>Turn each pointer with the same tip and turn as the corners. Do <b>not</b> add <code>cube_distance</code>: a pointer is a direction, not a place.</td><td>Average the 4 turned corners</td></tr>
-<tr><td>Works for</td><td>Any shape</td><td>Only shapes like the cube, centred on (0, 0, 0), where every face's middle is straight out from the middle</td></tr>
-</table></div>
-<p>So why does this lesson use Way 2? Only because it needs no new data: the turned corners are already there, and the cube is the one shape we have. "Easier" just means "less to type today". In Lesson 5 we add a pyramid, Way 2 gives its sloping faces the wrong pointer (panel b), and we switch to Way 1.</p>
+<h3>3.8 Run it: see the normals</h3>
+<p><code>step1_face_normals.py</code> starts from Lesson 3's last program, with the normals added to <code>cube_faces</code>. It paints the cube one green, with no light yet, and draws each visible face's turned normal as a white arrow with its three numbers.</p>
+<figure id="fig-3b-3-9"><img src="images/run_step1_face_normals.png" alt="Screenshot of step1_face_normals.py at the start pose: a flat green cube with three white arrows sticking out of the top, left and front faces, labelled (0.25, 0.87, -0.43), (-0.87, 0.0, -0.5) and (0.43, -0.5, -0.75)." loading="lazy"><figcaption><span class="fignum">Fig 3B.3.9</span><code>step1_face_normals.py</code> at the start pose. The labels match Table 3B.3.8 (rounded to 2 places). SPACE pauses, R goes back to the start pose, C swaps to six colours, N hides the arrows.</figcaption></figure>
+<p>Notice how flat the cube looks with no light: only the thin black outlines show the edges. Let it tumble and watch one arrow: its three numbers change all the time, but none ever goes above 1 or below -1, because turning never changes an arrow's length.</p>
 <div class="check">
-<div class="q"><p class="qq"><span class="qn">Q7</span>Average the right face's corners when the cube is not turned: (1, 1, -1), (1, 1, 1), (1, -1, 1), (1, -1, -1). What pointer do you get?</p><details><summary>Show answer</summary><div class="ans">x: <code>( (1 + 1 + 1 + 1) / 4 ) = ( 4 / 4 ) = 1</code>. y: <code>( (1 + 1 + -1 + -1) / 4 ) = 0</code>. z: <code>( (-1 + 1 + 1 + -1) / 4 ) = 0</code>. Pointer (1, 0, 0): straight right, as in Fig 3B.3.1.</div></details></div>
-<div class="q"><p class="qq"><span class="qn">Q8</span>At turn 90° the front pointer is (1, 0, 0) (Fig 3B.3.2c). Which face's pointer was (1, 0, 0) before turning? What has happened?</p><details><summary>Show answer</summary><div class="ans">The right face's. The cube has turned a quarter of the way round, so the front face now sits where the right face used to be, and points the same way it used to.</div></details></div>
-<div class="q"><p class="qq"><span class="qn">Q9</span>Why does <code>face_pointer</code> use <code>turned_points</code> and not <code>world_points</code>?</p><details><summary>Show answer</summary><div class="ans">The pointer must start at the cube's middle, (0, 0, 0), and be 1 long. In WORLD coordinates the cube's middle is at (0, 0, 5), so averaging WORLD corners gives the face's position from you, about 4 to 6 units long (Fig 3B.3.4b). That is a place, not a direction.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q7</span>Work out the right face's normal from its first 3 corners: a = corner 5 (1, 1, -1), b = corner 6 (1, 1, 1), c = corner 2 (1, -1, 1).</p><details><summary>Show answer</summary><div class="ans">A = b - a = (0, 0, 2). B = c - a = (0, -2, 2). x: <code>( (0 * 2) - (2 * -2) ) = ( 0 + 4 ) = 4</code>. y: <code>( (2 * 0) - (0 * 2) ) = 0</code>. z: <code>( (0 * -2) - (0 * 0) ) = 0</code>. cross = (4, 0, 0), length 4, normal (1, 0, 0): straight right, as in Fig 3B.3.1.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q8</span>At turn 90° the front normal is (1, 0, 0) (Fig 3B.3.5c). Which face's stored normal was (1, 0, 0)? What has happened?</p><details><summary>Show answer</summary><div class="ans">The right face's. The cube has turned a quarter of the way round, so the front face now sits where the right face used to be, and points the same way it used to.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q9</span>Why do we turn the normal with <code>rotate_all</code> but never add <code>cube_distance</code> to it?</p><details><summary>Show answer</summary><div class="ans">A normal is a direction, not a place. Turning the cube changes which way each face points, so the normal must turn. Moving the cube away does not change which way anything points, so the normal must not move. Adding 5 to z would make it about 4 to 6 units long and point away from you (Fig 3B.3.6b).</div></details></div>
 </div>
 
 <h2>Part 4: The light arrow <span class="mins">6 MIN</span></h2>
 <p>The second question: which way is the lamp? We answer it with one more arrow, called <code>LIGHT</code>.</p>
 <h3>4.1 LIGHT points toward the lamp</h3>
 <p>Imagine the lamp is far away, like the sun. Then its rays all arrive side by side, travelling the same way, and every face of the cube sees the lamp in the same direction. So we don't store where the lamp is, only which way it is.</p>
-<figure id="fig-3b-4-1"><img src="images/s11_light_direction.png" alt="Side view. A lamp far away at the top right sends parallel brown rays down-left onto a green cube. A thick yellow arrow labelled LIGHT starts at the cube and points the other way, up-right toward the lamp." loading="lazy"><figcaption><span class="fignum">Fig 3B.4.1</span>The rays travel from the lamp to the cube, but LIGHT points the other way: from the cube back toward the lamp. That way a face looking straight at the lamp has a pointer going the SAME way as LIGHT.</figcaption></figure>
+<figure id="fig-3b-4-1"><img src="images/s11_light_direction.png" alt="Side view. A lamp far away at the top right sends parallel brown rays down-left onto a green cube. A thick yellow arrow labelled LIGHT starts at the cube and points the other way, up-right toward the lamp." loading="lazy"><figcaption><span class="fignum">Fig 3B.4.1</span>The rays travel from the lamp to the cube, but LIGHT points the other way: from the cube back toward the lamp. That way a face looking straight at the lamp has a normal going the SAME way as LIGHT.</figcaption></figure>
 <p>This is the easiest thing to get backwards, so it is worth saying twice: <strong>LIGHT points from the cube toward the lamp.</strong></p>
 
 <h3>4.2 Building LIGHT</h3>
@@ -246,48 +254,48 @@ the brighter it is   (1 = full, 0 = none)</code></pre>
 <figure id="fig-3b-4-2"><img src="images/s12_light_build.png" alt="Step 1: front view with +x right, +y up: the lamp 12 right and 15 up. Top view with +x right, +z away up the page and -z toward you down the page: the lamp 12 right and 16 toward you. As numbers: (12, 15, -16). Step 2: root( (12 * 12) + (15 * 15) + ((-16) * (-16)) ) = root( 144 + 225 + 256 ) = root( 625 ) = 25, too long. Step 3: divide by 25 to get (0.48, 0.6, -0.64), and the length check gives root( 1.0 ) = 1." loading="lazy"><figcaption><span class="fignum">Fig 3B.4.2</span>The same shrinking trick as Fig 3B.2.2b, in 3D. 12, 15 and 16 were chosen because their squares add up to 625 = (25 * 25), so dividing by 25 gives tidy decimals.<span class="panels">Panels: <b>3B.4.2a</b> (top) 1. pick a spot for the lamp · <b>3B.4.2b</b> (bottom left) 2. how long is it? · <b>3B.4.2c</b> (bottom right) 3. divide every part by 25</span></figcaption></figure>
 <p>Inside out: <code>(12 * 12) = 144</code>, <code>(15 * 15) = 225</code>, <code>((-16) * (-16)) = 256</code>; <code>(144 + 225 + 256) = 625</code>; <code>root(625) = 25</code>. Then <code>(12 / 25) = 0.48</code>, <code>(15 / 25) = 0.6</code>, <code>(-16 / 25) = -0.64</code>.</p>
 <pre><code>LIGHT = (0.48, 0.6, -0.64)      # right a bit, up, toward you: 1 long</code></pre>
-<p>The lamp never moves. Only the cube turns, so only the pointers change from frame to frame.</p>
+<p>The lamp never moves. Only the cube turns, so only the normals change from frame to frame.</p>
 <div class="check">
 <div class="q"><p class="qq"><span class="qn">Q10</span>Someone writes <code>LIGHT = (-0.48, -0.6, 0.64)</code>. Where would that lamp be?</p><details><summary>Show answer</summary><div class="ans">Every number has flipped sign, so the arrow points the exact opposite way: down, to the left, and away from you, behind and below the cube. The faces you can see would all be in shadow.</div></details></div>
 <div class="q"><p class="qq"><span class="qn">Q11</span>You want a lamp straight overhead. What is LIGHT? Is it 1 long?</p><details><summary>Show answer</summary><div class="ans"><code>(0, 1, 0)</code>. Length <code>root( (0 * 0) + (1 * 1) + (0 * 0) ) = root( 1 ) = 1</code>, so yes.</div></details></div>
 </div>
 
 <h2>Part 5: The dot product <span class="mins">13 MIN</span></h2>
-<p>The third question: how well do the face's pointer and LIGHT line up? If they point the same way the face looks at the lamp (brightness 1). If they are at right angles, the light just skims past (brightness 0). We need a sum that turns two arrows into that number.</p>
+<p>The third question: how well do the face's normal and LIGHT line up? If they point the same way the face looks at the lamp (brightness 1). If they are at right angles, the light just skims past (brightness 0). We need a sum that turns two arrows into that number.</p>
 <h3>5.1 Multiply the matching numbers, then add</h3>
 <p>The sum is called the <strong>dot product</strong>. Multiply the two x numbers together, multiply the two y numbers together, and add the answers. Try it on flat arrows first:</p>
 <figure id="fig-3b-5-1"><img src="images/s13_dot_2d.png" alt="Four flat grids. (1, 0) and (1, 0): ( (1 * 1) + (0 * 0) ) = 1, same way. (1, 0) and (0, 1): 0, at right angles. (1, 0) and (-1, 0): -1, opposite ways. (0.6, 0.8) and (0, 1): ( (0.6 * 0) + (0.8 * 1) ) = 0.8, nearly the same way." loading="lazy"><figcaption><span class="fignum">Fig 3B.5.1</span>Both arrows are 1 long in every panel. Same way gives 1, right angles give 0, opposite gives -1, and in between gives in between.<span class="panels">Panels: <b>3B.5.1a</b> (1st) same way · <b>3B.5.1b</b> (2nd) at right angles · <b>3B.5.1c</b> (3rd) opposite ways · <b>3B.5.1d</b> (4th) nearly the same way</span></figcaption></figure>
 <p>Look at panel d. LIGHT there is (0, 1), straight up, so the x pair is <code>(0.6 * 0) = 0</code> and drops out. The dot keeps only the arrow's "up" part, 0.8: how much of the arrow points at the lamp.</p>
 
 <h3>5.2 It matches the rays</h3>
-<p>Now the check promised in Part 1. Put the cards back under the lamp. The lamp is straight up, so LIGHT is (0, 1). Each card's pointer is a 1-long arrow, and the dot product should give the same brightness as counting rays.</p>
-<figure id="fig-3b-5-2"><img src="images/s14_dot_card.png" alt="Three cards under the lamp. At 0 degrees: pointer (0, 1), dot ( (0 * 0) + (1 * 1) ) = 1, rays 12 of 12 = 1. At 60 degrees: pointer (0.866, 0.5), dot ( (0.866 * 0) + (0.5 * 1) ) = 0.5, rays 6 of 12 = 0.5. At 90 degrees: pointer (1, 0), dot 0, rays 0 of 12 = 0. Each says same answer." loading="lazy"><figcaption><span class="fignum">Fig 3B.5.2</span>The pointer of the 60° card is (0.866, 0.5): <code>sin(60°) = 0.866</code> across and <code>cos(60°) = 0.5</code> up, from Lesson 2's unit circle. The dot product and the ray count agree on every card.<span class="panels">Panels: <b>3B.5.2a</b> (left) card at 0° · <b>3B.5.2b</b> (middle) card at 60° · <b>3B.5.2c</b> (right) card at 90°</span></figcaption></figure>
+<p>Now the check promised in Part 1. Put the cards back under the lamp. The lamp is straight up, so LIGHT is (0, 1). Each card's normal is a 1-long arrow, and the dot product should give the same brightness as counting rays.</p>
+<figure id="fig-3b-5-2"><img src="images/s14_dot_card.png" alt="Three cards under the lamp. At 0 degrees: normal (0, 1), dot ( (0 * 0) + (1 * 1) ) = 1, rays 12 of 12 = 1. At 60 degrees: normal (0.866, 0.5), dot ( (0.866 * 0) + (0.5 * 1) ) = 0.5, rays 6 of 12 = 0.5. At 90 degrees: normal (1, 0), dot 0, rays 0 of 12 = 0. Each says same answer." loading="lazy"><figcaption><span class="fignum">Fig 3B.5.2</span>The normal of the 60° card is (0.866, 0.5): <code>sin(60°) = 0.866</code> across and <code>cos(60°) = 0.5</code> up, from Lesson 2's unit circle. The dot product and the ray count agree on every card.<span class="panels">Panels: <b>3B.5.2a</b> (left) card at 0° · <b>3B.5.2b</b> (middle) card at 60° · <b>3B.5.2c</b> (right) card at 90°</span></figcaption></figure>
 <div class="keyconcept" role="note" aria-label="Key concept">
 <span class="kc-label">KEY CONCEPT</span>
-<pre><code>brightness = dot(pointer, LIGHT)
+<pre><code>brightness = dot(turned_normal, LIGHT)
            = ( (x1 * x2) + (y1 * y2) + (z1 * z2) )</code></pre>
 <p>When both arrows are 1 long, the dot product IS the share of light the face catches. This one line replaces counting rays and measuring angles.</p>
 </div>
-<p>This is why both arrows had to be 1 long. If the pointer were (3, 4) instead of (0.6, 0.8), the dot with (0, 1) would be 4: "four times full light", which makes no sense. Keeping both at length 1 keeps the answer between -1 and 1.</p>
-<figure id="fig-3b-5-3"><img src="images/c26_dot_product.png" alt="Five panels with a yellow LIGHT arrow and a white pointer at 0, 60, 90, 120 and 180 degrees apart. The dot products are 1, 0.5, 0, -0.5 and -1" loading="lazy"><figcaption><span class="fignum">Fig 3B.5.3</span>The whole range on one picture. For two arrows that are both 1 long, the dot product is the cos of the angle between them: the same curve as Fig 3B.1.2, but carrying on below 0 past 90°.<span class="panels">Panels: <b>3B.5.3a</b> (1st) 0° apart (dot 1.0) · <b>3B.5.3b</b> (2nd) 60° apart (dot 0.5) · <b>3B.5.3c</b> (3rd) 90° apart (dot 0) · <b>3B.5.3d</b> (4th) 120° apart (dot -0.5) · <b>3B.5.3e</b> (5th) 180° apart (dot -1.0)</span></figcaption></figure>
+<p>This is why both arrows had to be 1 long. If the normal were (3, 4) instead of (0.6, 0.8), the dot with (0, 1) would be 4: "four times full light", which makes no sense. Keeping both at length 1 keeps the answer between -1 and 1.</p>
+<figure id="fig-3b-5-3"><img src="images/c26_dot_product.png" alt="Five panels with a yellow LIGHT arrow and a white normal at 0, 60, 90, 120 and 180 degrees apart. The dot products are 1, 0.5, 0, -0.5 and -1" loading="lazy"><figcaption><span class="fignum">Fig 3B.5.3</span>The whole range on one picture. For two arrows that are both 1 long, the dot product is the cos of the angle between them: the same curve as Fig 3B.1.2, but carrying on below 0 past 90°.<span class="panels">Panels: <b>3B.5.3a</b> (1st) 0° apart (dot 1.0) · <b>3B.5.3b</b> (2nd) 60° apart (dot 0.5) · <b>3B.5.3c</b> (3rd) 90° apart (dot 0) · <b>3B.5.3d</b> (4th) 120° apart (dot -0.5) · <b>3B.5.3e</b> (5th) 180° apart (dot -1.0)</span></figcaption></figure>
 
 <h3>5.3 In 3D: all six faces</h3>
-<p>In 3D there is one more pair to multiply, the two z numbers. Start with the cube not turned, because its pointers are so simple: each has only one number that isn't 0, so only one pair survives.</p>
-<figure id="fig-3b-5-4"><img src="images/s15_dot_six_faces.png" alt="Six rows, one per face, each with its pointer, the bracketed dot product with LIGHT and a bar. front ( (0 * 0.48) + (0 * 0.6) + ((-1) * (-0.64)) ) = 0.64. top 0.6. right 0.48. left -0.48. bottom -0.6. back -0.64. Positive bars green, negative bars red." loading="lazy"><figcaption><span class="fignum">Fig 3B.5.4</span>Cube not turned, SHAPE pointers from Fig 3B.3.1. The front scores highest (0.64) because LIGHT's biggest part is its -0.64 toward you, and the front pointer points toward you.</figcaption></figure>
+<p>In 3D there is one more pair to multiply, the two z numbers. Start with the cube not turned, because its normals are so simple: each has only one number that isn't 0, so only one pair survives.</p>
+<figure id="fig-3b-5-4"><img src="images/s15_dot_six_faces.png" alt="Six rows, one per face, each with its normal, the bracketed dot product with LIGHT and a bar. front ( (0 * 0.48) + (0 * 0.6) + ((-1) * (-0.64)) ) = 0.64. top 0.6. right 0.48. left -0.48. bottom -0.6. back -0.64. Positive bars green, negative bars red." loading="lazy"><figcaption><span class="fignum">Fig 3B.5.4</span>Cube not turned, stored normals from Fig 3B.3.1. The front scores highest (0.64) because LIGHT's biggest part is its -0.64 toward you, and the front normal points toward you.</figcaption></figure>
 <p>The front face, inside out: <code>(0 * 0.48) = 0</code>, <code>(0 * 0.6) = 0</code>, <code>((-1) * (-0.64)) = 0.64</code> (minus times minus is plus), so <code>( 0 + 0 + 0.64 ) = 0.64</code>. Three faces get positive numbers, the three on the lamp's side. The other three get negative numbers.</p>
 
 <h3>5.4 Negative means no light</h3>
 <p>A negative dot means the face looks away from the lamp, like the upside-down card in Fig 3B.1.1d. A face can't catch less than no light, so we change any negative number to 0.</p>
 <figure id="fig-3b-5-5"><img src="images/s16_clamp.png" alt="A number line from -1 to 1, red below 0 labelled looks away from the lamp, green above labelled looks partly toward the lamp. Arrows mark left -0.096, front 0.388 and top 0.917; the left value is moved up to 0. Below: the code if brightness < 0: brightness = 0." loading="lazy"><figcaption><span class="fignum">Fig 3B.5.5</span>Only negative numbers change. 0.388 and 0.917 stay as they are; -0.096 becomes 0.</figcaption></figure>
-<pre><code>def brightness_of(pointer):
-    brightness = dot(pointer, LIGHT)        # -1 .. 1
+<pre><code>def brightness_of(turned_normal):
+    brightness = dot(turned_normal, LIGHT)  # -1 .. 1
     if brightness &lt; 0:
         brightness = 0                      # facing away: no light
     return brightness                       # 0 .. 1</code></pre>
 
 <h3>5.5 The start pose</h3>
-<p>Now the real numbers: the three pointers from Table 3B.3.6, each dotted with LIGHT, one pair at a time.</p>
-<figure id="fig-3b-5-6"><img src="images/c27_dot_worked.png" alt="Three columns. Front face: pointer (0.433, -0.5, -0.75), pairs 0.208, -0.300, 0.480, dot 0.388. Left face: pointer (-0.866, 0, -0.5), pairs -0.416, 0, 0.320, dot -0.096, below 0 so brightness 0. Top face: pointer (0.25, 0.866, -0.433), pairs 0.120, 0.520, 0.277, dot 0.917. Each column ends with a shade swatch." loading="lazy"><figcaption><span class="fignum">Fig 3B.5.6</span>The start pose, bracket by bracket. Ignore the shade swatches at the bottom for now; Part 6 explains them. The top looks almost straight at the lamp (0.917), the front is about half lit (0.388), and the left looks slightly away (-0.096, so 0).<span class="panels">Panels: <b>3B.5.6a</b> (left) FRONT face · <b>3B.5.6b</b> (middle) LEFT face · <b>3B.5.6c</b> (right) TOP face</span></figcaption></figure>
+<p>Now the real numbers: the three turned normals from Table 3B.3.8, each dotted with LIGHT, one pair at a time.</p>
+<figure id="fig-3b-5-6"><img src="images/c27_dot_worked.png" alt="Three columns. Front face: normal (0.433, -0.5, -0.75), pairs 0.208, -0.300, 0.480, dot 0.388. Left face: normal (-0.866, 0, -0.5), pairs -0.416, 0, 0.320, dot -0.096, below 0 so brightness 0. Top face: normal (0.25, 0.866, -0.433), pairs 0.120, 0.520, 0.277, dot 0.917. Each column ends with a shade swatch." loading="lazy"><figcaption><span class="fignum">Fig 3B.5.6</span>The start pose, bracket by bracket. Ignore the shade swatches at the bottom for now; Part 6 explains them. The top looks almost straight at the lamp (0.917), the front is about half lit (0.388), and the left looks slightly away (-0.096, so 0).<span class="panels">Panels: <b>3B.5.6a</b> (left) FRONT face · <b>3B.5.6b</b> (middle) LEFT face · <b>3B.5.6c</b> (right) TOP face</span></figcaption></figure>
 <p>The front face, written out in full: <code>( (0.433 * 0.48) + ((-0.5) * 0.6) + ((-0.75) * (-0.64)) ) = ( 0.208 + -0.300 + 0.480 ) = 0.388</code>.</p>
 
 <h3>5.6 Run it: brightness on every face</h3>
@@ -295,7 +303,7 @@ the brighter it is   (1 = full, 0 = none)</code></pre>
 <figure id="fig-3b-5-7"><img src="images/run_step2_brightness.png" alt="Screenshot of step2_brightness.py at the start pose: the top face bright green labelled 0.917, the front dark green labelled 0.388, and the left face pure black, labelled 0, visible only by its grey outline." loading="lazy"><figcaption><span class="fignum">Fig 3B.5.7</span><code>step2_brightness.py</code> at the start pose. The three numbers match Fig 3B.5.6. N hides the numbers. Notice the left face: it is pure black, and only its grey outline shows it is there.</figcaption></figure>
 <div class="check">
 <div class="q"><p class="qq"><span class="qn">Q12</span>Work out the dot product of (0.6, 0.8) and (0.8, 0.6). Do they point nearly the same way?</p><details><summary>Show answer</summary><div class="ans"><code>( (0.6 * 0.8) + (0.8 * 0.6) ) = ( 0.48 + 0.48 ) = 0.96</code>. Yes: 0.96 is close to 1.</div></details></div>
-<div class="q"><p class="qq"><span class="qn">Q13</span>Before any turning, what is the dot product of the top face's pointer (0, 1, 0) with LIGHT?</p><details><summary>Show answer</summary><div class="ans"><code>( (0 * 0.48) + (1 * 0.6) + (0 * (-0.64)) ) = ( 0 + 0.6 + 0 ) = 0.6</code>. Only the y pair survives, as in Fig 3B.5.4.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q13</span>Before any turning, what is the dot product of the top face's normal (0, 1, 0) with LIGHT?</p><details><summary>Show answer</summary><div class="ans"><code>( (0 * 0.48) + (1 * 0.6) + (0 * (-0.64)) ) = ( 0 + 0.6 + 0 ) = 0.6</code>. Only the y pair survives, as in Fig 3B.5.4.</div></details></div>
 <div class="q"><p class="qq"><span class="qn">Q14</span>The bottom face (cube not turned) has dot -0.6. What brightness does it get, and why?</p><details><summary>Show answer</summary><div class="ans">0. The bottom looks down, away from a lamp that is above the cube, so it catches no light. The negative number is changed to 0.</div></details></div>
 <div class="q"><p class="qq"><span class="qn">Q15</span>Change LIGHT to (0, 1, 0), straight overhead. Before any turning, which faces get light?</p><details><summary>Show answer</summary><div class="ans">Only the top, with dot <code>( (0 * 0) + (1 * 1) + (0 * 0) ) = 1</code>. The front, back, left and right all give 0 (side-on) and the bottom gives -1, changed to 0.</div></details></div>
 </div>
@@ -319,8 +327,8 @@ the brighter it is   (1 = full, 0 = none)</code></pre>
 <figure id="fig-3b-6-3"><img src="images/c28_shade_ramp.png" alt="A strip of green from dark at brightness 0 (shade 0.2) to full green at brightness 1 (shade 1.0), with left, front and top marked. The formula and the top face worked out: (70, 230, 120) times 0.934 gives (65, 215, 112)" loading="lazy"><figcaption><span class="fignum">Fig 3B.6.3</span>Every brightness from 0 to 1 and the green it gives. The top face, start to finish: shade 0.934, colour (65, 215, 112), the last box of Fig 3B.0.4.<span class="panels">Panels: <b>3B.6.3a</b> (top) the brightness ramp · <b>3B.6.3b</b> (bottom left) the formula · <b>3B.6.3c</b> (bottom right) worked: the TOP face</span></figcaption></figure>
 <pre><code>AMBIENT = 0.2
 
-def shade_colour(colour, pointer):
-    brightness = dot(pointer, LIGHT)        # -1 .. 1
+def shade_colour(colour, turned_normal):
+    brightness = dot(turned_normal, LIGHT)  # -1 .. 1
     if brightness &lt; 0:
         brightness = 0                      # facing away from the light
     shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )   # 0.2 .. 1
@@ -329,7 +337,7 @@ def shade_colour(colour, pointer):
 
 <h3>6.3 Run it: the lit cube</h3>
 <p><code>step3_lit_cube.py</code> is the finished lit cube, and the program Lesson 4 starts from. Let it tumble and watch each face brighten as it turns toward the upper right, where the lamp is.</p>
-<figure id="fig-3b-6-4"><img src="images/c29_lit_film.png" alt="Six frames of the lit green cube tumbling, faces getting brighter and darker as they turn" loading="lazy"><figcaption><span class="fignum">Fig 3B.6.4</span>The lamp stays still; only the cube turns, so the pointers change and the shading follows them.<span class="panels">Panels: <b>3B.6.4a</b> (1st) frame 0 · <b>3B.6.4b</b> (2nd) frame 40 · <b>3B.6.4c</b> (3rd) frame 80 · <b>3B.6.4d</b> (4th) frame 120 · <b>3B.6.4e</b> (5th) frame 160 · <b>3B.6.4f</b> (6th) frame 200</span></figcaption></figure>
+<figure id="fig-3b-6-4"><img src="images/c29_lit_film.png" alt="Six frames of the lit green cube tumbling, faces getting brighter and darker as they turn" loading="lazy"><figcaption><span class="fignum">Fig 3B.6.4</span>The lamp stays still; only the cube turns, so the normals change and the shading follows them.<span class="panels">Panels: <b>3B.6.4a</b> (1st) frame 0 · <b>3B.6.4b</b> (2nd) frame 40 · <b>3B.6.4c</b> (3rd) frame 80 · <b>3B.6.4d</b> (4th) frame 120 · <b>3B.6.4e</b> (5th) frame 160 · <b>3B.6.4f</b> (6th) frame 200</span></figcaption></figure>
 <figure id="fig-3b-6-5"><img src="images/run_step3_lit_cube.png" alt="Screenshot of step3_lit_cube.py at the start pose: a green cube with a bright top, medium front and dark left side" loading="lazy"><figcaption><span class="fignum">Fig 3B.6.5</span><code>step3_lit_cube.py</code> at the start pose. Compare the left face with Fig 3B.5.7: now it is dark green, not black. L switches the light off and on, C swaps between one green and the six face colours.</figcaption></figure>
 <div class="check">
 <div class="q"><p class="qq"><span class="qn">Q16</span>With AMBIENT = 0.2, what shade does a face get at brightness 0.5? What does CUBE_GREEN's 230 become?</p><details><summary>Show answer</summary><div class="ans"><code>( 0.2 + ( 0.8 * 0.5 ) ) = ( 0.2 + 0.4 ) = 0.6</code>. Green becomes <code>round(230 * 0.6) = 138</code>.</div></details></div>
@@ -339,10 +347,10 @@ def shade_colour(colour, pointer):
 <h2>Wrap up <span class="mins">3 MIN</span></h2>
 <div class="key">
   <strong>The ideas from today</strong>
-  <p>1. The more a face points at the lamp, the more light it catches: brightness from 0 (none) to 1 (full).<br>2. An arrow is written as numbers (x, y, z). Its length is <code>root( (x * x) + (y * y) + (z * z) )</code>, and dividing by the length makes it 1 long.<br>3. A face's pointer is the average of its 4 turned SHAPE corners: an arrow from the cube's middle straight out of the face.<br>4. <code>LIGHT = (0.48, 0.6, -0.64)</code> points from the cube toward the lamp, and is 1 long.<br>5. The dot product <code>( (x1 * x2) + (y1 * y2) + (z1 * z2) )</code> of two 1-long arrows is the share of light; negative becomes 0.<br>6. <code>shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )</code>, then multiply the colour by shade. AMBIENT stops shadows going black.</p>
+  <p>1. The more a face points at the lamp, the more light it catches: brightness from 0 (none) to 1 (full).<br>2. An arrow is written as numbers (x, y, z). Its length is <code>root( (x * x) + (y * y) + (z * z) )</code>, and dividing by the length makes it 1 long.<br>3. A face's normal is a 1-long arrow straight out of the face. Work it out once (two edges, cross product, shrink to 1), store it with the face, and turn it with <code>rotate_all</code> every frame, without adding <code>cube_distance</code>.<br>4. <code>LIGHT = (0.48, 0.6, -0.64)</code> points from the cube toward the lamp, and is 1 long.<br>5. The dot product <code>( (x1 * x2) + (y1 * y2) + (z1 * z2) )</code> of two 1-long arrows is the share of light; negative becomes 0.<br>6. <code>shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )</code>, then multiply the colour by shade. AMBIENT stops shadows going black.</p>
 </div>
 <div class="check">
-<div class="q"><p class="qq"><span class="qn">Q18</span>Final check: list, in order, what <code>step3_lit_cube.py</code> does to colour one face.</p><details><summary>Show answer</summary><div class="ans">1. Skip the face if the clock test says it is turned away (Lesson 3). 2. Work out its average z for the painter's sort (Lesson 3). 3. Average its 4 turned SHAPE corners to get its pointer. 4. Dot the pointer with LIGHT to get its brightness, and change a negative brightness to 0. 5. Work out <code>shade = ( 0.2 + ( 0.8 * brightness ) )</code>. 6. Multiply red, green and blue by the shade and round them.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q18</span>Final check: list, in order, what <code>step3_lit_cube.py</code> does to colour one face.</p><details><summary>Show answer</summary><div class="ans">1. Skip the face if the clock test says it is turned away (Lesson 3). 2. Work out its average z for the painter's sort (Lesson 3). 3. Turn its stored normal with <code>rotate_all</code> (no <code>cube_distance</code>). 4. Dot the turned normal with LIGHT to get its brightness, and change a negative brightness to 0. 5. Work out <code>shade = ( 0.2 + ( 0.8 * brightness ) )</code>. 6. Multiply red, green and blue by the shade and round them.</div></details></div>
 </div>
 <h3>Practice before Lesson 4</h3>
 <ul>
@@ -357,7 +365,7 @@ def shade_colour(colour, pointer):
 <h2>Files</h2>
 <p>Download the code for this lesson (right-click a file and choose <em>Save link as</em>):</p>
 <ul class="files">
-  <li><a href="code/step1_face_pointers.py" download><code>code/step1_face_pointers.py</code></a>: one green, no light; draws each visible face's pointer with its numbers; P hides them</li>
+  <li><a href="code/step1_face_normals.py" download><code>code/step1_face_normals.py</code></a>: normals stored in <code>cube_faces</code>; one green, no light; draws each visible face's turned normal with its numbers; N hides them</li>
   <li><a href="code/step2_brightness.py" download><code>code/step2_brightness.py</code></a>: LIGHT and the dot product; brightness only, so shadows go black; N shows the numbers</li>
   <li><a href="code/step3_lit_cube.py" download><code>code/step3_lit_cube.py</code></a>: the finished lit cube with AMBIENT; L for light, C for colours</li>
   <li><code>images/</code>: every diagram on this page as a PNG</li>
