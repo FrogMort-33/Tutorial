@@ -72,15 +72,15 @@ figure, .tabcap { scroll-margin-top:16px; }
 <nav style="font-family:var(--mono, monospace);font-size:14px;"><a style="color:var(--accent)" href="../">&larr; All lessons</a> &middot; <a style="color:var(--accent)" href="../figures/">Figure index</a></nav>
 
 <header style="display:flex;flex-direction:column;gap:12px">
-  <span class="eyebrow">Wireframe 3D course · Lesson 3 · about 50 minutes</span>
+  <span class="eyebrow">Wireframe 3D course · Lesson 3 · about 40 minutes</span>
   <h1>Solid faces</h1>
-  <p class="lede">So far the cube has been made of wire: 12 lines with nothing between them. Today we fill in its six sides with colour, paint them in the right order, skip the ones that face away, and light them with a lamp. By the end the cube looks like a real solid object tumbling in the air.</p>
+  <p class="lede">So far the cube has been made of wire: 12 lines with nothing between them. Today we fill in its six sides with colour, paint them in the right order, and skip the ones that face away. By the end the cube looks like a real solid object tumbling in the air. Lighting it with a lamp comes next, in its own lesson, Lesson 3B.</p>
 </header>
 
-<figure id="fig-3-0-1"><img src="images/course_map.png" alt="Course map: eight lessons on a road from Lesson 1 to a mini game. Lesson 3 is highlighted as you are here; Lessons 1, 2 and 2B are done." loading="lazy"><figcaption><span class="fignum">Fig 3.0.1</span>The course map. Coloured cards are done or today; darker cards are still to come. Every lesson adds one idea to the same small program.</figcaption></figure>
+<figure id="fig-3-0-1"><img src="images/course_map.png" alt="Course map: thirteen lessons on a road. Lesson 3 is highlighted as you are here; Lessons 1, 2 and 2B are done; Lesson 3B, Light and shade, is next." loading="lazy"><figcaption><span class="fignum">Fig 3.0.1</span>The course map. Coloured cards are done or today; darker cards are still to come. Every lesson adds one idea to the same small program.</figcaption></figure>
 <div class="key">
   <strong>Where this lesson fits</strong>
-  <p><strong>Before:</strong> <a href="../lesson2b/">Lesson 2B</a> made the wire cube tumble on all three axes.<br><strong>Today:</strong> fill the six faces with colour, paint them far to near, hide the back ones and light them.<br><strong>Next:</strong> <a href="../lesson4/">Lesson 4, Moving the camera</a> lets you walk round this solid cube.</p>
+  <p><strong>Before:</strong> <a href="../lesson2b/">Lesson 2B</a> made the wire cube tumble on all three axes.<br><strong>Today:</strong> fill the six faces with colour, paint them far to near, and hide the back ones.<br><strong>Next:</strong> <a href="../lesson3b/">Lesson 3B, Light and shade</a> lights this solid cube with a lamp, slowly and one idea at a time.</p>
   <p>From today on every shape in the course is solid. The painter's sort is what lets Lesson 5 draw many shapes in the right order.</p>
 </div>
 
@@ -92,7 +92,6 @@ figure, .tabcap { scroll-margin-top:16px; }
   <li>Explain why painting faces in list order looks wrong, and fix it with the painter's method (furthest face first).</li>
   <li>Work out a face's average z by hand, and sort a list of tuples with <code>sort(reverse=True)</code>.</li>
   <li>Use two screen arrows and the cross product to tell if a face is turned toward you.</li>
-  <li>Find a face's pointer, and use the dot product to make it brighter or darker under a lamp.</li>
 </ol>
 <p class="tabcap" id="fig-3-0-2"><span class="fignum">Table 3.0.2</span>Lesson plan: time, part and what happens</p>
 <div class="tablewrap"><table>
@@ -102,16 +101,15 @@ figure, .tabcap { scroll-margin-top:16px; }
 <tr><td class="t">14–18</td><td>2. The first problem</td><td>Fill all 6 faces in list order and watch the back face cover the front. Run <code>step1_fill_faces.py</code>. Q5.</td></tr>
 <tr><td class="t">18–28</td><td>3. The painter's method</td><td>Far things first. Average z by hand, all 6 faces at the start pose, sorting tuples. Run <code>step2_painter.py</code>. Q6–Q8.</td></tr>
 <tr><td class="t">28–39</td><td>4. Hide the back faces</td><td>Why 3 faces are wasted. The clock test. Arrows on screen, the cross product, two worked faces, all 6 faces. Run <code>step3_hide_back_faces.py</code>. Q9–Q12.</td></tr>
-<tr><td class="t">39–48</td><td>5. Light and shade</td><td>The torch and the card. Face pointers. The LIGHT arrow. The dot product. Brightness to colour. Run <code>step4_lit_cube.py</code>. Q13–Q16.</td></tr>
-<tr><td class="t">48–50</td><td>Wrap up</td><td>The ideas from today. Final check Q17. Preview of Lesson 4.</td></tr>
+<tr><td class="t">39–41</td><td>Wrap up</td><td>The ideas from today. Final check Q13. Preview of Lesson 3B.</td></tr>
 </table></div>
 
 <h2>Recap: where we are going <span class="mins">4 MIN</span></h2>
-<p>At the end of Lesson 2B the cube tipped, turned and rolled, but it was still a wire frame: you could see the back edges straight through the front. Today we build a solid cube in four small steps. Each step is its own program, and each one fixes something the step before got wrong.</p>
-<figure id="fig-3-0-3"><img src="images/c01_roadmap.png" alt="Five panels of the same cube: wireframe, filled in the wrong order, painted far to near, with back faces hidden, and finally lit in shades of green" loading="lazy"><figcaption><span class="fignum">Fig 3.0.3</span>All five pictures show the cube in one fixed pose, which we call the START POSE: tipped by -30° (the top swings toward you) and turned by 30°. All four programs start in this pose, and most of today's worked examples use it.<span class="panels">Panels: <b>3.0.3a</b> (1st) Lesson 2B wireframe · <b>3.0.3b</b> (2nd) Step 1 filled faces in list order · <b>3.0.3c</b> (3rd) Step 2 painter&#x27;s method · <b>3.0.3d</b> (4th) Step 3 back faces hidden · <b>3.0.3e</b> (5th) Step 4 light and shade</span></figcaption></figure>
+<p>At the end of Lesson 2B the cube tipped, turned and rolled, but it was still a wire frame: you could see the back edges straight through the front. Today we build a solid cube in three small steps. Each step is its own program, and each one fixes something the step before got wrong.</p>
+<figure id="fig-3-0-3"><img src="images/c01_roadmap.png" alt="Four panels of the same cube: wireframe, filled in the wrong order, painted far to near, and with back faces hidden" loading="lazy"><figcaption><span class="fignum">Fig 3.0.3</span>All four pictures show the cube in one fixed pose, which we call the START POSE: tipped by -30° (the top swings toward you) and turned by 30°. All three programs start in this pose, and most of today's worked examples use it.<span class="panels">Panels: <b>3.0.3a</b> (1st) Lesson 2B wireframe · <b>3.0.3b</b> (2nd) Step 1 filled faces in list order · <b>3.0.3c</b> (3rd) Step 2 painter&#x27;s method · <b>3.0.3d</b> (4th) Step 3 back faces hidden</span></figcaption></figure>
 <p>Why this pose? At tip 0, turn 0, roll 0 you look straight at the front face and see nothing else. Tipping by -30° brings the top into view, and turning by 30° brings the left side into view, so you can see three faces at once. Remember from Lesson 2B that a negative tip is simply a tip the other way: the top comes toward you instead of going away.</p>
 <p>The recipe for each corner is exactly the one from Lesson 2B. What is new happens afterwards, once per face.</p>
-<figure id="fig-3-0-4"><img src="images/c02_recipe.png" alt="Flow chart. Top row, for each of the 8 corners: SHAPE corner, tip turn roll, add cube_distance to get WORLD, project to get SCREEN. Second row, new, for each of the 6 faces: gather 4 corners, clock test, average z, light. Third row, new, once: sort far to near, fill each face" loading="lazy"><figcaption><span class="fignum">Fig 3.0.4</span>The top row you already know. The yellow boxes are today's new steps, with the part of the lesson that teaches each one. Notice that each new step uses a different kind of coordinates.<span class="panels">Panels: <b>3.0.4a</b> (top row) for each of the 8 corners · <b>3.0.4b</b> (middle row) new: for each of the 6 faces · <b>3.0.4c</b> (bottom row) new: then, once</span></figcaption></figure>
+<figure id="fig-3-0-4"><img src="images/c02_recipe.png" alt="Flow chart. Top row, for each of the 8 corners: SHAPE corner, tip turn roll, add cube_distance to get WORLD, project to get SCREEN. Second row, new, for each of the 6 faces: gather 4 corners, clock test, average z, then a greyed-out light box for Lesson 3B. Third row, new, once: sort far to near, fill each face" loading="lazy"><figcaption><span class="fignum">Fig 3.0.4</span>The top row you already know. The yellow boxes are today's new steps, with the part of the lesson that teaches each one. The grey "light" box is the next lesson, Lesson 3B. Notice that each new step uses a different kind of coordinates.<span class="panels">Panels: <b>3.0.4a</b> (top row) for each of the 8 corners · <b>3.0.4b</b> (middle row) new: for each of the 6 faces · <b>3.0.4c</b> (bottom row) new: then, once</span></figcaption></figure>
 <div class="check">
 <div class="q"><p class="qq"><span class="qn">Q1</span>At the start pose, which three faces can you see? Which three are hidden?</p><details><summary>Show answer</summary><div class="ans">You see the front, the left and the top. The back, the right and the bottom are hidden behind them. You can check this on the first picture, Fig 3.0.3: panel 3.0.3d (Step 3) shows the hidden faces as dashed outlines.</div></details></div>
 </div>
@@ -125,7 +123,7 @@ figure, .tabcap { scroll-margin-top:16px; }
 <h3>1.2 All six faces</h3>
 <p>The easiest way to see all six faces at once is to unfold the cube flat, like a cardboard box opened out. Each square shows a face as you would see it standing outside the cube, looking at that face.</p>
 <figure id="fig-3-1-2"><img src="images/c04_six_faces_net.png" alt="The cube unfolded into a cross shape: top above front, left and right beside it, back beside right, bottom below. Each square shows its corner numbers and a clockwise arrow. Beside it, the cube_faces list in Python" loading="lazy"><figcaption><span class="fignum">Fig 3.1.2</span>Where two squares touch, they share 2 corner numbers: the front and the top share corners 4 and 5, because that is the edge where they meet. Fold the flaps up and you get the cube back.</figcaption></figure>
-<p>In the code each face is a tuple of two things: the 4 corner numbers, and a colour. We give every face its own colour today so you can always tell which face is which. In step 4 we switch to one green for the whole cube.</p>
+<p>In the code each face is a tuple of two things: the 4 corner numbers, and a colour. We give every face its own colour today so you can always tell which face is which. In Lesson 3B we switch to one green for the whole cube and light it.</p>
 <pre><code>cube_faces = [
     ((4, 5, 1, 0), RED),       # front  (all have z = -1)
     ((6, 7, 3, 2), PURPLE),    # back   (all have z = +1)
@@ -251,69 +249,21 @@ if not is_facing_you(face_points):
 <div class="q"><p class="qq"><span class="qn">Q12</span>Why do we use SCREEN points for the clock test, and not SHAPE or WORLD points?</p><details><summary>Show answer</summary><div class="ans">Because the question is "which way round do the corners go as you SEE them?", and what you see is the screen. The screen points already include the turning, the distance and the perspective, so the test is right for every pose.</div></details></div>
 </div>
 
-<h2>Part 5: Light and shade <span class="mins">9 MIN</span></h2>
-<h3>5.1 The torch and the card</h3>
-<p>Shine a torch at a card. When the card faces the torch it is bright. Tilt it and it gets dimmer, because the same rays are spread over a slanting surface. Turn it edge-on and no light lands on it at all.</p>
-<figure id="fig-3-5-1"><img src="images/c21_torch_and_card.png" alt="Three panels with a lamp shining 6 rays at a green card. Facing the lamp: 6 of 6 rays hit, brightness 1. Tilted 60 degrees: 3 of 6 rays hit, brightness 0.5. Edge-on: 0 of 6, brightness 0" loading="lazy"><figcaption><span class="fignum">Fig 3.5.1</span>The white arrow is the way the card's front side faces. The smaller the angle between that arrow and the lamp, the more light the card catches.<span class="panels">Panels: <b>3.5.1a</b> (left) facing the lamp · <b>3.5.1b</b> (middle) tilted 60° · <b>3.5.1c</b> (right) edge-on (90°)</span></figcaption></figure>
-<p>So to light a face we need two arrows: one for the way the face points, and one toward the lamp. Then we need a sum that tells us how closely they line up.</p>
-
-<h3>5.2 The face pointer</h3>
-<p>Every face has a pointer: an arrow from the centre of the cube, straight out through the middle of the face. For our cube every pointer is exactly 1 long and lies along one axis.</p>
-<figure id="fig-3-5-2"><img src="images/c22_face_pointers.png" alt="The cube with an arrow coming out of each face. A table lists the pointers before turning: front (0, 0, -1), back (0, 0, 1), left (-1, 0, 0), right (1, 0, 0), top (0, 1, 0), bottom (0, -1, 0)" loading="lazy"><figcaption><span class="fignum">Fig 3.5.2</span>SHAPE coordinates. The pointers are glued to the faces, so when the cube turns, they turn too. (The proper name for a face pointer is the face's normal.)</figcaption></figure>
-<p>How do we find a pointer after the cube has turned? Because the cube's centre is (0, 0, 0), the middle of a face IS its pointer. And the middle of a face is the average of its 4 corners, done separately for x, y and z, just like average z in Part 3.</p>
-<figure id="fig-3-5-3"><img src="images/c23_pointer_average.png" alt="Left: front face corners not turned, averaged column by column to give (0, 0, -1). Right: the same four corners at the start pose, averaged to give (0.433, -0.5, -0.75)" loading="lazy"><figcaption><span class="fignum">Fig 3.5.3</span>Use the TURNED SHAPE points, before <code>cube_distance</code> is added. If you used WORLD points, the arrow would start at the cube's centre 5 units away instead of at (0, 0, 0).<span class="panels">Panels: <b>3.5.3a</b> (left) FRONT face, not turned · <b>3.5.3b</b> (right) FRONT face at the start pose</span></figcaption></figure>
-<p>Can we trust that? Let's turn the front pointer (0, 0, -1) with Lesson 2B's rules instead and see if we get the same answer.</p>
-<figure id="fig-3-5-4"><img src="images/c24_pointer_turned.png" alt="Tip by -30: (0, 0, -1) becomes (0, -0.5, -0.866). Then turn by 30: becomes (0.433, -0.5, -0.75), the same as the average" loading="lazy"><figcaption><span class="fignum">Fig 3.5.4</span>Both ways give (0.433, -0.5, -0.75). It is still 1 long, as the length check at the bottom shows.<span class="panels">Panels: <b>3.5.4a</b> (left) 1. TIP by -30° · <b>3.5.4b</b> (right) 2. TURN by 30°</span></figcaption></figure>
-<p>In the code, <code>face_pointer(corners, turned_points)</code> does the averaging. This is why step 4 now keeps a third list, <code>turned_points</code>, beside <code>world_points</code> and <code>screen_points</code>.</p>
-
-<h3>5.3 The light arrow</h3>
-<p>The second arrow points from the cube toward the lamp. It is a direction, not a position: it says which way the lamp is, not where it is.</p>
-<figure id="fig-3-5-5"><img src="images/c25_light_arrow.png" alt="Front view showing LIGHT's x part 0.48 and y part 0.6. Top view showing x 0.48 and z -0.64. Length check equals 1" loading="lazy"><figcaption><span class="fignum">Fig 3.5.5</span>LIGHT = (0.48, 0.6, -0.64): a little right, up, and toward you, like a lamp over your right shoulder. Its length is exactly 1.<span class="panels">Panels: <b>3.5.5a</b> (left) FRONT view: x and y · <b>3.5.5b</b> (middle) TOP view: x and z</span></figcaption></figure>
-<p>Why these numbers? A lamp up, to one side and in front is how photographers light an object, because then the three faces you see each get a different brightness. 0.48, 0.6 and 0.64 were picked because together they make an arrow exactly 1 long, and the next section needs both arrows to be 1 long. The lamp stays still; only the cube turns.</p>
-
-<h3>5.4 The dot product</h3>
-<p>The dot product takes two arrows and gives one number saying how much they point the same way. Multiply the matching letters, then add the three answers.</p>
-<figure id="fig-3-5-6"><img src="images/c26_dot_product.png" alt="Five panels with a yellow LIGHT arrow and a white pointer at 0, 60, 90, 120 and 180 degrees apart. The dot products are 1, 0.5, 0, -0.5 and -1" loading="lazy"><figcaption><span class="fignum">Fig 3.5.6</span>For two arrows that are both 1 long, the dot product is the cos of the angle between them, the same cos you met in Lesson 2. 60° apart gives 0.5, which is exactly the tilted card from 5.1.<span class="panels">Panels: <b>3.5.6a</b> (1st) 0° apart (dot 1.0) · <b>3.5.6b</b> (2nd) 60° apart (dot 0.5) · <b>3.5.6c</b> (3rd) 90° apart (dot 0) · <b>3.5.6d</b> (4th) 120° apart (dot -0.5) · <b>3.5.6e</b> (5th) 180° apart (dot -1.0)</span></figcaption></figure>
-<div class="key"><strong>The dot product (3D)</strong>
-<p><code>dot = ( (x1 * x2) + (y1 * y2) + (z1 * z2) )</code><br>1 = same way, 0 = side-on, -1 = opposite. A face that points away from the lamp gets a negative number, and we treat that as 0: no light.</p></div>
-<figure id="fig-3-5-7"><img src="images/c27_dot_worked.png" alt="Three columns. Front face: dot 0.388, shade 0.510. Left face: dot -0.096, brightness 0, shade 0.200. Top face: dot 0.917, shade 0.933" loading="lazy"><figcaption><span class="fignum">Fig 3.5.7</span>The start pose, bracket by bracket. The top faces the lamp almost directly. The front is half turned to it. The left points slightly away, so it is in shadow.<span class="panels">Panels: <b>3.5.7a</b> (left) FRONT face · <b>3.5.7b</b> (middle) LEFT face · <b>3.5.7c</b> (right) TOP face</span></figcaption></figure>
-
-<h3>5.5 Brightness to colour</h3>
-<p>Brightness 0 would make a face black, and a black face on a black background disappears. Real rooms have some light bouncing everywhere, so we add a little: AMBIENT = 0.2 means every face keeps at least 20% of its colour.</p>
-<figure id="fig-3-5-8"><img src="images/c28_shade_ramp.png" alt="A strip of green from dark at brightness 0 (shade 0.2) to full green at brightness 1 (shade 1.0), with left, front and top marked. The formula and the top face worked out: (70, 230, 120) times 0.934 gives (65, 215, 112)" loading="lazy"><figcaption><span class="fignum">Fig 3.5.8</span><code>shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )</code> runs from 0.2 to 1. Each of red, green and blue is multiplied by the shade and rounded to a whole number.<span class="panels">Panels: <b>3.5.8a</b> (top) the brightness ramp · <b>3.5.8b</b> (bottom left) the formula · <b>3.5.8c</b> (bottom right) worked: the TOP face</span></figcaption></figure>
-<pre><code>def shade_colour(colour, pointer):
-    brightness = dot(pointer, LIGHT)        # -1 .. 1
-    if brightness &lt; 0:
-        brightness = 0                      # facing away from the light
-    shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )   # 0.2 .. 1
-    red, green, blue = colour
-    return ( round(red * shade), round(green * shade), round(blue * shade) )</code></pre>
-<figure id="fig-3-5-9"><img src="images/c29_lit_film.png" alt="Six frames of the lit green cube tumbling, faces getting brighter and darker as they turn" loading="lazy"><figcaption><span class="fignum">Fig 3.5.9</span>As the cube tumbles, each face brightens as it turns toward the upper right, where the lamp is, and darkens as it turns away.<span class="panels">Panels: <b>3.5.9a</b> (1st) frame 0 · <b>3.5.9b</b> (2nd) frame 40 · <b>3.5.9c</b> (3rd) frame 80 · <b>3.5.9d</b> (4th) frame 120 · <b>3.5.9e</b> (5th) frame 160 · <b>3.5.9f</b> (6th) frame 200</span></figcaption></figure>
-<figure id="fig-3-5-10"><img src="images/run_step4_lit_cube.png" alt="Screenshot of step4_lit_cube.py at the start pose: a green cube with a bright top, medium front and dark left side" loading="lazy"><figcaption><span class="fignum">Fig 3.5.10</span><code>step4_lit_cube.py</code>, the finished cube. L switches the light off and on, C swaps between one green and the six face colours.</figcaption></figure>
-<div class="check">
-<div class="q"><p class="qq"><span class="qn">Q13</span>Before any turning, what is the dot product of the top face's pointer (0, 1, 0) with LIGHT?</p><details><summary>Show answer</summary><div class="ans"><code>( (0 * 0.48) + (1 * 0.6) + (0 * -0.64) ) = ( 0 + 0.6 + 0 ) = 0.6</code>. Only the y part survives, because the pointer has nothing in x or z.</div></details></div>
-<div class="q"><p class="qq"><span class="qn">Q14</span>Why must <code>face_pointer</code> use <code>turned_points</code> and not <code>world_points</code>?</p><details><summary>Show answer</summary><div class="ans">The pointer must start at (0, 0, 0). In WORLD coordinates the cube's centre is at (0, 0, 5), so averaging WORLD corners would give the face's middle measured from you, with about 5 added to z. That is a position, not a direction, and its length is not 1, so the dot product would give nonsense.</div></details></div>
-<div class="q"><p class="qq"><span class="qn">Q15</span>With AMBIENT = 0.2, what shade does a face get when its brightness is 0.5? What green value does CUBE_GREEN's 230 become?</p><details><summary>Show answer</summary><div class="ans"><code>( 0.2 + ( 0.8 * 0.5 ) ) = ( 0.2 + 0.4 ) = 0.6</code>. Green becomes <code>round(230 * 0.6) = 138</code>.</div></details></div>
-<div class="q"><p class="qq"><span class="qn">Q16</span>You change LIGHT to (0, 1, 0). Where is the lamp, and which face is brightest before any turning?</p><details><summary>Show answer</summary><div class="ans">Straight overhead. The top face is brightest with dot 1. The front, back, left and right all get dot 0 and the bottom gets -1, so all five of those are at the AMBIENT shade of 0.2. The cube would look flat from the front until it tumbles.</div></details></div>
-</div>
-
 <h2>Wrap up <span class="mins">2 MIN</span></h2>
 <div class="key">
   <strong>The ideas from today</strong>
-  <p>1. A face is 4 corner numbers, listed clockwise as seen from outside. <code>pygame.draw.polygon</code> fills it.<br>2. Painting in list order goes wrong. The painter's method sorts the faces by average WORLD z and paints the furthest first.<br>3. A face whose corners go anticlockwise on the screen has its back to you. The cross product <code>( (A_x * B_y) - (A_y * B_x) )</code> tells you which way they go: positive means paint.<br>4. A face's pointer is the average of its turned SHAPE corners. The dot product of the pointer with LIGHT says how much light it catches.<br>5. <code>shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )</code> turns that into a colour, and AMBIENT stops shadows going black.<br>6. Each new step uses a different kind of coordinates: SCREEN for the clock test, WORLD for distance, SHAPE for light.</p>
+  <p>1. A face is 4 corner numbers, listed clockwise as seen from outside. <code>pygame.draw.polygon</code> fills it.<br>2. Painting in list order goes wrong. The painter's method sorts the faces by average WORLD z and paints the furthest first.<br>3. A face whose corners go anticlockwise on the screen has its back to you. The cross product <code>( (A_x * B_y) - (A_y * B_x) )</code> tells you which way they go: positive means paint.<br>4. Each new step uses a different kind of coordinates: SCREEN for the clock test, WORLD for distance. (Lesson 3B adds the third: SHAPE, for light.)</p>
 </div>
 <div class="check">
-<div class="q"><p class="qq"><span class="qn">Q17</span>Final check: list, in order, everything <code>step4_lit_cube.py</code> does to draw one frame.</p><details><summary>Show answer</summary><div class="ans">1. The three angles grow by their speeds. 2. Each of the 8 corners is tipped, turned and rolled (kept in <code>turned_points</code>), moved away by <code>cube_distance</code> (kept in <code>world_points</code>) and projected (kept in <code>screen_points</code>). 3. For each of the 6 faces: look up its 4 screen points; skip it if the clock test says it is turned away; work out its average z; find its pointer and shade its colour. 4. Sort the faces that are left, furthest first. 5. Fill and outline each one in that order.</div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q13</span>Final check: list, in order, everything <code>step3_hide_back_faces.py</code> does to draw one frame.</p><details><summary>Show answer</summary><div class="ans">1. The three angles grow by their speeds. 2. Each of the 8 corners is tipped, turned and rolled, moved away by <code>cube_distance</code> (kept in <code>world_points</code>) and projected (kept in <code>screen_points</code>). 3. For each of the 6 faces: look up its 4 screen points; skip it if the clock test says it is turned away; work out its average z. 4. Sort the faces that are left, furthest first. 5. Fill and outline each one in that order.</div></details></div>
 </div>
-<h3>Practice before Lesson 4</h3>
+<h3>Practice before Lesson 3B</h3>
 <ul>
-  <li>Make a lit pyramid: 5 corners, a square base and 4 triangle faces. <code>pygame.draw.polygon</code> fills triangles just as well. Watch out: the pointer trick (average of the corners) only works when every face is the same distance from the centre, so use the light only on the cube for now.</li>
-  <li>Add keys that move the lamp, for example J and K to swap LIGHT between (0.48, 0.6, -0.64) and (-0.48, 0.6, -0.64).</li>
+  <li>Make a solid pyramid: 5 corners, a square base and 4 triangle faces. <code>pygame.draw.polygon</code> fills triangles just as well. List each triangle's 3 corners clockwise as seen from outside, so the clock test works.</li>
   <li>Draw two cubes side by side, at x = -3 and x = +3, and put both cubes' faces into one <code>faces_to_draw</code> list, so the painter's method sorts them together.</li>
-  <li>Colour the shadow side with a hint of blue instead of plain dark: add a small amount to blue only, when brightness is 0.</li>
 </ul>
-<h3>Next time: Lesson 4, moving the camera</h3>
-<p>Until now the cube has done all the moving while you stood still at (0, 0, 0). In Lesson 4 you walk around the cube and look about. Looking left and right is <code>rotate_y</code> applied to the whole world with the angle the other way round, and looking up and down is <code>rotate_x</code> used the same way. Everything from today keeps working, because the clock test and the painter's method only ever look at what ends up on the screen.</p>
+<h3>Next time: Lesson 3B, light and shade</h3>
+<p>Paint the whole cube one green and it looks like a flat sticker: you can only see where the faces meet because of the black outlines. In Lesson 3B we add a lamp, so each face gets brighter or darker depending on which way it points. We take it slowly, one small idea at a time: which way a face points, which way the lamp is, how well the two line up, and what colour that gives.</p>
 
 <h2>Files</h2>
 <p>Download the code for this lesson (right-click a file and choose <em>Save link as</em>):</p>
@@ -321,7 +271,6 @@ if not is_facing_you(face_points):
   <li><a href="code/step1_fill_faces.py" download><code>code/step1_fill_faces.py</code></a>: six filled faces, painted in list order (wrong on purpose)</li>
   <li><a href="code/step2_painter.py" download><code>code/step2_painter.py</code></a>: the painter's method, with each face's average z shown; P compares</li>
   <li><a href="code/step3_hide_back_faces.py" download><code>code/step3_hide_back_faces.py</code></a>: the clock test skips faces turned away; B for x-ray</li>
-  <li><a href="code/step4_lit_cube.py" download><code>code/step4_lit_cube.py</code></a>: the lit solid cube; L for light, C for colours</li>
   <li><code>images/</code>: every diagram on this page as a PNG</li>
   <li><a href="../figures/">Figure index</a>: every figure and table in the course, with its number. Numbers read <code>Fig lesson.part.figure</code>, plus a letter for one panel of a picture (for example <code>Fig 3.4.2b</code>).</li>
 </ul>

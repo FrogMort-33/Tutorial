@@ -1,41 +1,29 @@
 # ======================================================================
-# LESSON 3 - STEP 4: THE LIT SOLID CUBE (light and shade)
+# LESSON 3B - STEP 1: FACE POINTERS
 # ----------------------------------------------------------------------
-# Goal: light the cube, so faces that point at the light are bright
-# and faces that point away are dim. This is the final cube of Lesson 3
-# and the starting point for Lesson 4.
+# Goal: SEE the arrow that sticks straight out of each face.
+# Nothing is lit yet.  This step only answers the question
+# "which way does each face point?"
 #
-# What is new since step 3:
+# Starts from Lesson 3's last program, step3_hide_back_faces.py.
+#
+# What is new:
 #
 #   1. face_pointer(corners, turned_points)
-#        Every face of our cube has a "pointing arrow": the arrow from
-#        the cube's centre (0, 0, 0) to the middle of the face. It points
-#        straight OUT of the face and is exactly 1 long.
-#        We find it by AVERAGING the face's 4 turned SHAPE corners.
-#        Example, front face, not turned:  (0, 0, -1)  (straight at you)
+#        The arrow straight OUT of a face.  For our cube it is just the
+#        MIDDLE of the face (the average of its 4 turned SHAPE corners),
+#        because the cube's middle is (0, 0, 0) and every face is 1 step
+#        from it.  Front face, not turned:  (0, 0, -1) = straight at you.
 #
-#   2. LIGHT = (0.48, 0.6, -0.64)
-#        An arrow pointing TOWARD the light: up, a little right, and
-#        toward you. It is exactly 1 long too.
+#   2. A white arrow is drawn out of every face you can see, and the
+#      pointer's three numbers are written beside it, so you can watch
+#      the numbers change as the cube tumbles.
 #
-#   3. dot(arrow_1, arrow_2) - the DOT PRODUCT:
-#        ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
-#        For two arrows of length 1 it tells you how much they point the
-#        same way:   1 = same way,  0 = side-on,  -1 = opposite.
+#   3. CUBE_GREEN: one colour for the whole cube (C swaps back to six).
 #
-#   4. brightness = dot(pointer, LIGHT), never below 0
-#      shade      = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )
-#      colour     = each of (red, green, blue) times shade
-#
-# The full recipe, every frame:
-#
-#   SHAPE corners -> tip, turn, roll -> add cube_distance -> project
-#   then for each face:  clock test (skip?) -> average z -> light
-#   then sort far -> near and paint.
-#
-# Controls:  SPACE = pause,  R = reset,
-#            L = light on / off,   C = six colours / one colour
-# Run:  python step4_lit_cube.py
+# Controls:  SPACE = pause,  R = back to the start pose,
+#            C = one colour / six colours,  P = pointers on / off
+# Run:  python step1_face_pointers.py
 # ======================================================================
 
 import math
@@ -45,14 +33,14 @@ pygame.init()
 WIDTH = 800
 HEIGHT = 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Lesson 3, step 2 - the painter's method")
+pygame.display.set_caption('Lesson 3B, step 1 - face pointers')
 clock = pygame.time.Clock()
 font = pygame.font.SysFont(None, 28)
 
 BLACK = (0, 0, 0)
 YELLOW = (255, 255, 0)
 
-# ---- NEW: one colour for each face ----------------------------------
+# ---- One colour for each face (from Lesson 3) -----------------------
 # (red, green, blue), each 0 to 255. Six colours that are easy to tell
 # apart, so you can always say WHICH face you are looking at.
 RED = (235, 80, 80)          # front
@@ -61,9 +49,9 @@ BLUE = (70, 150, 255)        # left
 GREEN = (70, 210, 120)       # right
 GOLD = (245, 200, 60)        # top
 ORANGE = (245, 140, 50)      # bottom
-CUBE_GREEN = (70, 230, 120)  # NEW: one colour for the whole cube, so you
-                             # can see the light without six colours
-                             # getting in the way. (C key swaps.)
+CUBE_GREEN = (70, 230, 120)  # ONE colour for the whole cube, so the light
+                             # is the ONLY thing that makes faces differ.
+                             # (C key swaps to the six face colours.)
 
 CENTRE_X = (WIDTH / 2)            # (800 / 2) = 400
 CENTRE_Y = (HEIGHT / 2)           # (600 / 2) = 300
@@ -81,7 +69,7 @@ cube_points = [
     (-1,  1,  1),   # 7  top-left-back
 ]
 
-# ---- NEW: the cube's 6 faces -----------------------------------------
+# ---- The cube's 6 faces (from Lesson 3) -----------------------------
 # An EDGE joins 2 corners.  A FACE joins 4 corners in a loop.
 #
 # Each face lists its 4 corners CLOCKWISE as you see that face from
@@ -106,26 +94,9 @@ cube_faces = [
 
 cube_distance = 5
 
-# ---- NEW: the light ---------------------------------------------------
-# LIGHT is an arrow pointing TOWARD the light (from the cube to the lamp):
-#   x =  0.48  -> a little to the RIGHT
-#   y =  0.6   -> UP
-#   z = -0.64  -> TOWARD you (remember -z is toward you)
-# Its length is root( (0.48 * 0.48) + (0.6 * 0.6) + (0.64 * 0.64) )
-#             = root( 0.2304 + 0.36 + 0.4096 ) = root(1) = 1  exactly.
-# Why these numbers? A lamp up, to the right and behind your shoulder is
-# the classic way to light a model. At the start pose it gives the three
-# faces you can see three very DIFFERENT brightnesses:
-#   top 0.917 (bright),  front 0.388 (medium),  left -0.096 (in shadow)
-LIGHT = (0.48, 0.6, -0.64)
-
-# AMBIENT: light that comes from everywhere (the room, the sky).
-# 0.2 means even a face in total shadow keeps 20% of its colour, so it
-# never turns pure black and vanishes into the black background.
-AMBIENT = 0.2
 
 # ---- Angles and speeds (exactly as Lesson 2B, step 3) -----------------
-# NEW: we START at a pose that shows three faces (front, left and top),
+# We START at a pose that shows three faces (front, left and top),
 # the same pose as the lesson's diagrams: tipped -30 (top toward you)
 # and turned 30. At 0, 0, 0 you would only see the front face.
 START_X = -30
@@ -138,8 +109,16 @@ SPEED_X = 0.5          # 12 s per full tip
 SPEED_Y = 1            #  6 s per full turn
 SPEED_Z = 0.25         # 24 s per full roll
 paused = False
-use_light = True       # NEW: L key flips this
 one_colour = True      # NEW: C key flips this (one colour / six colours)
+show_pointers = True   # NEW: P key flips this
+
+WHITE = (255, 255, 255)
+small_font = pygame.font.SysFont(None, 24)
+
+# How far the drawn arrow sticks OUT of the face, in SHAPE units.
+# 0.8 is long enough to see clearly, short enough to stay on screen.
+POINTER_DRAW_LENGTH = 0.8
+
 
 
 # ---- The three turns (copied from Lesson 2B, unchanged) ---------------
@@ -196,7 +175,7 @@ def project(point_3d):
 
 
 def average_z(corners, world_points):
-    """NEW: how far away is this face? The average WORLD z of its corners.
+    """(Lesson 3) How far away is this face? The average WORLD z of its corners.
 
     corners      - the face's 4 corner NUMBERS, e.g. (4, 5, 1, 0)
     world_points - all 8 corners in WORLD coordinates (after adding
@@ -210,7 +189,7 @@ def average_z(corners, world_points):
 
 
 def is_facing_you(face_points):
-    """NEW: the clock test. True if this face is turned toward you.
+    """(Lesson 3) The clock test. True if this face is turned toward you.
 
     face_points - the face's corners as SCREEN points, in the face's
                   own order (clockwise when seen from outside).
@@ -236,16 +215,35 @@ def is_facing_you(face_points):
     return (cross > 0)
 
 
-def face_pointer(corners, turned_points):
-    """NEW: the arrow pointing straight OUT of a face.
 
-    For our cube this is simply the MIDDLE of the face in SHAPE
-    coordinates (the average of its 4 corners), because the cube's
-    centre is (0, 0, 0) and every face is 1 step from that centre.
+
+def face_pointer(corners, turned_points):
+    """NEW: the POINTER of a face: an arrow straight OUT of the face.
+
+    The idea in one line:  the pointer is the MIDDLE of the face,
+    measured from the middle of the cube.
+
+    Why does that work?  The cube's middle is (0, 0, 0) in SHAPE
+    coordinates, and every face is exactly 1 step out from it.  So the
+    arrow from (0, 0, 0) to the face's middle:
+        * points straight out of the face, and
+        * is exactly 1 long.
+
+    How do we find the middle?  Average the 4 corners, one letter at a
+    time: add the 4 x's and divide by 4, then the same for y and for z.
+
+    Worked example (front face, cube NOT turned):
+        corners 4, 5, 1, 0 = (-1, 1, -1) (1, 1, -1) (1, -1, -1) (-1, -1, -1)
+        x: ( (-1 + 1 + 1 + -1) / 4 ) = ( 0 / 4 )  =  0
+        y: ( (1 + 1 + -1 + -1) / 4 ) = ( 0 / 4 )  =  0
+        z: ( (-1 + -1 + -1 + -1) / 4 ) = ( -4 / 4 ) = -1
+        pointer = (0, 0, -1)    -> straight at you
 
     corners       - the face's 4 corner NUMBERS, e.g. (4, 5, 1, 0)
-    turned_points - all 8 corners, turned, in SHAPE coordinates
-                    (BEFORE cube_distance is added!)
+    turned_points - all 8 corners AFTER tip/turn/roll, in SHAPE
+                    coordinates (BEFORE cube_distance is added!
+                    Adding 5 to z would move the arrow's start away
+                    from (0, 0, 0) and it would stop being 1 long.)
     """
     total_x = 0
     total_y = 0
@@ -255,37 +253,37 @@ def face_pointer(corners, turned_points):
         total_x = (total_x + x)
         total_y = (total_y + y)
         total_z = (total_z + z)
-    count = len(corners)                    # 4
+    count = len(corners)                    # 4 corners
     return ( (total_x / count), (total_y / count), (total_z / count) )
 
+def face_middle_on_screen(pointer):
+    """NEW (for drawing only): where is the middle of a face on screen?
 
-def dot(arrow_1, arrow_2):
-    """NEW: the dot product. How much do two arrows point the same way?
-    For arrows of length 1:  1 = same way, 0 = side-on, -1 = opposite."""
-    x1, y1, z1 = arrow_1
-    x2, y2, z2 = arrow_2
-    return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
-
-
-def shade_colour(colour, pointer):
-    """NEW: make a colour brighter or darker, depending on the light.
-
-    colour  - the face's full colour (red, green, blue)
-    pointer - the face's pointing arrow (from face_pointer)
+    The face's middle in SHAPE coordinates IS its pointer (see
+    face_pointer).  Add cube_distance to get WORLD, then project.
     """
-    brightness = dot(pointer, LIGHT)        # -1 .. 1
-    if brightness < 0:
-        brightness = 0                      # facing away from the light
-    shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )   # 0.2 .. 1
-    red, green, blue = colour
-    return ( round(red * shade), round(green * shade), round(blue * shade) )
+    x, y, z = pointer
+    return project( (x, y, (z + cube_distance)) )
 
+
+def pointer_tip_on_screen(pointer):
+    """NEW (for drawing only): the TIP of the pointer arrow on screen.
+
+    We draw the arrow sticking out of the face by POINTER_DRAW_LENGTH
+    units.  The middle of the face is at 1 x pointer from the cube's
+    centre, so the tip is at ( 1 + POINTER_DRAW_LENGTH ) x pointer.
+    """
+    x, y, z = pointer
+    reach = (1 + POINTER_DRAW_LENGTH)
+    tip = ( (x * reach), (y * reach), ((z * reach) + cube_distance) )
+    return project(tip)
 
 def keep_under_360(angle):
     """360 degrees is the same as 0, so start again after a full turn."""
     if angle >= 360:
         angle = (angle - 360)
     return angle
+
 
 
 running = True
@@ -296,10 +294,10 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 paused = not paused
-            if event.key == pygame.K_l:
-                use_light = not use_light
             if event.key == pygame.K_c:
                 one_colour = not one_colour
+            if event.key == pygame.K_p:
+                show_pointers = not show_pointers
             if event.key == pygame.K_r:
                 angle_x = START_X
                 angle_y = START_Y
@@ -313,10 +311,10 @@ while running:
     screen.fill(BLACK)
 
     # ---- turn -> move away -> project, for all 8 corners -------------
-    # NEW: we keep THREE lists now, one for each kind of coordinates:
-    #   turned_points - SHAPE, turned  (for the light)
-    #   world_points  - WORLD          (for the painter's method)
-    #   screen_points - SCREEN         (for the clock test and drawing)
+    # We keep THREE lists, one for each kind of coordinates:
+    #   turned_points - SHAPE, turned  (NEW job: the face pointers)
+    #   world_points  - WORLD          (the painter's method)
+    #   screen_points - SCREEN         (the clock test and drawing)
     turned_points = []
     world_points = []
     screen_points = []
@@ -335,39 +333,56 @@ while running:
         for corner_number in corners:
             face_points.append(screen_points[corner_number])
 
-        # 1. The clock test (step 3): skip faces with their back to you.
+        # 1. The clock test (Lesson 3): skip faces with their back to you.
         if not is_facing_you(face_points):
             continue
 
-        # 2. How far away is it? (step 2)
+        # 2. How far away is it? (Lesson 3, the painter's method)
         distance = average_z(corners, world_points)
 
-        # 3. NEW: what colour, after the light?
+        # 3. NEW: which way does this face point?
+        pointer = face_pointer(corners, turned_points)
+
         if one_colour:
             colour = CUBE_GREEN
-        if use_light:
-            pointer = face_pointer(corners, turned_points)
-            colour = shade_colour(colour, pointer)
 
-        faces_to_draw.append( (distance, face_points, colour) )
+        faces_to_draw.append( (distance, face_points, colour, pointer) )
 
-    # ---- The painter's method (step 2): furthest first ----------------
+    # ---- The painter's method (Lesson 3): furthest first ---------------
     faces_to_draw.sort(reverse=True)
 
-    for distance, face_points, colour in faces_to_draw:
+    for distance, face_points, colour, pointer in faces_to_draw:
         pygame.draw.polygon(screen, colour, face_points)        # filled
         pygame.draw.polygon(screen, BLACK, face_points, 2)      # outline
+
+    # ---- NEW: draw each visible face's pointer on top ------------------
+    # (Drawn AFTER all the faces, so no face can paint over an arrow.)
+    if show_pointers:
+        for distance, face_points, colour, pointer in faces_to_draw:
+            start = face_middle_on_screen(pointer)     # middle of the face
+            end = pointer_tip_on_screen(pointer)       # tip of the arrow
+            pygame.draw.line(screen, WHITE, start, end, 3)
+            pygame.draw.circle(screen, WHITE, end, 5)  # a blob for the tip
+            # Write the pointer's numbers, rounded to 2 places, at the tip.
+            x, y, z = pointer
+            label = ("(" + str(round(x, 2)) + ", " + str(round(y, 2)) +
+                     ", " + str(round(z, 2)) + ")")
+            picture = small_font.render(label, True, WHITE)
+            if end[0] >= start[0]:
+                # arrow points right: write the numbers to the RIGHT of the tip
+                text_x = (end[0] + 8)
+            else:
+                # arrow points left: write them to the LEFT of the tip, so
+                # the text doesn't sit on top of the arrow
+                text_x = ( (end[0] - 8) - picture.get_width() )
+            screen.blit(picture, (text_x, (end[1] - 8)))
 
     text = ("tip x = " + str(round(angle_x, 1)) +
             "   turn y = " + str(round(angle_y, 1)) +
             "   roll z = " + str(round(angle_z, 1)))
     screen.blit(font.render(text, True, YELLOW), (20, 20))
-    if use_light:
-        mode_text = "Light ON (L)    C = one colour / six colours"
-    else:
-        mode_text = "Light OFF (L)   C = one colour / six colours"
-    screen.blit(font.render(mode_text, True, YELLOW), (20, 50))
-    screen.blit(font.render("SPACE = pause,  R = reset", True, YELLOW), (20, 80))
+    screen.blit(font.render("White arrows = face pointers (SHAPE coordinates)", True, YELLOW), (20, 50))
+    screen.blit(font.render("SPACE = pause,  R = reset,  C = colours,  P = pointers", True, YELLOW), (20, 80))
 
     pygame.display.flip()
     clock.tick(60)
@@ -376,10 +391,10 @@ pygame.quit()
 
 # ----------------------------------------------------------------------
 # TRY THIS:
-#   * Press L to switch the light off. Without it, can you still see
-#     where one face ends and the next begins (ignore the outlines)?
-#   * Move the light: LIGHT = (0, 1, 0) is straight overhead. Which face
-#     is brightest now? (Keep the length 1 - this one is.)
-#   * Set AMBIENT = 0, then AMBIENT = 0.6. What happens to the dark side?
-#   * Delete the outline line. Does the light alone show the cube's shape?
+#   * Press R, then SPACE to pause.  Read the FRONT face's pointer.
+#     It should say (0.43, -0.5, -0.75), as in the lesson.
+#   * Watch ONE arrow as the cube tumbles.  Do its three numbers ever go
+#     above 1 or below -1?  (They can't: the arrow is always 1 long.)
+#   * Change face_pointer to use world_points instead of turned_points.
+#     Where do the arrows go now, and why?
 # ----------------------------------------------------------------------

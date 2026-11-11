@@ -1,11 +1,12 @@
 # Draws the course map PNG, one "you are here" version per lesson.
 # 2026-11-10: grown from 8 to 12 cards (Lessons 8 clipping, 9 models from files,
 # 10 depth buffer, 11 movement and collisions), in a third row.
+# 2026-11-11: Lesson 3B (light and shade) split out of Lesson 3: 13 cards, a fourth row.
 # Usage: python3 course_map.py OUTDIR   -> writes course_map_<key>.png for every lesson
 import sys, math
 from PIL import Image, ImageDraw, ImageFont
 
-W, H = 1800, 1600
+W, H = 1800, 2040
 BG = (16, 20, 24)
 FG = (232, 238, 234)
 MUTED = (150, 162, 156)
@@ -25,7 +26,9 @@ LESSONS = [
  ("2b", "LESSON 2B", "Tip, roll and tumble",       (80, 160, 255),
         "rotate_x, rotate_z, the order", "tumbles on all 3 axes"),
  ("3",  "LESSON 3",  "Solid faces",                (255, 196, 60),
-        "painter's sort, clock test, light", "shows a solid, lit cube"),
+        "painter's sort, clock test", "shows a solid cube"),
+ ("3b", "LESSON 3B", "Light and shade",            (250, 235, 120),
+        "face pointers, dot product", "lights the cube with a lamp"),
  ("4",  "LESSON 4",  "Moving the camera",          (255, 110, 170),
         "to_camera(), NEAR, walking", "lets you walk round"),
  ("5",  "LESSON 5",  "A small world",              (180, 120, 255),
@@ -90,11 +93,24 @@ def icon(d, key, x, y, w, h, col, on):
             d.line([cx, cy - 60, cx, cy + 60], fill=(75, 224, 140), width=3)
             d.line([cx - 35, cy + 40, cx + 35, cy - 40], fill=(90, 160, 255), width=3)
     elif key == "3":
+        # solid cube, three faces in three different flat colours (no light yet)
         pts = [proj(p, cx, cy, 150) for p in turned(0.6, -0.45)]
-        faces = [((3,2,6,7), 1.0), ((0,1,2,3), 0.7), ((0,3,7,4), 0.45)]
+        faces = [((3,2,6,7), (245, 200, 60)), ((0,1,2,3), (235, 80, 80)), ((0,3,7,4), (70, 150, 255))]
+        for f, fc in faces:
+            d.polygon([pts[i] for i in f], fill=(fc if on else DIM), outline=BG)
+    elif key == "3b":
+        # one-colour cube lit by a lamp: bright top, medium front, dark side
+        pts = [proj(p, cx + 20, cy + 6, 140) for p in turned(0.6, -0.45)]
+        faces = [((3,2,6,7), 1.0), ((0,1,2,3), 0.55), ((0,3,7,4), 0.25)]
         for f, sh in faces:
             fill = tuple(int(v * sh) for v in (col if on else DIM))
             d.polygon([pts[i] for i in f], fill=fill, outline=BG)
+        lx, ly = x + 22, y + 18
+        d.ellipse([lx - 12, ly - 12, lx + 12, ly + 12], fill=(col if on else DIM))
+        for k in range(8):
+            a = k * math.pi / 4
+            d.line([lx + 17 * math.cos(a), ly + 17 * math.sin(a), lx + 24 * math.cos(a), ly + 24 * math.sin(a)],
+                   fill=(col if on else DIM), width=3)
     elif key == "4":
         # a little eye/camera on the left looking at a cube on the right
         ex, ey = x + 40, cy
@@ -191,12 +207,12 @@ def wrap(d, text, f, maxw):
 
 # ---------- the board ----------
 CW, CH, GAP, LEFT = 380, 330, 60, 50
-ROW_Y = [200, 640, 1080]
+ROW_Y = [200, 640, 1080, 1520]
 def card_xy(i):
-    # snake: row 1 left->right (1,2,2B,3), row 2 right->left (4,5,6,7),
-    # row 3 left->right again (8,9,10,11)
+    # snake: row 1 left->right (1,2,2B,3), row 2 right->left (3B,4,5,6),
+    # row 3 left->right again (7,8,9,10), row 4 right->left (11)
     row, col = divmod(i, 4)
-    if row == 1: col = 3 - col
+    if row % 2 == 1: col = 3 - col
     return LEFT + col * (CW + GAP), ROW_Y[row]
 
 def draw(current):
@@ -263,7 +279,7 @@ def draw(current):
             d.text((px, y - 40), "YOU ARE HERE", font=font(26, True), fill=BG, anchor="mm")
 
     # bottom strip: before / today / next
-    sy = 1470
+    sy = 1910
     prev = LESSONS[ci - 1] if ci > 0 else None
     nxt = LESSONS[ci + 1] if ci < (N - 1) else None
     parts = [

@@ -4,9 +4,9 @@
 # Goal: YOU move, the cube stays still. Walk up to it, past it and
 # round the back of it with the keyboard.
 #
-# This starts from Lesson 3's lit solid cube (step4_lit_cube.py).
+# This starts from Lesson 3B's lit solid cube (step3_lit_cube.py).
 #
-# What is new since Lesson 3:
+# What is new since Lesson 3B:
 #
 #   1. cube_position = (0, 0, 5)
 #        The cube now has a fixed place in the WORLD. This is the same
@@ -127,7 +127,7 @@ MOVE_SPEED = 0.05
 # Nothing closer than that could ever be useful to draw.
 NEAR = 0.1
 
-# ---- The light (from Lesson 3, unchanged) -----------------------------
+# ---- The light (from Lesson 3B, unchanged) ----------------------------
 # The lamp belongs to the WORLD (like the sun), so it does NOT move when
 # you walk. The top of the cube stays the brightest face from anywhere.
 LIGHT = (0.48, 0.6, -0.64)
@@ -265,7 +265,7 @@ def is_facing_you(face_points):
 
 
 def face_pointer(corners, turned_points):
-    """The arrow straight out of a face (from Lesson 3, unchanged).
+    """The arrow straight out of a face (from Lesson 3B, unchanged).
     Uses turned SHAPE points, so the light stays fixed in the world."""
     total_x = 0
     total_y = 0
@@ -280,14 +280,14 @@ def face_pointer(corners, turned_points):
 
 
 def dot(arrow_1, arrow_2):
-    """The dot product (from Lesson 3)."""
+    """The dot product (from Lesson 3B)."""
     x1, y1, z1 = arrow_1
     x2, y2, z2 = arrow_2
     return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
 
 
 def shade_colour(colour, pointer):
-    """Brighter when the face points at the light (from Lesson 3)."""
+    """Brighter when the face points at the light (from Lesson 3B)."""
     brightness = dot(pointer, LIGHT)
     if brightness < 0:
         brightness = 0
@@ -429,7 +429,7 @@ while running:
         # 2. How far away is it? CHANGED: CAMERA z, distance from YOU.
         distance = average_z(corners, camera_points)
 
-        # 3. What colour, after the light? (Lesson 3)
+        # 3. What colour, after the light? (Lesson 3B)
         if one_colour:
             colour = CUBE_GREEN
         if use_light:

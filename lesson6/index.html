@@ -78,7 +78,7 @@ figure, .tabcap { scroll-margin-top:16px; }
   <p class="lede">Since Lesson 2 every turn has been its own little formula: tip, turn, roll, then undo your turn and undo your tip. Today we pack each turn into a 3 × 3 grid of numbers called a matrix, and then join several grids into one. The picture on the screen does not change at all. What changes is how much work the computer does to draw it, and how tidy the code is. This is how real 3D engines store every turn.</p>
 </header>
 
-<figure id="fig-6-0-1"><img src="images/course_map.png" alt="Course map: eight lessons on a road from Lesson 1 to a mini game. Lesson 6, Matrices, is highlighted as you are here; Lessons 1 to 5 are done and Lesson 7, a mini game, is next." loading="lazy"><figcaption><span class="fignum">Fig 6.0.1</span>The course map. Coloured cards are done or today; darker cards are still to come. Every lesson adds one idea to the same small program.</figcaption></figure>
+<figure id="fig-6-0-1"><img src="images/course_map.png" alt="Course map: thirteen lessons on a road from Lesson 1 to Lesson 11. Lesson 6, Matrices, is highlighted as you are here; Lessons 1 to 5 are done and Lesson 7, a mini game, is next." loading="lazy"><figcaption><span class="fignum">Fig 6.0.1</span>The course map. Coloured cards are done or today; darker cards are still to come. Every lesson adds one idea to the same small program.</figcaption></figure>
 <div class="key">
   <strong>Where this lesson fits</strong>
   <p><strong>Before:</strong> <a href="../lesson5/">Lesson 5</a>, A small world, filled the world with seven shapes and a floor grid.<br><strong>Today:</strong> every turn becomes a matrix, so the same world is drawn with far fewer cos and sin calls.<br><strong>Next:</strong> Lesson 7, A mini game, flies the camera round the world to collect cubes, using today's tidy code.</p>
@@ -86,7 +86,7 @@ figure, .tabcap { scroll-margin-top:16px; }
 </div>
 
 <h2>Lesson plan</h2>
-<p><strong>Who it's for:</strong> someone who finished Lesson 5 and can run <code>step3_small_world.py</code>. You need the three turn rules (Lessons 2 and 2B), the dot product (Lesson 3), <code>to_camera()</code> (Lesson 4), and the <code>things</code> list (Lesson 5). <strong>Needs:</strong> Python 3 and <code>pip install pygame-ce</code>, as before.</p>
+<p><strong>Who it's for:</strong> someone who finished Lesson 5 and can run <code>step3_small_world.py</code>. You need the three turn rules (Lessons 2 and 2B), the dot product (Lesson 3B), <code>to_camera()</code> (Lesson 4), and the <code>things</code> list (Lesson 5). <strong>Needs:</strong> Python 3 and <code>pip install pygame-ce</code>, as before.</p>
 <p><strong>By the end, the learner can:</strong></p>
 <ol>
   <li>Say what a 3 × 3 matrix is, and read any number in it by row and column.</li>
@@ -118,7 +118,7 @@ figure, .tabcap { scroll-margin-top:16px; }
 <p>A <strong>matrix</strong> (plural: matrices) is a grid of numbers. Ours are always 3 rows by 3 columns, because a point has 3 numbers going in (x, y, z) and 3 numbers coming out (new x, new y, new z). Here is the first one we will use. It is Lesson 2's "turn by 30°" rule; Part 3 shows where every number comes from.</p>
 <figure id="fig-6-1-1"><img src="images/g03_what_is_a_matrix.png" alt="A 3 by 3 grid: row 0 is 0.866, 0, -0.5 in blue; row 1 is 0, 1, 0 in yellow; row 2 is 0.5, 0, 0.866 in orange. Labels: row 0 makes new_x, row 1 makes new_y, row 2 makes new_z; column 0 times x, column 1 times y, column 2 times z. Beside it, the same grid as a Python tuple of three tuples." loading="lazy"><figcaption><span class="fignum">Fig 6.1.1</span>Rows go across, columns go down, both numbered from 0 like Python lists. In Python, <code>turn_30[2][0]</code> means row 2, then item 0 of that row: 0.5.<span class="panels">Panels: <b>6.1.1a</b> (left) the grid turn_30 · <b>6.1.1b</b> (right) the same grid in Python</span></figcaption></figure>
 <h3>Matrix × point</h3>
-<p>To put a point through a matrix, take each row in turn and do Lesson 3's <strong>dot product</strong> with the point: multiply the first numbers together, the second numbers together, the third numbers together, then add the three answers. Row 0 gives the new x, row 1 the new y, row 2 the new z.</p>
+<p>To put a point through a matrix, take each row in turn and do Lesson 3B's <strong>dot product</strong> with the point: multiply the first numbers together, the second numbers together, the third numbers together, then add the three answers. Row 0 gives the new x, row 1 the new y, row 2 the new z.</p>
 <figure id="fig-6-1-2"><img src="images/g04_row_times_point.png" alt="The turn_30 grid times corner 5 (1, 1, -1) equals (1.366, 1, -0.366), with each row's dot product written out: new_x = (0.866 * 1) + (0 * 1) + (-0.5 * -1) = 1.366; new_y = (0 * 1) + (1 * 1) + (0 * -1) = 1; new_z = (0.5 * 1) + (0 * 1) + (0.866 * -1) = -0.366. A panel explains corner 5's SHAPE coordinates." loading="lazy"><figcaption><span class="fignum">Fig 6.1.2</span>All in SHAPE coordinates, centre (0, 0, 0) = the middle of the cube. The answer, (1.366, 1, −0.366), is exactly what Lesson 2's <code>rotate_y(corner_5, 30)</code> gave.</figcaption></figure>
 <p>In code it is three calls to the <code>dot()</code> function you already have:</p>
 <pre><code>def matrix_times_point(matrix, point_3d):
