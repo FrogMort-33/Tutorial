@@ -55,25 +55,6 @@ tank_edges = [
     (30, 31), (31, 32), (32, 33), (33, 30),                                                  # radar dish
 ]
 
-# ----------------------------------------------------------------------
-# FACES:  (corners clockwise seen from outside,  colour,  NORMAL)
-#
-# The NORMAL is an arrow 1 long that points straight OUT of the face,
-# in SHAPE coordinates (the shape's middle is 0,0,0, shape not turned yet).
-# It is stored here as data, just like the points, and every frame it is
-# turned with the SAME turns as the points (but never moved: it is a
-# direction, not a place).
-#
-# How each normal was worked out (see Lesson 3B):
-#   take the face's first 3 corners a, b, c
-#   A = b - a       B = c - a                 (two edges of the face)
-#   cross = ( (A_y * B_z) - (A_z * B_y),
-#             (A_z * B_x) - (A_x * B_z),
-#             (A_x * B_y) - (A_y * B_x) )     (an arrow square-on to both edges)
-#   normal = cross / length_of(cross)         (shrink it to 1 long)
-# e.g. pyramid front (4, 1, 0): a=(0,1,0) b=(1,-1,-1) c=(-1,-1,-1)
-#   A=(1,-2,-1)  B=(-1,-2,-1)  cross=(0, 2, -4)  length=4.472  normal=(0, 0.447, -0.894)
-# ----------------------------------------------------------------------
 cube_faces = [
     ((6, 7, 3, 2), PURPLE, (0, 0, 1)),     # back    points away (+z)
     ((7, 4, 0, 3), BLUE,   (-1, 0, 0)),    # left
@@ -125,7 +106,8 @@ tank_faces = [
     ((21, 25, 26, 22), RED,     (1, 0, 0)),                   # barrel: sides
     ((23, 27, 24, 20), RED,     (-1, 0, 0)),
     ((22, 26, 27, 23), RED,     (0, 0, 1)),                   # barrel: muzzle
-    ((30, 31, 32, 33), CYAN,    (0, 0, 1)),                   # radar dish
+    ((30, 31, 32, 33), CYAN,    (0, 0, 1)),                   # radar dish: front
+    ((30, 33, 32, 31), PURPLE,  (0, 0, -1)),                  # radar dish: back (reversed corners)
 ]
 
 
@@ -141,18 +123,6 @@ cube_distance = 5
 angle_degrees = tilt_degrees = spin_degrees = 0
 
 TURN_STEP = 1
-
-# ----------------------------------------------------------------------
-# LIGHT: an arrow 1 long pointing FROM the shapes TOWARD the lamp.
-# (12, 15, -16) is "a bit right, up, toward you"; its length is 25,
-# so dividing by 25 makes it 1 long: (0.48, 0.6, -0.64).
-# AMBIENT: every face gets at least 0.2 brightness, so shadows are not black.
-# ----------------------------------------------------------------------
-LIGHT = ( (12 / 25), (15 / 25), (-16 / 25) )
-AMBIENT = 0.2
-NORMAL_DRAW_LENGTH = 0.5    # how long (in SHAPE units) to draw each normal when N is on
-use_light = True            # L key turns the shading on and off
-show_normals = False        # N key shows each face's normal as a white line
 
 def average_z(face_world_points):
 
@@ -195,34 +165,23 @@ def rotate_z(point_3d, angle):
     new_y = (x * sin_a) + (y * cos_a)
     return (new_x, new_y, z)
 
-def turn(point_3d):
-    # The three turns, in the same order for EVERY point and EVERY normal.
-    # Points and normals must get exactly the same turns, or the normals
-    # would stop pointing out of their faces.
-    return rotate_z(rotate_x(rotate_y(point_3d, angle_degrees), tilt_degrees), spin_degrees)
-
-
-def dot(a, b):
-    # Dot product: multiply x by x, y by y, z by z, then add.
-    # For two arrows 1 long: 1 = same way, 0 = right angles, -1 = opposite ways.
-    return ( (a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]) )
-
-
-def shade_colour(colour, normal):
-    # How much does this face look toward the lamp? (negative = turned away = 0)
-    brightness = dot(normal, LIGHT)
-    if brightness < 0:
-        brightness = 0
-    shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )     # 0.2 .. 1.0
-    r, g, b = colour
-    return ( int(r * shade), int(g * shade), int(b * shade) )
-
-
 def project(point_3d):
     x, y, z = point_3d
     screen_x = CENTRE_X + ( (x * FOCAL) / z )
     screen_y = CENTRE_Y - ( (y * FOCAL) / z )
     return (screen_x, screen_y)
+
+def is_facing_you(face_points): # Cross Product of the two SCREEN arrow vectors ! Send in full face ( only reads 0,1,2)
+    a_x, a_y = face_points[0]
+    b_x, b_y = face_points[1]
+    c_x, c_y = face_points[2]
+    arrow_a_x = (b_x - a_x)
+    arrow_a_y = (b_y - a_y)
+    arrow_b_x = (c_x - a_x)
+    arrow_b_y = (c_y - a_y)
+    cross = ( (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x) )
+    return (cross > 0)
+
 
 running = True
 while running:
@@ -231,10 +190,6 @@ while running:
             running = False
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             running = False
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_l:
-            use_light = not use_light
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_n:
-            show_normals = not show_normals
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_d]:         angle_degrees = (angle_degrees + TURN_STEP)
@@ -259,7 +214,7 @@ while running:
         #FOR Each Set of SHAPE points ( using 0,0,0 as center of shape ) 
         for p in points:
                 #Rotate the points in the SHAPE 
-                x, y, z = turn(p)
+                x, y, z = rotate_z(rotate_x(rotate_y(p, angle_degrees), tilt_degrees), spin_degrees)
                 #Move the shape into is GAME world X,Y,Z locating 
                 moved = (shape_x + x, shape_y + y, (shape_z + z + cube_distance))
                 #Save location in GAME x,y,z 
@@ -278,36 +233,19 @@ while running:
                 for corner_number in corners:
                     face_points.append(screen_points[corner_number])
                     face_world_points.append(world_points[corner_number] )
-                average_z_value = average_z(face_world_points)
+                
+                
+                if is_facing_you(face_points) : # Only add to draw list if yo are facing me . 
 
-                # Turn the face's NORMAL with the same turns as the points.
-                # We do NOT add the shape's position: a normal is a direction, not a place.
-                turned_normal = turn(normal)
+                    turned_normal = rotate_z(rotate_x(rotate_y(normal, angle_degrees), tilt_degrees), spin_degrees)
 
-                if use_light:
-                    face_colour = shade_colour(colour, turned_normal)
-                else:
-                    face_colour = colour
-
-                face_paint_order.append((average_z_value, face_colour, face_points, face_world_points, turned_normal))
+                    average_z_value = average_z(face_world_points)
+                    face_paint_order.append((average_z_value, colour, face_points))
             
-            # sort on average z only (key=) so Python never tries to compare the lists
-            face_paint_order.sort(key=lambda face: face[0], reverse=True)
-            for average_z_value, face_colour, face_points, face_world_points, turned_normal in face_paint_order:
-                pygame.draw.polygon(screen, face_colour, face_points)   # filled     
+            face_paint_order.sort(reverse=True)
+            for average_z_value, colour, face_points in face_paint_order:
+                pygame.draw.polygon(screen, colour, face_points)        # filled     
                 pygame.draw.polygon(screen, RED, face_points, 2)        # outline
-
-                if show_normals:
-                    # Middle of the face in WORLD coordinates = average of its corners
-                    count = len(face_world_points)
-                    mid_x = (sum(p[0] for p in face_world_points) / count)
-                    mid_y = (sum(p[1] for p in face_world_points) / count)
-                    mid_z = (sum(p[2] for p in face_world_points) / count)
-                    # Tip of the line = middle + (normal * NORMAL_DRAW_LENGTH)
-                    tip = ( (mid_x + (turned_normal[0] * NORMAL_DRAW_LENGTH)),
-                            (mid_y + (turned_normal[1] * NORMAL_DRAW_LENGTH)),
-                            (mid_z + (turned_normal[2] * NORMAL_DRAW_LENGTH)) )
-                    pygame.draw.line(screen, (255, 255, 255), project((mid_x, mid_y, mid_z)), project(tip), 2)
 
         else: 
 
