@@ -14,9 +14,11 @@ CYAN = (0, 255, 255)
 RED = (255, 60, 60)
 PURPLE = (160, 100, 230)
 BLUE = (70, 150, 255) 
-GOLD = (245, 200, 60) 
+GOLD = (245, 200, 60)
+CUBE_GREEN = (70, 230, 120)  
 
-
+LIGHT = (0.48, 0.6, -0.64) # THe 'where is the light ' arrow direction of length 1 . 
+AMBIENT = 0.2 # Everyone deservers a little light .. 
 
 CENTRE_X = (WIDTH / 2)
 CENTRE_Y = (HEIGHT / 2)
@@ -113,10 +115,10 @@ tank_faces = [
 
 
 shapes = [
-    ('CUBE' , cube_points,    cube_edges, cube_faces,    -2.0, 0.0, 0.0, GREEN),
-    ('PYRAMID' , pyramid_points, pyramid_edges, pyramid_faces,  2.0, 0.0, 0.0, CYAN),
-    ('DIAMOND', tank_points, tank_edges, tank_faces, 0.0, 2.5, 5.0, ORANGE),
-    ('DIAMOND', diamond_points, diamond_edges, diamond_faces, 0.0, -2.5, 3.0, RED)
+    ('CUBE' , cube_points,    cube_edges, cube_faces,    -2.0, 0.0, 0.0, GREEN ,0.5),
+    ('PYRAMID' , pyramid_points, pyramid_edges, pyramid_faces,  2.0, 0.0, 0.0, CYAN ,1),
+    ('Tank', tank_points, tank_edges, tank_faces, 0.0, 2.5, 5.0, ORANGE,1 ),
+    ('DIAMOND', diamond_points, diamond_edges, diamond_faces, 0.0, -2.5, 3.0, RED,1)
       ]
 
 cube_distance = 5
@@ -124,12 +126,7 @@ angle_degrees = tilt_degrees = spin_degrees = 0
 
 TURN_STEP = 1
 
-def average_z(face_world_points):
 
-    total = 0
-    for x, y, z in face_world_points:
-        total = (total + z)
-    return (total / len(face_world_points))
 
 
 def rotate_y(point_3d, angle):
@@ -171,6 +168,12 @@ def project(point_3d):
     screen_y = CENTRE_Y - ( (y * FOCAL) / z )
     return (screen_x, screen_y)
 
+def average_z(face_world_points):
+    total = 0
+    for x, y, z in face_world_points:
+        total = (total + z)
+    return (total / len(face_world_points))
+
 def is_facing_you(face_points): # Cross Product of the two SCREEN arrow vectors ! Send in full face ( only reads 0,1,2)
     a_x, a_y = face_points[0]
     b_x, b_y = face_points[1]
@@ -181,6 +184,22 @@ def is_facing_you(face_points): # Cross Product of the two SCREEN arrow vectors 
     arrow_b_y = (c_y - a_y)
     cross = ( (arrow_a_x * arrow_b_y) - (arrow_a_y * arrow_b_x) )
     return (cross > 0)
+
+def dot(arrow_1, arrow_2):  # DOT PRODUCT: how well do two arrows line up? (both must be 1 long)
+    x1, y1, z1 = arrow_1
+    x2, y2, z2 = arrow_2
+    return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
+
+
+def shade_colour(colour, turned_normal):  # LIGHTING: how bright is this face? Returns the shaded colour
+
+    # Take the dot product of the turned normal and LIGHT: multiply x by x, y by y and z by z, then add the three results.
+    # dot product will show how aligned our NORMAL is with the light 
+    brightness = dot(turned_normal, LIGHT)                  # -1 .. 1  (how well the face lines up with the lamp)
+    if brightness < 0:         brightness = 0               # turned away from the lamp = no lamp light
+    brightness = AMBIENT + ( (1 - AMBIENT) * brightness )   # 0.2 .. 1.0  (everyone gets a little light)
+    red, green, blue = colour
+    return ( int(red * brightness), int(green * brightness), int(blue * brightness) )
 
 
 running = True
@@ -206,7 +225,7 @@ while running:
     screen.fill(BLACK)
 
     #FOR EACH SHAPE ! 
-    for shape_name , points, edges, faces,  shape_x, shape_y, shape_z, shape_color in shapes:  
+    for shape_name , points, edges, faces,  shape_x, shape_y, shape_z, shape_color ,scale in shapes:  
 
         world_points = []  # Real GAME WOrld X,Y,Z coordinates for points 
         screen_points = [] # 2D Projected convershion of points 
@@ -214,6 +233,10 @@ while running:
         #FOR Each Set of SHAPE points ( using 0,0,0 as center of shape ) 
         for p in points:
                 #Rotate the points in the SHAPE 
+
+                x,y,z = p
+                p = x*scale , y* scale , z* scale 
+
                 x, y, z = rotate_z(rotate_x(rotate_y(p, angle_degrees), tilt_degrees), spin_degrees)
                 #Move the shape into is GAME world X,Y,Z locating 
                 moved = (shape_x + x, shape_y + y, (shape_z + z + cube_distance))
@@ -234,10 +257,16 @@ while running:
                     face_points.append(screen_points[corner_number])
                     face_world_points.append(world_points[corner_number] )
                 
-                
+                #Cross product check 
                 if is_facing_you(face_points) : # Only add to draw list if yo are facing me . 
 
                     turned_normal = rotate_z(rotate_x(rotate_y(normal, angle_degrees), tilt_degrees), spin_degrees)
+
+
+
+                    #colour = shade_colour(colour, turned_normal)
+                    colour = shade_colour(CUBE_GREEN, turned_normal)
+
 
                     average_z_value = average_z(face_world_points)
                     face_paint_order.append((average_z_value, colour, face_points))
@@ -245,7 +274,7 @@ while running:
             face_paint_order.sort(reverse=True)
             for average_z_value, colour, face_points in face_paint_order:
                 pygame.draw.polygon(screen, colour, face_points)        # filled     
-                pygame.draw.polygon(screen, RED, face_points, 2)        # outline
+                pygame.draw.polygon(screen, shape_color, face_points, 2)        # outline
 
         else: 
 
