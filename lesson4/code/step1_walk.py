@@ -4,19 +4,15 @@
 # Goal: YOU move, the cube stays still. Walk up to it, past it and
 # round the back of it with the keyboard.
 #
-# This starts from Lesson 3B's lit solid cube (step3_lit_cube.py).
+# This starts from step 0 (step0_world_map.py): the lit cube, its
+# place in the WORLD, where you stand, and the mini-map.
 #
-# What is new since Lesson 3B:
+# What is new since step 0:
 #
-#   1. cube_position = (0, 0, 5)
-#        The cube now has a fixed place in the WORLD. This is the same
-#        5 as Lesson 1's cube_distance, so nothing looks different
-#        until you start walking.
+#   1. Walking: W A S D and Q E change cam_x, cam_y and cam_z.
+#        Watch your pink dot move on the mini-map as you go.
 #
-#   2. cam_x, cam_y, cam_z  (start at 0, 0, 0)
-#        Where YOU are standing, in WORLD coordinates.
-#
-#   3. to_camera(world_point)
+#   2. to_camera(world_point)
 #        Turns a WORLD point into a CAMERA point (measured from YOU)
 #        by SUBTRACTING where you stand:
 #
@@ -24,15 +20,12 @@
 #           camera_y = (y - cam_y)
 #           camera_z = (z - cam_z)
 #
-#   4. NEAR = 0.1
+#   3. NEAR = 0.1
 #        A face with ANY corner closer than 0.1 in front of you (or
 #        behind you) is skipped. Dividing by a z of 0 crashes, and a
 #        negative z draws a flipped "ghost" (lesson Part 3).
 #
-#   5. The painter's sort now uses CAMERA z (distance from YOU).
-#
-#   6. A mini-map in the bottom-right corner: the WORLD seen from
-#      above, with you as a pink dot.
+#   4. The painter's sort now uses CAMERA z (distance from YOU).
 #
 # The recipe for one corner, every frame:
 #
@@ -61,8 +54,8 @@ font = pygame.font.SysFont(None, 28)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 YELLOW = (255, 255, 0)
-PINK = (255, 105, 200)        # NEW: the colour we use for YOU (the camera)
-MAP_BACK = (25, 30, 36)       # NEW: dark grey-blue behind the mini-map
+PINK = (255, 105, 200)        # (step 0) the colour we use for YOU (the camera)
+MAP_BACK = (25, 30, 36)       # (step 0) dark grey-blue behind the mini-map
 
 # ---- One colour for each face (from Lesson 3) -------------------------
 RED = (235, 80, 80)          # front
@@ -100,7 +93,7 @@ cube_faces = [
     ((2, 3, 0, 1), ORANGE),    # bottom (all have y = -1)
 ]
 
-# ---- NEW: where the cube lives in the WORLD ----------------------------
+# ---- (step 0) where the cube lives in the WORLD ------------------------
 # Before, we added cube_distance to z and that was the whole story,
 # because you never moved. Now the cube gets a proper address on the
 # map, and YOU get one too (below).
@@ -109,7 +102,7 @@ cube_faces = [
 cube_position = (0, 0, 5)
 cube_x, cube_y, cube_z = cube_position      # unpack the 3 numbers
 
-# ---- NEW: where YOU are standing (the camera), in WORLD coordinates ---
+# ---- (step 0) where YOU are standing (the camera), in WORLD coordinates
 # Start at (0, 0, 0): the seat you sat in for Lessons 1 to 3.
 cam_x = 0
 cam_y = 0
@@ -134,7 +127,7 @@ LIGHT = (0.48, 0.6, -0.64)
 AMBIENT = 0.2
 
 # ---- The cube's own spin (from Lessons 2 and 2B) ----------------------
-# NEW: the cube starts STILL, with all angles at 0, so corner 5 is at
+# (step 0) the cube starts STILL, with all angles at 0, so corner 5 is at
 # WORLD (1, 1, 4) like in the lesson's worked examples. SPACE spins it.
 angle_x = 0
 angle_y = 0
@@ -142,12 +135,12 @@ angle_z = 0
 SPEED_X = 0.5
 SPEED_Y = 1
 SPEED_Z = 0.25
-spinning = False       # NEW: SPACE flips this
+spinning = False       # (step 0) SPACE flips this
 use_light = True
-one_colour = False     # NEW default: six colours, so when you walk
+one_colour = False     # (step 0) default: six colours, so when you walk
                        # round you can always tell WHICH side you see
 
-# ---- NEW: the mini-map ------------------------------------------------
+# ---- (step 0) the mini-map --------------------------------------------
 # A 160 x 160 px box, 10 px in from the bottom-right corner:
 #   left = (800 - 10 - 160) = 630,   top = (600 - 10 - 160) = 430
 MAP_LEFT = 630
@@ -304,7 +297,7 @@ def keep_under_360(angle):
 
 
 def to_map(x, z):
-    """NEW: a WORLD (x, z) -> a pixel on the mini-map.
+    """(step 0) a WORLD (x, z) -> a pixel on the mini-map.
 
     Like project(), but with no dividing, because the map is flat.
     +z goes UP the map, and screen y counts DOWN, so we SUBTRACT z.
@@ -317,7 +310,7 @@ def to_map(x, z):
 
 
 def draw_map(world_points):
-    """NEW: draw the mini-map: the cube's outline and you, from above."""
+    """(step 0) draw the mini-map: the cube's outline and you, from above."""
     box = pygame.Rect(MAP_LEFT, MAP_TOP, MAP_SIZE, MAP_SIZE)
     pygame.draw.rect(screen, MAP_BACK, box)
     # set_clip: anything we draw outside the box is cut off, so if you

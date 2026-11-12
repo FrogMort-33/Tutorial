@@ -52,8 +52,8 @@ font = pygame.font.SysFont(None, 28)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 YELLOW = (255, 255, 0)
-PINK = (255, 105, 200)        # (step 1) the colour we use for YOU (the camera)
-MAP_BACK = (25, 30, 36)       # (step 1) dark grey-blue behind the mini-map
+PINK = (255, 105, 200)        # (step 0) the colour we use for YOU (the camera)
+MAP_BACK = (25, 30, 36)       # (step 0) dark grey-blue behind the mini-map
 
 # ---- One colour for each face (from Lesson 3) -------------------------
 RED = (235, 80, 80)          # front
@@ -91,7 +91,7 @@ cube_faces = [
     ((2, 3, 0, 1), ORANGE),    # bottom (all have y = -1)
 ]
 
-# ---- (step 1) where the cube lives in the WORLD ----------------------------
+# ---- (step 0) where the cube lives in the WORLD ----------------------------
 # Before, we added cube_distance to z and that was the whole story,
 # because you never moved. Now the cube gets a proper address on the
 # map, and YOU get one too (below).
@@ -100,7 +100,7 @@ cube_faces = [
 cube_position = (0, 0, 5)
 cube_x, cube_y, cube_z = cube_position      # unpack the 3 numbers
 
-# ---- (step 1) where YOU are standing (the camera), in WORLD coordinates ---
+# ---- (step 0) where YOU are standing (the camera), in WORLD coordinates ---
 # Start at (0, 0, 0): the seat you sat in for Lessons 1 to 3.
 cam_x = 0
 cam_y = 0
@@ -143,7 +143,7 @@ LIGHT = (0.48, 0.6, -0.64)
 AMBIENT = 0.2
 
 # ---- The cube's own spin (from Lessons 2 and 2B) ----------------------
-# (step 1) the cube starts STILL, with all angles at 0, so corner 5 is at
+# (step 0) the cube starts STILL, with all angles at 0, so corner 5 is at
 # WORLD (1, 1, 4) like in the lesson's worked examples. SPACE spins it.
 angle_x = 0
 angle_y = 0
@@ -151,12 +151,12 @@ angle_z = 0
 SPEED_X = 0.5
 SPEED_Y = 1
 SPEED_Z = 0.25
-spinning = False       # (step 1) SPACE flips this
+spinning = False       # (step 0) SPACE flips this
 use_light = True
 one_colour = False     # Step 1 default: six colours, so when you walk
                        # round you can always tell WHICH side you see
 
-# ---- (step 1) the mini-map ------------------------------------------------
+# ---- (step 0) the mini-map ------------------------------------------------
 # A 160 x 160 px box, 10 px in from the bottom-right corner:
 #   left = (800 - 10 - 160) = 630,   top = (600 - 10 - 160) = 430
 MAP_LEFT = 630
@@ -324,7 +324,7 @@ def keep_under_360(angle):
 
 
 def to_map(x, z):
-    """(step 1) a WORLD (x, z) -> a pixel on the mini-map.
+    """(step 0) a WORLD (x, z) -> a pixel on the mini-map.
 
     Like project(), but with no dividing, because the map is flat.
     +z goes UP the map, and screen y counts DOWN, so we SUBTRACT z.
@@ -337,7 +337,7 @@ def to_map(x, z):
 
 
 def draw_map(world_points):
-    """(step 1) draw the mini-map: the cube's outline and you, from above."""
+    """(step 0) draw the mini-map: the cube's outline and you, from above."""
     box = pygame.Rect(MAP_LEFT, MAP_TOP, MAP_SIZE, MAP_SIZE)
     pygame.draw.rect(screen, MAP_BACK, box)
     # set_clip: anything we draw outside the box is cut off, so if you
