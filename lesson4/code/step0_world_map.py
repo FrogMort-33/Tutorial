@@ -77,14 +77,16 @@ cube_points = [
 ]
 
 # ---- The cube's 6 faces (from Lesson 3) -------------------------------
-# Each face lists its 4 corners CLOCKWISE as seen from OUTSIDE the cube.
+# Each face lists its 4 corners CLOCKWISE as seen from OUTSIDE the cube,
+# its colour, and its NORMAL (from Lesson 3B): the arrow 1 long that
+# points straight OUT of the face, in SHAPE coordinates.
 cube_faces = [
-    ((4, 5, 1, 0), RED),       # front  (all have z = -1)
-    ((6, 7, 3, 2), PURPLE),    # back   (all have z = +1)
-    ((7, 4, 0, 3), BLUE),      # left   (all have x = -1)
-    ((5, 6, 2, 1), GREEN),     # right  (all have x = +1)
-    ((7, 6, 5, 4), GOLD),      # top    (all have y = +1)
-    ((2, 3, 0, 1), ORANGE),    # bottom (all have y = -1)
+    ((4, 5, 1, 0), RED,    ( 0,  0, -1)),   # front  -> toward you  (-z)
+    ((6, 7, 3, 2), PURPLE, ( 0,  0,  1)),   # back   -> away        (+z)
+    ((7, 4, 0, 3), BLUE,   (-1,  0,  0)),   # left   -> left        (-x)
+    ((5, 6, 2, 1), GREEN,  ( 1,  0,  0)),   # right  -> right       (+x)
+    ((7, 6, 5, 4), GOLD,   ( 0,  1,  0)),   # top    -> up          (+y)
+    ((2, 3, 0, 1), ORANGE, ( 0, -1,  0)),   # bottom -> down        (-y)
 ]
 
 # ---- NEW: where the cube lives in the WORLD ----------------------------
@@ -219,21 +221,6 @@ def is_facing_you(face_points):
     return (cross > 0)
 
 
-def face_pointer(corners, turned_points):
-    """The arrow straight out of a face (from Lesson 3B, unchanged).
-    Uses turned SHAPE points, so the light stays fixed in the world."""
-    total_x = 0
-    total_y = 0
-    total_z = 0
-    for corner_number in corners:
-        x, y, z = turned_points[corner_number]
-        total_x = (total_x + x)
-        total_y = (total_y + y)
-        total_z = (total_z + z)
-    count = len(corners)
-    return ( (total_x / count), (total_y / count), (total_z / count) )
-
-
 def dot(arrow_1, arrow_2):
     """The dot product (from Lesson 3B)."""
     x1, y1, z1 = arrow_1
@@ -241,9 +228,9 @@ def dot(arrow_1, arrow_2):
     return ( (x1 * x2) + (y1 * y2) + (z1 * z2) )
 
 
-def shade_colour(colour, pointer):
+def shade_colour(colour, turned_normal):
     """Brighter when the face points at the light (from Lesson 3B)."""
-    brightness = dot(pointer, LIGHT)
+    brightness = dot(turned_normal, LIGHT)
     if brightness < 0:
         brightness = 0
     shade = ( AMBIENT + ( (1 - AMBIENT) * brightness ) )
@@ -318,16 +305,13 @@ while running:
     screen.fill(BLACK)
 
     # ---- spin -> place, for all 8 corners --------------------------------
-    # THREE lists:
-    #   turned_points - SHAPE, spun   (for the light)
+    # TWO lists:
     #   world_points  - WORLD         (for the painter's sort and the map)
     #   screen_points - SCREEN        (for the clock test and drawing)
-    turned_points = []
     world_points = []
     screen_points = []
     for p in cube_points:
         turned = rotate_all(p)                         # SHAPE, spun
-        turned_points.append(turned)
         x, y, z = turned
         world = ( (x + cube_x), (y + cube_y), (z + cube_z) )   # WORLD
         world_points.append(world)
@@ -335,7 +319,7 @@ while running:
 
     # ---- Make a list of the faces we will paint ------------------------
     faces_to_draw = []
-    for corners, colour in cube_faces:
+    for corners, colour, normal in cube_faces:
         face_points = []
         for corner_number in corners:
             face_points.append(screen_points[corner_number])
@@ -351,8 +335,11 @@ while running:
         if one_colour:
             colour = CUBE_GREEN
         if use_light:
-            pointer = face_pointer(corners, turned_points)
-            colour = shade_colour(colour, pointer)
+            # Turn the stored normal with the SAME spin as the corners.
+            # No cube_position and no camera: a normal is a direction,
+            # and the lamp belongs to the world.
+            turned_normal = rotate_all(normal)
+            colour = shade_colour(colour, turned_normal)
 
         faces_to_draw.append( (distance, face_points, colour) )
 
