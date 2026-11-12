@@ -136,7 +136,7 @@ diamond_model = {"points": diamond_points, "edges": diamond_edges, "faces": diam
 #   "position" - where its CENTRE is, in WORLD coordinates
 #   "size"     - 1 = normal, 2 = twice as big, 0.5 = half
 #   "angles"   - its spin right now: [turn, tilt, spin] in degrees
-#   "speeds"   - degrees added each frame: (turn, tilt, spin). SPACE pauses.
+#   "speeds"   - degrees added each frame: (turn, tilt, spin)
 #   "colour"   - its own colour: face outlines and its dot on the map
 #   "palette"  - the list of colours its faces use, in face order
 #   "velocity" - how far it MOVES each frame: [x, y, z]. It bounces inside its "bounds".
@@ -196,7 +196,6 @@ things = [
      "angles": [10, 20, 30], "speeds": (4, 3, 2), "colour": (230, 70, 110), "palette": PALETTE_SUNSET},
 ]
 
-spinning = True       # SPACE pauses every thing's own spin
 
 
 
@@ -210,6 +209,12 @@ cam_turn = 0          # which way you face, in degrees. 0 = facing +z (up the ma
 TURN_SPEED = 1.5      # degrees per frame
 cam_tip = 0           # looking up / down, in degrees. 0 = level, + = down, - = up
 TIP_LIMIT = 60        # don't let you look further up or down than this
+
+STAND_Y = 0           # your eye height when standing: 1 above the floor (FLOOR_Y is -1)
+cam_vy = 0            # your up / down speed: + = rising, - = falling
+JUMP_SPEED = 0.15     # the upward speed a jump starts with (SPACE)
+GRAVITY = 0.004       # taken off cam_vy every frame, so you slow, stop, then fall
+                      # (halved from 0.008: twice as high AND twice as long a jump)
 
 
 ## MINI MAP !!
@@ -402,7 +407,8 @@ while running:
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             running = False
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-            spinning = not spinning                       # pause / restart every thing's spin
+            if cam_y <= STAND_Y:                          # only jump when your feet are on the floor
+                cam_vy = JUMP_SPEED
 
     keys = pygame.key.get_pressed()
     # ---- Spin the things: I J K L U O by hand, plus each one's own speeds ----
@@ -414,11 +420,10 @@ while running:
         if keys[pygame.K_k]:         angles[1] = angles[1] - TURN_STEP
         if keys[pygame.K_u]:         angles[2] = angles[2] + TURN_STEP
         if keys[pygame.K_o]:         angles[2] = angles[2] - TURN_STEP
-        if spinning:
-            speeds = thing["speeds"]
-            angles[0] = angles[0] + speeds[0]
-            angles[1] = angles[1] + speeds[1]
-            angles[2] = angles[2] + speeds[2]
+        speeds = thing["speeds"]
+        angles[0] = angles[0] + speeds[0]
+        angles[1] = angles[1] + speeds[1]
+        angles[2] = angles[2] + speeds[2]
         angles[0] = keep_under_360(angles[0])
         angles[1] = keep_under_360(angles[1])
         angles[2] = keep_under_360(angles[2])
@@ -448,6 +453,13 @@ while running:
         cam_x = (cam_x - (right_x * MOVE_SPEED))
         cam_z = (cam_z - (right_z * MOVE_SPEED))
 
+    # ---- Jumping and falling --------------------------------------------
+    cam_vy = cam_vy - GRAVITY           # gravity pulls your speed DOWN a little each frame
+    cam_y = cam_y + cam_vy              # move up (or down) by that speed
+    if cam_y < STAND_Y:                 # gone below standing height: you've landed
+        cam_y = STAND_Y
+        cam_vy = 0
+
     # ---- Move every thing by its velocity, bouncing inside its bounds ----
     for thing in things:
         position = thing["position"]
@@ -466,12 +478,16 @@ while running:
 
 
 
+    face_paint_order = []          # EVERY face of EVERY thing, painted together after the loop
+
     #FOR EACH THING !
     for thing in things:
         model = thing["model"]
 
         world_points = []  # Real GAME WOrld X,Y,Z coordinates for points
         screen_points = [] # 2D Projected convershion of points
+        camera_points = [] # the same corners measured from YOU (CAMERA): used for the painter's sort
+
 
         #FOR Each SHAPE point ( using 0,0,0 as center of shape )
         for p in model["points"]:
@@ -479,14 +495,15 @@ while running:
                 world_points.append(moved)
 
                 camera_point = to_camera(moved)
+                camera_points.append(camera_point)          # keep it, so faces can use it later
+
+
                 if camera_point[2] >= NEAR:                  # [2] is z: how far in front of you
                     screen_points.append(project(camera_point))
                 else:
                     screen_points.append(None)              # too close or behind you: no pixel
 
         if model["faces"]:
-
-            face_paint_order =[]
 
             palette = thing["palette"]
             # enumerate counts as it goes: face_number is 0 for the first face, 1 for the next ...
@@ -496,7 +513,7 @@ while running:
 
                 for corner_number in corners:
                     face_points.append(screen_points[corner_number])
-                    face_world_points.append(world_points[corner_number] )
+                    face_world_points.append(camera_points[corner_number] )
 
                 if None in face_points:      # a corner is too close or behind you FAST FAIL
                     continue                 # skip the whole face
@@ -515,12 +532,7 @@ while running:
                     colour = shade_colour(colour, turned_normal)
 
                     average_z_value = average_z(face_world_points)
-                    face_paint_order.append((average_z_value, colour, face_points))
-
-            face_paint_order.sort(reverse=True)
-            for average_z_value, colour, face_points in face_paint_order:
-                pygame.draw.polygon(screen, colour, face_points)              # filled
-                pygame.draw.polygon(screen, thing["colour"], face_points, 2)  # outline
+                    face_paint_order.append((average_z_value, colour, face_points, thing["colour"]))
 
         else:
 
@@ -529,7 +541,13 @@ while running:
                     continue                                 # an end too close or behind you
                 pygame.draw.line(screen, thing["colour"], screen_points[a], screen_points[b], 2)
 
-## MINI MAP 
+    # ---- The painter's sort: ALL faces together, furthest from YOU first ----
+    face_paint_order.sort(reverse=True)
+    for average_z_value, colour, face_points, outline_colour in face_paint_order:
+        pygame.draw.polygon(screen, colour, face_points)               # filled
+        pygame.draw.polygon(screen, outline_colour, face_points, 2)    # outline
+
+## MINI MAP
     map_box = pygame.Rect(MAP_LEFT, MAP_TOP, MAP_SIZE, MAP_SIZE)
     pygame.draw.rect(screen, MAP_COLOUR_BACK, map_box)          # filled background
     pygame.draw.rect(screen, (255, 255, 255), map_box, 1)       # thin white border
