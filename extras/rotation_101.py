@@ -264,8 +264,8 @@ while running:
 
 
 
-                    #colour = shade_colour(colour, turned_normal)
-                    colour = shade_colour(CUBE_GREEN, turned_normal)
+                    colour = shade_colour(colour, turned_normal)
+                    #colour = shade_colour(CUBE_GREEN, turned_normal)
 
 
                     average_z_value = average_z(face_world_points)
