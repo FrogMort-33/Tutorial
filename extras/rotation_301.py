@@ -2,11 +2,6 @@ import math
 import random
 import pygame
 
-
-
-
-
-
 pygame.init()
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 WIDTH, HEIGHT = screen.get_size()
@@ -24,51 +19,14 @@ GOLD = (245, 200, 60)
 CUBE_GREEN = (70, 230, 120)  
 PINK = (255, 105, 200)
 
-# ---- PALETTES: lists of face colours, kept apart from the faces ----------
-# Face 0 gets colour 0, face 1 gets colour 1, and so on, in order.
-#   MORE colours than faces  -> the extra colours are simply not used
-#   FEWER colours than faces -> start again from colour 0 (wrap round)
-PALETTE_WARM = [                 # 7 colours for a 6-face cube: the 7th is spare
-    (235, 80, 80),     # red
-    (245, 140, 50),    # orange
-    (245, 200, 60),    # gold
-    (250, 120, 100),   # coral
-    (255, 110, 170),   # rose
-    (200, 60, 60),     # dark red
-    (255, 180, 120),   # peach (not used by a cube)
-]
-PALETTE_COOL = [                 # only 4 colours: faces 4 and 5 wrap round to colours 0 and 1
-    (70, 150, 255),    # blue
-    (60, 210, 200),    # teal
-    (160, 100, 230),   # purple
-    (90, 170, 255),    # sky blue
-]
-PALETTE_GOLD = [                 # just 1 colour: every face wraps round to it (n % 1 is always 0)
-    (245, 200, 60),    # gold
-]
-PALETTE_FOREST = [               # 5 colours: exactly one per pyramid face
-    (60, 140, 70),     # pine
-    (120, 190, 80),    # leaf
-    (190, 220, 110),   # lime
-    (90, 160, 140),    # sage
-    (150, 110, 60),    # bark
-]
-PALETTE_SUNSET = [               # 3 colours: a diamond's 8 faces go round it nearly 3 times
-    (255, 120, 60),    # tangerine
-    (230, 70, 110),    # raspberry
-    (130, 70, 170),    # dusk purple
-]
-PALETTE_ICE = [                  # 8 colours: exactly one per diamond face, no wrapping
-    (220, 245, 255),   # frost
-    (170, 220, 250),   # pale blue
-    (120, 190, 240),   # sky
-    (80, 150, 220),    # deep sky
-    (180, 240, 230),   # mint ice
-    (130, 210, 210),   # glacier
-    (200, 200, 255),   # lavender ice
-    (150, 170, 230),   # steel blue
-]
-
+# PALETTES: # Face 0 gets colour 0, face 1 gets colour 1, and so on, in order.
+# MORE colours than faces  -> the extra colours are simply not used .#   FEWER colours than faces -> start again from colour 0 (wrap round)
+PALETTE_WARM   = [(235, 80, 80), (245, 140, 50), (245, 200, 60), (250, 120, 100), (255, 110, 170), (200, 60, 60), (255, 180, 120)]
+PALETTE_COOL   = [(70, 150, 255), (60, 210, 200), (160, 100, 230), (90, 170, 255)]
+PALETTE_GOLD   = [(245, 200, 60)]
+PALETTE_FOREST = [(60, 140, 70), (120, 190, 80), (190, 220, 110), (90, 160, 140), (150, 110, 60)]
+PALETTE_SUNSET = [(255, 120, 60), (230, 70, 110), (130, 70, 170)]
+PALETTE_ICE    = [(220, 245, 255), (170, 220, 250), (120, 190, 240), (80, 150, 220), (180, 240, 230), (130, 210, 210), (200, 200, 255), (150, 170, 230)]
 
 LIGHT = (0.48, 0.6, -0.64) # THe 'where is the light ' arrow direction of length 1 . 
 AMBIENT = 0.2 # Everyone deservers a little light .. 
@@ -77,145 +35,119 @@ CENTRE_X = (WIDTH / 2)
 CENTRE_Y = (HEIGHT / 2)
 FOCAL = WIDTH / 2   # 90 degree horizontal view on any screen
 
+
+#   6 faces: 0 back (+z, away from you), 1 left, 2 right, 3 top, 4 bottom, 5 front (-z, toward you)
 cube_points = [(-1, -1, -1),( 1, -1, -1), ( 1, -1,  1),(-1, -1,  1),(-1,  1, -1),( 1,  1, -1),(1,  1,  1),(-1,  1,  1),]
 cube_edges = [(0, 1), (1, 2), (2, 3), (3, 0), (4, 5), (5, 6), (6, 7), (7, 4),(0, 4), (1, 5), (2, 6), (3, 7),]
-
-# Each face is (corners, normal). Its colour comes from the thing's palette,
-# in this order: face 0 = back, 1 = left, 2 = right, 3 = top, 4 = bottom, 5 = front.
-cube_faces = [
-    ((6, 7, 3, 2), (0, 0, 1)),     # 0 back    points away (+z)
-    ((7, 4, 0, 3), (-1, 0, 0)),    # 1 left
-    ((5, 6, 2, 1), (1, 0, 0)),     # 2 right
-    ((7, 6, 5, 4), (0, 1, 0)),     # 3 top
-    ((2, 3, 0, 1), (0, -1, 0)),    # 4 bottom
-    ((4, 5, 1, 0), (0, 0, -1)),    # 5 front   points toward you (-z)
-    ]
-
-# ---- MODELS: a shape's points, edges and faces kept together ------------
-# Faces keep their NORMAL as the second item: (corners, normal).
+cube_faces = [((6, 7, 3, 2), (0, 0, 1)), ((7, 4, 0, 3), (-1, 0, 0)), ((5, 6, 2, 1), (1, 0, 0)), ((7, 6, 5, 4), (0, 1, 0)), ((2, 3, 0, 1), (0, -1, 0)), ((4, 5, 1, 0), (0, 0, -1))]
 cube_model = {"points": cube_points, "edges": cube_edges, "faces": cube_faces}
 
-# ---- PYRAMID (from rotation_101): a square base and a tip ----------------
-# Corners 0 to 3 are the cube's 4 bottom corners; corner 4 is the tip.
-# Height 2 and width 2, like the cube, so it sits on the floor the same way.
+#   5 faces: 0 base (points down), 1 front slope, 2 right slope, 3 back slope, 4 left slope
 pyramid_points = [(-1, -1, -1), (1, -1, -1), (1, -1, 1), (-1, -1, 1), (0, 1, 0)]
 pyramid_edges = [(0, 1), (1, 2), (2, 3), (3, 0), (0, 4), (1, 4), (2, 4), (3, 4)]
-# Each face is (corners, normal). Face order for palettes:
-# 0 = base, 1 = front slope, 2 = right slope, 3 = back slope, 4 = left slope.
-pyramid_faces = [
-    ((2, 3, 0, 1), (0, -1, 0)),            # 0 base, points down
-    ((4, 1, 0),    (0, 0.447, -0.894)),    # 1 front slope: a bit up, mostly toward you
-    ((4, 2, 1),    (0.894, 0.447, 0)),     # 2 right slope
-    ((4, 3, 2),    (0, 0.447, 0.894)),     # 3 back slope
-    ((4, 0, 3),    (-0.894, 0.447, 0)),    # 4 left slope
-]
+pyramid_faces = [((2, 3, 0, 1), (0, -1, 0)), ((4, 1, 0), (0, 0.447, -0.894)), ((4, 2, 1), (0.894, 0.447, 0)), ((4, 3, 2), (0, 0.447, 0.894)), ((4, 0, 3), (-0.894, 0.447, 0))]
 pyramid_model = {"points": pyramid_points, "edges": pyramid_edges, "faces": pyramid_faces}
 
-# ---- DIAMOND (from rotation_101): two pyramids joined base to base -------
-# 6 corners: top, bottom, and 4 round the middle. 8 triangle faces.
-# 0.577 = 1 / sqrt(3): the arrow (1, 1, 1) shrunk to 1 long.
+#   8 faces: top half 0 front-left, 1 front-right, 2 back-right, 3 back-left; bottom half 4 front-left, 5 front-right, 6 back-right, 7 back-left
 diamond_points = [(0, 1, 0), (0, -1, 0), (-1, 0, 0), (1, 0, 0), (0, 0, -1), (0, 0, 1)]
-diamond_edges = [(2, 4), (4, 3), (3, 5), (5, 2), (0, 2), (0, 3), (0, 4), (0, 5),
-                 (1, 2), (1, 3), (1, 4), (1, 5)]
-# Faces 0 to 3 are the top half, 4 to 7 the bottom half.
-diamond_faces = [
-    ((0, 4, 2), (-0.577,  0.577, -0.577)),   # 0 top, front-left
-    ((0, 3, 4), ( 0.577,  0.577, -0.577)),   # 1 top, front-right
-    ((0, 5, 3), ( 0.577,  0.577,  0.577)),   # 2 top, back-right
-    ((0, 2, 5), (-0.577,  0.577,  0.577)),   # 3 top, back-left
-    ((1, 2, 4), (-0.577, -0.577, -0.577)),   # 4 bottom, front-left
-    ((1, 4, 3), ( 0.577, -0.577, -0.577)),   # 5 bottom, front-right
-    ((1, 3, 5), ( 0.577, -0.577,  0.577)),   # 6 bottom, back-right
-    ((1, 5, 2), (-0.577, -0.577,  0.577)),   # 7 bottom, back-left
-]
+diamond_edges = [(2, 4), (4, 3), (3, 5), (5, 2), (0, 2), (0, 3), (0, 4), (0, 5), (1, 2), (1, 3), (1, 4), (1, 5)]
+diamond_faces = [((0, 4, 2), (-0.577, 0.577, -0.577)), ((0, 3, 4), (0.577, 0.577, -0.577)), ((0, 5, 3), (0.577, 0.577, 0.577)), ((0, 2, 5), (-0.577, 0.577, 0.577)), ((1, 2, 4), (-0.577, -0.577, -0.577)), ((1, 4, 3), (0.577, -0.577, -0.577)), ((1, 3, 5), (0.577, -0.577, 0.577)), ((1, 5, 2), (-0.577, -0.577, 0.577))]
 diamond_model = {"points": diamond_points, "edges": diamond_edges, "faces": diamond_faces}
 
-# ---- THINGS: every object in the world, one dictionary each --------------
-#   "name"     - a label, so you can tell them apart
-#   "model"    - which shape (its points, edges and faces)
-#   "position" - where its CENTRE is, in WORLD coordinates
-#   "size"     - 1 = normal, 2 = twice as big, 0.5 = half
-#   "angles"   - its spin right now: [turn, tilt, spin] in degrees
-#   "speeds"   - degrees added each frame: (turn, tilt, spin)
-#   "colour"   - its own colour: face outlines and its dot on the map
-#   "palette"  - the list of colours its faces use, in face order
-#   "velocity" - how far it MOVES each frame: [x, y, z]. It bounces inside its "bounds".
-#   "bounds"   - added below the floor settings: (smallest x, y, z), (biggest x, y, z)
-#
-# "position" and "velocity" are LISTS [ ], because they change every frame.
-#
-# A thing SITS ON THE FLOOR when its centre y = (FLOOR_Y + size):
-#   size 1   -> y = (-1 + 1)   = 0
-#   size 0.2 -> y = (-1 + 0.2) = -0.8
-things = [
-    {"name": "big cube", "model": cube_model, "position": [-2, 0, 9], "velocity": [0.02, 0.01, -0.015], "size": 1,
-     "angles": [35, 0, 0], "speeds": (0, 1, 2), "colour": GREEN, "palette": PALETTE_WARM},
-     
-    {"name": "small cube", "model": cube_model, "position": [3, -0.8, 5], "velocity": [-0.03, 0.02, 0.025], "size": 0.2,
-     "angles": [-50, 0, 0], "speeds": (2, 0, 0), "colour": CUBE_GREEN, "palette": PALETTE_COOL},
-
-    {"name": "floor mini", "model": cube_model, "position": [-3, -0.7, 4], "velocity": [0.025, 0.03, 0.02], "size": 0.3,
-     "angles": [20, 0, 0], "speeds": (1, 0, 0), "colour": ORANGE, "palette": PALETTE_WARM},
-
-    # Hovering just above eye height (your eye is at y = 0), tumbling slowly.
-    {"name": "hover mini", "model": cube_model, "position": [0, 0.6, 6], "velocity": [-0.02, -0.015, 0.03], "size": 0.3,
-     "angles": [10, 30, 0], "speeds": (1.5, 1, 0.5), "colour": CYAN, "palette": PALETTE_COOL},
-
-    # High up on the right, far away, tumbling.
-    {"name": "high mini", "model": cube_model, "position": [5, 2.5, 10], "velocity": [-0.035, -0.02, -0.01], "size": 0.4,
-     "angles": [45, 20, 10], "speeds": (0.5, 2, 1), "colour": GOLD, "palette": PALETTE_WARM},
-
-    # Middle height on the left, far away, spinning fast.
-    {"name": "mid mini", "model": cube_model, "position": [-5, 1.2, 11], "velocity": [0.015, 0.025, -0.03], "size": 0.25,
-     "angles": [0, 45, 45], "speeds": (3, 0, 1), "colour": PURPLE, "palette": PALETTE_COOL},
-
-    # One-colour palette: every face is gold, the light alone tells the sides apart.
-    {"name": "gold mini", "model": cube_model, "position": [1.5, 1, 3.5], "velocity": [0.04, 0.035, 0.03], "size": 0.1,
-     "angles": [30, 0, 0], "speeds": (1, 1, 1), "colour": GOLD, "palette": PALETTE_GOLD},
-
-    # ---- PYRAMIDS ----------------------------------------------------------
-    # A big pyramid gliding low and slowly, turning like a lighthouse.
-    {"name": "big pyramid", "model": pyramid_model, "position": [4, 1, 8], "velocity": [-0.015, 0.005, 0.01], "size": 1.2,
-     "angles": [15, 0, 0], "speeds": (0.7, 0, 0), "colour": (120, 190, 80), "palette": PALETTE_FOREST},
-
-    # A small pyramid tumbling end over end, high up.
-    {"name": "tumble pyramid", "model": pyramid_model, "position": [-3, 2.5, 7], "velocity": [0.03, -0.02, 0.02], "size": 0.4,
-     "angles": [0, 60, 20], "speeds": (1, 2.5, 0.5), "colour": (190, 220, 110), "palette": PALETTE_FOREST},
-
-    # ---- DIAMONDS ----------------------------------------------------------
-    # 8 faces, 3 colours: watch the sunset colours repeat round the diamond.
-    {"name": "sunset diamond", "model": diamond_model, "position": [-1, 1.5, 6], "velocity": [0.02, 0.03, -0.02], "size": 0.6,
-     "angles": [0, 0, 0], "speeds": (2, 0, 0), "colour": (255, 120, 60), "palette": PALETTE_SUNSET},
-
-    # 8 faces, 8 colours: every face its own icy colour.
-    {"name": "ice diamond", "model": diamond_model, "position": [2, 2, 10], "velocity": [-0.025, -0.015, -0.03], "size": 0.8,
-     "angles": [45, 30, 0], "speeds": (1.5, 0.8, 1.2), "colour": (170, 220, 250), "palette": PALETTE_ICE},
-
-    # Same model and palette as the sunset one, but small, fast and spinning hard.
-    {"name": "spark diamond", "model": diamond_model, "position": [5, 0.5, 4], "velocity": [-0.04, 0.025, 0.035], "size": 0.25,
-     "angles": [10, 20, 30], "speeds": (4, 3, 2), "colour": (230, 70, 110), "palette": PALETTE_SUNSET},
+# ---- FRAME: a square with a hole in the middle, made of 4 long boxes ------
+# same corner order and same faces as the cube, with its corner numbers moved along by 8.
+frame_points = [
+    (-1, 0.6, -0.2), (1, 0.6, -0.2), (1, 0.6, 0.2), (-1, 0.6, 0.2), (-1, 1, -0.2), (1, 1, -0.2), (1, 1, 0.2), (-1, 1, 0.2),    # 0-7 top box
+    (-1, -1, -0.2), (1, -1, -0.2), (1, -1, 0.2), (-1, -1, 0.2), (-1, -0.6, -0.2), (1, -0.6, -0.2), (1, -0.6, 0.2), (-1, -0.6, 0.2),    # 8-15 bottom box
+    (-1, -0.6, -0.2), (-0.6, -0.6, -0.2), (-0.6, -0.6, 0.2), (-1, -0.6, 0.2), (-1, 0.6, -0.2), (-0.6, 0.6, -0.2), (-0.6, 0.6, 0.2), (-1, 0.6, 0.2),    # 16-23 left box
+    (0.6, -0.6, -0.2), (1, -0.6, -0.2), (1, -0.6, 0.2), (0.6, -0.6, 0.2), (0.6, 0.6, -0.2), (1, 0.6, -0.2), (1, 0.6, 0.2), (0.6, 0.6, 0.2),    # 24-31 right box
 ]
+frame_edges = [
+    (0, 1), (1, 2), (2, 3), (3, 0), (4, 5), (5, 6), (6, 7), (7, 4), (0, 4), (1, 5), (2, 6), (3, 7),    # top
+    (8, 9), (9, 10), (10, 11), (11, 8), (12, 13), (13, 14), (14, 15), (15, 12), (8, 12), (9, 13), (10, 14), (11, 15),    # bottom
+    (16, 17), (17, 18), (18, 19), (19, 16), (20, 21), (21, 22), (22, 23), (23, 20), (16, 20), (17, 21), (18, 22), (19, 23),    # left
+    (24, 25), (25, 26), (26, 27), (27, 24), (28, 29), (29, 30), (30, 31), (31, 28), (24, 28), (25, 29), (26, 30), (27, 31),    # right
+]
+frame_faces = [
+    ((6, 7, 3, 2), (0, 0, 1)), ((7, 4, 0, 3), (-1, 0, 0)), ((5, 6, 2, 1), (1, 0, 0)), ((7, 6, 5, 4), (0, 1, 0)), ((2, 3, 0, 1), (0, -1, 0)), ((4, 5, 1, 0), (0, 0, -1)),    # 0-5 top: back, left, right, top, bottom, front
+    ((14, 15, 11, 10), (0, 0, 1)), ((15, 12, 8, 11), (-1, 0, 0)), ((13, 14, 10, 9), (1, 0, 0)), ((15, 14, 13, 12), (0, 1, 0)), ((10, 11, 8, 9), (0, -1, 0)), ((12, 13, 9, 8), (0, 0, -1)),    # 6-11 bottom: back, left, right, top, bottom, front
+    ((22, 23, 19, 18), (0, 0, 1)), ((23, 20, 16, 19), (-1, 0, 0)), ((21, 22, 18, 17), (1, 0, 0)), ((20, 21, 17, 16), (0, 0, -1)),    # 12-15 left: back, left, right, front (no top / bottom: they touch the top and bottom boxes)
+    ((30, 31, 27, 26), (0, 0, 1)), ((31, 28, 24, 27), (-1, 0, 0)), ((29, 30, 26, 25), (1, 0, 0)), ((28, 29, 25, 24), (0, 0, -1)),    # 16-19 right: back, left, right, front (no top / bottom: they touch the top and bottom boxes)
+]
+#   20 faces: the top and bottom boxes have all 6, the left and right boxes only 4. Their top and bottom
+#   faces were removed: they sit flat against the top and bottom boxes, hidden inside the frame,
+#   and only caused flickering lines where the boxes meet.
+frame_model = {"points": frame_points, "edges": frame_edges, "faces": frame_faces}
 
+# ---- TANK (from rotation_101): Wireframe Warfare's tank, facing +z --------
+# Same points and edges as rotation_101. Faces are (corners, normal): the colours were dropped,
+# because the thing's palette colours them now. 22 faces, in the order listed.
+tank_points = [
+    (-0.9, -1, -1.3), (0.9, -1, -1.3), (0.9, -1, 1.2), (-0.9, -1, 1.2),                # 0-3   hull: track base
+    (-1.1, -0.55, -1.5), (1.1, -0.55, -1.5), (1.1, -0.55, 1.6), (-1.1, -0.55, 1.6),    # 4-7   hull: belt
+    (-0.75, -0.1, -1.2), (0.75, -0.1, -1.2), (0.75, -0.1, 0.5), (-0.75, -0.1, 0.5),    # 8-11  hull: deck
+    (-0.5, -0.1, -0.9), (0.5, -0.1, -0.9), (0.5, -0.1, 0.3), (-0.5, -0.1, 0.3),        # 12-15 turret: base
+    (-0.4, 0.35, -0.8), (0.4, 0.35, -0.8), (0.4, 0.35, 0), (-0.4, 0.35, 0),            # 16-19 turret: top
+    (-0.08, 0.02, 0.15), (0.08, 0.02, 0.15), (0.08, 0.02, 1.9), (-0.08, 0.02, 1.9),    # 20-23 barrel: bottom
+    (-0.08, 0.18, 0.15), (0.08, 0.18, 0.15), (0.08, 0.18, 1.9), (-0.08, 0.18, 1.9),    # 24-27 barrel: top
+    (0, 0.35, -0.5), (0, 0.6, -0.5),                                                   # 28-29 radar mast
+    (-0.22, 0.6, -0.5), (0.22, 0.6, -0.5), (0.22, 0.82, -0.5), (-0.22, 0.82, -0.5),    # 30-33 radar dish
+]
+tank_edges = [
+    (0, 1), (0, 4), (1, 2), (1, 5), (2, 3), (2, 6), (3, 0), (3, 7), (4, 5), (4, 8), (5, 6), (5, 9), (6, 7), (6, 10), (7, 4), (7, 11), (8, 9), (9, 10), (10, 11), (11, 8),    # hull
+    (12, 13), (12, 16), (13, 14), (13, 17), (14, 15), (14, 18), (15, 12), (15, 19), (16, 17), (17, 18), (18, 19), (19, 16),                                                  # turret
+    (20, 21), (21, 22), (22, 23), (23, 20), (24, 25), (25, 26), (26, 27), (27, 24), (20, 24), (21, 25), (22, 26), (23, 27),                                                  # barrel
+    (28, 29), (30, 31), (31, 32), (32, 33), (33, 30),                                                                                                                        # radar: mast, then dish
+]
+tank_faces = [
+    ((0, 1, 2, 3), (0, -1, 0)), ((0, 4, 5, 1), (0, -0.406, -0.914)), ((1, 5, 6, 2), (0.914, -0.406, 0)), ((2, 6, 7, 3), (0, -0.664, 0.747)), ((3, 7, 4, 0), (-0.914, -0.406, 0)),                   #  0-4  hull: underside, then base -> belt (-z, +x, +z, -x sides)
+    ((4, 8, 9, 5), (0, 0.555, -0.832)), ((5, 9, 10, 6), (0.789, 0.614, 0)), ((6, 10, 11, 7), (0, 0.926, 0.379)), ((7, 11, 8, 4), (-0.789, 0.614, 0)), ((8, 11, 10, 9), (0, 1, 0)),                  #  5-9  hull: belt -> deck (-z, +x, +z, -x sides), then the deck
+    ((12, 16, 17, 13), (0, 0.217, -0.976)), ((13, 17, 18, 14), (0.976, 0.217, 0)), ((14, 18, 19, 15), (0, 0.555, 0.832)), ((15, 19, 16, 12), (-0.976, 0.217, 0)), ((16, 19, 18, 17), (0, 1, 0)),    # 10-14 turret: sides (-z, +x, +z, -x sides), then the top
+    ((20, 21, 22, 23), (0, -1, 0)), ((24, 27, 26, 25), (0, 1, 0)), ((21, 25, 26, 22), (1, 0, 0)), ((23, 27, 24, 20), (-1, 0, 0)), ((22, 26, 27, 23), (0, 0, 1)),                                    # 15-19 barrel: bottom, top, +x side, -x side, muzzle (+z)
+    ((30, 31, 32, 33), (0, 0, 1)), ((30, 33, 32, 31), (0, 0, -1)),                                                                                                                                  # 20-21 radar dish: front, back
+]
+#   22 faces, numbered as above for the palette. The tank's barrel points to +z (its front).
+tank_model = {"points": tank_points, "edges": tank_edges, "faces": tank_faces}
+
+# ---- THINGS: every object in the world, one dictionary each --------------
+# "position" and "velocity" are LISTS [ ], because they change every frame.
+# A thing SITS ON THE FLOOR when its centre y = (FLOOR_Y + size):
+things = [
+    {"name": "big cube",       "model": cube_model,    "position": [-2, 0, 9],    "velocity": [0.02, 0.01, -0.015],    "size": 1,    "angles": [35, 0, 0],   "speeds": (0, 1, 2),       "colour": (120, 190, 240), "palette": PALETTE_ICE},
+    {"name": "small cube",     "model": cube_model,    "position": [3, -0.8, 5],  "velocity": [-0.03, 0.02, 0.025],    "size": 0.2,  "angles": [-50, 0, 0],  "speeds": (2, 0, 0),       "colour": (255, 120, 60),  "palette": PALETTE_SUNSET},
+    {"name": "floor mini",     "model": cube_model,    "position": [-3, -0.7, 4], "velocity": [0.025, 0.03, 0.02],     "size": 0.3,  "angles": [20, 0, 0],   "speeds": (1, 0, 0),       "colour": (120, 190, 240), "palette": PALETTE_ICE},
+    {"name": "hover mini",     "model": cube_model,    "position": [0, 0.6, 6],   "velocity": [-0.02, -0.015, 0.03],   "size": 0.3,  "angles": [10, 30, 0],  "speeds": (1.5, 1, 0.5),   "colour": (255, 120, 60),  "palette": PALETTE_SUNSET},
+    {"name": "high mini",      "model": cube_model,    "position": [5, 2.5, 10],  "velocity": [-0.035, -0.02, -0.01],  "size": 0.4,  "angles": [45, 20, 10], "speeds": (0.5, 2, 1),     "colour": (120, 190, 240), "palette": PALETTE_ICE},
+    {"name": "mid mini",       "model": cube_model,    "position": [-5, 1.2, 11], "velocity": [0.015, 0.025, -0.03],   "size": 0.25, "angles": [0, 45, 45],  "speeds": (3, 0, 1),       "colour": (255, 120, 60),  "palette": PALETTE_SUNSET},
+    {"name": "gold mini",      "model": cube_model,    "position": [1.5, 1, 3.5], "velocity": [0.04, 0.035, 0.03],     "size": 0.1,  "angles": [30, 0, 0],   "speeds": (1, 1, 1),       "colour": (120, 190, 240), "palette": PALETTE_ICE},
+    {"name": "big pyramid",    "model": pyramid_model, "position": [4, 1, 8],     "velocity": [-0.015, 0.005, 0.01],   "size": 1.2,  "angles": [15, 0, 0],   "speeds": (0.7, 0, 0),     "colour": (255, 120, 60),  "palette": PALETTE_SUNSET},
+    {"name": "tumble pyramid", "model": pyramid_model, "position": [-3, 2.5, 7],  "velocity": [0.03, -0.02, 0.02],     "size": 0.4,  "angles": [0, 60, 20],  "speeds": (1, 2.5, 0.5),   "colour": (120, 190, 240), "palette": PALETTE_ICE},
+    {"name": "sunset diamond", "model": diamond_model, "position": [-1, 1.5, 6],  "velocity": [0.02, 0.03, -0.02],     "size": 0.6,  "angles": [0, 0, 0],    "speeds": (2, 0, 0),       "colour": (255, 120, 60),  "palette": PALETTE_SUNSET},
+    {"name": "ice diamond",    "model": diamond_model, "position": [2, 2, 10],    "velocity": [-0.025, -0.015, -0.03], "size": 0.8,  "angles": [45, 30, 0],  "speeds": (1.5, 0.8, 1.2), "colour": (120, 190, 240), "palette": PALETTE_ICE},
+    {"name": "spark diamond",  "model": diamond_model, "position": [5, 0.5, 4],   "velocity": [-0.04, 0.025, 0.035],   "size": 0.25, "angles": [10, 20, 30], "speeds": (4, 3, 2),       "colour": (255, 120, 60),  "palette": PALETTE_SUNSET},
+    {"name": "big frame",      "model": frame_model,   "position": [0, 1, 8],     "velocity": [0.05, 0.015, -0.008],   "size": 1,    "angles": [20, 0, 0],   "speeds": (0.5, 0, 0),     "colour": (120, 190, 240), "palette": PALETTE_ICE},
+    {"name": "tumble frame",   "model": frame_model,   "position": [-4, 2, 6],    "velocity": [0.025, -0.02, 0.015],   "size": 0.7,  "angles": [0, 30, 15],  "speeds": (1, 1.5, 0.7),   "colour": (255, 120, 60),  "palette": PALETTE_SUNSET},
+    {"name": "tank",           "model": tank_model,    "position": [0, 0.5, 16],  "velocity": [0, 0, 0],               "size": 1.5,  "angles": [180, 0, 0],  "speeds": (0, 0, 0),       "colour": (120, 190, 80),  "palette": PALETTE_FOREST},
+    {"name": "tank left",      "model": tank_model,    "position": [-3.5, 0, 16], "velocity": [0, 0, 0],               "size": 1,    "angles": [180, 0, 0],  "speeds": (0, 0, 0),       "colour": (120, 190, 80),  "palette": PALETTE_FOREST},
+    {"name": "tank right",     "model": tank_model,    "position": [3.5, 0, 16],  "velocity": [0, 0, 0],               "size": 1,    "angles": [180, 0, 0],  "speeds": (0, 0, 0),       "colour": (120, 190, 80),  "palette": PALETTE_FOREST},
+]
 
 
 
 cam_x = 0      # where YOU (the camera) stand, in WORLD coordinates
 cam_y = 0      # your height (not shown on the map)
 cam_z = 0
+cam_turn = 0          # which way you face, in degrees. 0 = facing +z (up the map)
+cam_tip = 0           # looking up / down, in degrees. 0 = level, + = down, - = up
+cam_vy = 0            # your up / down speed: + = rising, - = falling
 
 TURN_STEP = 1
-
-cam_turn = 0          # which way you face, in degrees. 0 = facing +z (up the map)
 TURN_SPEED = 1.5      # degrees per frame
-cam_tip = 0           # looking up / down, in degrees. 0 = level, + = down, - = up
 TIP_LIMIT = 60        # don't let you look further up or down than this
-
 STAND_Y = 0           # your eye height when standing: 1 above the floor (FLOOR_Y is -1)
-cam_vy = 0            # your up / down speed: + = rising, - = falling
 JUMP_SPEED = 0.15     # the upward speed a jump starts with (SPACE)
 GRAVITY = 0.004       # taken off cam_vy every frame, so you slow, stop, then fall
                       # (halved from 0.008: twice as high AND twice as long a jump)
-
 
 ## MINI MAP !!
 MAP_SIZE = HEIGHT/3                         # the map is a 160 x 160 pixel square
@@ -225,14 +157,11 @@ MAP_COLOUR_BACK = (25, 30, 36)         # dark grey-blue, so the map stands out f
 
 MAP_CX = (MAP_LEFT + (MAP_SIZE / 2))   # WORLD x = 0 goes across the middle of the box
 MAP_CY = (MAP_TOP + (MAP_SIZE * 0.8))   # 80% of the way down the box
-
 MAP_SCALE = (MAP_SIZE / 16)             # the box always shows 16 world units across
 
 MOVE_SPEED = 0.05      # how far you move in ONE frame
 NEAR = 0.1     # anything closer than this, measured from YOU, is not drawn
 MOUSE_SPEED = 0.2      # degrees of turn per pixel the mouse moves
-
-
 
 FLOOR_Y = -1                  # the floor's height: the bottom of a full-size cube at y = 0
 GRID_LEFT = -8                # the grid runs from x = -8 ...
@@ -241,19 +170,12 @@ GRID_BACK = -3                # and from z = -3 ...
 GRID_FAR = 13                 # ... to z = 13
 GRID_COLOUR = (40, 90, 70)    # dim green: the floor is background, so it shouldn't stand out
 CEILING_Y = 4                 # nothing flies higher than this
-
-# ---- Each thing's BOUNDS: the box its CENTRE must stay inside -------------
-# The box is the floor, the ceiling and the edges of the grid, pulled IN by
-# the thing's "reach": how far its corners can stick out from its centre.
-# A cube's corner is (size * 1.75) from its centre (1.75 is just over the
-# square root of 3), so even a tumbling cube never pokes through the floor.
-for thing in things:
-    reach = thing["size"] * 1.75
-    smallest = [GRID_LEFT + reach,  FLOOR_Y + reach,   GRID_BACK + reach]
-    biggest  = [GRID_RIGHT - reach, CEILING_Y - reach, GRID_FAR - reach]
-    thing["bounds"] = (smallest, biggest)
 SHOW_PIECES = True            # TEST: True = every 1-unit floor piece gets its own colour
 
+# ---- The WORLD BOX: every thing's centre bounces inside it ---------------
+#   x: the grid's left and right edges,  y: floor to ceiling,  z: the grid's back and far edges
+WORLD_MIN = [GRID_LEFT,  FLOOR_Y,   GRID_BACK]     # smallest x, y, z
+WORLD_MAX = [GRID_RIGHT, CEILING_Y, GRID_FAR]      # biggest  x, y, z
 
 def rotate_y(point_3d, angle):
     x, y, z = point_3d
@@ -460,11 +382,11 @@ while running:
         cam_y = STAND_Y
         cam_vy = 0
 
-    # ---- Move every thing by its velocity, bouncing inside its bounds ----
+    # ---- Move every thing by its velocity, bouncing inside the WORLD BOX ----
     for thing in things:
         position = thing["position"]
         velocity = thing["velocity"]
-        smallest, biggest = thing["bounds"]
+        smallest, biggest = WORLD_MIN, WORLD_MAX
         for axis in range(3):                                   # 0 = x, 1 = y, 2 = z
             position[axis] = position[axis] + velocity[axis]
             if position[axis] > biggest[axis]:                  # past the top end:
