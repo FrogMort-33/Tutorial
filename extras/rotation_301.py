@@ -5,7 +5,7 @@ import pygame
 from rotation_data import *
 from rotation_functions import *        # (this also opens the game window)
 
-START_LEVEL = 99 # DEBUG: which level to play (see LEVELS in rotation_levels.py). 99 = skunk works, the test level
+START_LEVEL = 7 # DEBUG: which level to play (see LEVELS in rotation_levels.py). 99 = skunk works, the test level
 show_spheres = False   # C key: draw the collision spheres (a debug view)
 show_wall_grid = True  # G key: the grid on the walls and ceiling (watch the FPS counter as you switch it)
 
@@ -37,8 +37,7 @@ while running:
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
             if camera["y"] <= STAND_Y and you["frozen"] == 0:   # only jump with your feet on the floor (not frozen)
                 camera["vy"] = JUMP_SPEED
-
-
+                
     keys = pygame.key.get_pressed()
     spin_things(keys)                               # each thing's own spin, plus the I J K L U O keys
     move_camera(keys)                               # you: look, walk, jump
@@ -47,8 +46,9 @@ while running:
 
     bounce_things_off_each_other()                  # after moving: things that touch bounce apart
     bounce_things_off_boxes()                       # ...and things that hit a box bounce off it
+    move_bullets()                                  # bullets fly, and stop on the first thing they hit
     update_sparks()                                 # move, drop and age the sparks
-    tanks_take_aim()                                # turrets pointing at you fire (after their cooldown)
+    things_shoot()                                  # guns fire: turrets at you, DOWN guns straight down (after their cooldown)
     remove_finished_things()                        # used-up bullets and destroyed shapes go
     update_level_progress()                         # every shape gone? "completed" message, then the next level
 
@@ -59,6 +59,7 @@ while running:
         draw_wall_grid()                           # G key: the grid on the walls and ceiling
     draw_world_box()                               # the wireframe box round the room: corner posts and ceiling
     draw_floor_shapes()                            # then the flat shapes ON the floor, still before any shape
+    draw_your_shadow()                             # TEST: your hit radius, as a ring on the floor under you
 
     face_paint_order = []          # EVERY face of EVERY thing, painted together after the loop
     add_thing_faces(face_paint_order)               # every thing's visible faces...
@@ -73,7 +74,7 @@ while running:
 
     draw_mini_map()
     draw_crosshair()                                   # the crosshair, on top of everything in the 3D view
-    draw_hud()
+    draw_hud(len(face_paint_order))                # (how many faces were drawn: for the counts in the bottom-left)
     draw_level_banner()                            # the level's name and intro: centre, then the name at the top
     draw_level_complete()                          # "Level X completed!" once every shape is gone
 

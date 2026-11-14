@@ -11,12 +11,14 @@ Run it with `python rotation_301.py` from this folder. Other `rotation_*.py` / `
 - **Chime** at the end of longer work, before the final message:
   `powershell -c "[console]::beep(660,180); [console]::beep(880,180); [console]::beep(1320,320)"`
 - Explanations aimed at learners. Plain words, short.
-- "backup, save, upload to git" = copy `extras` to `e:\python\Tutorial_backups\extras_<date>_<time>`, then commit and push.
+- "backup, save, upload to git" = copy `extras` to the backups folder as `extras_<date>_<time>`, then commit and push.
+  The backups folder depends on the PC: `e:\python\Tutorial_backups` where there is an E: drive,
+  otherwise `C:\Users\enda_\Desktop\Python\Tutorial_backups` (the PC with no E: drive).
 - The user works on more than one PC: `git pull` before starting, commit + push when done.
 
 ## File split (keep it)
 - `rotation_301.py` — the game loop only. `START_LEVEL` at the top picks the level (debug).
-- `rotation_data.py` — colours, palettes, models, settings, shared state (`things`, `camera`, `you`, ...). No pygame.
+- `rotation_data.py` — colours, palettes, models, settings, shared state (`things`, `bullets`, `camera`, `you`, ...). Bullets have their OWN list: `move_bullets()` does everything a bullet does. No pygame.
 - `rotation_functions.py` — maths, camera, drawing, clipping, collisions, sounds, `load_level`, HUD, mini-map.
 - `rotation_levels.py` — `DESIGNS` (shapes, tanks) and `LEVELS` (data-driven: name, intro, world box, start, floor_shapes, boxes, spawn, optional sizes).
 

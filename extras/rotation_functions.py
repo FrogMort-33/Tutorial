@@ -14,6 +14,7 @@ WIDTH, HEIGHT = screen.get_size()
 clock = pygame.time.Clock()
 fps_font = pygame.font.SysFont(None, 32)   # default font, size 32, for the FPS counter
 title_font = pygame.font.SysFont(None, 80)  # the level's name, big, as the level starts
+clock_font = pygame.font.SysFont(None, 72)  # the LEVEL TIME clock, top right
 intro_font = pygame.font.SysFont(None, 36)  # the level's intro line, under the name
 
 
@@ -86,6 +87,11 @@ MAP_BOX_TOP = (HEIGHT - 10 - (MAP_SIZE * 0.25) - MAP_BOX_HEIGHT)   # ... and gro
 # A see-through card the size of the map box. SRCALPHA = this surface has its own alpha (see-through-ness).
 map_background = pygame.Surface((MAP_BOX_WIDTH, MAP_BOX_HEIGHT), pygame.SRCALPHA)
 map_background.fill(MAP_COLOUR_BACK + (128,))   # alpha 128: 0 = invisible, 255 = solid, 128 = about 50%
+# The map's STILL layer: the background, the 1-unit floor grid, the play area and the white border.
+# None of it moves during a level, so build_map_floor_layer() draws it ONCE when a level loads (the map's
+# scale changes with the level's size), and draw_mini_map() just blits it each frame.
+# (Decals and boxes are NOT on it: they may move one day, so they're drawn every frame on top.)
+map_floor_layer = pygame.Surface((MAP_BOX_WIDTH, MAP_BOX_HEIGHT), pygame.SRCALPHA)
 
 # YOU on the map: a gold dot, and two gold lines showing the EDGES of your view (what's on screen is between
 # them). Half the view's width comes from the screen and FOCAL: the screen's edge is (WIDTH / 2) pixels from
@@ -129,6 +135,27 @@ def fit_mini_map():
     box_centre_y = MAP_BOX_TOP + (MAP_BOX_HEIGHT / 2)
     MAP_CX = box_centre_x - (level_centre_x * MAP_SCALE)    # so the level's centre lands on the box's centre
     MAP_CY = box_centre_y + (level_centre_z * MAP_SCALE)    #   (+: the map's y goes DOWN as z goes up)
+    build_map_floor_layer()                                 # the new scale: draw the map's still layer again
+
+
+def build_map_floor_layer():
+    # Draw the map's STILL layer once (see map_floor_layer): background, grid, play area, border.
+    # The layer's own coordinates start at the map box's top-left corner, so every map point is shifted by it.
+    def on_layer(x, z):
+        map_x, map_y = to_map(x, z)
+        return (map_x - MAP_LEFT, map_y - MAP_BOX_TOP)
+    left, floor, near = WORLD_MIN
+    right, ceiling, far = WORLD_MAX
+    map_floor_layer.fill((0, 0, 0, 0))                      # clear the old level's layer
+    map_floor_layer.blit(map_background, (0, 0))            # the 50% see-through background
+    for x in range(int(left), int(right) + 1):              # the floor GRID: a line at every whole unit ...
+        pygame.draw.line(map_floor_layer, level_look["grid_colour"], on_layer(x, near), on_layer(x, far))
+    for z in range(int(near), int(far) + 1):                # ... both ways
+        pygame.draw.line(map_floor_layer, level_look["grid_colour"], on_layer(left, z), on_layer(right, z))
+    # The PLAY AREA: the level's floor as a hollow green rectangle (the green of the room's wireframe box)
+    play_area = [on_layer(left, near), on_layer(right, near), on_layer(right, far), on_layer(left, far)]
+    pygame.draw.polygon(map_floor_layer, level_look["box_colour"], play_area, 2)   # 2 = a 2-pixel outline, not filled
+    pygame.draw.rect(map_floor_layer, (255, 255, 255), map_floor_layer.get_rect(), 1)   # thin white border
 
 
 # ================================ LEVELS ================================
@@ -151,7 +178,7 @@ def load_level(number):
     for size_name, changes in level.get("sizes", {}).items():
         level_sizes[size_name].update(changes)
 
-    FLOOR_SHAPES[:] = [make_decal(entry, number) for entry in level["floor_shapes"]]
+    FLOOR_SHAPES[:] = [make_decal(entry, number) for entry in level["floor_shapes"] + [ORIGIN_MARK]]   # + the gold 0, 0 mark, LAST: drawn on top
     BOXES[:] = [dict(box) for box in level["boxes"]]      # copies: prepare_boxes() adds to each one
     particles[:] = []                                     # no sparks left over
     camera.update(level["start"])                         # where you begin
@@ -163,6 +190,9 @@ def load_level(number):
     you["freeze_grace"] = 0
     level_progress["number"] = number                     # which level this is, and it's not cleared yet
     level_progress["cleared_frames"] = None
+    level_progress["frames"] = 0                          # the level clock starts again
+    level_look["grid_colour"] = level.get("grid_colour", GRID_COLOUR)   # this level's grid colour (green if it has none)
+    level_look["box_colour"] = tuple(min(255, round(part * BOX_BRIGHTER)) for part in level_look["grid_colour"])
     level_banner["name"] = level.get("name", "")          # the title shown as the level starts
     level_banner["intro"] = level.get("intro", "")
     level_banner["frame"] = 0
@@ -172,6 +202,7 @@ def load_level(number):
     # THINGS: every spawn first (in order), THEN their children - all the first children (turrets),
     # then all the second children (radars) - so the top-level things come first in the list.
     things[:] = []
+    bullets[:] = []                                       # no bullets in flight
     parents = []
     for spawn in level["spawn"]:
         for needed in ("colour", "palette"):              # every spawn must set its own: the designs are GREY
@@ -183,10 +214,16 @@ def load_level(number):
         thing = build_thing(DESIGNS[spawn["design"]], hull_changes)
         if isinstance(thing["size"], str):                # a NAMED size ("MEDIUM"): its scale and health
             apply_size_name(thing, thing["size"])
+            if thing.get("scenery"):                      # SCENERY can't be killed: no health (bullets still stop on
+                for key in ("health", "max_health"):      #   it, with a ping, but do no damage)
+                    thing.pop(key, None)
         elif "health" in spawn:                           # a NUMBER size with its own health: keep it
             thing["fixed_health"] = spawn["health"]
-        things.append(thing)
         design_children = DESIGNS[spawn["design"]].get("children", [])
+        if "gun" in spawn and not design_children:        # a SHAPE with a gun: the gun is on the shape itself
+            thing["gun"] = True                           #   (a tank's gun goes on its turret, below)
+            setup_gun(thing, spawn["gun"], number)
+        things.append(thing)
         parents.append((thing, design_children, spawn.get("children", []), spawn))
     most_children = max([len(design_children) for thing, design_children, changes, spawn in parents] + [0])
     for slot in range(most_children):
@@ -253,7 +290,8 @@ def point_in_polygon(x, z, corners):
 def update_floor_hazards():
     # Once per frame: are YOU standing (feet on the floor - so jumping over is safe) on a decal that DOES something?
     #   ICE (freezes): you're frozen for FREEZE_FRAMES, then FREEZE_GRACE frames when it can't freeze you again
-    #   LAVA (hurts):  one hit as you step in, then one every LAVA_HURT_FRAMES frames while you stay
+    #   HURTS (lava, ice): one hit as you step in, then one every LAVA_HURT_FRAMES frames while you stay,
+    #                  flashing in the colour of the decal that hurt you
     on_floor = camera["y"] <= STAND_Y + 0.001
     if you["frozen"] > 0:                                 # frozen: count down; when it ends, the grace starts
         you["frozen"] = you["frozen"] - 1
@@ -266,8 +304,13 @@ def update_floor_hazards():
         you["frozen"] = FREEZE_FRAMES                     # FROZEN!
         if freeze_sound:
             freeze_sound.play()
-    in_lava = on_floor and any(decal["hurts"] and point_in_polygon(camera["x"], camera["z"], decal["corners"])
-                               for decal in FLOOR_SHAPES)
+    hurting = None                                        # the decal you're standing on that hurts (if any)
+    if on_floor:
+        for decal in FLOOR_SHAPES:
+            if decal["hurts"] and point_in_polygon(camera["x"], camera["z"], decal["corners"]):
+                hurting = decal
+                break
+    in_lava = hurting is not None
     if not in_lava:
         you["lava_timer"] = 0                             # out of it: next time it hurts straight away
         return
@@ -275,21 +318,29 @@ def update_floor_hazards():
         you["lava_timer"] = you["lava_timer"] - 1
         return
     you["hits_taken"] = you["hits_taken"] + 1             # OUCH: counts like a tank hit
-    you["hurt"] = 12                                      # the red flash round the screen
+    you["hurt"] = 12                                      # the flash round the screen ...
+    you["hurt_colour"] = hurting["colour"]                # ... in the decal's colour: lava orange-red, ice blue
     if hurt_sound:
         hurt_sound.play()
     you["lava_timer"] = LAVA_HURT_FRAMES
 
 
 def setup_gun(turret, changes, level_number):
-    # A turret's gun: GUN_DEFAULTS, with the level's "gun": {...} changes on top. Its counters start at 0.
+    # A gun: GUN_DEFAULTS, with the level's "gun": {...} changes on top. Its counters start at 0.
+    # 'turret' is whatever carries the gun: a tank's turret, or a shape (which can only shoot DOWN).
     config = dict(GUN_DEFAULTS)
     config.update(changes)
     if config["mode"] not in GUN_MODES:
         print("level", level_number, "- warning:", turret["name"], "has gun mode", config["mode"],
               "- it should be one of", GUN_MODES, ": using SPIN")
         config["mode"] = "SPIN"
-    if config["mode"] == "SPIN":
+    if "parent_thing" not in turret and config["mode"] not in SHAPE_GUN_MODES:   # a SHAPE: no turret to turn
+        print("level", level_number, "- warning:", turret["name"], "is a shape: its gun can only be",
+              SHAPE_GUN_MODES, ": using DOWN")
+        config["mode"] = "DOWN"
+    if config["mode"] in SHAPE_GUN_MODES:             # never turns: keeps its own spin (DOWN fires down, TARGET at you)
+        pass
+    elif config["mode"] == "SPIN":
         if config["turret_spin"] is not None:
             turret["speeds"] = (config["turret_spin"], 0, 0)       # spins this fast, all the way round
     else:
@@ -298,7 +349,9 @@ def setup_gun(turret, changes, level_number):
             config["turret_spin"] = 1                 # degrees per frame, if the level didn't say
         if config["mode"] == "OSCILLATE":
             turret["angles"][0] = config["centre"]    # start in the middle of its sweep
-    if config.get("start_angle") == "you":            # start pointing straight at where YOU start the level
+    if config["mode"] in SHAPE_GUN_MODES:             # nothing to point: no start angle
+        pass
+    elif config.get("start_angle") == "you":          # start pointing straight at where YOU start the level
         pivot = to_world((0, 0, 0), turret)           #   (the camera is already at the level's start here)
         towards_you = math.degrees(math.atan2(-(camera["x"] - pivot[0]), camera["z"] - pivot[2]))
         turret["angles"][0] = keep_under_360(towards_you - turret["parent_thing"]["angles"][0])   # relative to hull
@@ -307,6 +360,8 @@ def setup_gun(turret, changes, level_number):
     turret["gun_config"] = config
     turret["sweep_direction"] = 1                     # OSCILLATE: +1 or -1, the way it's sweeping
     turret.update({"cooldown": 0, "next_muzzle": 0, "volley_left": 0, "volley_timer": 0})
+    if config["mode"] in SHAPE_GUN_MODES:             # shape guns start part-way through a random cooldown, so a
+        turret["cooldown"] = random.randint(0, config["cooldown"])   #   room full of them doesn't fire in step
 
 
 def build_thing(design, changes):
@@ -366,7 +421,8 @@ def prepare_health():
     for thing in things:
         if "parent" not in thing:
             thing["reach"] = thing_reach(thing)
-    numbered = [thing for thing in things if "parent" not in thing and "size_name" not in thing]
+    numbered = [thing for thing in things if "parent" not in thing and "size_name" not in thing
+                and not thing.get("scenery")]                       # SCENERY gets no health
     if not numbered:
         return
     biggest_reach = max(thing["reach"] for thing in numbered)
@@ -546,7 +602,7 @@ def draw_floor_line(world_start, world_end):
     end = to_camera(world_end)
     if start[2] < NEAR or end[2] < NEAR:         # an end too close or behind you:
         return                                   #   don't draw it (for now)
-    colour = GRID_COLOUR
+    colour = level_look["grid_colour"]
     if SHOW_PIECES:
         # Same piece -> same "random" colour every frame: the piece's own
         # start and end points are the seed, so the colours don't flicker.
@@ -558,7 +614,8 @@ def draw_floor_line(world_start, world_end):
 
 def draw_collision_spheres():
     # Debug view: each collision sphere drawn as a thin white circle, on top of everything.
-    for thing in things:
+    # Bullets too: their one sphere is BULLET_HIT_RADIUS (bigger than the bullet looks).
+    for thing in things + bullets:
         for offset, radius in thing["model"]["collision_spheres"]:
             centre = to_camera(to_world(offset, thing))      # the same size -> spin -> place -> camera as a corner
             if centre[2] < NEAR:                             # behind you or too close: skip it
@@ -608,15 +665,12 @@ def add_box_faces(face_paint_order):
 def bounce_things_off_boxes():
     # Moving things against BOXES. A box doesn't move, so it's like a wall: the thing bounces off the FACE
     # it hit, the same way things bounce off the world box (only that one direction flips).
-    # A bullet that hits a box is used up instead: ping + sparks.
     for thing in things:
         if "parent" in thing:
             continue                                                    # children ride on their parents
         velocity = thing["velocity"]
         if velocity == [0, 0, 0] or thing.get("dead"):
             continue                                                    # parked, or destroyed this frame
-        if thing.get("bullet") and thing["range"] <= 0:
-            continue                                                    # already used up
         spheres = world_spheres(thing)
         for box in BOXES:
             # SPHERE vs BOX: the closest point IN the box to the sphere's centre = clamp the centre to the box.
@@ -631,15 +685,6 @@ def bounce_things_off_boxes():
             if hit is None:
                 continue
             centre, radius, closest, away = hit
-
-            if thing.get("bullet"):                                     # a BULLET: used up, thud + sparks
-                thing["range"] = 0
-                if thing["owner"] is None:
-                    crosshair["hit"] = CROSSHAIR_HIT_FRAMES             # your shot: show the hit marker
-                if thud_sound:
-                    thud_sound.play()                                   # boxes go THUD (dull), not ping
-                spawn_sparks(closest, [box["colour"], (255, 255, 255)])
-                break
 
             # Which FACE was hit? The axis where the centre sticks out of the box the most.
             if away == [0, 0, 0]:
@@ -679,12 +724,6 @@ def bounce_things_off_each_other():
                 continue                                                # both parked: nothing can happen
             if a.get("dead") or b.get("dead"):
                 continue                                                # destroyed this frame: removed at the end
-            if a.get("bullet") and b.get("bullet"):
-                continue                                                # bullets pass through each other
-            if a.get("owner") is b or b.get("owner") is a:
-                continue                                                # a tank's bullet never hits its own tank
-            if (a.get("bullet") and a["range"] <= 0) or (b.get("bullet") and b["range"] <= 0):
-                continue                                                # a bullet that's already used up
 
             # First touch wins: stop at the first sphere of a that touches a sphere of b
             touching = False
@@ -704,20 +743,6 @@ def bounce_things_off_each_other():
                     break
             if not touching:
                 continue                                                # not touching
-
-            # A BULLET hit something: the bullet is used up, the target is left alone. Bonk + sparks.
-            if a.get("bullet") or b.get("bullet"):
-                bullet, target = (a, b) if a.get("bullet") else (b, a)
-                bullet["range"] = 0                                     # removed at the end of this frame
-                if bullet["owner"] is None and "health" in target:      # YOUR bullet: the target loses 1 health
-                    target["health"] = max(0, target["health"] - 1)
-                    if target["health"] == 0:
-                        break_apart(target)                             # split in two, or die if it's down to 1
-                crosshair["hit"] = CROSSHAIR_HIT_FRAMES                 # flash the red X on the crosshair
-                if ping_sound:
-                    ping_sound.play()                                   # PING
-                spawn_sparks(impact, [target["colour"], (255, 255, 255), (255, 220, 120)])
-                continue
 
             # Moving TOWARDS each other? (b's speed relative to a, along the line from a to b, is negative)
             # Without this, two things still overlapping next frame would flip back into each other.
@@ -780,9 +805,9 @@ def fire_bullet():
 
 
 def spawn_bullet(start, aim, speed, colour, palette, owner):
-    # A new bullet THING. 'aim' must be length 1. 'owner' = the tank that fired it (None = you):
-    # a bullet never hits its own owner, and only TANK bullets can hit you.
-    things.append({"name": "bullet", "bullet": True, "model": bullet_model, "owner": owner,
+    # A new BULLET (in the bullets list). 'aim' must be length 1. 'owner' = the thing that fired it (None = you):
+    # a bullet never hits its own owner, and only enemy bullets can hit you.
+    bullets.append({"name": "bullet", "model": bullet_model, "owner": owner,
                    "position": [start[0], start[1], start[2]],                        # NEW lists
                    "velocity": [aim[0] * speed, aim[1] * speed, aim[2] * speed],      #   each time
                    "range": BULLET_RANGE,
@@ -822,29 +847,37 @@ def aim_turret(turret):
     turret["angles"][0] = keep_under_360(angle)
 
 
-def tanks_take_aim():
-    # Every turret with a gun: first it turns (its gun MODE), then, when it's ready (cooled down) AND pointing
-    # at you (within its "cone" degrees, judged flat - turrets only turn left / right), it starts a VOLLEY:
-    # "volley" shots, "volley_gap" frames apart, each one a perfect shot at your eye. Once a volley starts
-    # it's finished, even if the turret turns away. THEN it cools down for "cooldown" frames.
-    # (Each turret's numbers are in its gun_config: GUN_DEFAULTS plus its level's "gun" changes.)
-    guns = [thing for thing in things if thing.get("gun") and not thing["parent_thing"].get("dead")]   # (a separate
-                                                                  #   list: spawn_bullet adds to things)
+def things_shoot():
+    # Every thing with a gun (a tank's turret, or a shape): first it turns (its gun MODE), then, when it's ready
+    # (cooled down) AND pointing at you (within its "cone" degrees, judged flat - turrets only turn left / right),
+    # it starts a VOLLEY: "volley" shots, "volley_gap" frames apart. Once a volley starts it's finished, even if
+    # the turret turns away. THEN it cools down for "cooldown" frames.
+    # A DOWN gun never turns and doesn't need to see you: it fires straight down whenever it's cooled down.
+    # (Each gun's numbers are in its gun_config: GUN_DEFAULTS plus its level's "gun" changes.)
+    guns = [thing for thing in things if thing.get("gun") and not thing.get("dead")
+            and not thing.get("parent_thing", {}).get("dead")]
     for turret in guns:
         config = turret["gun_config"]
-        aim_turret(turret)
+        down = config["mode"] in SHAPE_GUN_MODES                  # (DOWN or TARGET: no turret to turn or point)
+        if not down:
+            aim_turret(turret)
         if turret["volley_left"] == 0:                            # not in the middle of a volley:
             if turret["cooldown"] > 0:
                 turret["cooldown"] = turret["cooldown"] - 1       #   still cooling down
                 continue
-            if not turret_sees_you(turret):
+            if not down and not turret_sees_you(turret):
                 continue                                          #   ready, but not pointing at you
             turret["volley_left"] = config["volley"]              #   ready AND sees you: start a volley...
             turret["volley_timer"] = 0                            #   ...with the first shot right now
         turret["volley_timer"] = turret["volley_timer"] - 1
         if turret["volley_timer"] > 0:
             continue                                              # waiting for the next shot in the volley
-        fire_at_you(turret)
+        if config["mode"] == "DOWN":
+            fire_down(turret)
+        elif config["mode"] == "TARGET":
+            fire_target(turret)
+        else:
+            fire_at_you(turret)
         turret["volley_left"] = turret["volley_left"] - 1
         turret["volley_timer"] = config["volley_gap"]
         if turret["volley_left"] == 0:
@@ -864,6 +897,41 @@ def turret_sees_you(turret):
     return ((forward[0] * to_you_x) + (forward[2] * to_you_z)) / flat >= math.cos(math.radians(cone))
 
 
+def bullet_colours(shooter):
+    # A gun's bullet colours: its own "bullet_colour" / "bullet_palette" if the level gave them, else the shooter's.
+    config = shooter["gun_config"]
+    return (config["bullet_colour"] or shooter["colour"], config["bullet_palette"] or shooter["palette"])
+
+
+def fire_down(shooter):
+    # One shot STRAIGHT DOWN, from the shooter's LOWEST point right now. Same bullet as a tank's, in the
+    # shooter's colours. Its owner is the shooter (or the tank, for a turret): a bullet never hits its own owner.
+    # The lowest point: the corner with the lowest y (if several are equally low, the first one).
+    corners = [to_world(point, shooter) for point in shooter["model"]["points"]]
+    start = list(min(corners, key=lambda corner: corner[1]))                       # the lowest corner
+    start[1] = max(start[1], WORLD_MIN[1])        # never under the floor (a shape low down sparks on it straight away)
+    spawn_bullet(start, (0, -1, 0), shooter["gun_config"]["bullet_speed"],
+                 *bullet_colours(shooter), shooter.get("parent_thing", shooter))   # the gun's (or shooter's) colours
+
+
+def fire_target(shooter):
+    # One shot STRAIGHT AT YOUR EYE, from the shooter's corner NEAREST you (if several are equally near, the
+    # first one). Its owner is the shooter: a bullet never hits its own owner.
+    # (Squared distances: no square root needed to compare them.)
+    def squared_distance_to_you(corner):
+        dx, dy, dz = (camera["x"] - corner[0]), (camera["y"] - corner[1]), (camera["z"] - corner[2])
+        return (dx * dx) + (dy * dy) + (dz * dz)
+    corners = [to_world(point, shooter) for point in shooter["model"]["points"]]
+    start = min(corners, key=squared_distance_to_you)             # the nearest corner
+    dx, dy, dz = (camera["x"] - start[0]), (camera["y"] - start[1]), (camera["z"] - start[2])
+    distance = math.sqrt((dx * dx) + (dy * dy) + (dz * dz))       # aimed from that point, straight at your eye
+    if distance == 0:
+        return                                                    # you're touching it: no direction to fire
+    aim = (dx / distance, dy / distance, dz / distance)
+    spawn_bullet(start, aim, shooter["gun_config"]["bullet_speed"],
+                 *bullet_colours(shooter), shooter.get("parent_thing", shooter))   # the gun's (or shooter's) colours
+
+
 def fire_at_you(turret):
     # One perfect shot: from the turret's next muzzle, aimed exactly at your eye in 3D (height too).
     muzzles = turret["model"]["muzzles"]
@@ -872,7 +940,7 @@ def fire_at_you(turret):
     dx, dy, dz = (camera["x"] - muzzle[0]), (camera["y"] - muzzle[1]), (camera["z"] - muzzle[2])
     distance = math.sqrt((dx * dx) + (dy * dy) + (dz * dz))
     spawn_bullet(muzzle, (dx / distance, dy / distance, dz / distance), turret["gun_config"]["bullet_speed"],
-                 TANK_BULLET_COLOUR, PALETTE_TANK_BULLET, turret["parent_thing"])
+                 *bullet_colours(turret), turret["parent_thing"])   # the gun's (or shooter's) colours
 
 
 def break_apart(thing):
@@ -907,6 +975,9 @@ def break_apart(thing):
         piece["position"] = [thing["position"][axis] + (push[axis] * piece_reach * side) for axis in range(3)]
         piece["velocity"] = [thing["velocity"][axis] + (push[axis] * SPLIT_KICK * side) for axis in range(3)]
         piece["angles"] = list(thing["angles"])
+        if piece.get("gun") and piece["gun_config"]["mode"] in SHAPE_GUN_MODES:   # the pieces keep the gun, but each
+            piece["cooldown"] = random.randint(0, piece["gun_config"]["cooldown"])   # gets its own random wait,
+            piece["volley_left"] = 0                                     #   so they don't drop in step either
         things.append(piece)
 
 
@@ -915,7 +986,7 @@ def draw_health():
     # The squares are a fixed size on screen (not shrunk by distance), so they stay readable far away.
     for thing in things:
         if "health" not in thing:
-            continue                                          # children and bullets have no health
+            continue                                          # children have no health
         x, y, z = thing["position"]
         above = to_camera((x, y + thing["reach"] + 0.3, z))  # a point just above the top of the shape
         if above[2] < NEAR:
@@ -1030,6 +1101,21 @@ def draw_floor_shapes():
             pygame.draw.polygon(screen, decal_colour(decal), on_screen)
 
 
+def draw_your_shadow():
+    # TEST: a ring on the floor right under you, the size of YOUR_HIT_RADIUS - how close a bullet must get.
+    # A circle made of 24 short straight lines: corner n is at angle (360 / 24) * n round the centre.
+    if not SHOW_YOUR_SHADOW:
+        return
+    steps = 24
+    ring = []
+    for n in range(steps + 1):                            # + 1: the last corner joins back onto the first
+        angle = math.radians((360 / steps) * n)
+        ring.append((camera["x"] + (YOUR_HIT_RADIUS * math.cos(angle)), FLOOR_Y,
+                     camera["z"] + (YOUR_HIT_RADIUS * math.sin(angle))))
+    for n in range(steps):
+        draw_world_line(ring[n], ring[n + 1], (255, 255, 255))
+
+
 def draw_world_line(world_start, world_end, colour):
     # A straight line in the WORLD. If part of it is behind you (closer than NEAR), that part is TRIMMED off
     # and the rest is drawn - so only two points are worked out, however long the line is.
@@ -1081,10 +1167,10 @@ def draw_world_box():
     right, ceiling, far = WORLD_MAX
     corners = [(left, near), (right, near), (right, far), (left, far)]     # round the floor, in order
     for x, z in corners:
-        draw_world_line((x, floor, z), (x, ceiling, z), WORLD_BOX_COLOUR)  # the corner posts
+        draw_world_line((x, floor, z), (x, ceiling, z), level_look["box_colour"])  # the corner posts
     for n in range(4):
         (x1, z1), (x2, z2) = corners[n], corners[(n + 1) % 4]              # each corner to the next
-        draw_world_line((x1, ceiling, z1), (x2, ceiling, z2), WORLD_BOX_COLOUR)   # the ceiling's edges
+        draw_world_line((x1, ceiling, z1), (x2, ceiling, z2), level_look["box_colour"])   # the ceiling's edges
 
 
 def grid_steps(start, end, step):
@@ -1107,18 +1193,18 @@ def draw_wall_grid():
     across_z = grid_steps(near, far, WALL_GRID_STEP)          # upright lines on the left and right walls
     for z in (near, far):                                     # the NEAR and FAR walls
         for x in across_x:
-            draw_world_line((x, floor, z), (x, ceiling, z), GRID_COLOUR)
+            draw_world_line((x, floor, z), (x, ceiling, z), level_look["grid_colour"])
         for y in heights:
-            draw_world_line((left, y, z), (right, y, z), GRID_COLOUR)
+            draw_world_line((left, y, z), (right, y, z), level_look["grid_colour"])
     for x in (left, right):                                   # the LEFT and RIGHT walls
         for z in across_z:
-            draw_world_line((x, floor, z), (x, ceiling, z), GRID_COLOUR)
+            draw_world_line((x, floor, z), (x, ceiling, z), level_look["grid_colour"])
         for y in heights:
-            draw_world_line((x, y, near), (x, y, far), GRID_COLOUR)
+            draw_world_line((x, y, near), (x, y, far), level_look["grid_colour"])
     for x in across_x:                                        # the CEILING: lines running away from you ...
-        draw_world_line((x, ceiling, near), (x, ceiling, far), GRID_COLOUR)
+        draw_world_line((x, ceiling, near), (x, ceiling, far), level_look["grid_colour"])
     for z in across_z:                                        # ... and lines across
-        draw_world_line((left, ceiling, z), (right, ceiling, z), GRID_COLOUR)
+        draw_world_line((left, ceiling, z), (right, ceiling, z), level_look["grid_colour"])
 
 
 def draw_floor():
@@ -1128,9 +1214,9 @@ def draw_floor():
     if not SHOW_PIECES:
         # Each grid line drawn WHOLE (draw_world_line trims any part behind you): far fewer points to work out
         for z in range(near, far + 1):                # lines ACROSS: one at every z
-            draw_world_line((left, FLOOR_Y, z), (right, FLOOR_Y, z), GRID_COLOUR)
+            draw_world_line((left, FLOOR_Y, z), (right, FLOOR_Y, z), level_look["grid_colour"])
         for x in range(left, right + 1):              # lines AWAY: one at every x
-            draw_world_line((x, FLOOR_Y, near), (x, FLOOR_Y, far), GRID_COLOUR)
+            draw_world_line((x, FLOOR_Y, near), (x, FLOOR_Y, far), level_look["grid_colour"])
         return
     # SHOW_PIECES (a test view): every 1-unit piece in its own colour, so the pieces are drawn one by one
     for z in range(near, far + 1):                    # lines ACROSS: one at every z
@@ -1170,8 +1256,8 @@ def move_camera(keys):
     mouse_dx, mouse_dy = pygame.mouse.get_rel()          # pixels moved since last frame
     camera["turn"] = (camera["turn"] - (mouse_dx * MOUSE_SPEED))     # mouse right = turn right
     camera["tip"] = (camera["tip"] + (mouse_dy * MOUSE_SPEED))       # mouse up = look up
-    if camera["tip"] > TIP_LIMIT:      camera["tip"] = TIP_LIMIT     # stop at the limits
-    if camera["tip"] < -TIP_LIMIT:     camera["tip"] = -TIP_LIMIT
+    if camera["tip"] > TIP_LIMIT_DOWN:   camera["tip"] = TIP_LIMIT_DOWN    # stop at the limits (+ = looking DOWN)
+    if camera["tip"] < -TIP_LIMIT_UP:    camera["tip"] = -TIP_LIMIT_UP     #   (- = looking UP)
 
     forward_x, forward_y, forward_z = rotate_y((0, 0, 1), camera["turn"])   # the way you face
     right_x, right_y, right_z = rotate_y((1, 0, 0), camera["turn"])         # your right hand
@@ -1205,26 +1291,6 @@ def move_things():
             continue                                            #   RELATIVE, so never move or bounce it here
         position = thing["position"]
         velocity = thing["velocity"]
-        if thing.get("bullet"):                                 # BULLETS: fly straight, never bounce off the walls
-            for axis in range(3):
-                position[axis] = position[axis] + velocity[axis]
-            thing["range"] = thing["range"] - BULLET_SPEED      # used up a little more of its range
-            for axis in range(3):                               # left the WORLD BOX (floor, ceiling, walls)? done.
-                # Only if it's still heading OUT, and BULLET_MARGIN past the edge: you can stand just outside
-                # the box, so your shots must fly in, and tank shots must still reach you.
-                if position[axis] < (WORLD_MIN[axis] - BULLET_MARGIN) and velocity[axis] < 0:
-                    thing["range"] = 0
-                if position[axis] > (WORLD_MAX[axis] + BULLET_MARGIN) and velocity[axis] > 0:
-                    thing["range"] = 0
-            if thing["owner"] is not None:                      # a TANK's bullet: has it hit YOU?
-                dx, dy, dz = (camera["x"] - position[0]), (camera["y"] - position[1]), (camera["z"] - position[2])
-                if (dx * dx) + (dy * dy) + (dz * dz) < (YOUR_HIT_RADIUS * YOUR_HIT_RADIUS):
-                    thing["range"] = 0
-                    you["hits_taken"] = you["hits_taken"] + 1
-                    you["hurt"] = 12                            # frames of red flash round the screen
-                    if hurt_sound:
-                        hurt_sound.play()                       # a sad "wahhh"
-            continue
         smallest, biggest = WORLD_MIN, WORLD_MAX
         for axis in range(3):                                   # 0 = x, 1 = y, 2 = z
             position[axis] = position[axis] + velocity[axis]
@@ -1239,21 +1305,120 @@ def move_things():
             vx, vz = velocity[0], velocity[2]                   # only the flat (x, z) part: no tilting up or down
             if vx != 0 or vz != 0:                              # standing still: keep the angle it already has
                 # rotate_y points a model's front (+z) along (-sin a, cos a), so a = atan2(-vx, vz)
-                thing["angles"][0] = math.degrees(math.atan2(-vx, vz))
+                new_angle = math.degrees(math.atan2(-vx, vz))
+                change = new_angle - thing["angles"][0]
+                thing["angles"][0] = new_angle
+                if change != 0:
+                    # Its children (turret, radar) turn WITH it, because their angles are relative to it.
+                    # Turn them back by the same amount, so they keep pointing where they were in the world.
+                    for child in things:
+                        if child.get("parent_thing") is thing:
+                            child["angles"][0] = keep_under_360(child["angles"][0] - change)
+
+
+def move_bullets():
+    # Everything a BULLET does, once per frame (after the things have moved and bounced):
+    #   spin, fly straight, use up range, then the FIRST thing it hits stops it:
+    #   1. the WORLD BOX (walls, floor, ceiling)  - sparks
+    #   2. YOU (enemy bullets only)               - hurt: red flash, "wahhh"
+    #   3. a BOX                                  - thud + sparks
+    #   4. a THING (not its own owner)            - ping + sparks; YOUR bullet takes 1 health
+    # A bullet is a point with a hit radius (BULLET_HIT_RADIUS), so it can't jump over a TINY shape.
+    # Bullets pass through each other.
+    targets = [(thing, world_spheres(thing)) for thing in things           # each thing's spheres, worked out ONCE
+               if "parent" not in thing and not thing.get("dead")]
+    for bullet in bullets:
+        angles, speeds = bullet["angles"], bullet["speeds"]
+        for axis in range(3):
+            angles[axis] = keep_under_360(angles[axis] + speeds[axis])      # spins as it flies
+        position, velocity = bullet["position"], bullet["velocity"]
+        for axis in range(3):
+            position[axis] = position[axis] + velocity[axis]
+        bullet["range"] = bullet["range"] - BULLET_SPEED                    # used up a little more of its range
+
+        # 1. The WORLD BOX: only if it's still heading OUT (you can stand just outside the box: your shots must
+        #    fly in). It stops AT the surface, with a puff of sparks.
+        for axis in range(3):
+            hit_wall = None
+            if position[axis] < (WORLD_MIN[axis] - BULLET_MARGIN) and velocity[axis] < 0:
+                hit_wall = WORLD_MIN[axis] - BULLET_MARGIN
+            if position[axis] > (WORLD_MAX[axis] + BULLET_MARGIN) and velocity[axis] > 0:
+                hit_wall = WORLD_MAX[axis] + BULLET_MARGIN
+            if hit_wall is not None and bullet["range"] > 0:
+                bullet["range"] = 0
+                position[axis] = hit_wall                                   # back onto the surface: sparks start there
+                spawn_sparks(position, [bullet["colour"], (255, 255, 255)])
+        if bullet["range"] <= 0:
+            continue
+
+        # 2. YOU: only bullets something else fired
+        if bullet["owner"] is not None:
+            dx, dy, dz = (camera["x"] - position[0]), (camera["y"] - position[1]), (camera["z"] - position[2])
+            if (dx * dx) + (dy * dy) + (dz * dz) < (YOUR_HIT_RADIUS * YOUR_HIT_RADIUS):
+                bullet["range"] = 0
+                you["hits_taken"] = you["hits_taken"] + 1
+                you["hurt"] = 12                                            # frames of flash round the screen ...
+                you["hurt_colour"] = bullet["colour"]                       # ... in the BULLET's colour
+                if hurt_sound:
+                    hurt_sound.play()                                       # a sad "wahhh"
+                continue
+
+        # 3. A BOX: the closest point IN the box to the bullet (clamp it to the box) - near enough = a hit
+        hit_box = False
+        for box in BOXES:
+            closest = [max(box["min"][axis], min(position[axis], box["max"][axis])) for axis in range(3)]
+            away = [position[axis] - closest[axis] for axis in range(3)]
+            if (away[0] * away[0]) + (away[1] * away[1]) + (away[2] * away[2]) < (BULLET_HIT_RADIUS * BULLET_HIT_RADIUS):
+                bullet["range"] = 0
+                if bullet["owner"] is None:
+                    crosshair["hit"] = CROSSHAIR_HIT_FRAMES                 # your shot: show the hit marker
+                if thud_sound:
+                    thud_sound.play()                                       # boxes go THUD (dull), not ping
+                spawn_sparks(closest, [box["colour"], (255, 255, 255)])
+                hit_box = True
+                break
+        if hit_box:
+            continue
+
+        # 4. A THING: any of its collision spheres within reach of the bullet
+        for target, spheres in targets:
+            if target is bullet["owner"] or target.get("dead"):
+                continue                                                    # never its own owner
+            hit = False
+            for centre, radius in spheres:
+                dx, dy, dz = (centre[0] - position[0]), (centre[1] - position[1]), (centre[2] - position[2])
+                reach = radius + BULLET_HIT_RADIUS
+                if (dx * dx) + (dy * dy) + (dz * dz) < (reach * reach):     # squared: no sqrt needed
+                    hit = True
+                    break
+            if not hit:
+                continue
+            bullet["range"] = 0                                             # used up; the target is left alone...
+            if bullet["owner"] is None and "health" in target:              # ...unless it's YOUR bullet: 1 health
+                target["health"] = max(0, target["health"] - 1)
+                if target["health"] == 0:
+                    break_apart(target)                                     # split in two, or die if it's down to 1
+            if bullet["owner"] is None:
+                crosshair["hit"] = CROSSHAIR_HIT_FRAMES                     # flash the red X on the crosshair
+            if ping_sound:
+                ping_sound.play()                                           # PING
+            spawn_sparks(position, [target["colour"], (255, 255, 255), (255, 220, 120)])
+            break
 
 
 def remove_finished_things():
-    # Remove used-up bullets (out of range, hit the floor, or hit something). [:] changes the list itself,
-    # rather than making a new list called things, and doing it HERE means we're not looping over things.
-    things[:] = [thing for thing in things if not (thing.get("bullet") and thing["range"] <= 0)
-                 and not thing.get("dead")                                             # destroyed shapes...
+    # Remove used-up bullets (out of range, hit a wall, a box, you or a shape) and destroyed shapes.
+    # [:] changes the list itself, rather than making a new list, and doing it HERE means we're not looping over it.
+    bullets[:] = [bullet for bullet in bullets if bullet["range"] > 0]
+    things[:] = [thing for thing in things
+                 if not thing.get("dead")                                              # destroyed shapes...
                  and not ("parent_thing" in thing and thing["parent_thing"].get("dead"))]   # ...and their children
 
 
 def add_thing_faces(face_paint_order):
     # Every thing's visible faces go into face_paint_order (things with no faces are drawn as lines right away).
-    #FOR EACH THING !
-    for thing in things:
+    #FOR EACH THING (and each bullet: drawn the same way, and sorted with everything else) !
+    for thing in things + bullets:
         model = thing["model"]
 
         world_points = []  # Real GAME WOrld X,Y,Z coordinates for points
@@ -1328,15 +1493,9 @@ def paint_faces(face_paint_order):
 
 def draw_mini_map():
 ## MINI MAP
-    map_box = pygame.Rect(MAP_LEFT, MAP_BOX_TOP, MAP_BOX_WIDTH, MAP_BOX_HEIGHT)
-    screen.blit(map_background, (MAP_LEFT, MAP_BOX_TOP))        # 50% see-through background: the 3D view shows through
-
-    # The PLAY AREA: the level's floor, seen from above, as a hollow green rectangle (the same green as the
-    # room's wireframe box). Drawn first, so everything else on the map sits on top of it.
-    left, floor, near = WORLD_MIN
-    right, ceiling, far = WORLD_MAX
-    play_area = [to_map(left, near), to_map(right, near), to_map(right, far), to_map(left, far)]
-    pygame.draw.polygon(screen, WORLD_BOX_COLOUR, play_area, 2)  # 2 = a 2-pixel outline, not filled
+    # The STILL layer (background, floor grid, play area, border), drawn once per level: just blit it.
+    # Everything else on the map is drawn on top of it, every frame.
+    screen.blit(map_floor_layer, (MAP_LEFT, MAP_BOX_TOP))
 
     for decal in FLOOR_SHAPES:                                               # decals, seen from above:
         pygame.draw.polygon(screen, decal_colour(decal), [to_map(x, z) for x, z in decal["corners"]])   # under all else
@@ -1344,11 +1503,12 @@ def draw_mini_map():
         (low_x, low_y, low_z), (high_x, high_y, high_z) = box["min"], box["max"]
         pygame.draw.polygon(screen, box["colour"], [to_map(low_x, low_z), to_map(high_x, low_z),
                                                     to_map(high_x, high_z), to_map(low_x, high_z)])
-    pygame.draw.rect(screen, (255, 255, 255), map_box, 1)       # thin white border
 
 
 
     for thing in things:                                          # each thing = its SHADOW, seen from straight above
+        if thing.get("scenery"):
+            continue                                              # SCENERY is level dressing: not on the map
         # Every corner in the WORLD (sized, spun, placed - and carried by its parent, for turrets and radars)
         # (add_thing_faces() already worked them out this frame: reuse them; work them out only if missing)
         corners_in_world = thing.get("world_points") or [to_world(point, thing) for point in thing["model"]["points"]]
@@ -1397,13 +1557,16 @@ def next_level_number():
 
 
 def update_level_progress():
-    # Once per frame. When every SHAPE is gone (not counting bullets, or children - they go with their parent),
+    # Once per frame. When every SHAPE is gone (not counting children - they go with their parent),
     # the level is CLEARED: count frames, and after LEVEL_COMPLETE_FRAMES load the next level (if there is one).
+    if level_progress["cleared_frames"] is None:
+        level_progress["frames"] = level_progress["frames"] + 1   # the LEVEL TIME ticks while it's being played
     if not LEVELS[level_progress["number"]]["spawn"]:
         return                                            # an EMPTY level (nothing spawned) never "completes"
     if level_progress["cleared_frames"] is None:
         shapes_left = [thing for thing in things
-                       if "parent" not in thing and not thing.get("bullet") and not thing.get("dead")]
+                       if "parent" not in thing and not thing.get("dead")
+                       and not thing.get("scenery")]               # SCENERY never needs killing
         if not shapes_left:
             level_progress["cleared_frames"] = 0          # cleared: the message starts now
         return
@@ -1453,10 +1616,10 @@ def draw_level_banner():
     fade_start = BANNER_HOLD + BANNER_MOVE + BANNER_INTRO_HOLD
     fading = min(1, max(0, (frame - fade_start) / BANNER_FADE))
 
-    # THE NAME: rendered big, then shrunk as it rises (to 45% of its size at the top)
+    # THE NAME: rendered big, then shrunk as it rises (to 70% of its size at the top)
     name_surface = title_font.render(level_banner["name"], True, BANNER_COLOUR)
     shadow_surface = title_font.render(level_banner["name"], True, BLACK)
-    scale = 1 - (0.55 * eased)
+    scale = 1 - (0.3 * eased)                                 # at the top it's 70% of its starting size
     if scale < 1:
         size = (round(name_surface.get_width() * scale), round(name_surface.get_height() * scale))
         name_surface = pygame.transform.smoothscale(name_surface, size)
@@ -1481,8 +1644,32 @@ def draw_level_banner():
         screen.blit(intro_surface, (intro_x, intro_y))
 
 
-def draw_hud():
-    # The text and bars in the top-left corner, and the red flash when you're hit.
+def minutes_seconds(seconds):
+    # 83 -> "1:23" (minutes, then seconds always as two digits)
+    seconds = max(0, int(seconds))
+    return str(seconds // 60) + ":" + str(seconds % 60).zfill(2)
+
+
+def draw_level_clock():
+    # Top right: the LEVEL number, the LEVEL TIME counting up (big), and the TARGET TIME counting down under it.
+    # The target is the level's "target_time" (seconds), or DEFAULT_TARGET_TIME. It turns red once it runs out.
+    level = LEVELS[level_progress["number"]]
+    played = level_progress["frames"] / 60                     # frames -> seconds (the game runs at 60 FPS)
+    left = level.get("target_time", DEFAULT_TARGET_TIME) - played
+    lines = [(fps_font, "LEVEL " + str(level_progress["number"]), GREEN),
+             (fps_font, "LEVEL TIME", GREEN),
+             (clock_font, minutes_seconds(played), GREEN),
+             (fps_font, "TARGET  " + minutes_seconds(left), GREEN if left > 0 else (255, 80, 80))]
+    y = 10
+    for font, text, colour in lines:
+        surface = font.render(text, True, colour)
+        screen.blit(surface, (screen.get_width() - surface.get_width() - 10, y))   # right-aligned, 10 px in
+        y = y + surface.get_height() + 4
+
+
+def draw_hud(faces_drawn=0):
+    # The text and bars in the top-left corner, the list counts in the bottom-left, and the red flash when hit.
+    # faces_drawn = how many faces made it into this frame's paint list (the rest were culled or too close).
     # FPS counter, top-left corner
     fps_text = fps_font.render("FPS: " + str(round(clock.get_fps())), True, GREEN)
     screen.blit(fps_text, (10, 10))
@@ -1516,8 +1703,29 @@ def draw_hud():
         pygame.draw.rect(screen, GREEN, bar, 1)                            # outline
         percent_text = fps_font.render(str(round(volume["slider"] * 100)) + "%  (- =)", True, GREEN)
         screen.blit(percent_text, (bar.right + 10, 160))
+    draw_level_clock()                                                 # top right: level, time, target
+
+    # The KEY LISTS, bottom-left: how much the engine is handling this frame.
+    # POINTS and FACES count every model's corners and faces (a box is a cube: 8 corners, 6 faces).
+    # FACES drawn of total: the rest were culled (turned away from you) or too close / behind you.
+    all_models = [thing["model"] for thing in things + bullets]
+    total_points = sum(len(model["points"]) for model in all_models) + (8 * len(BOXES))
+    total_faces = sum(len(model["faces"]) for model in all_models) + (6 * len(BOXES))
+    counts = ["THINGS: " + str(len(things)),
+              "BOXES: " + str(len(BOXES)),
+              "DECALS: " + str(len(FLOOR_SHAPES)),
+              "BULLETS: " + str(len(bullets)),
+              "SPARKS: " + str(len(particles)),
+              "POINTS: " + str(total_points),
+              "FACES: " + str(faces_drawn) + " of " + str(total_faces)]
+    y = screen.get_height() - (30 * len(counts)) - 10                  # stacked up from the bottom edge
+    for line in counts:
+        screen.blit(fps_font.render(line, True, GREEN), (10, y))
+        y = y + 30
+
     if you["frozen"] > 0:
         pygame.draw.rect(screen, FREEZE_COLOUR, screen.get_rect(), 16)  # FROZEN: a thick icy border
     if you["hurt"] > 0:
-        pygame.draw.rect(screen, (255, 0, 0), screen.get_rect(), 12)    # a thick red border: 12 pixels wide
+        pygame.draw.rect(screen, you["hurt_colour"], screen.get_rect(), 12)   # a thick border, 12 pixels wide,
+                                                                            #   in the colour of what hit you
         you["hurt"] = you["hurt"] - 1

@@ -24,6 +24,7 @@ DESIGNS = {
     # ---- SHAPES: one model each ----
     "cube":    {"model": cube_model,    "colour": GREY, "palette": PALETTE_GREY},
     "pyramid": {"model": pyramid_model, "colour": GREY, "palette": PALETTE_GREY},
+    "wire pyramid": {"model": pyramid_wire_model, "colour": GREY, "palette": PALETTE_GREY},   # edges only, no faces
     "diamond": {"model": diamond_model, "colour": GREY, "palette": PALETTE_GREY},
     "frame":   {"model": frame_model,   "colour": GREY, "palette": PALETTE_GREY},
 
@@ -55,11 +56,16 @@ DESIGNS = {
 # Each level, by NUMBER. What a level holds:
 #   "name"         - the level's title: shown big in the middle as the level starts, then at the top of the screen
 #   "intro"        - one line shown under the name as the level starts, then it fades away
+#   "grid_colour"  - (optional) the colour of EVERY grid (floor, walls, mini-map), e.g. (140, 35, 30) for red (left out = GRID_COLOUR, green)
+#   "target_time"  - (optional) seconds to beat: the TARGET TIME counts down from it, top right
+#                    (left out = DEFAULT_TARGET_TIME in rotation_data.py)
 #   "world"        - the WORLD BOX: two opposite corners, "min" (smallest x, y, z) and "max" (biggest x, y, z).
 #                    min y is the FLOOR (keep it at FLOOR_Y, -1), max y the CEILING. Keep x and z whole numbers:
 #                    the floor grid has a line at every whole number. Things' CENTRES bounce inside it.
 #   "start"        - where YOU begin: x, y (eye height: STAND_Y when standing), z, turn and tip (see camera)
-#   "floor_shapes" - DECALS on the floor. Either plain paint: ([corners as (x, z)], colour)
+#   "floor_shapes" - DECALS on the floor. (Every level also gets a tiny GOLD square at x 0, z 0, automatically:
+#                    ORIGIN_MARK in rotation_data.py. Don't add gold squares of your own.)
+#                    Each decal is either plain paint: ([corners as (x, z)], colour)
 #                    or a decal TYPE that does something (see DECAL_TYPES in rotation_data.py):
 #                    {"type": "lava", "min": (x, z), "max": (x, z)}   - a rectangle from two opposite corners
 #                    {"type": "lava", "corners": [(x, z), ...]}        - any shape
@@ -68,6 +74,8 @@ DESIGNS = {
 #   "sizes"        - (optional) this level's changes to the named SIZES (see rotation_data.py), e.g.
 #                    {"SMALL": {"splits_to": None}} = in this level, SMALL shapes die instead of splitting
 #   "spawn"        - the things in the level, in order: a "design" name + only what's different.
+#                    "scenery": True = LEVEL DRESSING: it still draws, moves and shoots, but it isn't counted for
+#                    "level complete", isn't drawn on the mini-map, and can't be killed (bullets just stop on it).
 #                    ALWAYS give "colour" and "palette" (the designs are grey, to show when they're missing).
 #                    "size": a NAMED size ("TINY" "SMALL" "MEDIUM" "LARGE" "HUGE") for shapes: it sets how big the
 #                    shape is, its health, and what it splits into. (A plain number still works: tanks use one.)
@@ -79,6 +87,11 @@ DESIGNS = {
 #                                          Anything left out = GUN_DEFAULTS (rotation_data.py), which explains each one.
 #                      "health": 6       - its own health (otherwise: its share of MAX_HEALTH, by size)
 #                      "radar_spin": -6  - how fast its radar spins (degrees per frame)
+#                    SHAPES can have a "gun" too, mode "DOWN" (drops bullets straight down from its lowest point) or
+#                      "TARGET" (fires straight at you), every time it's cooled down,
+#                      e.g. "gun": {"mode": "DOWN", "cooldown": 120, "volley": 1}
+#                      (the same firing settings as a tank: cooldown, volley, volley_gap, bullet_speed).
+#                      When a shape with a gun splits, both pieces keep the gun.
 LEVELS = {
     1: {    # ---- LEVEL 1: TRAINING DAY - one big blue cube to practise on ----
         "name": "Training Day",
@@ -87,9 +100,6 @@ LEVELS = {
         "start": {"x": 0, "y": 0, "z": -7, "turn": 0, "tip": 0},     # on the gold square, facing the far wall (+z)
 
         "floor_shapes": [
-            # gold 1 x 1 square near the back wall (z = -8): where you start
-            ([(-0.5, -7.5), (0.5, -7.5), (0.5, -6.5), (-0.5, -6.5)],
-             (255, 215, 0)),
         ],
 
         "boxes": [],
@@ -119,8 +129,6 @@ LEVELS = {
         "start": {"x": 0, "y": 0, "z": -7, "turn": 0, "tip": 0},
 
         "floor_shapes": [
-            ([(-0.5, -7.5), (0.5, -7.5), (0.5, -6.5), (-0.5, -6.5)],
-             (255, 215, 0)),
         ],
 
         "boxes": [],
@@ -131,13 +139,15 @@ LEVELS = {
             # two LARGE cubes along the far wall, floating like level 1's (same height and distance from the wall),
             # 7 units apart so their tilted corners never touch, spinning opposite ways
             {"design": "cube", "name": "left cube",
-             "position": [-3.5, 1.28, 5.86], "size": "LARGE",
+             "position": [-3.5, 1.78, 5.86], "size": "LARGE",
              "angles": [30, 20, 0], "speeds": (0.5, 0, 0),
-             "colour": (120, 190, 240), "palette": PALETTE_ICE},
+             "colour": (120, 190, 240), "palette": PALETTE_ICE,
+             "gun": {"mode": "DOWN", "volley": 1}},     # drops ONE bullet straight down each time it fires
             {"design": "cube", "name": "right cube",              # the FIRE cube
-             "position": [3.5, 1.28, 5.86], "size": "LARGE",
+             "position": [3.5, 1.78, 5.86], "size": "LARGE",
              "angles": [-30, 20, 0], "speeds": (-0.5, 0, 0),
-             "colour": (255, 120, 60), "palette": PALETTE_SUNSET},
+             "colour": (255, 120, 60), "palette": PALETTE_SUNSET,
+             "gun": {"mode": "DOWN", "volley": 1}},     # drops ONE bullet straight down each time it fires
         ],
     },
 
@@ -148,8 +158,6 @@ LEVELS = {
         "start": {"x": 0, "y": 0, "z": -7, "turn": 0, "tip": 0},
 
         "floor_shapes": [
-            ([(-0.5, -7.5), (0.5, -7.5), (0.5, -6.5), (-0.5, -6.5)],
-             (255, 215, 0)),
         ],
 
         "boxes": [],
@@ -162,17 +170,20 @@ LEVELS = {
             # sideways, so 5 apart they never touch), so: y 1.28, z 5.86 - like level 1's cube.
             # A diamond's tips are all 1 from its centre (1.25 at LARGE), whichever way it turns, so it sits at y 0.75.
             {"design": "cube", "name": "ice cube",                # ICE
-             "position": [-5, 1.28, 5.86], "size": "LARGE",
+             "position": [-5, 1.78, 5.86], "size": "LARGE",
              "angles": [30, 20, 0], "speeds": (0.5, 0, 0),
-             "colour": (120, 190, 240), "palette": PALETTE_ICE},
+             "colour": (120, 190, 240), "palette": PALETTE_ICE,
+             "gun": {"mode": "DOWN", "volley": 1}},     # drops ONE bullet straight down each time it fires
             {"design": "diamond", "name": "fire and ice diamond",  # FIRE AND ICE
-             "position": [0, 0.75, 5.86], "size": "LARGE",
+             "position": [0, 1.25, 5.86], "size": "LARGE",
              "angles": [0, 20, 0], "speeds": (-0.5, 0, 0),
-             "colour": FIRE_AND_ICE, "palette": PALETTE_FIRE_AND_ICE},
+             "colour": FIRE_AND_ICE, "palette": PALETTE_FIRE_AND_ICE,
+             "gun": {"mode": "DOWN", "volley": 1}},     # drops ONE bullet straight down each time it fires
             {"design": "pyramid", "name": "fire pyramid",          # FIRE
-             "position": [5, 1.28, 5.86], "size": "LARGE",
+             "position": [5, 1.78, 5.86], "size": "LARGE",
              "angles": [-30, 20, 0], "speeds": (0.5, 0, 0),
-             "colour": (255, 120, 60), "palette": PALETTE_SUNSET},
+             "colour": (255, 120, 60), "palette": PALETTE_SUNSET,
+             "gun": {"mode": "DOWN", "volley": 1}},     # drops ONE bullet straight down each time it fires
         ],
     },
 
@@ -183,8 +194,6 @@ LEVELS = {
         "start": {"x": 0, "y": 0, "z": -7, "turn": 0, "tip": 0},
 
         "floor_shapes": [
-            ([(-0.5, -7.5), (0.5, -7.5), (0.5, -6.5), (-0.5, -6.5)],
-             (255, 215, 0)),
         ],
 
         "boxes": [],
@@ -206,15 +215,18 @@ LEVELS = {
             {"design": "cube", "name": "fire cube 1",
              "position": [-4, 2, 2], "velocity": [0.03, 0.02, 0.025], "size": "MEDIUM",
              "angles": [20, 10, 0], "speeds": (1, 0.5, 0),
-             "colour": (255, 120, 60), "palette": PALETTE_SUNSET},
+             "colour": (255, 120, 60), "palette": PALETTE_SUNSET,
+             "gun": {"mode": "DOWN", "volley": 1}},     # drops ONE bullet straight down each time it fires
             {"design": "cube", "name": "fire cube 2",
              "position": [0, 3.5, 0], "velocity": [-0.025, 0.03, -0.02], "size": "MEDIUM",
              "angles": [45, 0, 20], "speeds": (0.5, 1, 0.5),
-             "colour": (255, 120, 60), "palette": PALETTE_SUNSET},
+             "colour": (255, 120, 60), "palette": PALETTE_SUNSET,
+             "gun": {"mode": "DOWN", "volley": 1}},     # drops ONE bullet straight down each time it fires
             {"design": "cube", "name": "fire cube 3",
              "position": [4, 1.5, -2], "velocity": [0.02, -0.025, 0.03], "size": "MEDIUM",
              "angles": [0, 30, 10], "speeds": (1.5, 0, 1),
-             "colour": (255, 120, 60), "palette": PALETTE_SUNSET},
+             "colour": (255, 120, 60), "palette": PALETTE_SUNSET,
+             "gun": {"mode": "DOWN", "volley": 1}},     # drops ONE bullet straight down each time it fires
         ],
     },
 
@@ -225,8 +237,6 @@ LEVELS = {
         "start": {"x": 0, "y": 0, "z": -7, "turn": 0, "tip": 0},
 
         "floor_shapes": [
-            ([(-0.5, -7.5), (0.5, -7.5), (0.5, -6.5), (-0.5, -6.5)],
-             (255, 215, 0)),
         ],
 
         "boxes": [],
@@ -253,19 +263,23 @@ LEVELS = {
             {"design": "cube", "name": "ice cube",
              "position": [-4, 2, 0], "velocity": [0.03, 0.02, 0.025], "size": "MEDIUM",
              "angles": [20, 10, 0], "speeds": (1, 0.5, 0),
-             "colour": (120, 190, 240), "palette": PALETTE_ICE},
+             "colour": (120, 190, 240), "palette": PALETTE_ICE,
+             "gun": {"mode": "DOWN", "volley": 1}},     # drops ONE bullet straight down each time it fires
             {"design": "pyramid", "name": "fire pyramid",
              "position": [4, 1.5, -1], "velocity": [-0.025, 0.03, 0.02], "size": "MEDIUM",
              "angles": [0, 0, 0], "speeds": (1.5, 0, 0),
-             "colour": (255, 120, 60), "palette": PALETTE_SUNSET},
+             "colour": (255, 120, 60), "palette": PALETTE_SUNSET,
+             "gun": {"mode": "DOWN", "volley": 1}},     # drops ONE bullet straight down each time it fires
             {"design": "diamond", "name": "fire and ice diamond",
              "position": [-2, 3.5, -3], "velocity": [0.02, -0.025, 0.03], "size": "MEDIUM",
              "angles": [0, 20, 0], "speeds": (2, 0, 0.5),
-             "colour": FIRE_AND_ICE, "palette": PALETTE_FIRE_AND_ICE},
+             "colour": FIRE_AND_ICE, "palette": PALETTE_FIRE_AND_ICE,
+             "gun": {"mode": "DOWN", "volley": 1}},     # drops ONE bullet straight down each time it fires
             {"design": "frame", "name": "fire and ice frame",
              "position": [3, 3, 1], "velocity": [-0.03, -0.02, -0.025], "size": "MEDIUM",
              "angles": [30, 0, 0], "speeds": (0.8, 0.5, 0),
-             "colour": FIRE_AND_ICE, "palette": PALETTE_FIRE_AND_ICE},
+             "colour": FIRE_AND_ICE, "palette": PALETTE_FIRE_AND_ICE,
+             "gun": {"mode": "TARGET", "volley": 1}},   # fires ONE bullet straight AT YOU each time it fires
         ],
     },
 
@@ -273,23 +287,20 @@ LEVELS = {
         "name": "The Floor Is Lava",
         "intro": "Don't stand in the lava - jump it (SPACE). And watch that tank: it follows you.",
         "world": {"min": (-8, -1, -8), "max": (8, 7, 8)},           # the same room as levels 1 - 5
-        "start": {"x": 0, "y": 0, "z": -6, "turn": 0, "tip": 0},     # just inside the lava border
+        "start": {"x": 0.5, "y": 0, "z": -7, "turn": 0, "tip": 0},   # on the gold strip, in line with the drips (z -7)
+        "grid_colour": (140, 35, 30),                               # a RED floor grid: the floor is lava
 
         "floor_shapes": [
-            ([(-0.5, -6.5), (0.5, -6.5), (0.5, -5.5), (-0.5, -5.5)],    # the gold start square (paint)
-             (255, 215, 0)),
-            # three LAVA strips right across the room, 1 deep: you have to JUMP them to get across.
-            # Spread EVENLY over the open floor between the border's near side (z -6.5) and its far side (z 5):
-            # 11.5 deep, minus 3 for the strips = 8.5, in four equal gaps of 2.125.
-            {"type": "lava", "min": (-8, -4.375), "max": (8, -3.375)},
-            {"type": "lava", "min": (-8, -1.25),  "max": (8, -0.25)},
-            {"type": "lava", "min": (-8, 1.875),  "max": (8, 2.875)},
-            # a LAVA BORDER all the way round the room, 1.5 wide (the four sides overlap at the corners)
-            {"type": "lava", "min": (-8, 5),    "max": (8, 8)},        # along the far wall: DOUBLE width (3),
-                                                                       #   the fireproof tank drives along it
-            {"type": "lava", "min": (-8, -8),   "max": (8, -6.5)},     # along the near wall, behind you
-            {"type": "lava", "min": (-8, -8),   "max": (-6.5, 8)},     # along the left wall
-            {"type": "lava", "min": (6.5, -8),  "max": (8, 8)},        # along the right wall
+            # EVERY edge sits on a whole grid line, in bands 2 squares deep, from the far wall down:
+            #   z 6 to 8 LAVA (the fireproof tank drives along it), 4 to 6 clear, 2 to 4 LAVA, 0 to 2 clear,
+            #   -2 to 0 LAVA, -4 to -2 clear, -6 to -4 LAVA, -8 to -6 clear (where you START, against the near wall)
+            # Plus a LAVA border 1 square wide down each side wall.
+            {"type": "lava", "min": (-8, 6),  "max": (8, 8)},
+            {"type": "lava", "min": (-8, 2),  "max": (8, 4)},
+            {"type": "lava", "min": (-8, -2), "max": (8, 0)},
+            {"type": "lava", "min": (-8, -6), "max": (8, -4)},
+            {"type": "lava", "min": (-8, -8), "max": (-7, 8)},        # the left wall's border
+            {"type": "lava", "min": (7, -8),  "max": (8, 8)},         # the right wall's border
         ],
 
         "boxes": [],
@@ -322,30 +333,59 @@ LEVELS = {
              "position": [3, 3, 1], "velocity": [-0.025, -0.02, -0.025], "size": "MEDIUM",
              "angles": [30, 0, 0], "speeds": (0.8, 0.5, 0),
              "colour": (255, 120, 60), "palette": PALETTE_SUNSET},
+
+            # LAVA DRIPPERS: SMALL pyramids turned UPSIDE DOWN (tilted 180), hanging from the ceiling, one over
+            # the exact middle (in z) of EACH clear strip, the one you start in too, sliding side to side (x only).
+            # BLACK faces with a RED outline (the level's grid red): they look like wireframes, but hide their
+            # back edges. Each starts at a different x, and they take turns going left and right.
+            # Their tip is their lowest corner, so each DOWN gun drips SUNSET lava from the tip.
+            #   SMALL = 1 across (size 0.5): the pyramid is 1 tall, so its centre is 0.5 under the ceiling (y 7)
+            #   The clear strips are 2 squares deep: their middles are z 5, 1, -3 and -7 (where you start)
+            {"design": "pyramid", "name": "lava dripper 1",
+             "position": [-5, 6.5, 5], "velocity": [0.02, 0, 0], "size": "SMALL",
+             "angles": [0, 180, 0], "speeds": (0, 0, 0),          # upside down, and never spins
+             "colour": (140, 35, 30), "palette": PALETTE_BLACK,
+             "gun": {"mode": "DOWN", "volley": 3, "cooldown": 45, "bullet_colour": (255, 120, 60), "bullet_palette": PALETTE_SUNSET},
+             "scenery": True},                               # level dressing: not counted, not on the map, can't be killed
+            {"design": "pyramid", "name": "lava dripper 2",
+             "position": [3, 6.5, 1], "velocity": [-0.02, 0, 0], "size": "SMALL",
+             "angles": [0, 180, 0], "speeds": (0, 0, 0),          # upside down, and never spins
+             "colour": (140, 35, 30), "palette": PALETTE_BLACK,
+             "gun": {"mode": "DOWN", "volley": 3, "cooldown": 45, "bullet_colour": (255, 120, 60), "bullet_palette": PALETTE_SUNSET},
+             "scenery": True},                               # level dressing: not counted, not on the map, can't be killed
+            {"design": "pyramid", "name": "lava dripper 3",
+             "position": [-2, 6.5, -3], "velocity": [0.02, 0, 0], "size": "SMALL",
+             "angles": [0, 180, 0], "speeds": (0, 0, 0),          # upside down, and never spins
+             "colour": (140, 35, 30), "palette": PALETTE_BLACK,
+             "gun": {"mode": "DOWN", "volley": 3, "cooldown": 45, "bullet_colour": (255, 120, 60), "bullet_palette": PALETTE_SUNSET},
+             "scenery": True},                               # level dressing: not counted, not on the map, can't be killed
+            {"design": "pyramid", "name": "lava dripper 4",             # over the strip you START in
+             "position": [5, 6.5, -7], "velocity": [-0.02, 0, 0], "size": "SMALL",
+             "angles": [0, 180, 0], "speeds": (0, 0, 0),          # upside down, and never spins
+             "colour": (140, 35, 30), "palette": PALETTE_BLACK,
+             "gun": {"mode": "DOWN", "volley": 3, "cooldown": 45, "bullet_colour": (255, 120, 60), "bullet_palette": PALETTE_SUNSET},
+             "scenery": True},                               # level dressing: not counted, not on the map, can't be killed
         ],
     },
 
-    7: {    # ---- LEVEL 7: FROZEN - level 6, frozen: ICE strips freeze you so the tank can line you up ----
+    7: {    # ---- LEVEL 7: FROZEN - a clone of level 6, frozen: ICE bands freeze you so the tank can line you up ----
         "name": "Frozen (will not let you go!)",
         "intro": "Ice freezes you in place - and that tank is waiting. Jump it (SPACE)!",
-        "world": {"min": (-8, -1, -8), "max": (8, 7, 8)},           # the same room as levels 1 - 6
-        "start": {"x": 0, "y": 0, "z": -6, "turn": 0, "tip": 0},     # just inside the ice border
+        "world": {"min": (-8, -1, -8), "max": (8, 7, 8)},           # the same room as levels 1 - 5
+        "start": {"x": 0.5, "y": 0, "z": -7, "turn": 0, "tip": 0},   # on the gold strip, in line with the drips (z -7)
+        "grid_colour": (40, 90, 150),                               # a BLUE floor grid: the floor is ice
 
         "floor_shapes": [
-            ([(-0.5, -6.5), (0.5, -6.5), (0.5, -5.5), (-0.5, -5.5)],    # the gold start square (paint)
-             (255, 215, 0)),
-            # three ICE strips right across the room, 1 deep: JUMP them, or be frozen (1 second) where the tank can aim
-            # Spread EVENLY over the open floor between the border's near side (z -6.5) and its far side (z 5):
-            # 11.5 deep, minus 3 for the strips = 8.5, in four equal gaps of 2.125.
-            {"type": "ice", "min": (-8, -4.375), "max": (8, -3.375)},
-            {"type": "ice", "min": (-8, -1.25),  "max": (8, -0.25)},
-            {"type": "ice", "min": (-8, 1.875),  "max": (8, 2.875)},
-            # an ICE BORDER all the way round the room, 1.5 wide (the four sides overlap at the corners)
-            {"type": "ice", "min": (-8, 5),    "max": (8, 8)},        # along the far wall: DOUBLE width (3),
-                                                                       #   the ice tank drives along it
-            {"type": "ice", "min": (-8, -8),   "max": (8, -6.5)},     # along the near wall, behind you
-            {"type": "ice", "min": (-8, -8),   "max": (-6.5, 8)},     # along the left wall
-            {"type": "ice", "min": (6.5, -8),  "max": (8, 8)},        # along the right wall
+            # EVERY edge sits on a whole grid line, in bands 2 squares deep, from the far wall down:
+            #   z 6 to 8 ICE (the frost-proof tank drives along it), 4 to 6 clear, 2 to 4 ICE, 0 to 2 clear,
+            #   -2 to 0 ICE, -4 to -2 clear, -6 to -4 ICE, -8 to -6 clear (where you START, against the near wall)
+            # Plus a ICE border 1 square wide down each side wall.
+            {"type": "ice", "min": (-8, 6),  "max": (8, 8)},
+            {"type": "ice", "min": (-8, 2),  "max": (8, 4)},
+            {"type": "ice", "min": (-8, -2), "max": (8, 0)},
+            {"type": "ice", "min": (-8, -6), "max": (8, -4)},
+            {"type": "ice", "min": (-8, -8), "max": (-7, 8)},        # the left wall's border
+            {"type": "ice", "min": (7, -8),  "max": (8, 8)},         # the right wall's border
         ],
 
         "boxes": [],
@@ -354,14 +394,14 @@ LEVELS = {
 
         "spawn": [
             # a small tank patrolling the far end, its turret TRACKING you (turning towards you, 0.7 degrees a frame)
-            {"design": "tank", "name": "ice tank",                  # ice colours: it doesn't freeze
+            {"design": "tank", "name": "ice tank",                 # ice colours: it doesn't freeze
              "position": [0, -0.4, 6.5], "velocity": [0.012, 0, 0],
              "size": 0.6, "angles": [-90, 0, 0],
              "colour": (120, 190, 240), "palette": PALETTE_ICE,
              "gun": {"mode": "TRACK", "turret_spin": 0.7, "start_angle": "you", "cooldown": 150},
              "radar_spin": -6},
 
-            # one MEDIUM of each basic shape, all in ICE colours, flying and spinning over the ice
+            # one MEDIUM of each basic shape, all in ICE colours (ice creatures!), flying and spinning over the ice
             {"design": "cube", "name": "ice cube",
              "position": [-4, 2, 2], "velocity": [0.02, 0.015, -0.02], "size": "MEDIUM",
              "angles": [20, 10, 0], "speeds": (1, 0.5, 0),
@@ -378,6 +418,38 @@ LEVELS = {
              "position": [3, 3, 1], "velocity": [-0.025, -0.02, -0.025], "size": "MEDIUM",
              "angles": [30, 0, 0], "speeds": (0.8, 0.5, 0),
              "colour": (120, 190, 240), "palette": PALETTE_ICE},
+
+            # ICE DRIPPERS: SMALL pyramids turned UPSIDE DOWN (tilted 180), hanging from the ceiling, one over
+            # the exact middle (in z) of EACH clear strip, the one you start in too, sliding side to side (x only).
+            # BLACK faces with a BLUE outline (the level's grid blue): they look like wireframes, but hide their
+            # back edges. Each starts at a different x, and they take turns going left and right.
+            # Their tip is their lowest corner, so each DOWN gun drips ICE ice from the tip.
+            #   SMALL = 1 across (size 0.5): the pyramid is 1 tall, so its centre is 0.5 under the ceiling (y 7)
+            #   The clear strips are 2 squares deep: their middles are z 5, 1, -3 and -7 (where you start)
+            {"design": "pyramid", "name": "icicle 1",
+             "position": [-5, 6.5, 5], "velocity": [0.02, 0, 0], "size": "SMALL",
+             "angles": [0, 180, 0], "speeds": (0, 0, 0),          # upside down, and never spins
+             "colour": (40, 90, 150), "palette": PALETTE_BLACK,
+             "gun": {"mode": "DOWN", "volley": 3, "cooldown": 45, "bullet_colour": (120, 190, 240), "bullet_palette": PALETTE_ICE},
+             "scenery": True},                               # level dressing: not counted, not on the map, can't be killed
+            {"design": "pyramid", "name": "icicle 2",
+             "position": [3, 6.5, 1], "velocity": [-0.02, 0, 0], "size": "SMALL",
+             "angles": [0, 180, 0], "speeds": (0, 0, 0),          # upside down, and never spins
+             "colour": (40, 90, 150), "palette": PALETTE_BLACK,
+             "gun": {"mode": "DOWN", "volley": 3, "cooldown": 45, "bullet_colour": (120, 190, 240), "bullet_palette": PALETTE_ICE},
+             "scenery": True},                               # level dressing: not counted, not on the map, can't be killed
+            {"design": "pyramid", "name": "icicle 3",
+             "position": [-2, 6.5, -3], "velocity": [0.02, 0, 0], "size": "SMALL",
+             "angles": [0, 180, 0], "speeds": (0, 0, 0),          # upside down, and never spins
+             "colour": (40, 90, 150), "palette": PALETTE_BLACK,
+             "gun": {"mode": "DOWN", "volley": 3, "cooldown": 45, "bullet_colour": (120, 190, 240), "bullet_palette": PALETTE_ICE},
+             "scenery": True},                               # level dressing: not counted, not on the map, can't be killed
+            {"design": "pyramid", "name": "icicle 4",             # over the strip you START in
+             "position": [5, 6.5, -7], "velocity": [-0.02, 0, 0], "size": "SMALL",
+             "angles": [0, 180, 0], "speeds": (0, 0, 0),          # upside down, and never spins
+             "colour": (40, 90, 150), "palette": PALETTE_BLACK,
+             "gun": {"mode": "DOWN", "volley": 3, "cooldown": 45, "bullet_colour": (120, 190, 240), "bullet_palette": PALETTE_ICE},
+             "scenery": True},                               # level dressing: not counted, not on the map, can't be killed
         ],
     },
 
@@ -410,10 +482,6 @@ LEVELS = {
         "start": {"x": -7.8, "y": 0, "z": -3.2, "turn": -30, "tip": -1},   # just outside the near-left corner
 
         "floor_shapes": [
-            # gold 1 x 1 square under WORLD (0, 0, 0)
-            ([(-0.5, -0.5), (0.5, -0.5), (0.5, 0.5), (-0.5, 0.5)],
-             (255, 215, 0)),
-
             # white arrow: the way the light TRAVELS, in the lower-right corner of the floor.
             # Hard-coded for LIGHT = (0.48, 0.6, -0.64): from its tail at (7.5, -2.5) to its tip at (6.3, -0.9).
             ([(7.436, -2.548), (6.596, -1.428), (6.42, -1.56),        # shaft one side, out to the head
@@ -511,6 +579,7 @@ LEVELS = {
             {"design": "twin tank", "name": "tank",             # the BIG tank, parked
              "position": [0, 0.5, 16], "size": 1.5, "angles": [180, 0, 0],
              "colour": (120, 190, 80), "palette": PALETTE_FOREST,
+             "gun": {"volley": 6},                              #   TWO barrels: 6 shots a volley (3 each)
              "children": [{"speeds": (0.3, 0, 0)},              #   its turret turns slowly
                           {"speeds": (-6, 0, 0)}]},             #   its radar spins the OPPOSITE way, fast
 

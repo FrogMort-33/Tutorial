@@ -41,6 +41,9 @@ PALETTE_COOL = [                # (spare)
 PALETTE_GOLD = [                # just one colour: every face gold (the lighting still shades each side)
     (245, 200, 60),
 ]
+PALETTE_BLACK = [               # every face BLACK, like the background: with a coloured outline it looks like a
+    (0, 0, 0),                  #   wireframe, but the faces still HIDE the edges behind them ("hidden lines")
+]
 PALETTE_GREY = [                # "NOT SET": the designs' own palette. A thing that shows up grey is missing its
     (128, 128, 128),            #   own "palette" in a level's spawn list (load_level warns about it too)
 ]
@@ -138,6 +141,15 @@ pyramid_model = {
     "edges": pyramid_edges,
     "faces": pyramid_faces,
     "collision_spheres": [((0, -0.3, 0), 1.0)],     # lowered: the pyramid is heavier at the bottom
+}
+
+# The same pyramid as a WIREFRAME: no faces, so it's drawn as its edges (lines in the thing's colour).
+# Everything else is the pyramid's: its corners, edges and collision sphere.
+pyramid_wire_model = {
+    "points": pyramid_points,
+    "edges": pyramid_edges,
+    "faces": [],                                    # no faces = drawn as lines
+    "collision_spheres": pyramid_model["collision_spheres"],
 }
 
 
@@ -429,8 +441,14 @@ radar_model = {
 # A thing SITS ON THE FLOOR when its centre y = (FLOOR_Y + size) - for models whose lowest point is -1.
 #
 # The list starts EMPTY: load_level() in rotation_functions.py fills it from a level in rotation_levels.py
-# (and bullets and broken pieces are added while the game runs).
+# (and broken pieces are added while the game runs).
 things = []
+
+# BULLETS in flight: their OWN list, not things. A bullet only flies straight and HITS: it never bounces, spins
+# under your keys, has health or splits. move_bullets() in rotation_functions.py does everything a bullet does.
+# Each bullet is a dictionary: "position", "velocity", "range" (how far it can still fly), "owner" (the thing
+# that fired it; None = you), "colour", "palette", and "model", "size", "angles", "speeds" so it can be drawn.
+bullets = []
 
 
 # ---- SIZES: the NAMED sizes. A level spawns a shape at a named size: "size": "MEDIUM" ----
@@ -470,7 +488,8 @@ camera = {
 
 TURN_STEP = 1         # degrees per frame that the I J K L U O keys turn every thing by hand
 TURN_SPEED = 1.5      # degrees per frame (not used at the moment: you turn with the mouse, MOUSE_SPEED)
-TIP_LIMIT = 60        # degrees: don't let you look further up or down than this
+TIP_LIMIT_DOWN = 60   # degrees: how far you can look DOWN at the floor
+TIP_LIMIT_UP = 85     # degrees: how far you can look UP at the ceiling (keep under 90: past it the view flips over)
 STAND_Y = 0           # your eye height when standing: 1 above the floor (FLOOR_Y is -1)
 JUMP_SPEED = 0.15     # the upward speed a jump starts with (SPACE), in world units per frame
 GRAVITY = 0.004       # taken off camera["vy"] every frame, so you slow, stop, then fall
@@ -494,7 +513,8 @@ SPARK_SIZE = 0.04         # a spark's radius in world units, when it's brand new
 BULLET_SPEED = 0.4        # world units per frame (fast: 24 units a second at 60 FPS)
 BULLET_RANGE = 1000       # how far a bullet flies before it's removed: very long, the WORLD BOX stops it first
 BULLET_SIZE = 0.05        # a cube of size 0.05 is 0.1 across
-BULLET_MARGIN = 1         # bullets die once they're this far OUTSIDE the world box (you can stand just outside it)
+BULLET_MARGIN = 0         # bullets stop this far OUTSIDE the world box: 0 = right AT the walls, floor and ceiling
+                          #   (with a puff of sparks). Every bullet - yours, a tank's or a dropper's.
 BULLET_HIT_RADIUS = 0.2   # world units: how close a bullet has to get to HIT something. Bigger than the bullet
                           #   looks (0.1 across), so shots that clip a shape's corner still count, and a fast
                           #   bullet can't jump right over a TINY shape between two frames.
@@ -506,26 +526,37 @@ bullet_model = {"points": cube_points, "edges": cube_edges, "faces": cube_faces,
                 "collision_spheres": [((0, 0, 0), BULLET_HIT_RADIUS / BULLET_SIZE)]}
 
 
-# ---- TANK GUNS: turrets fire green bullets at you when they're pointing your way ----
+# ---- TANK GUNS: turrets fire bullets (in their own colours) at you when they're pointing your way ----
 TANK_CONE = 8             # degrees either side of straight ahead: point within this of you = "I see you"
 TANK_COOLDOWN = 90        # frames a turret rests after a volley (1.5 seconds at 60 FPS)
 TANK_VOLLEY = 3           # shots in one volley
 TANK_VOLLEY_GAP = 8       # frames between the shots in a volley
 TANK_BULLET_SPEED = 0.15  # world units per frame: slower than yours, so you can dodge
-TANK_BULLET_COLOUR = (60, 255, 60)                      # green outline
-PALETTE_TANK_BULLET = [(60, 255, 60), (30, 200, 30)]    # green faces
+# Bullets take the SHOOTER's colour and palette: a tank's turret (its tank's colours), a shape, or you (gold).
 YOUR_HIT_RADIUS = 0.3     # a tank bullet this close to your eye counts as hitting YOU
+# A tiny GOLD square on the floor under WORLD x 0, z 0, added to EVERY level by load_level() (0.2 across).
+ORIGIN_MARK = ([(-0.1, -0.1), (0.1, -0.1), (0.1, 0.1), (-0.1, 0.1)], (255, 215, 0))
+SHOW_YOUR_SHADOW = True   # TEST: a ring on the floor under you, YOUR_HIT_RADIUS wide (look down to see it)
 
 # ---- A TANK's GUN: the DEFAULTS. A tank in a level can change any of these in its own "gun": {...} ----
 #   "mode"         - how the turret turns:
 #                    "SPIN"      round and round, all 360 degrees (it fires when it happens to point at you)
 #                    "OSCILLATE" sweeps back and forth between centre - range and centre + range (a cone)
 #                    "TRACK"     turns towards YOU and locks on (at most turret_spin degrees a frame)
+#                    "DOWN"      never turns or aims: fires STRAIGHT DOWN from the thing's lowest point, every
+#                                time it's cooled down.
+#                    "TARGET"    never turns, but fires STRAIGHT AT YOU from the edge of the thing nearest you,
+#                                every time it's cooled down.
+#                    DOWN and TARGET are the only modes a SHAPE can have (a shape has no turret to turn).
+#                    (Any thing can have a gun: a tank's goes on its turret, a shape's on the shape itself.
+#                     All modes share the FIRING settings: cooldown, volley, volley_gap, bullet_speed.)
 #   "turret_spin"  - degrees per frame: how fast it spins (SPIN), sweeps (OSCILLATE) or turns to follow you (TRACK).
 #                    None (SPIN only) = keep the spin the design or the level's "children" gave it.
 #   "range"        - OSCILLATE: degrees either side of "centre" it sweeps
 #   "centre"       - OSCILLATE: the middle of the sweep, in degrees, relative to the hull's front (0 = straight ahead)
 #   "cone", "cooldown", "volley", "volley_gap", "bullet_speed" - as the TANK_ settings above, for this tank only
+#   "bullet_colour", "bullet_palette" - its BULLETS' outline colour and face palette. None = the shooter's own
+#                    colours (a lava dripper with black faces can still drip SUNSET bullets).
 #   "start_angle"  - where the turret points when the level starts: degrees relative to the hull's front, or "you"
 #                    = straight at where you start (so it fires straight away). None = straight ahead (OSCILLATE:
 #                    the middle of its sweep).
@@ -540,9 +571,13 @@ GUN_DEFAULTS = {
     "volley": TANK_VOLLEY,
     "volley_gap": TANK_VOLLEY_GAP,
     "bullet_speed": TANK_BULLET_SPEED,
+    "bullet_colour": None,
+    "bullet_palette": None,
 }
-GUN_MODES = ("SPIN", "OSCILLATE", "TRACK")
-you = {"hits_taken": 0, "hurt": 0,   # how many times you've been hit, and frames left of the red flash
+GUN_MODES = ("SPIN", "OSCILLATE", "TRACK", "DOWN", "TARGET")
+SHAPE_GUN_MODES = ("DOWN", "TARGET")    # the modes that need no turret: they never turn, and fire every cooldown
+you = {"hits_taken": 0, "hurt": 0,   # how many times you've been hit, and frames left of the flash
+       "hurt_colour": (255, 0, 0),   # the flash's colour: what hit you (a bullet's, or the lava's / ice's)
        "lava_timer": 0,              # frames until standing in lava hurts you again (0 = straight away)
        "frozen": 0,                  # frames left FROZEN by ice (0 = free to move)
        "freeze_grace": 0}            # frames left when ice can't freeze you again
@@ -568,7 +603,9 @@ level_banner = {"name": "", "intro": "", "frame": 0}   # what's showing now: set
 # ---- LEVEL COMPLETED: when every shape is destroyed, a message shows, then the NEXT level loads ----
 LEVEL_COMPLETE_FRAMES = 180   # frames the "Level X completed!" message shows before the next level (3 seconds)
 TEST_LEVELS = (99,)           # levels that aren't part of the normal 1, 2, 3 ... order (finishing one ends there)
-level_progress = {"number": None, "cleared_frames": None}   # this level's number, and frames since it was cleared
+level_progress = {"number": None, "cleared_frames": None,    # this level's number, and frames since it was cleared
+                  "frames": 0}                              # frames PLAYED on this level (stops when cleared): the LEVEL TIME
+DEFAULT_TARGET_TIME = 120     # seconds: a level's TARGET TIME if it doesn't give its own "target_time"
                                                             #   (None = not cleared yet)
 
 crosshair = {"kick": 0, "hit": 0}   # what it's doing right now. A DICTIONARY, so functions can change it
@@ -584,8 +621,12 @@ MOUSE_SPEED = 0.2     # degrees of turn per pixel the mouse moves
 FLOOR_Y = -1                  # the floor's height: the bottom of a full-size cube at y = 0
                               # (every level's "world" min y should be this; the grid's size comes from the level)
 GRID_COLOUR = (40, 90, 70)    # dim green: the floor is background, so it shouldn't stand out
+# This level's look: set by load_level() from the level's optional settings (a DICT, changed in place,
+# so every file sees the new level's values).
+level_look = {"grid_colour": GRID_COLOUR,
+              "box_colour": GRID_COLOUR}   # the room's OUTER box and the map's play area: the grid colour, BRIGHTER
+BOX_BRIGHTER = 1.6            # the outer box is the grid colour times this (capped at 255): it stands out a little   # EVERY grid's colour: floor, walls (G) and mini-map (a level's "grid_colour", or GRID_COLOUR)
 WALL_GRID_STEP = 2                  # world units between the grid lines on the WALLS and CEILING (G key: on / off)
-WORLD_BOX_COLOUR = (70, 140, 110)   # a little brighter than the grid: the wireframe box round the room
                                     #   (the 4 corner posts up to the ceiling, and the ceiling's 4 edges)
 
 
@@ -605,7 +646,7 @@ FLOOR_SHAPES = []     # filled by load_level() from the level's "floor_shapes" (
 DECAL_TYPES = {
     "paint": {"colour": None,            "hurts": False, "glow": False, "freezes": False},   # just a mark
     "lava":  {"colour": (255, 70, 20),   "hurts": True,  "glow": True,  "freezes": False},   # jump over it!
-    "ice":   {"colour": (170, 225, 255), "hurts": False, "glow": True,  "freezes": True},    # it freezes you!
+    "ice":   {"colour": (170, 225, 255), "hurts": True,  "glow": True,  "freezes": True},    # it freezes AND hurts you!
 }
 FREEZE_FRAMES = 60        # frames ice freezes you for (1 second): long enough for a tank to lock on
 FREEZE_GRACE = 60         # frames after thawing when ice can't freeze you again (so you can walk off it)
