@@ -29,14 +29,25 @@ The files share names with `import *`, so shared lists/dicts must be **changed i
 - Sizes are named: HUGE 4 across / 5 hp → LARGE 2.5 / 4 → **MEDIUM 1.5 / 3** (the user's reference) → SMALL 1 / 2 → TINY 0.5 / 1 (dies). Levels can override with `"sizes"`.
 - A level with nothing in `spawn` never "completes".
 - Lines are trimmed at NEAR **and** to the screen edges before drawing (`draw_world_line` + `trim_line_to_screen`; decals use `trim_to_near` + `trim_to_screen`). This is what keeps big rooms fast — don't remove it.
+- Faces go through `face_on_screen()`: trim at NEAR, project, shoelace back-face test, trim to screen. (Skipping a face with a corner behind NEAR made big pillars vanish up close.)
+- Build long level boxes as ~1-unit pieces: the painter's sort uses one distance per face, so long faces draw wrong.
+- Simplest working rule first; no clever edge cases unless gameplay needs them.
+- Guns: every gun is one config (`GUN_DEFAULTS`). Turrets: SPIN / OSCILLATE / TRACK (aimed in the hull's own frame, so they work on walls and ceilings). Shapes: DOWN (first lowest corner) / TARGET (first corner nearest your eye). Bullets take the firer's colours unless `bullet_colour` / `bullet_palette` are set.
+- `"scenery": True` = not counted for clearing, not on the map, can't be killed (drippers, bunkers).
+- Your body = a column from feet (eye − 1) to eye, `YOUR_BODY_RADIUS` wide. Boxes block you (x and z checked separately, so you slide) and you can stand on them (`STEP_UP`).
+  THINGS block you too (`into_a_thing`: only steps that go DEEPER are refused, so you can always get out). A MOVING thing that touches you hurts you and bounces off (`things_bump_you`, then `BUMP_GRACE` frames).
+- Every grid follows `level_look["grid_colour"]`; boxes default to it × `BOX_BRIGHTER`. A gold `ORIGIN_MARK` is at x 0, z 0 in every level.
 
 ## Levels so far
 1 Training Day · 2 Fire and Ice · 3 Triple Threat · 4 Move or Die (patrolling tank) · 5 Crossfire (two tanks) ·
-6 The Floor Is Lava · 7 Frozen (will not let you go!) (ice clone of 6) · 8 The Big Room (empty, 32 x 32) ·
-9 The Huge Room (empty, 48 x 48) · 99 Skunk works (test level, now 48 x 48).
+6 The Floor Is Lava (lava bands, drippers) · 7 Frozen (will not let you go!) (ice clone of 6) ·
+8 The Canyon (32 x 32 stone ruins, floor/wall/ceiling bunkers) · 9 The Huge Room (48 x 48, one small cube) ·
+99 Skunk works (48 x 48, everything shoots at you). 99 now comes after 9 (`TEST_LEVELS` is empty).
 Levels 1–7 use a 16 x 16 x 8 room.
 
 ## Open ideas (not built yet)
-- Player health / game over (lava and tank hits only count "Hits taken" for now).
+- Player health / game over (hits only count "Hits taken" for now).
+- A `make_box()` helper for building structures; health bars draw through walls; your head isn't stopped when jumping under boxes.
+- Publish: .exe, icon, screenshots.
 - Named sizes for tanks.
 - Things can overhang the world-box walls (bounce uses the centre); a surface-based bounce was proposed, not built.
