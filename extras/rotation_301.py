@@ -5,7 +5,7 @@ import pygame
 from rotation_data import *
 from rotation_functions import *        # (this also opens the game window)
 
-START_LEVEL = 7 # DEBUG: which level to play (see LEVELS in rotation_levels.py). 99 = skunk works, the test level
+START_LEVEL = 99 # DEBUG: which level to play (see LEVELS in rotation_levels.py). 99 = skunk works, the test level
 show_spheres = False   # C key: draw the collision spheres (a debug view)
 show_wall_grid = True  # G key: the grid on the walls and ceiling (watch the FPS counter as you switch it)
 

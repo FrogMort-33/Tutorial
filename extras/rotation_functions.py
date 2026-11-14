@@ -1045,7 +1045,33 @@ def draw_world_line(world_start, world_end, colour):
             start = crossing                         # trim the start off ...
         else:
             end = crossing                           # ... or the end
-    pygame.draw.line(screen, colour, project(start), project(end), 1)
+    on_screen = trim_line_to_screen(project(start), project(end))
+    if on_screen:
+        pygame.draw.line(screen, colour, on_screen[0], on_screen[1], 1)
+
+
+def trim_line_to_screen(a, b):
+    # A line on the screen, cut down to the screen's edges (None = none of it is on screen).
+    # Ends trimmed at NEAR can land tens of thousands of pixels off screen, and pygame takes longer the further
+    # a line runs off the screen (a line 2,000,000 pixels long took 6.5 ms!), which made big rooms slow.
+    # Walk along the line from a (share 0) to b (share 1): each screen edge can only cut off the start or the end.
+    start_share, end_share = 0.0, 1.0
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    for step, room in ((-dx, a[0] + 1), (dx, WIDTH + 1 - a[0]),       # left and right edges (1 pixel spare)
+                       (-dy, a[1] + 1), (dy, HEIGHT + 1 - a[1])):     # top and bottom edges
+        if step == 0:
+            if room < 0:
+                return None                         # runs along outside this edge: nothing on screen
+            continue
+        share = room / step                          # how far along the line it meets this edge
+        if step < 0:
+            start_share = max(start_share, share)    # coming IN through this edge: cut the start
+        else:
+            end_share = min(end_share, share)        # going OUT through this edge: cut the end
+        if start_share > end_share:
+            return None                              # the line misses the screen
+    return ((a[0] + (dx * start_share), a[1] + (dy * start_share)),
+            (a[0] + (dx * end_share), a[1] + (dy * end_share)))
 
 
 def draw_world_box():
@@ -1373,6 +1399,8 @@ def next_level_number():
 def update_level_progress():
     # Once per frame. When every SHAPE is gone (not counting bullets, or children - they go with their parent),
     # the level is CLEARED: count frames, and after LEVEL_COMPLETE_FRAMES load the next level (if there is one).
+    if not LEVELS[level_progress["number"]]["spawn"]:
+        return                                            # an EMPTY level (nothing spawned) never "completes"
     if level_progress["cleared_frames"] is None:
         shapes_left = [thing for thing in things
                        if "parent" not in thing and not thing.get("bullet") and not thing.get("dead")]

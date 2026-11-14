@@ -325,11 +325,11 @@ LEVELS = {
         ],
     },
 
-    7: {    # ---- LEVEL 7: THIN ICE - level 6, frozen: ICE strips freeze you so the tank can line you up ----
+    7: {    # ---- LEVEL 7: FROZEN - level 6, frozen: ICE strips freeze you so the tank can line you up ----
         "name": "Frozen (will not let you go!)",
         "intro": "Ice freezes you in place - and that tank is waiting. Jump it (SPACE)!",
         "world": {"min": (-8, -1, -8), "max": (8, 7, 8)},           # the same room as levels 1 - 6
-        "start": {"x": 0, "y": 0, "z": -6, "turn": 0, "tip": 0},     # just inside the lava border
+        "start": {"x": 0, "y": 0, "z": -6, "turn": 0, "tip": 0},     # just inside the ice border
 
         "floor_shapes": [
             ([(-0.5, -6.5), (0.5, -6.5), (0.5, -5.5), (-0.5, -5.5)],    # the gold start square (paint)
@@ -381,10 +381,32 @@ LEVELS = {
         ],
     },
 
+    8: {    # ---- LEVEL 8: THE BIG ROOM - an EMPTY room twice as wide and long (32 x 32): how does big feel? ----
+        "name": "The Big Room",
+        "intro": "Nothing here yet - just space. How does a 32 x 32 room feel?",
+        "world": {"min": (-16, -1, -16), "max": (16, 7, 16)},       # 32 wide (x), 32 long (z), 8 tall
+        "start": {"x": 0, "y": 0, "z": -14, "turn": 0, "tip": 0},    # near the back wall, facing the far wall
+
+        "floor_shapes": [],
+        "boxes": [],
+        "spawn": [],                                    # EMPTY: a level with nothing to destroy never "completes"
+    },
+
+    9: {    # ---- LEVEL 9: THE HUGE ROOM - a clone of level 8, but three times as wide and long (48 x 48) ----
+        "name": "The Huge Room",
+        "intro": "Still nothing here - just even more space. How does a 48 x 48 room feel?",
+        "world": {"min": (-24, -1, -24), "max": (24, 7, 24)},       # 48 wide (x), 48 long (z), 8 tall
+        "start": {"x": 0, "y": 0, "z": -22, "turn": 0, "tip": 0},    # near the back wall, facing the far wall
+
+        "floor_shapes": [],
+        "boxes": [],
+        "spawn": [],                                    # EMPTY: a level with nothing to destroy never "completes"
+    },
+
     99: {   # ---- LEVEL 99: SKUNK WORKS - the test level: the world as built so far ----
         "name": "Skunk works",
         "intro": "The test level: everything built so far, all at once.",
-        "world": {"min": (-8, -1, -3), "max": (8, 8, 20)},          # 16 wide, 9 high, 23 deep
+        "world": {"min": (-24, -1, -24), "max": (24, 8, 24)},       # 48 wide (x), 48 long (z), 9 high
         "start": {"x": -7.8, "y": 0, "z": -3.2, "turn": -30, "tip": -1},   # just outside the near-left corner
 
         "floor_shapes": [
