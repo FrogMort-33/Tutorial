@@ -41,6 +41,10 @@ PALETTE_COOL = [                # (spare)
 PALETTE_GOLD = [                # just one colour: every face gold (the lighting still shades each side)
     (245, 200, 60),
 ]
+STONE = (110, 125, 95)         # mossy stone: the outline colour for jungle ruins (boxes)
+PALETTE_STONE = [(120, 130, 105), (95, 108, 85), (140, 150, 120), (85, 98, 78), (150, 160, 130), (75, 88, 68)]
+SAND = (170, 150, 100)          # sandbags: the outline colour for jungle defences (boxes)
+PALETTE_SAND = [(180, 160, 110), (150, 132, 90), (200, 180, 125), (140, 122, 82), (210, 190, 135), (130, 112, 75)]
 PALETTE_BLACK = [               # every face BLACK, like the background: with a coloured outline it looks like a
     (0, 0, 0),                  #   wireframe, but the faces still HIDE the edges behind them ("hidden lines")
 ]
@@ -117,6 +121,20 @@ cube_model = {
     "edges": cube_edges,
     "faces": cube_faces,
     "collision_spheres": [((0, 0, 0), 1.2)],    # one sphere: between a side (1 away) and a corner (1.73 away)
+}
+
+# ---- LOW BOX: the cube squashed to HALF height (2 wide, 2 deep, 1 tall): a bunker's base ----
+# The same corner order as the cube, so the cube's edges and faces (and their normals) fit it exactly:
+# squashing it straight down doesn't change which way any face points.
+low_box_points = [
+    (-1, -0.5, -1), ( 1, -0.5, -1), ( 1, -0.5,  1), (-1, -0.5,  1),     # 0-3  bottom: y = -0.5
+    (-1,  0.5, -1), ( 1,  0.5, -1), ( 1,  0.5,  1), (-1,  0.5,  1),     # 4-7  top (the lid): y = +0.5
+]
+low_box_model = {
+    "points": low_box_points,
+    "edges": cube_edges,
+    "faces": cube_faces,
+    "collision_spheres": [((-0.5, 0, 0), 0.75), ((0.5, 0, 0), 0.75)],    # two side by side: it's wide, not tall
 }
 
 
@@ -332,6 +350,20 @@ turret_model = {
     "collision_spheres": [((0, 0.2, 2.05), 0.2)],   # barrel tip: swings WITH the turret
 }
 
+# ---- CUPOLA: a turret with NO barrel (for bunkers on walls and ceilings) ----
+# The turret's body only: its first 8 corners, its first 12 edges and its first 5 faces (no barrel).
+# Its FRONT is still +z (the sloped side): aiming turns +z towards you, exactly as with a barrel.
+# Bullets come out of its ROOF instead of a barrel tip: "muzzles" is just a point, anywhere on the model.
+cupola_model = {
+    "points": turret_points[:8],
+    "edges": turret_edges[:12],
+    "faces": turret_faces[:5],                      # 0 rear, 1 +x, 2 FRONT (sloped, +z), 3 -x, 4 roof
+    "muzzles": [(0, 0.45, -0.1)],                   # the middle of its roof
+    "collision_spheres": [((0, 0.25, 0), 0.5)],
+}
+# Its colours: forest green, with a bright GOLD VISOR on the front (face 2), so you can see which way it faces
+PALETTE_CUPOLA = [(60, 140, 70), (60, 140, 70), (255, 215, 0), (60, 140, 70), (90, 160, 80)]
+
 
 # ---- TWIN TURRET: the same turret, with TWO barrels side by side (for the big tank) ----
 # Same turret points as turret_model. Its one barrel was moved 0.15 to the left, and a copy
@@ -534,6 +566,10 @@ TANK_VOLLEY_GAP = 8       # frames between the shots in a volley
 TANK_BULLET_SPEED = 0.15  # world units per frame: slower than yours, so you can dodge
 # Bullets take the SHOOTER's colour and palette: a tank's turret (its tank's colours), a shape, or you (gold).
 YOUR_HIT_RADIUS = 0.3     # a tank bullet this close to your eye counts as hitting YOU
+YOUR_BODY_RADIUS = 0.25   # BOXES: how close your body can get to a box's side (see you_hit_a_box)
+BUMP_GRACE = 45           # THINGS: frames after a moving thing hits you before one can hurt you again (0.75 s)
+STEP_UP = 0.3             # BOXES: a box top this far above your feet (or less) you just WALK up onto, like a
+                          #   step. Anything taller blocks you (jump onto it). Sandbags are 0.4: jump them.
 # A tiny GOLD square on the floor under WORLD x 0, z 0, added to EVERY level by load_level() (0.2 across).
 ORIGIN_MARK = ([(-0.1, -0.1), (0.1, -0.1), (0.1, 0.1), (-0.1, 0.1)], (255, 215, 0))
 SHOW_YOUR_SHADOW = True   # TEST: a ring on the floor under you, YOUR_HIT_RADIUS wide (look down to see it)
@@ -580,7 +616,8 @@ you = {"hits_taken": 0, "hurt": 0,   # how many times you've been hit, and frame
        "hurt_colour": (255, 0, 0),   # the flash's colour: what hit you (a bullet's, or the lava's / ice's)
        "lava_timer": 0,              # frames until standing in lava hurts you again (0 = straight away)
        "frozen": 0,                  # frames left FROZEN by ice (0 = free to move)
-       "freeze_grace": 0}            # frames left when ice can't freeze you again
+       "freeze_grace": 0,            # frames left when ice can't freeze you again
+       "bump_grace": 0}              # frames left before a moving THING can hurt you again
 
 
 # ================================ CROSSHAIR ================================
@@ -602,7 +639,7 @@ level_banner = {"name": "", "intro": "", "frame": 0}   # what's showing now: set
 
 # ---- LEVEL COMPLETED: when every shape is destroyed, a message shows, then the NEXT level loads ----
 LEVEL_COMPLETE_FRAMES = 180   # frames the "Level X completed!" message shows before the next level (3 seconds)
-TEST_LEVELS = (99,)           # levels that aren't part of the normal 1, 2, 3 ... order (finishing one ends there)
+TEST_LEVELS = ()           # levels that aren't part of the normal 1, 2, 3 ... order (finishing one ends there)
 level_progress = {"number": None, "cleared_frames": None,    # this level's number, and frames since it was cleared
                   "frames": 0}                              # frames PLAYED on this level (stops when cleared): the LEVEL TIME
 DEFAULT_TARGET_TIME = 120     # seconds: a level's TARGET TIME if it doesn't give its own "target_time"

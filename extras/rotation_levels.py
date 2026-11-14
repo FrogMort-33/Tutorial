@@ -39,6 +39,17 @@ DESIGNS = {
             {"part": "radar",  "model": radar_model,  "position": [0, 0.35, -0.5], "speeds": (6, 0, 0)},   # mast foot, on the turret roof
         ],
     },
+    # ---- BUNKERS: a LOW BOX that never moves, with a tank turret on its lid ----
+    # A child's position is in its PARENT's model units: the low box's lid is at y = 0.5, and the turret's base
+    # is at its own y = 0, so [0, 0.5, 0] sits it right on top. At size 0.6 it matches the small tank exactly.
+    "bunker": {
+        "model": low_box_model,
+        "colour": GREY,
+        "palette": PALETTE_GREY,
+        "children": [
+            {"part": "turret", "model": turret_model, "position": [0, 0.5, 0], "gun": True},
+        ],
+    },
     "twin tank": {                   # the same tank, with the TWO-barrelled turret
         "model": hull_model,
         "colour": GREY,
@@ -453,31 +464,221 @@ LEVELS = {
         ],
     },
 
-    8: {    # ---- LEVEL 8: THE BIG ROOM - an EMPTY room twice as wide and long (32 x 32): how does big feel? ----
-        "name": "The Big Room",
-        "intro": "Nothing here yet - just space. How does a 32 x 32 room feel?",
+    8: {    # ---- LEVEL 8: THE CANYON - a big room (32 x 32) of stone ruins, with bunkers on the floor, walls and ceiling ----
+        "name": "The Canyon",
+        "intro": "Bunkers on the floor, the walls and the ceiling. Use the ruins for cover.",
         "world": {"min": (-16, -1, -16), "max": (16, 7, 16)},       # 32 wide (x), 32 long (z), 8 tall
         "start": {"x": 0, "y": 0, "z": -14, "turn": 0, "tip": 0},    # near the back wall, facing the far wall
+        "grid_colour": (60, 70, 55),                                # a dim STONE grey-green grid (from the stone palette)
 
         "floor_shapes": [],
-        "boxes": [],
-        "spawn": [],                                    # EMPTY: a level with nothing to destroy never "completes"
+        "boxes": [
+            # JUNGLE RUINS in mossy stone (STONE, PALETTE_STONE). Every edge on a whole or half unit.
+            # THE FOUNDATIONS: where the gate stood - the LOW outline of a fallen building (x -3 to 3, z 6 to 10):
+            # wall stubs 0.2 to 1 tall with gaps where stones are missing, a fallen block and a step. Low enough to
+            # see and shoot over, cover close to the ground. Pieces no longer than 1 unit.
+            {"min": (-3, -1, 6), "max": (-2, 0.0, 6.4), "colour": STONE, "palette": PALETTE_STONE},   # front: corner stub
+            {"min": (-2, -1, 6), "max": (-1, -0.5, 6.4), "colour": STONE, "palette": PALETTE_STONE},   # front: low
+            {"min": (0, -1, 6), "max": (1, -0.2, 6.4), "colour": STONE, "palette": PALETTE_STONE},   # front (a gap at x -1 to 0: a missing stone)
+            {"min": (1, -1, 6), "max": (2, -0.7, 6.4), "colour": STONE, "palette": PALETTE_STONE},   # front: almost gone
+            {"min": (2, -1, 6), "max": (3, 0.0, 6.4), "colour": STONE, "palette": PALETTE_STONE},   # front: corner stub
+            {"min": (-3, -1, 6.4), "max": (-2.6, -0.3, 7.4), "colour": STONE, "palette": PALETTE_STONE},   # left side
+            {"min": (-3, -1, 8.4), "max": (-2.6, -0.6, 9.4), "colour": STONE, "palette": PALETTE_STONE},   # left side (gap from z 7.4 to 8.4)
+            {"min": (2.6, -1, 6.4), "max": (3, -0.4, 7.4), "colour": STONE, "palette": PALETTE_STONE},   # right side
+            {"min": (2.6, -1, 7.4), "max": (3, -0.8, 8.4), "colour": STONE, "palette": PALETTE_STONE},   # right side, almost gone
+            {"min": (-3, -1, 9.6), "max": (-2, -0.2, 10), "colour": STONE, "palette": PALETTE_STONE},   # back: corner stub
+            {"min": (-1, -1, 9.6), "max": (0, -0.5, 10), "colour": STONE, "palette": PALETTE_STONE},   # back
+            {"min": (1, -1, 9.6), "max": (2, -0.3, 10), "colour": STONE, "palette": PALETTE_STONE},   # back
+            {"min": (2, -1, 9.6), "max": (3, 0.0, 10), "colour": STONE, "palette": PALETTE_STONE},   # back: corner stub
+            {"min": (-0.6, -1, 7.6), "max": (0.4, -0.6, 8.2), "colour": STONE, "palette": PALETTE_STONE},   # a fallen block inside
+            {"min": (-1.5, -1, 8.6), "max": (-0.5, -0.8, 9.2), "colour": STONE, "palette": PALETTE_STONE},   # a step
+            # THE RUIN: two walls (0.4 thick) meeting at a corner (x -12, z 12): a DOORWAY in one, a WINDOW in the
+            # other, broken tops at different heights, and rubble. (Turned 90 clockwise about x -9, z 9.)
+            {"min": (-12, -1, 9.5), "max": (-11.6, 2, 12), "colour": STONE, "palette": PALETTE_STONE},   # wall A (along z): left of the doorway, full height
+            {"min": (-12, -1, 7), "max": (-11.6, 1.5, 8.5), "colour": STONE, "palette": PALETTE_STONE},   # wall A: right of the doorway, broken lower
+            {"min": (-12, -1, 6), "max": (-11.6, 0.5, 7), "colour": STONE, "palette": PALETTE_STONE},   # wall A: the crumbled end
+            {"min": (-12, 1.2, 8.5), "max": (-11.6, 2, 9.5), "colour": STONE, "palette": PALETTE_STONE},   # wall A: the lintel over the doorway
+            {"min": (-11.6, -1, 11.6), "max": (-9.5, 2, 12), "colour": STONE, "palette": PALETTE_STONE},   # wall B (along x): up to the window
+            {"min": (-9.5, -1, 11.6), "max": (-8.5, 0.3, 12), "colour": STONE, "palette": PALETTE_STONE},   # wall B: under the window
+            {"min": (-9.5, 1, 11.6), "max": (-8.5, 1.6, 12), "colour": STONE, "palette": PALETTE_STONE},   # wall B: over the window
+            {"min": (-8.5, -1, 11.6), "max": (-6, 1.2, 12), "colour": STONE, "palette": PALETTE_STONE},   # wall B: past the window, broken lower
+            {"min": (-11, -1, 6.8), "max": (-10.4, -0.6, 7.4), "colour": STONE, "palette": PALETTE_STONE},   # rubble
+            {"min": (-10, -1, 10.1), "max": (-9.6, -0.7, 10.6), "colour": STONE, "palette": PALETTE_STONE},   # rubble
+            # THE ROCK COLUMN: a floor-to-CEILING column of weathered rock (where the stump was), x about 9.5 to
+            # 11.5, z about 8.5 to 10.5. Eight layers, each 1 tall, each a little shifted and resized, so its sides
+            # are jagged. (Short layers, not one 8-tall box: long faces draw wrong next to short ones.)
+            {"min": (9.4, -1, 8.4), "max": (11.6, 0, 10.6), "colour": STONE, "palette": PALETTE_STONE},   # layer 1: y -1 to 0
+            {"min": (9.6, 0, 8.6), "max": (11.5, 1, 10.6), "colour": STONE, "palette": PALETTE_STONE},   # layer 2: y 0 to 1
+            {"min": (9.5, 1, 8.5), "max": (11.3, 2, 10.4), "colour": STONE, "palette": PALETTE_STONE},   # layer 3: y 1 to 2
+            {"min": (9.7, 2, 8.7), "max": (11.4, 3, 10.5), "colour": STONE, "palette": PALETTE_STONE},   # layer 4: y 2 to 3
+            {"min": (9.6, 3, 8.6), "max": (11.2, 4, 10.3), "colour": STONE, "palette": PALETTE_STONE},   # layer 5: y 3 to 4
+            {"min": (9.5, 4, 8.5), "max": (11.3, 5, 10.4), "colour": STONE, "palette": PALETTE_STONE},   # layer 6: y 4 to 5
+            {"min": (9.6, 5, 8.4), "max": (11.5, 6, 10.5), "colour": STONE, "palette": PALETTE_STONE},   # layer 7: y 5 to 6
+            {"min": (9.4, 6, 8.3), "max": (11.6, 7, 10.6), "colour": STONE, "palette": PALETTE_STONE},   # layer 8: y 6 to 7
+            # YOUR SANDBAGS: a U round where you start (x 0, z -14), open BEHIND you. The normal sandbag height
+            # (0.4 tall, top at y -0.6), like the bunkers' nests: low cover you can see and shoot over.
+            {"min": (-1.9, -1, -12.6), "max": (-1.5, -0.6, -12.2), "colour": SAND, "palette": PALETTE_SAND},   # front left corner
+            {"min": (1.5, -1, -12.6), "max": (1.9, -0.6, -12.2), "colour": SAND, "palette": PALETTE_SAND},   # front right corner
+            {"min": (-1.5, -1, -12.6), "max": (-0.5, -0.6, -12.2), "colour": SAND, "palette": PALETTE_SAND},   # front
+            {"min": (-0.5, -1, -12.6), "max": (0.5, -0.6, -12.2), "colour": SAND, "palette": PALETTE_SAND},   # front
+            {"min": (0.5, -1, -12.6), "max": (1.5, -0.6, -12.2), "colour": SAND, "palette": PALETTE_SAND},   # front
+            {"min": (-1.9, -1, -13.6), "max": (-1.5, -0.6, -12.6), "colour": SAND, "palette": PALETTE_SAND},   # left side
+            {"min": (1.5, -1, -13.6), "max": (1.9, -0.6, -12.6), "colour": SAND, "palette": PALETTE_SAND},   # right side
+            {"min": (-1.9, -1, -14.4), "max": (-1.5, -0.6, -13.6), "colour": SAND, "palette": PALETTE_SAND},   # left side
+            {"min": (1.5, -1, -14.4), "max": (1.9, -0.6, -13.6), "colour": SAND, "palette": PALETTE_SAND},   # right side
+            # THE FRONT RUIN: COVER between where you start and the bunkers. A broken wall across the front
+            # right (z -9 to -8.6, 0.4 thick) with a DOORWAY and an eye-height WINDOW to shoot through, and a
+            # short return wall at its end. Built in pieces no longer than 1 unit (so it always draws right).
+            # Your eye is at y 0: walls taller than that hide you.
+            {"min": (5, -1, -9), "max": (6, 1.2, -8.6), "colour": STONE, "palette": PALETTE_STONE},   # wall, broken lower (peek over it)
+            {"min": (6, -1, -9), "max": (7, -0.3, -8.6), "colour": STONE, "palette": PALETTE_STONE},   # wall under the WINDOW
+            {"min": (6, 0.4, -9), "max": (7, 2.0, -8.6), "colour": STONE, "palette": PALETTE_STONE},   # wall over the WINDOW (the window: y -0.3 to 0.4, at your eye)
+            {"min": (7, -1, -9), "max": (7.5, 1.6, -8.6), "colour": STONE, "palette": PALETTE_STONE},   # wall, left of the DOORWAY
+            {"min": (7.5, 1.4, -9), "max": (8.5, 1.9, -8.6), "colour": STONE, "palette": PALETTE_STONE},   # lintel over the DOORWAY (x 7.5 to 8.5)
+            {"min": (8.5, -1, -9), "max": (9.5, 1.8, -8.6), "colour": STONE, "palette": PALETTE_STONE},   # wall, right of the doorway
+            {"min": (9.5, -1, -9), "max": (10.5, 1.4, -8.6), "colour": STONE, "palette": PALETTE_STONE},   # wall
+            {"min": (10.5, -1, -9), "max": (11, 2.0, -8.6), "colour": STONE, "palette": PALETTE_STONE},   # the corner, full height
+            {"min": (10.6, -1, -10), "max": (11, 2.0, -9), "colour": STONE, "palette": PALETTE_STONE},   # return wall (along z)
+            {"min": (10.6, -1, -11), "max": (11, 1.0, -10), "colour": STONE, "palette": PALETTE_STONE},   # return wall, broken lower
+            {"min": (5.6, -1, -10.2), "max": (6.2, -0.5, -9.6), "colour": STONE, "palette": PALETTE_STONE},   # rubble behind the wall
+            {"min": (9.0, -1, -10.0), "max": (9.5, -0.6, -9.5), "colour": STONE, "palette": PALETTE_STONE},   # rubble
+            # THE WEST NEST: a low SANDBAG wall (0.4 tall: just under the bunker's gun, so it can fire over) round the west
+            # floor bunker (x -10, z -4), with a GAP facing the back wall
+            {"min": (-12, -1, -2.5), "max": (-11.5, -0.6, -2), "colour": SAND, "palette": PALETTE_SAND},   # corner
+            {"min": (-8.5, -1, -2.5), "max": (-8, -0.6, -2), "colour": SAND, "palette": PALETTE_SAND},   # corner
+            {"min": (-12, -1, -6), "max": (-11.5, -0.6, -5.5), "colour": SAND, "palette": PALETTE_SAND},   # corner
+            {"min": (-8.5, -1, -6), "max": (-8, -0.6, -5.5), "colour": SAND, "palette": PALETTE_SAND},   # corner
+            {"min": (-11.5, -1, -2.5), "max": (-10.5, -0.6, -2), "colour": SAND, "palette": PALETTE_SAND},   # far side
+            {"min": (-10.5, -1, -2.5), "max": (-9.5, -0.6, -2), "colour": SAND, "palette": PALETTE_SAND},   # far side
+            {"min": (-9.5, -1, -2.5), "max": (-8.5, -0.6, -2), "colour": SAND, "palette": PALETTE_SAND},   # far side
+            {"min": (-12, -1, -5.5), "max": (-11.5, -0.6, -4.5), "colour": SAND, "palette": PALETTE_SAND},   # left side
+            {"min": (-8.5, -1, -5.5), "max": (-8, -0.6, -4.5), "colour": SAND, "palette": PALETTE_SAND},   # right side
+            {"min": (-12, -1, -4.5), "max": (-11.5, -0.6, -3.5), "colour": SAND, "palette": PALETTE_SAND},   # left side
+            {"min": (-8.5, -1, -4.5), "max": (-8, -0.6, -3.5), "colour": SAND, "palette": PALETTE_SAND},   # right side
+            {"min": (-12, -1, -3.5), "max": (-11.5, -0.6, -2.5), "colour": SAND, "palette": PALETTE_SAND},   # left side
+            {"min": (-8.5, -1, -3.5), "max": (-8, -0.6, -2.5), "colour": SAND, "palette": PALETTE_SAND},   # right side
+            {"min": (-11.5, -1, -6), "max": (-11, -0.6, -5.5), "colour": SAND, "palette": PALETTE_SAND},   # near side, left part ...
+            {"min": (-9, -1, -6), "max": (-8.5, -0.6, -5.5), "colour": SAND, "palette": PALETTE_SAND},   # ... and right part: the GAP is between them
+            # EAST NEST: the same sandbag nest round the east floor bunker (x 10, z -4)
+            {"min": (8, -1, -2.5), "max": (8.5, -0.6, -2), "colour": SAND, "palette": PALETTE_SAND},   # corner
+            {"min": (11.5, -1, -2.5), "max": (12, -0.6, -2), "colour": SAND, "palette": PALETTE_SAND},   # corner
+            {"min": (8, -1, -6), "max": (8.5, -0.6, -5.5), "colour": SAND, "palette": PALETTE_SAND},   # corner
+            {"min": (11.5, -1, -6), "max": (12, -0.6, -5.5), "colour": SAND, "palette": PALETTE_SAND},   # corner
+            {"min": (8.5, -1, -2.5), "max": (9.5, -0.6, -2), "colour": SAND, "palette": PALETTE_SAND},   # far side
+            {"min": (9.5, -1, -2.5), "max": (10.5, -0.6, -2), "colour": SAND, "palette": PALETTE_SAND},   # far side
+            {"min": (10.5, -1, -2.5), "max": (11.5, -0.6, -2), "colour": SAND, "palette": PALETTE_SAND},   # far side
+            {"min": (8, -1, -5.5), "max": (8.5, -0.6, -4.5), "colour": SAND, "palette": PALETTE_SAND},   # left side
+            {"min": (11.5, -1, -5.5), "max": (12, -0.6, -4.5), "colour": SAND, "palette": PALETTE_SAND},   # right side
+            {"min": (8, -1, -4.5), "max": (8.5, -0.6, -3.5), "colour": SAND, "palette": PALETTE_SAND},   # left side
+            {"min": (11.5, -1, -4.5), "max": (12, -0.6, -3.5), "colour": SAND, "palette": PALETTE_SAND},   # right side
+            {"min": (8, -1, -3.5), "max": (8.5, -0.6, -2.5), "colour": SAND, "palette": PALETTE_SAND},   # left side
+            {"min": (11.5, -1, -3.5), "max": (12, -0.6, -2.5), "colour": SAND, "palette": PALETTE_SAND},   # right side
+            {"min": (8.5, -1, -6), "max": (9, -0.6, -5.5), "colour": SAND, "palette": PALETTE_SAND},   # near side, left part ...
+            {"min": (11, -1, -6), "max": (11.5, -0.6, -5.5), "colour": SAND, "palette": PALETTE_SAND},   # ... and right part: the GAP is between them
+            # MIDDLE NEST: the same sandbag nest round the middle floor bunker (x 0, z -2)
+            {"min": (-2, -1, -0.5), "max": (-1.5, -0.6, 0), "colour": SAND, "palette": PALETTE_SAND},   # corner
+            {"min": (1.5, -1, -0.5), "max": (2, -0.6, 0), "colour": SAND, "palette": PALETTE_SAND},   # corner
+            {"min": (-2, -1, -4), "max": (-1.5, -0.6, -3.5), "colour": SAND, "palette": PALETTE_SAND},   # corner
+            {"min": (1.5, -1, -4), "max": (2, -0.6, -3.5), "colour": SAND, "palette": PALETTE_SAND},   # corner
+            {"min": (-1.5, -1, -0.5), "max": (-0.5, -0.6, 0), "colour": SAND, "palette": PALETTE_SAND},   # far side
+            {"min": (-0.5, -1, -0.5), "max": (0.5, -0.6, 0), "colour": SAND, "palette": PALETTE_SAND},   # far side
+            {"min": (0.5, -1, -0.5), "max": (1.5, -0.6, 0), "colour": SAND, "palette": PALETTE_SAND},   # far side
+            {"min": (-2, -1, -3.5), "max": (-1.5, -0.6, -2.5), "colour": SAND, "palette": PALETTE_SAND},   # left side
+            {"min": (1.5, -1, -3.5), "max": (2, -0.6, -2.5), "colour": SAND, "palette": PALETTE_SAND},   # right side
+            {"min": (-2, -1, -2.5), "max": (-1.5, -0.6, -1.5), "colour": SAND, "palette": PALETTE_SAND},   # left side
+            {"min": (1.5, -1, -2.5), "max": (2, -0.6, -1.5), "colour": SAND, "palette": PALETTE_SAND},   # right side
+            {"min": (-2, -1, -1.5), "max": (-1.5, -0.6, -0.5), "colour": SAND, "palette": PALETTE_SAND},   # left side
+            {"min": (1.5, -1, -1.5), "max": (2, -0.6, -0.5), "colour": SAND, "palette": PALETTE_SAND},   # right side
+            {"min": (-1.5, -1, -4), "max": (-1, -0.6, -3.5), "colour": SAND, "palette": PALETTE_SAND},   # near side, left part ...
+            {"min": (1, -1, -4), "max": (1.5, -0.6, -3.5), "colour": SAND, "palette": PALETTE_SAND},   # ... and right part: the GAP is between them
+            # THE SHRINE: a ruined three-sided stone room at the front left - COVER from the bunkers. Its FRONT
+            # wall (z -8.4 to -8) faces the bunkers; its open side faces the back wall, where you come in.
+            # An ARROW SLIT and a BREACH in the front wall, side walls crumbling lower towards you, a low ALTAR
+            # inside to crouch behind, fallen stones outside. Pieces no longer than 1 unit.
+            {"min": (-13, -1, -8.4), "max": (-12, 2.2, -8), "colour": STONE, "palette": PALETTE_STONE},   # front wall: the tall corner
+            {"min": (-12, -1, -8.4), "max": (-11.2, 1.8, -8), "colour": STONE, "palette": PALETTE_STONE},   # front wall
+            {"min": (-11.2, -1, -8.4), "max": (-10.8, -0.4, -8), "colour": STONE, "palette": PALETTE_STONE},   # under the ARROW SLIT
+            {"min": (-11.2, 0.6, -8.4), "max": (-10.8, 1.8, -8), "colour": STONE, "palette": PALETTE_STONE},   # over the arrow slit (the slit: y -0.4 to 0.6, at your eye)
+            {"min": (-10.8, -1, -8.4), "max": (-10, 1.8, -8), "colour": STONE, "palette": PALETTE_STONE},   # front wall
+            {"min": (-10, -1, -8.4), "max": (-9, 0.8, -8), "colour": STONE, "palette": PALETTE_STONE},   # front wall, broken low (peek over it)
+            {"min": (-8, -1, -8.4), "max": (-7.6, 1.5, -8), "colour": STONE, "palette": PALETTE_STONE},   # front wall's right end (the BREACH is x -9 to -8)
+            {"min": (-13.4, -1, -9), "max": (-13, 2.2, -8), "colour": STONE, "palette": PALETTE_STONE},   # left wall, full height
+            {"min": (-13.4, -1, -10), "max": (-13, 1.6, -9), "colour": STONE, "palette": PALETTE_STONE},   # left wall, crumbling
+            {"min": (-13.4, -1, -11), "max": (-13, 0.9, -10), "colour": STONE, "palette": PALETTE_STONE},   # left wall, crumbled low
+            {"min": (-8, -1, -9), "max": (-7.6, 1.5, -8.4), "colour": STONE, "palette": PALETTE_STONE},   # right wall
+            {"min": (-8, -1, -10), "max": (-7.6, 0.6, -9), "colour": STONE, "palette": PALETTE_STONE},   # right wall, crumbled low
+            {"min": (-11.5, -1, -10), "max": (-10.5, -0.3, -9.2), "colour": STONE, "palette": PALETTE_STONE},   # the ALTAR: crouch behind it
+            {"min": (-12.5, -1, -7.4), "max": (-11.5, -0.6, -7.0), "colour": STONE, "palette": PALETTE_STONE},   # a fallen stone outside the front wall
+            {"min": (-8.8, -1, -7.6), "max": (-8.2, -0.6, -7.1), "colour": STONE, "palette": PALETTE_STONE},   # rubble from the breach
+            {"min": (-9.6, -1, -7.4), "max": (-9.2, -0.7, -7.0), "colour": STONE, "palette": PALETTE_STONE},   # rubble from the breach
+        ],
+        "spawn": [
+            # FLOOR BUNKERS (3), and wall and ceiling bunkers (4). The floor ones: low green boxes at the SMALL
+            # TANK's size (0.6: 1.2 across,
+            # 0.6 tall - y -0.7 = sitting on the floor), each with a small tank's turret on top
+            # whose turret SPINS round (SPIN mode) and fires a volley of 3 whenever it points at you.
+            # Different start angles and spin directions, so they never sweep in step.
+            {"design": "bunker", "name": "west bunker",
+             "position": [-10, -0.7, -4], "size": 0.6,
+             "colour": (60, 140, 70), "palette": PALETTE_FOREST,
+             "gun": {"mode": "SPIN", "turret_spin": 1.0, "start_angle": 0, "volley": 3}},
+            {"design": "bunker", "name": "east bunker",
+             "position": [10, -0.7, -4], "size": 0.6,
+             "colour": (60, 140, 70), "palette": PALETTE_FOREST,
+             "gun": {"mode": "SPIN", "turret_spin": -1.0, "start_angle": 90, "volley": 3}},
+            {"design": "bunker", "name": "left wall bunker",          # on the LEFT wall (x = -16)
+             "position": [-15.7, 3, 4], "size": 0.6,
+             "angles": [0, 0, -90],                             # rolled -90: lid facing into the room (+x)
+             "colour": (60, 140, 70), "palette": PALETTE_FOREST,
+             "gun": {"mode": "TRACK", "turret_spin": 1, "volley": 3},
+             "children": [{"model": cupola_model, "palette": PALETTE_CUPOLA}]},   # the CUPOLA: no barrel   # its turret turns to follow you
+            {"design": "bunker", "name": "ceiling bunker",            # hanging from the CEILING (y = 7)
+             "position": [6, 6.7, 4], "size": 0.6,
+             "angles": [0, 180, 0],                             # upside down: lid facing the floor
+             "colour": (60, 140, 70), "palette": PALETTE_FOREST,
+             "gun": {"mode": "TRACK", "turret_spin": 1, "volley": 3},
+             "children": [{"model": cupola_model, "palette": PALETTE_CUPOLA}]},   # the CUPOLA: no barrel
+            {"design": "bunker", "name": "middle bunker",
+             "position": [0, -0.7, -2], "size": 0.6,
+             "colour": (60, 140, 70), "palette": PALETTE_FOREST,
+             "gun": {"mode": "SPIN", "turret_spin": 1.2, "start_angle": 45, "volley": 3}},
+            {"design": "bunker", "name": "far wall bunker",           # on the FAR wall (z = 16)
+             "position": [0, 3, 15.7], "size": 0.6,
+             "angles": [0, -90, 0],                             # tilted -90: lid facing into the room (-z)
+             "colour": (60, 140, 70), "palette": PALETTE_FOREST,
+             "gun": {"mode": "TRACK", "turret_spin": 1, "volley": 3},
+             "children": [{"model": cupola_model, "palette": PALETTE_CUPOLA}]},   # the CUPOLA: no barrel
+            # WALL and CEILING BUNKERS: the same bunker turned so its lid faces into the room, its low box 0.3 in
+            # from the surface. Each has a CUPOLA (no barrel, gold visor on its front, bullets from its roof)
+            # that TRACKS you (turns to follow you) in the plane of its wall.
+            {"design": "bunker", "name": "right wall bunker",         # on the RIGHT wall (x = 16)
+             "position": [15.7, 3, 0], "size": 0.6,
+             "angles": [0, 0, 90],                              # rolled 90: lid facing into the room (-x)
+             "colour": (60, 140, 70), "palette": PALETTE_FOREST,
+             "gun": {"mode": "TRACK", "turret_spin": 1, "volley": 3},
+             "children": [{"model": cupola_model, "palette": PALETTE_CUPOLA}]},   # the CUPOLA: no barrel
+        ],
     },
 
-    9: {    # ---- LEVEL 9: THE HUGE ROOM - a clone of level 8, but three times as wide and long (48 x 48) ----
+    9: {    # ---- LEVEL 9: THE HUGE ROOM - an EMPTY room three times as wide and long (48 x 48) ----
         "name": "The Huge Room",
-        "intro": "Still nothing here - just even more space. How does a 48 x 48 room feel?",
+        "intro": "Just even more space - and one small cube to find and kill.",
         "world": {"min": (-24, -1, -24), "max": (24, 7, 24)},       # 48 wide (x), 48 long (z), 8 tall
         "start": {"x": 0, "y": 0, "z": -22, "turn": 0, "tip": 0},    # near the back wall, facing the far wall
 
         "floor_shapes": [],
         "boxes": [],
-        "spawn": [],                                    # EMPTY: a level with nothing to destroy never "completes"
+        "spawn": [
+            # ONE small cube to kill, so the level can be cleared and you go on to 99. Parked, spinning, in front of you.
+            {"design": "cube", "name": "lonely cube",
+             "position": [0, 0.5, -12], "size": "SMALL", "angles": [30, 20, 0], "speeds": (1, 0, 0),
+             "colour": (120, 190, 240), "palette": PALETTE_ICE},
+        ],
     },
 
     99: {   # ---- LEVEL 99: SKUNK WORKS - the test level: the world as built so far ----
         "name": "Skunk works",
-        "intro": "The test level: everything built so far, all at once.",
+        "intro": "Everything built so far, all at once - and ALL of it is trying to kill you.",
         "world": {"min": (-24, -1, -24), "max": (24, 8, 24)},       # 48 wide (x), 48 long (z), 9 high
         "start": {"x": -7.8, "y": 0, "z": -3.2, "turn": -30, "tip": -1},   # just outside the near-left corner
 
@@ -505,96 +706,109 @@ LEVELS = {
             {"design": "cube", "name": "big cube",
              "position": [-2, 0, 9], "velocity": [0.02, 0.01, -0.015],
              "size": "LARGE", "angles": [35, 0, 0], "speeds": (0, 1, 2),
-             "colour": (120, 190, 240), "palette": PALETTE_ICE},
+             "colour": (120, 190, 240), "palette": PALETTE_ICE,
+             "gun": {"mode": "TARGET", "volley": 1}},          # shoots AT YOU
 
             {"design": "cube", "name": "small cube",
              "position": [3, -0.8, 5], "velocity": [-0.03, 0.02, 0.025],
              "size": "TINY", "angles": [-50, 0, 0], "speeds": (2, 0, 0),
-             "colour": (255, 120, 60), "palette": PALETTE_SUNSET},
+             "colour": (255, 120, 60), "palette": PALETTE_SUNSET,
+             "gun": {"mode": "TARGET", "volley": 1}},          # shoots AT YOU
 
             {"design": "cube", "name": "floor mini",
              "position": [-3, -0.7, 4], "velocity": [0.025, 0.03, 0.02],
              "size": "TINY", "angles": [20, 0, 0], "speeds": (1, 0, 0),
-             "colour": (120, 190, 240), "palette": PALETTE_ICE},
+             "colour": (120, 190, 240), "palette": PALETTE_ICE,
+             "gun": {"mode": "TARGET", "volley": 1}},          # shoots AT YOU
 
             {"design": "cube", "name": "hover mini",
              "position": [0, 0.6, 6], "velocity": [-0.02, -0.015, 0.03],
              "size": "TINY", "angles": [10, 30, 0], "speeds": (1.5, 1, 0.5),
-             "colour": (255, 120, 60), "palette": PALETTE_SUNSET},
+             "colour": (255, 120, 60), "palette": PALETTE_SUNSET,
+             "gun": {"mode": "TARGET", "volley": 1}},          # shoots AT YOU
 
             {"design": "cube", "name": "high mini",
              "position": [5, 2.5, 10], "velocity": [-0.035, -0.02, -0.01],
              "size": "SMALL", "angles": [45, 20, 10], "speeds": (0.5, 2, 1),
-             "colour": (120, 190, 240), "palette": PALETTE_ICE},
+             "colour": (120, 190, 240), "palette": PALETTE_ICE,
+             "gun": {"mode": "TARGET", "volley": 1}},          # shoots AT YOU
 
             {"design": "cube", "name": "mid mini",
              "position": [-5, 1.2, 11], "velocity": [0.015, 0.025, -0.03],
              "size": "TINY", "angles": [0, 45, 45], "speeds": (3, 0, 1),
-             "colour": (255, 120, 60), "palette": PALETTE_SUNSET},
+             "colour": (255, 120, 60), "palette": PALETTE_SUNSET,
+             "gun": {"mode": "TARGET", "volley": 1}},          # shoots AT YOU
 
             {"design": "cube", "name": "gold mini",             # (named "gold", but it's an ice-blue cube)
              "position": [1.5, 1, 3.5], "velocity": [0.04, 0.035, 0.03],
              "size": "TINY", "angles": [30, 0, 0], "speeds": (1, 1, 1),
-             "colour": (120, 190, 240), "palette": PALETTE_ICE},
+             "colour": (120, 190, 240), "palette": PALETTE_ICE,
+             "gun": {"mode": "TARGET", "volley": 1}},          # shoots AT YOU
 
             # ---- PYRAMIDS ----
             {"design": "pyramid", "name": "big pyramid",
              "position": [4, 1, 8], "velocity": [-0.015, 0.005, 0.01],
              "size": "LARGE", "angles": [15, 0, 0], "speeds": (0.7, 0, 0),
-             "colour": (255, 120, 60), "palette": PALETTE_SUNSET},
+             "colour": (255, 120, 60), "palette": PALETTE_SUNSET,
+             "gun": {"mode": "TARGET", "volley": 1}},          # shoots AT YOU
 
             {"design": "pyramid", "name": "tumble pyramid",
              "position": [-3, 2.5, 7], "velocity": [0.03, -0.02, 0.02],
              "size": "SMALL", "angles": [0, 60, 20], "speeds": (1, 2.5, 0.5),
-             "colour": (120, 190, 240), "palette": PALETTE_ICE},
+             "colour": (120, 190, 240), "palette": PALETTE_ICE,
+             "gun": {"mode": "TARGET", "volley": 1}},          # shoots AT YOU
 
             # ---- DIAMONDS ----
             {"design": "diamond", "name": "sunset diamond",
              "position": [-1, 1.5, 6], "velocity": [0.02, 0.03, -0.02],
              "size": "SMALL", "angles": [0, 0, 0], "speeds": (2, 0, 0),
-             "colour": (255, 120, 60), "palette": PALETTE_SUNSET},
+             "colour": (255, 120, 60), "palette": PALETTE_SUNSET,
+             "gun": {"mode": "TARGET", "volley": 1}},          # shoots AT YOU
 
             {"design": "diamond", "name": "ice diamond",
              "position": [2, 2, 10], "velocity": [-0.025, -0.015, -0.03],
              "size": "MEDIUM", "angles": [45, 30, 0], "speeds": (1.5, 0.8, 1.2),
-             "colour": (120, 190, 240), "palette": PALETTE_ICE},
+             "colour": (120, 190, 240), "palette": PALETTE_ICE,
+             "gun": {"mode": "TARGET", "volley": 1}},          # shoots AT YOU
 
             {"design": "diamond", "name": "spark diamond",
              "position": [5, 0.5, 4], "velocity": [-0.04, 0.025, 0.035],
              "size": "TINY", "angles": [10, 20, 30], "speeds": (4, 3, 2),
-             "colour": (255, 120, 60), "palette": PALETTE_SUNSET},
+             "colour": (255, 120, 60), "palette": PALETTE_SUNSET,
+             "gun": {"mode": "TARGET", "volley": 1}},          # shoots AT YOU
 
             # ---- FRAMES ----
             {"design": "frame", "name": "big frame",
              "position": [0, 1, 8], "velocity": [0.05, 0.015, -0.008],
              "size": "LARGE", "angles": [20, 0, 0], "speeds": (0.5, 0, 0),
-             "colour": (120, 190, 240), "palette": PALETTE_ICE},
+             "colour": (120, 190, 240), "palette": PALETTE_ICE,
+             "gun": {"mode": "TARGET", "volley": 1}},          # shoots AT YOU
 
             {"design": "frame", "name": "tumble frame",
              "position": [-4, 2, 6], "velocity": [0.025, -0.02, 0.015],
              "size": "MEDIUM", "angles": [0, 30, 15], "speeds": (1, 1.5, 0.7),
-             "colour": (255, 120, 60), "palette": PALETTE_SUNSET},
+             "colour": (255, 120, 60), "palette": PALETTE_SUNSET,
+             "gun": {"mode": "TARGET", "volley": 1}},          # shoots AT YOU
 
             # ---- TANKS: they sit on the floor (centre y = FLOOR_Y + size), turned round to face you (-z) ----
             {"design": "twin tank", "name": "tank",             # the BIG tank, parked
              "position": [0, 0.5, 16], "size": 1.5, "angles": [180, 0, 0],
              "colour": (120, 190, 80), "palette": PALETTE_FOREST,
-             "gun": {"volley": 6},                              #   TWO barrels: 6 shots a volley (3 each)
-             "children": [{"speeds": (0.3, 0, 0)},              #   its turret turns slowly
-                          {"speeds": (-6, 0, 0)}]},             #   its radar spins the OPPOSITE way, fast
+             "gun": {"mode": "TRACK", "turret_spin": 1, "start_angle": "you", "volley": 6},   # TWO barrels, TRACKS you
+             "radar_spin": -6},
 
             {"design": "tank", "name": "tank left",             # parked
              "position": [-3.5, 0, 16], "size": 1, "angles": [180, 0, 0],
              "colour": (120, 190, 80), "palette": PALETTE_FOREST,
-             "children": [{"speeds": (-0.5, 0, 0)},
-                          {"speeds": (6, 0, 0)}]},
+             "gun": {"mode": "TRACK", "turret_spin": 1, "start_angle": "you"},   # TRACKS you
+             "radar_spin": 6},
 
             {"design": "tank", "name": "small tank",            # drives at an angle: speed 0.01 (a 3-4-5 triangle)
              "position": [3.5, -0.4, 16], "velocity": [-0.006, 0, -0.008],
              "size": 0.6, "angles": [180, 0, 0],
              "colour": (120, 190, 80), "palette": PALETTE_FOREST,
-             "children": [{"speeds": (2, 0, 0)},                #   its turret turns fast
-                          {"speeds": (-6, 0, 0)}]},
+             "gun": {"mode": "TRACK", "turret_spin": 1.5, "start_angle": "you"},   # TRACKS you, fast
+             "radar_spin": -6},
         ],
     },
 }

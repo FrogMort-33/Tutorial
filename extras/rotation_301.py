@@ -5,7 +5,7 @@ import pygame
 from rotation_data import *
 from rotation_functions import *        # (this also opens the game window)
 
-START_LEVEL = 7 # DEBUG: which level to play (see LEVELS in rotation_levels.py). 99 = skunk works, the test level
+START_LEVEL = 1 # DEBUG: which level to play (see LEVELS in rotation_levels.py). 99 = skunk works, the test level
 show_spheres = False   # C key: draw the collision spheres (a debug view)
 show_wall_grid = True  # G key: the grid on the walls and ceiling (watch the FPS counter as you switch it)
 
@@ -35,7 +35,8 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             fire_bullet()                                 # left click: FIRE (one bullet per click)
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-            if camera["y"] <= STAND_Y and you["frozen"] == 0:   # only jump with your feet on the floor (not frozen)
+            if camera["y"] <= standing_height(camera["x"], camera["z"]) + 0.001 and you["frozen"] == 0:
+                # only jump with your feet on the ground - the floor or a box top (and not frozen)
                 camera["vy"] = JUMP_SPEED
                 
     keys = pygame.key.get_pressed()
@@ -46,6 +47,7 @@ while running:
 
     bounce_things_off_each_other()                  # after moving: things that touch bounce apart
     bounce_things_off_boxes()                       # ...and things that hit a box bounce off it
+    things_bump_you()                               # ...and a MOVING thing that touches you hurts you, and bounces off
     move_bullets()                                  # bullets fly, and stop on the first thing they hit
     update_sparks()                                 # move, drop and age the sparks
     things_shoot()                                  # guns fire: turrets at you, DOWN guns straight down (after their cooldown)
