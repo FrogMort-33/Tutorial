@@ -63,6 +63,30 @@ PALETTE_FIRE_AND_ICE = [        # ice and sunset colours taking turns, face by f
     (80, 150, 220), (130, 70, 170),
 ]
 FIRE_AND_ICE = (200, 170, 255)  # its outline colour: between the ice blue and the sunset orange
+ICE_BLOCK = (170, 225, 255)     # the outline of ICE BLOCK boxes (level 9)
+SNOW = (235, 245, 255)          # the outline of packed SNOW boxes (your fort, level 9)
+PALETTE_SNOW = [(235, 245, 255), (210, 225, 240), (195, 212, 232), (225, 235, 250)]   # snow: white to pale blue-grey
+OBSIDIAN = (200, 60, 35)        # the outline of OBSIDIAN boxes (level 10): a red glow round dark rock
+PALETTE_OBSIDIAN = [(45, 32, 38), (60, 40, 46), (34, 24, 30), (72, 46, 44), (52, 36, 42), (40, 28, 34)]   # near-black rock
+EMBER = (255, 170, 90)          # the outline of hot EMBER blocks (level 10), faces in PALETTE_SUNSET
+SLIME = (140, 230, 60)          # SLIME things' outline: toxic lime (level 11)
+PALETTE_SLIME = [(140, 230, 60), (90, 200, 70), (60, 160, 60), (170, 240, 90), (110, 210, 120)]   # toxic greens
+SLUDGE = (120, 220, 60)         # the outline of SLUDGE boxes (level 11): glowing lime round dark muck
+PALETTE_SLUDGE = [(32, 58, 30), (42, 72, 36), (26, 46, 28), (52, 84, 42), (36, 64, 34)]           # dark sewer greens
+CUSTARD = (245, 205, 100)       # CUSTARD things' outline (level 12)
+PALETTE_CUSTARD = [(255, 228, 140), (245, 205, 100), (230, 180, 80), (255, 240, 180), (220, 165, 75)]   # custard yellows
+SPONGE = (225, 185, 115)        # the outline of SPONGE CAKE boxes (level 12)
+PALETTE_SPONGE = [(235, 200, 130), (215, 175, 105), (245, 215, 150), (200, 160, 95), (225, 190, 120)]   # golden sponge
+JELLY = (255, 90, 120)          # JELLY's outline: red jelly towers and jelly cubes (level 12)
+PALETTE_JELLY = [(230, 40, 80), (200, 30, 70), (250, 80, 110), (180, 25, 60), (240, 60, 95)]           # red jellies
+CANDY = (255, 150, 195)         # CUPID CANYON (level 12): candy pink outlines
+PALETTE_CANDY = [(255, 170, 205), (240, 140, 185), (255, 195, 220), (225, 120, 170), (250, 160, 200)]   # candy pinks
+ROSE = (255, 95, 170)           # CUPID CANYON: hot-pink outlines (the towers and the heart cubes)
+PALETTE_ROSE = [(235, 70, 150), (205, 45, 125), (250, 100, 170), (185, 35, 110), (240, 85, 160)]        # rose pinks
+BULLION = (255, 215, 90)        # FORT KNOX (level 13): gold-bar outlines
+PALETTE_BULLION = [(232, 186, 62), (205, 158, 42), (250, 212, 92), (182, 138, 32), (242, 198, 72)]     # gold bars
+BRONZE = (225, 150, 75)         # FORT KNOX: bronze outlines (the towers and cubes)
+PALETTE_BRONZE = [(195, 122, 52), (165, 98, 38), (215, 142, 68), (142, 82, 32), (205, 132, 60)]        # bronzes
 PALETTE_ICE = [                 # pale blues
     (220, 245, 255), (170, 220, 250), (120, 190, 240), (80, 150, 220),
     (180, 240, 230), (130, 210, 210), (200, 200, 255), (150, 170, 230),
@@ -643,7 +667,8 @@ LEVEL_COMPLETE_FRAMES = 180   # frames the "Level X completed!" message shows be
 TEST_LEVELS = ()           # levels that aren't part of the normal 1, 2, 3 ... order (finishing one ends there)
 level_progress = {"number": None, "cleared_frames": None,    # this level's number, and frames since it was cleared
                   "frames": 0,                              # frames PLAYED on this level (stops when cleared): the LEVEL TIME
-                  "gems_total": 0, "gems_collected": 0}     # GEMS: how many this level has, and how many you've got
+                  "gems_total": 0, "gems_collected": 0,     # GEMS: how many this level has, and how many you've got
+                  "hits_total": 0}                          # KILL: hits it took to clear the level at the START (0 = not worked out yet)
 DEFAULT_TARGET_TIME = 120     # seconds: a level's TARGET TIME if it doesn't give its own "target_time"
                                                             #   (None = not cleared yet)
 
@@ -683,9 +708,12 @@ FLOOR_SHAPES = []     # filled by load_level() from the level's "floor_shapes" (
 #   "freezes" - True = stepping on it (feet on the floor) FREEZES you for FREEZE_FRAMES: you can't walk or jump
 #              (you can still look and shoot). Then FREEZE_GRACE frames when it can't freeze you again.
 DECAL_TYPES = {
-    "paint": {"colour": None,            "hurts": False, "glow": False, "freezes": False},   # just a mark
-    "lava":  {"colour": (255, 70, 20),   "hurts": True,  "glow": True,  "freezes": False},   # jump over it!
-    "ice":   {"colour": (170, 225, 255), "hurts": True,  "glow": True,  "freezes": True},    # it freezes AND hurts you!
+    # "slows": how fast you can WALK while you stand on it (1 = normal, 0.3 = under a third of your speed)
+    "paint":   {"colour": None,            "hurts": False, "glow": False, "freezes": False, "slows": 1},     # just a mark
+    "lava":    {"colour": (255, 70, 20),   "hurts": True,  "glow": True,  "freezes": False, "slows": 1},     # jump over it!
+    "ice":     {"colour": (170, 225, 255), "hurts": True,  "glow": True,  "freezes": True,  "slows": 1},     # it freezes AND hurts you!
+    "slime":   {"colour": (120, 220, 50),  "hurts": True,  "glow": True,  "freezes": False, "slows": 0.6},   # sticky POISON: hurts, slows
+    "custard": {"colour": (245, 205, 100), "hurts": False, "glow": False, "freezes": False, "slows": 0.3},   # THICK: no harm, but SO slow
 }
 FREEZE_FRAMES = 60        # frames ice freezes you for (1 second): long enough for a tank to lock on
 FREEZE_GRACE = 60         # frames after thawing when ice can't freeze you again (so you can walk off it)
@@ -714,6 +742,20 @@ SHOW_PIECES = False           # TEST: True = every 1-unit floor piece gets its o
 WORLD_MIN = [0, FLOOR_Y, 0]     # smallest x, y, z
 WORLD_MAX = [0, 0, 0]           # biggest  x, y, z (y = the ceiling: an invisible limit, nothing draws it)
 
+# THE ROPE: a bullet from the RIGHT mouse button, tied to you by a line
+PLAYER_COLOUR = (240, 240, 255)      # YOUR colour: your bullets and the rope (white - gold is for gems)
+PALETTE_PLAYER = [PLAYER_COLOUR]     # every face of your bullets that colour (the lighting still shades each side)
+ROPE_HAND = (0.2, -0.25, 0.3)        # where the line leaves you, from your eye: a bit right, down and forward
+rope = {"bullet": None,              # the rope's bullet while it's out (None = no rope)
+        "start": (0, 0, 0),          # where it was thrown from (to measure how far it has flown)
+        "frames": 0}                 # frames left before it's gone (counts down from ROPE_LIFE)
+ROPE_RANGE = 10                      # the rope flies this far (world units); hit nothing by then and it's gone
+ROPE_LIFE = 300                      # frames from throwing until the rope is gone, hooked or not (5 seconds)
+lock_on = {"degrees": 2}             # LOCK-ON: while the rope is hooked on a THING (not a gem), your bullets turn
+                                     #   up to this many degrees a frame towards its centre (0 = off). A dict, so a
+                                     #   settings tab can change it later.
+ROPE_GEM_PULL = 0.05                 # a GEM on the rope is reeled in towards you this far each frame (3 units a second)
+
 
 # ================================ GEMS: little gold diamonds to COLLECT ================================
 # GEMS are THINGS with "gem": True, so they're drawn, spun, moved and shown on the mini-map like any thing.
@@ -726,8 +768,8 @@ WORLD_MAX = [0, 0, 0]           # biggest  x, y, z (y = the ceiling: an invisibl
 GEMS_PER_LEVEL = 8            # how many gems a level gets, unless it gives its own "gems"
 GEM_ACROSS = 0.3              # world units across, tip to tip (a TINY shape is 0.5)
 GEM_HOVER = 0.5               # the LOWEST a gem's centre floats over the floor: knee-high, so walking into it collects it
-GEM_HIGHEST = 0.8            # the HIGHEST: 1.0 = as high as your best jump can still collect it (0.5 = half way up),
-                              #   worked out from JUMP_SPEED and GRAVITY. Each gem gets a random height in between.
+GEM_HIGHEST = 0.8            # the HIGHEST: this much of the way from the floor to the CEILING (0.8 = 80%), so the
+                              #   high ones need the ROPE. Each gem gets a random height in between.
 GEM_BOB = 0.25                # how far it bobs up and down from there
 GEM_BOB_FRAMES = 120          # frames for one bob, up and back down (2 seconds)
 GEM_SPIN = (2, 0, 0)          # (turn, tilt, spin) degrees per frame: turns slowly round its upright axis

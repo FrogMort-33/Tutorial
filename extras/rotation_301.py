@@ -37,6 +37,10 @@ while running:
             apply_volume()
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             fire_bullet()                                 # left click: FIRE (one bullet per click)
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+            throw_rope()                                  # right button DOWN: throw the rope
+        if event.type == pygame.MOUSEBUTTONUP and event.button == 3:
+            drop_rope()                                   # right button UP: let it go
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
             if camera["y"] <= standing_height(camera["x"], camera["z"]) + 0.001 and you["frozen"] == 0:
                 # only jump with your feet on the ground - the floor or a box top (and not frozen)
@@ -53,7 +57,9 @@ while running:
     bounce_things_off_boxes()                       # ...and things that hit a box bounce off it
     things_bump_you()                               # ...and a MOVING thing that touches you hurts you, and bounces off
     update_gems()                                   # gems bob; walk into one to COLLECT it (a note of the scale)
+    steer_bullets()                                 # LOCK-ON: your bullets bend towards the hooked thing
     move_bullets()                                  # bullets fly, and stop on the first thing they hit
+    update_rope()                                   # the rope hit something? it stays there
     update_sparks()                                 # move, drop and age the sparks
     things_shoot()                                  # guns fire: turrets at you, DOWN guns straight down (after their cooldown)
     remove_finished_things()                        # used-up bullets and destroyed shapes go
@@ -74,6 +80,7 @@ while running:
     paint_faces(face_paint_order)                   # ...sorted far to near and painted
 
     draw_sparks()                                      # sparks on top of the shapes
+    draw_rope()                                        # the line from you to the rope
     draw_health()                                      # health squares above the shapes
 
     if show_spheres:                                   # C key: collision spheres on top of the shapes

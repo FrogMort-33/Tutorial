@@ -27,6 +27,11 @@ fps_font = pygame.font.SysFont(None, 32)   # default font, size 32, for the FPS 
 title_font = pygame.font.SysFont(None, 80)  # the level's name, big, as the level starts
 clock_font = pygame.font.SysFont(None, 72)  # the LEVEL TIME clock, top right
 intro_font = pygame.font.SysFont(None, 36)  # the level's intro line, under the name
+hud_big_font = pygame.font.SysFont(None, 60)    # HUD: the clock
+hud_mid_font = pygame.font.SysFont(None, 36)    # HUD: LEVEL n
+hud_small_font = pygame.font.SysFont(None, 28)  # HUD: labels, the level name, counts
+hud_tiny_font = pygame.font.SysFont(None, 22)   # HUD: "target 2:00"
+diag_font = pygame.font.SysFont("consolas", 16) # DIAGNOSTICS, bottom-left: small, but every character clear
 
 
 # ================================ SOUND ================================
@@ -206,6 +211,7 @@ def load_level(number):
     level_progress["number"] = number                     # which level this is, and it's not cleared yet
     level_progress["cleared_frames"] = None
     level_progress["frames"] = 0                          # the level clock starts again
+    level_progress["hits_total"] = 0                      # the HUD works out the KILL total on its first frame
     level_progress["gems_collected"] = 0                  # (place_gems() sets "gems_total", below)
     level_look["grid_colour"] = level.get("grid_colour", GRID_COLOUR)   # this level's grid colour (green if it has none)
     level_look["box_colour"] = tuple(min(255, round(part * BOX_BRIGHTER)) for part in level_look["grid_colour"])
@@ -288,7 +294,19 @@ def make_decal(entry, level_number):
         print("level", level_number, "- warning: a", decal_type, "decal has no colour: it will be GREY")
         colour = GREY
     return {"type": decal_type, "corners": list(corners), "colour": colour,
-            "hurts": kind["hurts"], "glow": kind["glow"], "freezes": kind["freezes"]}
+            "hurts": kind["hurts"], "glow": kind["glow"], "freezes": kind["freezes"], "slows": kind["slows"]}
+
+
+def floor_slowness():
+    # How fast can you walk right now? 1 = normal. Standing (feet on the floor) on SLIME or CUSTARD slows you:
+    # the slowest decal under you counts. Jumping over it is fine - only your feet on it slow you down.
+    if camera["y"] > STAND_Y + 0.001:
+        return 1                                          # in the air
+    slowest = 1
+    for decal in FLOOR_SHAPES:
+        if decal["slows"] < slowest and point_in_polygon(camera["x"], camera["z"], decal["corners"]):
+            slowest = decal["slows"]
+    return slowest
 
 
 def point_in_polygon(x, z, corners):
@@ -450,11 +468,10 @@ def jump_peak():
 
 def gem_height_range():
     # The lowest and highest a gem's centre can float (its CENTRE, before bobbing).
-    # Lowest: GEM_HOVER over the floor (walk into it). Highest: GEM_HIGHEST of the way up to where your best jump
-    # still collects it - your eye at the top of the jump, less the bob, so even at the top of its bob you reach it.
+    # Lowest: GEM_HOVER over the floor (walk into it). Highest: GEM_HIGHEST of the way from the floor to the ceiling.
     lowest = FLOOR_Y + GEM_HOVER
-    highest = jump_peak() - GEM_BOB
-    return lowest, lowest + ((highest - lowest) * GEM_HIGHEST)
+    highest = FLOOR_Y + ((WORLD_MAX[1] - FLOOR_Y) * GEM_HIGHEST)
+    return lowest, highest
 
 
 def place_gems(level, number):
@@ -953,7 +970,117 @@ def fire_bullet():
     start = 0.4                                   # start a little in front of your eye (closer is cut off by NEAR)
     crosshair["kick"] = CROSSHAIR_KICK            # the crosshair's arms jump out
     start_point = (camera["x"] + (aim_x * start), camera["y"] + (aim_y * start), camera["z"] + (aim_z * start))
-    spawn_bullet(start_point, (aim_x, aim_y, aim_z), BULLET_SPEED, (255, 215, 0), PALETTE_GOLD, None)   # GOLD
+    spawn_bullet(start_point, (aim_x, aim_y, aim_z), BULLET_SPEED, PLAYER_COLOUR, PALETTE_PLAYER, None)   # YOUR colour
+
+
+def throw_rope():
+    # RIGHT button down: fire a bullet like the left button does, and remember it as THE rope
+    drop_rope()                                   # only one rope at a time
+    aim = rotate_y(rotate_x((0, 0, 1), camera["tip"]), camera["turn"])
+    start = (camera["x"] + (aim[0] * 0.4), camera["y"] + (aim[1] * 0.4), camera["z"] + (aim[2] * 0.4))
+    spawn_bullet(start, aim, BULLET_SPEED, PLAYER_COLOUR, PALETTE_PLAYER, None)
+    rope["bullet"] = bullets[-1]                  # the bullet we just made: the end of the list
+    rope["start"] = start                         # to measure how far it flies (ROPE_RANGE)
+    rope["frames"] = ROPE_LIFE                    # the clock starts: gone after ROPE_LIFE frames
+
+
+def drop_rope():
+    # RIGHT button up: let go. Range 0 = the usual clean-up removes it
+    if rope["bullet"] is not None:
+        rope["bullet"]["range"] = 0
+    rope["bullet"] = None
+
+
+def update_rope():
+    # Just after move_bullets(): if the rope's range is used up, it HIT something - it stays there.
+    # If what it hit was a THING, it's tied to that thing's NEAREST CORNER, and follows it from then on.
+    bullet = rope["bullet"]
+    if bullet is None:
+        return
+    rope["frames"] = rope["frames"] - 1
+    if rope["frames"] <= 0:
+        drop_rope()                               # TIME'S UP: gone, hooked or not
+        return
+    if bullet["range"] > 0 and not bullet.get("stuck"):        # still flying: how far has it gone?
+        flown = math.sqrt(sum((bullet["position"][axis] - rope["start"][axis]) ** 2 for axis in range(3)))
+        if flown > ROPE_RANGE:
+            drop_rope()                           # OUT OF RANGE: it hit nothing, so it's gone
+            return
+    if bullet["range"] <= 0:
+        bullet["range"] = 1                       # alive again, so it isn't removed
+        bullet["stuck"] = True                    # move_bullets() leaves it alone from now on
+        thing = bullet.get("hit_thing")
+        if thing is not None:                     # it hit a THING: which of its corners is nearest?
+            def squared_distance(n):
+                corner = to_world(thing["model"]["points"][n], thing)
+                return sum((corner[axis] - bullet["position"][axis]) ** 2 for axis in range(3))
+            bullet["corner"] = min(range(len(thing["model"]["points"])), key=squared_distance)
+    if "corner" in bullet:                        # tied to a thing: follow that corner, wherever it's gone
+        thing = bullet["hit_thing"]
+        if thing.get("dead") or thing not in things:
+            drop_rope()                           # the thing's gone (killed or split): the rope LETS GO, as if you'd released
+        else:
+            if thing.get("gem"):                  # a GEM on the rope is REELED IN: it flies towards your eye
+                eye = (camera["x"], camera["y"], camera["z"])
+                away = [eye[axis] - thing["position"][axis] for axis in range(3)]
+                distance = math.sqrt(sum(a * a for a in away))
+                step = min(ROPE_GEM_PULL, distance)                    # never past you
+                if distance > 0:
+                    for axis in range(3):
+                        thing["position"][axis] = thing["position"][axis] + (away[axis] / distance * step)
+            bullet["position"][:] = to_world(thing["model"]["points"][bullet["corner"]], thing)
+
+
+def draw_rope():
+    # A line from your hand to the rope's bullet
+    bullet = rope["bullet"]
+    if bullet is None:
+        return
+    hand = rotate_y(rotate_x(ROPE_HAND, camera["tip"]), camera["turn"])   # the hand offset, turned with you
+    start = (camera["x"] + hand[0], camera["y"] + hand[1], camera["z"] + hand[2])
+    draw_world_line(start, bullet["position"], PLAYER_COLOUR)
+
+
+def locked_on_thing():
+    # The THING the rope is hooked on, if it's one to LOCK ON to (not a gem). None = no lock-on right now.
+    rope_bullet = rope["bullet"]
+    if rope_bullet is None or "corner" not in rope_bullet:
+        return None
+    target = rope_bullet["hit_thing"]
+    if target.get("gem"):
+        return None                                       # gems are reeled in, not locked on to
+    return target
+
+
+def steer_bullets():
+    # LOCK-ON. While the rope is hooked on a THING (not a gem), each of YOUR bullets turns towards that thing's
+    # centre, by up to lock_on["degrees"] a frame. Its speed never changes, only its direction.
+    target = locked_on_thing()
+    if target is None or lock_on["degrees"] == 0:
+        return                                            # not hooked on a thing (or lock-on is off)
+    most = math.radians(lock_on["degrees"])               # the biggest turn allowed this frame
+    for bullet in bullets:
+        if bullet["owner"] is not None or bullet is rope["bullet"]:
+            continue                                      # only YOUR bullets, and never the rope itself
+        velocity = bullet["velocity"]
+        speed = math.sqrt(sum(v * v for v in velocity))
+        to_target = [target["position"][axis] - bullet["position"][axis] for axis in range(3)]
+        distance = math.sqrt(sum(t * t for t in to_target))
+        if speed == 0 or distance == 0:
+            continue
+        going = [v / speed for v in velocity]             # which way it's going now (length 1)
+        wanted = [t / distance for t in to_target]        # which way it SHOULD go (length 1)
+        angle = math.acos(max(-1, min(1, dot(going, wanted))))   # how far off it is (radians)
+        if angle <= most:
+            new = wanted                                  # close enough: point straight at it
+        elif math.sin(angle) < 0.000001:
+            continue                                      # exactly the wrong way: no single way to turn
+        else:
+            # turn 'most' of the way from 'going' towards 'wanted' (the two mixed, so the result is still length 1)
+            a = math.sin(angle - most) / math.sin(angle)
+            b = math.sin(most) / math.sin(angle)
+            new = [(a * going[axis]) + (b * wanted[axis]) for axis in range(3)]
+        velocity[:] = [new[axis] * speed for axis in range(3)]
 
 
 def spawn_bullet(start, aim, speed, colour, palette, owner):
@@ -1561,6 +1688,7 @@ def move_camera(keys):
     right_x, right_y, right_z = rotate_y((1, 0, 0), camera["turn"])         # your right hand
 
     walk = 0 if you["frozen"] > 0 else MOVE_SPEED          # FROZEN by ice: you can't walk (you can still look)
+    walk = walk * floor_slowness()                        # SLIME and CUSTARD: you wade through it, slowly
     # Work out the whole step first (all the keys together) ...
     new_x, new_z = camera["x"], camera["z"]
     if keys[pygame.K_w]:                                  # forward
@@ -1635,9 +1763,10 @@ def move_bullets():
     # A bullet is a point with a hit radius (BULLET_HIT_RADIUS), so it can't jump over a TINY shape.
     # Bullets pass through each other.
     targets = [(thing, world_spheres(thing)) for thing in things           # each thing's spheres, worked out ONCE
-               if "parent" not in thing and not thing.get("dead")
-               and not thing.get("gem")]                                   # bullets fly through GEMS
+               if "parent" not in thing and not thing.get("dead")]        # (GEMS too: only the ROPE can hit them)
     for bullet in bullets:
+        if bullet.get("stuck"):
+            continue                                                        # a stuck ROPE: it stays where it hit
         angles, speeds = bullet["angles"], bullet["speeds"]
         for axis in range(3):
             angles[axis] = keep_under_360(angles[axis] + speeds[axis])      # spins as it flies
@@ -1700,6 +1829,8 @@ def move_bullets():
         for target, spheres in targets:
             if target is bullet["owner"] or target.get("dead"):
                 continue                                                    # never its own owner
+            if target.get("gem") and bullet is not rope["bullet"]:
+                continue                                                    # bullets fly through GEMS - the rope hooks them
             hit = False
             for centre, radius in spheres:
                 dx, dy, dz = (centre[0] - position[0]), (centre[1] - position[1]), (centre[2] - position[2])
@@ -1710,7 +1841,9 @@ def move_bullets():
             if not hit:
                 continue
             bullet["range"] = 0                                             # used up; the target is left alone...
-            if bullet["owner"] is None and "health" in target:              # ...unless it's YOUR bullet: 1 health
+            bullet["hit_thing"] = target                                    # which thing it hit (the ROPE needs this)
+            is_rope = bullet is rope["bullet"]                              # the ROPE hooks, it never hurts
+            if bullet["owner"] is None and "health" in target and not is_rope:   # ...unless it's YOUR bullet: 1 health
                 target["health"] = max(0, target["health"] - 1)
                 if target["health"] == 0:
                     break_apart(target)                                     # split in two, or die if it's down to 1
@@ -1919,6 +2052,8 @@ def draw_level_banner():
     level_banner["frame"] = frame + 1
     if not level_banner["name"]:
         return
+    if frame > BANNER_HOLD + BANNER_MOVE + BANNER_INTRO_HOLD + BANNER_FADE:
+        return                                                # all done: the HUD strip shows the name from now on
 
     # 'progress' goes 0 -> 1 during the move. 'eased' is the same, but starts and ends gently (no jolt).
     progress = min(1, max(0, (frame - BANNER_HOLD) / BANNER_MOVE))
@@ -1936,7 +2071,7 @@ def draw_level_banner():
         name_surface = pygame.transform.smoothscale(name_surface, size)
         shadow_surface = pygame.transform.smoothscale(shadow_surface, size)
     middle_y = HEIGHT * 0.3                                   # where it starts: a third of the way down
-    top_y = 12                                                # where it ends: just below the top edge
+    top_y = HUD_STRIP_HEIGHT + 24                             # where it ends: just under the HUD strip
     name_y = middle_y + ((top_y - middle_y) * eased)
     name_x = CENTRE_X - (name_surface.get_width() / 2)        # centred across the screen
     screen.blit(shadow_surface, (name_x + 3, name_y + 3))     # a black shadow, so it reads on any background
@@ -1961,23 +2096,6 @@ def minutes_seconds(seconds):
     return str(seconds // 60) + ":" + str(seconds % 60).zfill(2)
 
 
-def draw_level_clock():
-    # Top right: the LEVEL number, the LEVEL TIME counting up (big), and the TARGET TIME counting down under it.
-    # The target is the level's "target_time" (seconds), or DEFAULT_TARGET_TIME. It turns red once it runs out.
-    level = LEVELS[level_progress["number"]]
-    played = level_progress["frames"] / 60                     # frames -> seconds (the game runs at 60 FPS)
-    left = level.get("target_time", DEFAULT_TARGET_TIME) - played
-    lines = [(fps_font, "LEVEL " + str(level_progress["number"]), GREEN),
-             (fps_font, "LEVEL TIME", GREEN),
-             (clock_font, minutes_seconds(played), GREEN),
-             (fps_font, "TARGET  " + minutes_seconds(left), GREEN if left > 0 else (255, 80, 80))]
-    y = 10
-    for font, text, colour in lines:
-        surface = font.render(text, True, colour)
-        screen.blit(surface, (screen.get_width() - surface.get_width() - 10, y))   # right-aligned, 10 px in
-        y = y + surface.get_height() + 4
-
-
 def save_screenshot():
     # P key: save what's on the screen right now as a PNG in SCREENSHOT_FOLDER (made the first time).
     # The name is the date and time, e.g. screenshot_2026-11-15_14-30-05.png, so each one is new.
@@ -1992,67 +2110,162 @@ def save_screenshot():
     print("screenshot saved:", path)
 
 
+HUD_CARD_BACK = MAP_COLOUR_BACK + (150,)   # every HUD box: the mini-map's dark grey-blue, see-through
+HUD_EDGE = (190, 200, 210)                 # ... with a thin light edge
+HUD_STRIP_HEIGHT = 100                     # the strip across the top
+HUD_GOLD, HUD_RED, HUD_GREY, HUD_ORANGE = (255, 215, 0), (255, 80, 80), (150, 160, 170), (255, 140, 70)
+HUD_PIPS = 8                               # at most this many squares / diamonds in a row (the number says the rest)
+hud_cards = {}                             # see-through boxes, made once for each size and kept
+
+
+def hud_card(x, y, width, height):
+    # A see-through box with a thin edge, like the mini-map's. Returns its Rect (handy for placing things in it).
+    size = (int(width), int(height))
+    if size not in hud_cards:
+        card = pygame.Surface(size, pygame.SRCALPHA)       # SRCALPHA: it has its own see-through-ness
+        card.fill(HUD_CARD_BACK)
+        hud_cards[size] = card
+    rect = pygame.Rect(int(x), int(y), size[0], size[1])
+    screen.blit(hud_cards[size], rect.topleft)
+    pygame.draw.rect(screen, HUD_EDGE, rect, 1)
+    return rect
+
+
+def hud_text(font, message, colour, position, anchor="topleft"):
+    # Text placed by any corner or edge of it: anchor "topleft", "topright", "center", ...
+    surface = font.render(message, True, colour)
+    rect = surface.get_rect(**{anchor: position})
+    screen.blit(surface, rect)
+    return rect
+
+
+def draw_gem_pip(x, y, radius, collected):
+    # A little diamond: solid gold if collected, an outline if not yet
+    corners = [(x, y - radius), (x + (radius * 0.7), y), (x, y + radius), (x - (radius * 0.7), y)]
+    if collected:
+        pygame.draw.polygon(screen, HUD_GOLD, corners)
+    else:
+        pygame.draw.polygon(screen, (110, 95, 40), corners, 2)
+
+
+def hits_to_clear_size(size_name):
+    # How many hits a FRESH shape of this named size takes to clear completely: its own health, then the two
+    # pieces it splits into, and their pieces ... (this level's sizes). TINY 1, SMALL 4, MEDIUM 11, LARGE 26, HUGE 57.
+    if size_name is None:
+        return 0
+    size = level_sizes[size_name]
+    return size["health"] + (2 * hits_to_clear_size(size["splits_to"]))
+
+
+def hits_to_clear():
+    # How many hits it would take to clear the level from HERE: every shape's health left, plus the pieces it
+    # will still split into. Tanks (a number size, or with a turret) don't split: just their health.
+    total = 0
+    for thing in things:
+        if "health" not in thing or thing.get("dead") or thing.get("scenery"):
+            continue
+        total = total + thing["health"]
+        has_children = any(other.get("parent_thing") is thing for other in things)
+        if "size_name" in thing and not has_children:
+            total = total + (2 * hits_to_clear_size(level_sizes[thing["size_name"]]["splits_to"]))
+    return total
+
+
 def draw_hud(faces_drawn=0):
-    # The text and bars in the top-left corner, the list counts in the bottom-left, and the red flash when hit.
+    # THE HUD. Top: what matters - a strip with the LEVEL, what's left to KILL and COLLECT, and the CLOCK;
+    # your HITS top-left. Bottom-left: the DIAGNOSTICS (small, grey, but readable in a screenshot).
     # faces_drawn = how many faces made it into this frame's paint list (the rest were culled or too close).
-    # FPS counter, top-left corner
-    fps_text = fps_font.render("FPS: " + str(round(clock.get_fps())), True, GREEN)
-    screen.blit(fps_text, (10, 10))
+    level = LEVELS[level_progress["number"]]
 
-    # Facing, just under the FPS: compass style, 0 = up the map (+z), counting up as you turn RIGHT.
-    # camera["turn"] goes DOWN when you turn right, so flip its sign; % 360 wraps it into 0..359.
-    heading = round(-camera["turn"]) % 360
-    heading_text = fps_font.render("Facing: " + str(heading) + "°", True, GREEN)
-    screen.blit(heading_text, (10, 40))
+    # ---- TOP-LEFT: hits taken ----
+    card = hud_card(10, 10, 130, 50)
+    hud_text(hud_small_font, "HITS  " + str(you["hits_taken"]), HUD_RED, card.center, "center")
 
-    # Camera tilt, under that: 0 = level, + = looking UP, - = looking down.
-    # camera["tip"] is + when looking DOWN, so flip its sign.
-    tilt = round(-camera["tip"])
-    tilt_text = fps_font.render("Tilt: " + str(tilt) + "°", True, GREEN)
-    screen.blit(tilt_text, (10, 70))
+    # ---- THE STRIP: [ LEVEL | KILL + GEMS | CLOCK ], centred across the top ----
+    name_width = hud_small_font.size(level["name"])[0]
+    level_width = max(170, name_width + 32)                # wide enough for the level's name
+    goals_text_x = 76 + (HUD_PIPS * 22) + 16             # where the "% left" and "3 / 8" text starts (after the bar / pips)
+    goals_width = goals_text_x + hud_small_font.size("100% left")[0] + 16   # wide enough for the WIDEST text
+    clock_width = 190
+    strip = hud_card(CENTRE_X - ((level_width + goals_width + clock_width) / 2), 10,
+                     level_width + goals_width + clock_width, HUD_STRIP_HEIGHT)
+    goals_x = strip.x + level_width
+    clock_x = goals_x + goals_width
+    pygame.draw.line(screen, HUD_EDGE, (goals_x, strip.y + 10), (goals_x, strip.bottom - 10))
+    pygame.draw.line(screen, HUD_EDGE, (clock_x, strip.y + 10), (clock_x, strip.bottom - 10))
 
-    # Where you stand in the WORLD (camera["x"], camera["y"], camera["z"]), rounded to 1 decimal place.
-    position_text = fps_font.render("World x, y, z: " + str(round(camera["x"], 1)) + ", " + str(round(camera["y"], 1)) + ", " + str(round(camera["z"], 1)), True, GREEN)
-    screen.blit(position_text, (10, 100))
+    # LEVEL n, and its name under it
+    hud_text(hud_mid_font, "LEVEL " + str(level_progress["number"]), HUD_GOLD, (strip.x + 16, strip.y + 16))
+    hud_text(hud_small_font, level["name"], PLAYER_COLOUR, (strip.x + 16, strip.y + 56))
 
-    # Hits from the tanks, and a red flash round the screen edge for a moment after each one
-    hits_text = fps_font.render("Hits taken: " + str(you["hits_taken"]), True, (255, 80, 80))
-    screen.blit(hits_text, (10, 130))
+    # KILL: how much damage is LEFT to do, as a bar and a %. Counted in HITS (pieces from splitting included),
+    # so it only ever goes DOWN - unlike counting shapes, which goes UP every time one splits in two.
+    hits_left = hits_to_clear()
+    if level_progress["hits_total"] == 0:
+        level_progress["hits_total"] = hits_left          # the first frame of the level: this is 100%
+    hud_text(hud_small_font, "KILL", HUD_GREY, (goals_x + 16, strip.y + 18))
+    bar = pygame.Rect(goals_x + 76, strip.y + 21, (HUD_PIPS * 22) - 6, 14)
+    pygame.draw.rect(screen, (60, 66, 74), bar)
+    if level_progress["hits_total"] > 0:
+        share = hits_left / level_progress["hits_total"]
+        pygame.draw.rect(screen, HUD_ORANGE, (bar.x, bar.y, int(bar.width * share), bar.height))
+        left_text = "all done" if hits_left == 0 else str(math.ceil(share * 100)) + "% left"
+    else:
+        left_text = "none"                                # a level with nothing to kill
+    pygame.draw.rect(screen, HUD_EDGE, bar, 1)
+    hud_text(hud_small_font, left_text, HUD_ORANGE, (goals_x + goals_text_x, strip.y + 18))
 
-    # GEMS collected, in gold (only if this level has any)
-    if level_progress["gems_total"] > 0:
-        gems_text = fps_font.render("Diamonds: " + str(level_progress["gems_collected"]) + " / "
-                                    + str(level_progress["gems_total"]), True, (255, 215, 0))
-        screen.blit(gems_text, (10, 160))
+    # GEMS: one diamond per gem, solid once collected
+    hud_text(hud_small_font, "GEMS", HUD_GREY, (goals_x + 16, strip.y + 60))
+    total, collected = level_progress["gems_total"], level_progress["gems_collected"]
+    for n in range(min(total, HUD_PIPS)):
+        draw_gem_pip(goals_x + 92 + (n * 22), strip.y + 70, 9, n < collected)
+    gem_text = "none" if total == 0 else str(collected) + " / " + str(total)
+    hud_text(hud_small_font, gem_text, HUD_GOLD, (goals_x + goals_text_x, strip.y + 60))
+
+    # THE CLOCK: level time (big), the target under it, and a bar filling up towards the target (red once past it)
+    played = level_progress["frames"] / 60                 # frames -> seconds (the game runs at 60 FPS)
+    target = level.get("target_time", DEFAULT_TARGET_TIME)
+    late = played > target
+    hud_text(hud_big_font, minutes_seconds(played), HUD_RED if late else PLAYER_COLOUR,
+             (strip.right - 16, strip.y + 10), "topright")
+    hud_text(hud_tiny_font, "target " + minutes_seconds(target), HUD_GREY, (strip.right - 16, strip.y + 56), "topright")
+    bar = pygame.Rect(clock_x + 16, strip.y + 80, clock_width - 32, 8)
+    pygame.draw.rect(screen, (60, 66, 74), bar)
+    pygame.draw.rect(screen, HUD_RED if late else GREEN, (bar.x, bar.y, int(bar.width * min(1, played / target)), bar.height))
+    pygame.draw.rect(screen, HUD_EDGE, bar, 1)
 
     # VOLUME slider: hidden for now (the - and = keys still change the volume). Set SHOW_VOLUME = True to show it.
     if SHOW_VOLUME:
         volume_text = fps_font.render("Volume", True, GREEN)
-        screen.blit(volume_text, (10, 190))
-        bar = pygame.Rect(100, 194, 150, 16)                               # the slider's track
+        screen.blit(volume_text, (10, 70))
+        bar = pygame.Rect(100, 74, 150, 16)                                # the slider's track
         pygame.draw.rect(screen, GREEN, (bar.x, bar.y, bar.width * volume["slider"], bar.height))   # filled part
         pygame.draw.rect(screen, GREEN, bar, 1)                            # outline
         percent_text = fps_font.render(str(round(volume["slider"] * 100)) + "%  (- =)", True, GREEN)
-        screen.blit(percent_text, (bar.right + 10, 190))
-    draw_level_clock()                                                 # top right: level, time, target
+        screen.blit(percent_text, (bar.right + 10, 70))
 
-    # The KEY LISTS, bottom-left: how much the engine is handling this frame.
+    # ---- BOTTOM-LEFT: DIAGNOSTICS ----
+    # Facing: compass style, 0 = up the map (+z), counting up as you turn RIGHT (camera["turn"] goes DOWN, so flip it).
+    # Tilt: + = looking UP (camera["tip"] is + when looking DOWN, so flip it).
     # POINTS and FACES count every model's corners and faces (a box is a cube: 8 corners, 6 faces).
     # FACES drawn of total: the rest were culled (turned away from you) or too close / behind you.
     all_models = [thing["model"] for thing in things + bullets]
     total_points = sum(len(model["points"]) for model in all_models) + (8 * len(BOXES))
     total_faces = sum(len(model["faces"]) for model in all_models) + (6 * len(BOXES))
-    counts = ["THINGS: " + str(len(things)),
-              "BOXES: " + str(len(BOXES)),
-              "DECALS: " + str(len(FLOOR_SHAPES)),
-              "BULLETS: " + str(len(bullets)),
-              "SPARKS: " + str(len(particles)),
-              "POINTS: " + str(total_points),
-              "FACES: " + str(faces_drawn) + " of " + str(total_faces)]
-    y = screen.get_height() - (30 * len(counts)) - 10                  # stacked up from the bottom edge
-    for line in counts:
-        screen.blit(fps_font.render(line, True, GREEN), (10, y))
-        y = y + 30
+    lines = ["FPS " + str(round(clock.get_fps())) + "   Facing " + str(round(-camera["turn"]) % 360) + "°"
+             + "   Tilt " + str(round(-camera["tip"])) + "°"
+             + "   x,y,z " + str(round(camera["x"], 1)) + ", " + str(round(camera["y"], 1)) + ", " + str(round(camera["z"], 1)),
+             "THINGS " + str(len(things)) + "  BOXES " + str(len(BOXES)) + "  DECALS " + str(len(FLOOR_SHAPES))
+             + "  BULLETS " + str(len(bullets)) + "  SPARKS " + str(len(particles)),
+             "POINTS " + str(total_points) + "  FACES " + str(faces_drawn) + " of " + str(total_faces)]
+    line_height = diag_font.get_linesize() + 2
+    width = max(diag_font.size(line)[0] for line in lines) + 16
+    width = 20 * (int(width / 20) + 1)                     # rounded up to 20 px, so the box doesn't twitch in size
+    height = (line_height * len(lines)) + 12
+    card = hud_card(10, HEIGHT - height - 10, width, height)
+    for n, line in enumerate(lines):
+        hud_text(diag_font, line, HUD_GREY, (card.x + 8, card.y + 6 + (n * line_height)))
 
     if you["frozen"] > 0:
         pygame.draw.rect(screen, FREEZE_COLOUR, screen.get_rect(), 16)  # FROZEN: a thick icy border
