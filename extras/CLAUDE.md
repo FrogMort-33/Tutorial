@@ -22,6 +22,12 @@ Run it with `python rotation_301.py` from this folder. Other `rotation_*.py` / `
 - `rotation_functions.py` — maths, camera, drawing, clipping, collisions, sounds, `load_level`, HUD, mini-map.
 - `rotation_levels.py` — `DESIGNS` (shapes, tanks) and `LEVELS` (data-driven: name, intro, world box, start, floor_shapes, boxes, spawn, optional sizes).
 
+## Icon and .exe
+- Icon: the level 6 lava tank on a bright red grid. `rotation_301_icon.png` is the window/taskbar icon (loaded in `rotation_functions.py` from `GAME_FOLDER`, so it works in the .exe too); `rotation_301_icon.ico` (16-256 px) is the .exe's icon.
+- Build the .exe from `extras` with `py -m PyInstaller rotation_301.spec` (needs `pip install pyinstaller`). One file, no console window. It lands in `extras/dist/rotation_301.exe`; `build/` and `dist/` are NOT in git, so rebuild on each PC.
+otation_301.exe`; `build\` and `dist\` are NOT in git, so rebuild on each PC.
+- `WALL_GRID_STEP` (rotation_data.py) sets the wall/ceiling grid spacing; 1 = the same as the floor.
+
 The files share names with `import *`, so shared lists/dicts must be **changed in place** (`list[:] = ...`, `dict.update`), never rebound.
 
 ## Fixed decisions
@@ -48,6 +54,6 @@ Levels 1–7 use a 16 x 16 x 8 room.
 ## Open ideas (not built yet)
 - Player health / game over (hits only count "Hits taken" for now).
 - A `make_box()` helper for building structures; health bars draw through walls; your head isn't stopped when jumping under boxes.
-- Publish: .exe, icon, screenshots.
+- Publish: screenshots, and where to share it (the .exe and icon are done).
 - Named sizes for tanks.
 - Things can overhang the world-box walls (bounce uses the centre); a surface-based bounce was proposed, not built.

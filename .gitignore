@@ -1,2 +1,6 @@
 __pycache__/
 *.pyc
+
+# PyInstaller scratch folders (rebuild with: py -m PyInstaller rotation_301.spec)
+extras/build/
+extras/dist/

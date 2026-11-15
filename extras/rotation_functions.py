@@ -3,12 +3,15 @@
 # Importing this file opens the game window (everything here needs the screen's size).
 import array
 import math
+import os
 import random
 import pygame
 from rotation_data import *
 from rotation_levels import DESIGNS, LEVELS
 
 pygame.init()
+GAME_FOLDER = os.path.dirname(os.path.abspath(__file__))   # where these files are (also works inside the .exe)
+pygame.display.set_icon(pygame.image.load(os.path.join(GAME_FOLDER, "rotation_301_icon.png")))   # the lava tank: taskbar + Alt+Tab
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 WIDTH, HEIGHT = screen.get_size()
 clock = pygame.time.Clock()

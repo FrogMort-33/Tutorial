@@ -663,7 +663,7 @@ GRID_COLOUR = (40, 90, 70)    # dim green: the floor is background, so it should
 level_look = {"grid_colour": GRID_COLOUR,
               "box_colour": GRID_COLOUR}   # the room's OUTER box and the map's play area: the grid colour, BRIGHTER
 BOX_BRIGHTER = 1.6            # the outer box is the grid colour times this (capped at 255): it stands out a little   # EVERY grid's colour: floor, walls (G) and mini-map (a level's "grid_colour", or GRID_COLOUR)
-WALL_GRID_STEP = 2                  # world units between the grid lines on the WALLS and CEILING (G key: on / off)
+WALL_GRID_STEP = 1                  # world units between the grid lines on the WALLS and CEILING (G key: on / off). 1 = the same as the floor
                                     #   (the 4 corner posts up to the ceiling, and the ceiling's 4 edges)
 
 
