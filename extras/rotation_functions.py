@@ -5,6 +5,8 @@ import array
 import math
 import os
 import random
+import sys
+import time
 import pygame
 from rotation_data import *
 from rotation_levels import DESIGNS, LEVELS
@@ -12,6 +14,12 @@ from rotation_levels import DESIGNS, LEVELS
 pygame.init()
 GAME_FOLDER = os.path.dirname(os.path.abspath(__file__))   # where these files are (also works inside the .exe)
 pygame.display.set_icon(pygame.image.load(os.path.join(GAME_FOLDER, "rotation_301_icon.png")))   # the lava tank: taskbar + Alt+Tab
+# SCREENSHOTS (P key) go in a "screenshots" folder next to the game. Inside the .exe, GAME_FOLDER is a hidden
+# temporary folder that is deleted when the game closes, so there we use the folder the .exe itself is in.
+if getattr(sys, "frozen", False):
+    SCREENSHOT_FOLDER = os.path.join(os.path.dirname(sys.executable), "screenshots")
+else:
+    SCREENSHOT_FOLDER = os.path.join(GAME_FOLDER, "screenshots")
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 WIDTH, HEIGHT = screen.get_size()
 clock = pygame.time.Clock()
@@ -52,7 +60,9 @@ ping_sound = make_sound(1800, 1600, 0.25, 7000, 2)  # "ping": high, rings a litt
 hurt_sound = make_sound(330, 150, 0.7, 11000, 1.2)  # "wahhh": a slow, sad fall - YOU got hit
 thud_sound = make_sound(110, 70, 0.12, 14000, 5)    # "thud": very low, short, dies at once - hitting a BOX
 freeze_sound = make_sound(2600, 2200, 0.35, 5000, 1.5)   # "ting": very high and glassy - ice FREEZES you
-ALL_SOUNDS = [bump_sound, ping_sound, hurt_sound, thud_sound, freeze_sound]   # every sound, so the volume reaches them all
+# GEM NOTES: one clear note for each step of the scale (GEM_NOTES) - the pitch stays the same, and it rings out
+note_sounds = [make_sound(pitch, pitch, 0.45, 9000, 2.5) for pitch in GEM_NOTES]
+ALL_SOUNDS = [bump_sound, ping_sound, hurt_sound, thud_sound, freeze_sound] + note_sounds   # every sound, so the volume reaches them all
 
 # ---- VOLUME: one slider for every sound. Keys: - quieter, = louder (10% steps) ----
 # Our ears hear loudness on a CURVE, not a straight line: half the strength does NOT sound half as loud.
@@ -190,11 +200,13 @@ def load_level(number):
     you["hurt"] = 0
     you["bump_grace"] = 0
     you["lava_timer"] = 0
+    you["outside_timer"] = 0
     you["frozen"] = 0
     you["freeze_grace"] = 0
     level_progress["number"] = number                     # which level this is, and it's not cleared yet
     level_progress["cleared_frames"] = None
     level_progress["frames"] = 0                          # the level clock starts again
+    level_progress["gems_collected"] = 0                  # (place_gems() sets "gems_total", below)
     level_look["grid_colour"] = level.get("grid_colour", GRID_COLOUR)   # this level's grid colour (green if it has none)
     level_look["box_colour"] = tuple(min(255, round(part * BOX_BRIGHTER)) for part in level_look["grid_colour"])
     level_banner["name"] = level.get("name", "")          # the title shown as the level starts
@@ -247,6 +259,7 @@ def load_level(number):
                 setup_gun(child, spawn.get("gun", {}), number)
             things.append(child)
 
+    place_gems(level, number)                             # GEMS: scattered once everything else is in place
     prepare_boxes()                                       # the boxes' corners and colours
     prepare_health()                                      # every shape's health, from its size
     fit_mini_map()                                        # the whole level fits the mini-map
@@ -329,6 +342,24 @@ def update_floor_hazards():
     you["lava_timer"] = LAVA_HURT_FRAMES
 
 
+def update_outside_hurt():
+    # Once per frame: are YOU outside the play grid (the world box, looking from above: x and z)?
+    # Then it hurts, just like lava: one hit as you step out, then one every OUTSIDE_HURT_FRAMES frames.
+    outside = not (WORLD_MIN[0] <= camera["x"] <= WORLD_MAX[0] and WORLD_MIN[2] <= camera["z"] <= WORLD_MAX[2])
+    if not outside:
+        you["outside_timer"] = 0                          # back inside: next time it hurts straight away
+        return
+    if you["outside_timer"] > 0:
+        you["outside_timer"] = you["outside_timer"] - 1
+        return
+    you["hits_taken"] = you["hits_taken"] + 1             # OUCH: counts like a tank hit
+    you["hurt"] = 12                                      # the flash round the screen, in purple
+    you["hurt_colour"] = OUTSIDE_COLOUR
+    if hurt_sound:
+        hurt_sound.play()
+    you["outside_timer"] = OUTSIDE_HURT_FRAMES
+
+
 def setup_gun(turret, changes, level_number):
     # A gun: GUN_DEFAULTS, with the level's "gun": {...} changes on top. Its counters start at 0.
     # 'turret' is whatever carries the gun: a tank's turret, or a shape (which can only shoot DOWN).
@@ -378,6 +409,112 @@ def build_thing(design, changes):
     return thing
 
 
+# ================================ GEMS ================================
+gem_random = random.Random()    # the gems' OWN dice: placing them never changes any other random numbers
+
+
+def good_gem_spot(x, z, spots, others):
+    # Can a gem go at (x, z) on the floor? Not near a box, not over lava or ice, not near where you start,
+    # not near a thing, and not near another gem - so every gem can be walked into.
+    for box in BOXES:
+        if (box["min"][0] - GEM_BOX_GAP < x < box["max"][0] + GEM_BOX_GAP
+                and box["min"][2] - GEM_BOX_GAP < z < box["max"][2] + GEM_BOX_GAP):
+            return False                                  # in (or right next to) a box
+    for decal in FLOOR_SHAPES:
+        if decal["hurts"] or decal["freezes"]:
+            # the spot itself, and 4 points round it, half a unit out: none of them may be on the decal
+            for px, pz in ((x, z), (x + 0.5, z), (x - 0.5, z), (x, z + 0.5), (x, z - 0.5)):
+                if point_in_polygon(px, pz, decal["corners"]):
+                    return False                          # over (or right by) lava or ice
+    if math.hypot(x - camera["x"], z - camera["z"]) < GEM_START_GAP:
+        return False                                      # too close to where you start
+    for thing_x, thing_z, reach in others:
+        if math.hypot(x - thing_x, z - thing_z) < reach + GEM_THING_GAP:
+            return False                                  # under or next to a thing
+    for spot_x, spot_z in spots:
+        if math.hypot(x - spot_x, z - spot_z) < GEM_APART:
+            return False                                  # too close to another gem
+    return True
+
+
+def jump_peak():
+    # How high your EYE gets at the top of a jump from the floor. Worked out the same way move_camera() does it,
+    # one frame at a time: gravity takes a little off your speed, then you move up by that speed - until you stop rising.
+    eye, speed = STAND_Y, JUMP_SPEED
+    while True:
+        speed = speed - GRAVITY
+        if speed <= 0:
+            return eye                                    # stopped rising: this is the top
+        eye = eye + speed
+
+
+def gem_height_range():
+    # The lowest and highest a gem's centre can float (its CENTRE, before bobbing).
+    # Lowest: GEM_HOVER over the floor (walk into it). Highest: GEM_HIGHEST of the way up to where your best jump
+    # still collects it - your eye at the top of the jump, less the bob, so even at the top of its bob you reach it.
+    lowest = FLOOR_Y + GEM_HOVER
+    highest = jump_peak() - GEM_BOB
+    return lowest, lowest + ((highest - lowest) * GEM_HIGHEST)
+
+
+def place_gems(level, number):
+    # Once, when a level loads (after its boxes, floor shapes and things): scatter its gems at RANDOM good spots,
+    # each at a RANDOM height: from knee-high (walk into it) up to as high as a jump can reach (jump for it!).
+    # Each gem is a THING: a small gold diamond with "gem": True, hovering over the floor.
+    wanted = level.get("gems", GEMS_PER_LEVEL)
+    lowest, highest = gem_height_range()
+    others = [(thing["position"][0], thing["position"][2], thing_reach(thing))   # every thing, seen from above
+              for thing in things if "parent" not in thing]
+    spots = []
+    tries = 0
+    while len(spots) < wanted and tries < GEM_TRIES:
+        tries = tries + 1
+        x = gem_random.uniform(WORLD_MIN[0] + GEM_WALL_GAP, WORLD_MAX[0] - GEM_WALL_GAP)
+        z = gem_random.uniform(WORLD_MIN[2] + GEM_WALL_GAP, WORLD_MAX[2] - GEM_WALL_GAP)
+        if good_gem_spot(x, z, spots, others):
+            spots.append((x, z))
+    if len(spots) < wanted:
+        print("level", number, "- warning: only room for", len(spots), "of", wanted, "gems")
+    for n, (x, z) in enumerate(spots):
+        gem = build_thing({"model": diamond_model},
+                          {"name": "gem " + str(n + 1), "gem": True,
+                           "position": [x, gem_random.uniform(lowest, highest), z],   # a random height
+                           "size": GEM_ACROSS / model_across(diamond_model),     # 0.3 across / 2 wide = 0.15
+                           "angles": [gem_random.uniform(0, 360), 0, 0],        # each one turned a different way
+                           "speeds": GEM_SPIN,
+                           "colour": GEM_COLOUR, "palette": GEM_PALETTE,
+                           "bob_frame": gem_random.randint(0, GEM_BOB_FRAMES),  # so they don't all bob together
+                           "bob_height": 0})                                    # how far up or down it is right now
+        things.append(gem)
+    level_progress["gems_total"] = len(spots)
+
+
+def update_gems():
+    # Once per frame, for every gem: BOB up and down, then is it touching YOUR body? Then it's COLLECTED.
+    # The bob moves the gem by the CHANGE in its bob height, so a gem with a velocity still moves as well.
+    feet, eye = camera["y"] - 1, camera["y"]              # your body: a column from your feet up to your eye
+    for gem in things:
+        if not gem.get("gem") or gem.get("dead"):
+            continue
+        gem["bob_frame"] = gem["bob_frame"] + 1
+        bob = GEM_BOB * math.sin((2 * math.pi * gem["bob_frame"]) / GEM_BOB_FRAMES)
+        gem["position"][1] = gem["position"][1] + (bob - gem["bob_height"])
+        gem["bob_height"] = bob
+
+        # Touching you? The same test as a thing bumping you: the closest point of your column to its centre
+        cx, cy, cz = gem["position"]
+        closest_y = min(max(cy, feet), eye)
+        dx, dy, dz = (cx - camera["x"]), (cy - closest_y), (cz - camera["z"])
+        reach = (GEM_ACROSS / 2) + YOUR_BODY_RADIUS + GEM_PICKUP_EXTRA
+        if (dx * dx) + (dy * dy) + (dz * dz) < (reach * reach):
+            gem["dead"] = True                            # COLLECTED: removed at the end of the frame
+            level_progress["gems_collected"] = level_progress["gems_collected"] + 1
+            note = note_sounds[(level_progress["gems_collected"] - 1) % len(note_sounds)]   # the NEXT note up
+            if note:
+                note.play()
+            spawn_sparks(gem["position"], [GEM_COLOUR, (255, 215, 0), (255, 255, 255)])   # a puff of gold
+
+
 def check_level(number):
     # Warnings for the level designer (printed, the game still runs): a thing whose centre starts
     # outside the world box, or whose spheres start inside a box.
@@ -424,7 +561,7 @@ def prepare_health():
         if "parent" not in thing:
             thing["reach"] = thing_reach(thing)
     numbered = [thing for thing in things if "parent" not in thing and "size_name" not in thing
-                and not thing.get("scenery")]                       # SCENERY gets no health
+                and not thing.get("scenery") and not thing.get("gem")]   # SCENERY and GEMS get no health
     if not numbered:
         return
     biggest_reach = max(thing["reach"] for thing in numbered)
@@ -651,9 +788,24 @@ def prepare_boxes():
 def add_box_faces(face_paint_order):
     # Every frame: each box's visible faces go into the SAME paint list as the things' faces,
     # so boxes and things are sorted together (a tank in front of a box is painted after it).
+    # Two QUICK tests skip most of the work (a level with lots of boxes was slow without them):
+    #   1. a whole box BEHIND you (all 8 corners closer than NEAR) has nothing to paint: skip it
+    #   2. a box never turns, so its +x face can only face you if you are on its +x side, and so on:
+    #      one comparison per face, before the slow trimming (face_on_screen still does the exact test)
+    eye = (camera["x"], camera["y"], camera["z"])
     for box in BOXES:
         camera_points = [to_camera(corner) for corner in box["corners"]]       # only this part changes: YOU move
+        if all(point[2] < NEAR for point in camera_points):
+            continue                                                           # 1. all of it is behind you
         for face_number, (corners, normal) in enumerate(cube_faces):
+            # 2. which side of the box is this face? (normal is e.g. (1, 0, 0) = the +x side, at box["max"] x)
+            axis = 0 if normal[0] != 0 else (1 if normal[1] != 0 else 2)
+            side = normal[axis]
+            face_at = box["max"][axis] if side > 0 else box["min"][axis]
+            if (eye[axis] - face_at) * side < 0:
+                continue                                                       # you're not on its side: turned away
+                                                                               # (exactly level with it = edge-on: let
+                                                                               #  face_on_screen decide, as before)
             face_points = face_on_screen([camera_points[corner] for corner in corners])   # trimmed at NEAR
             if face_points is None:
                 continue                                                       # behind you, or turned away
@@ -713,7 +865,8 @@ def bounce_things_off_each_other():
     #   - Reversing both always sends them apart (their speed relative to each other is reversed).
     #   - A parked thing (velocity [0, 0, 0]) stays parked: reversing zero is still zero, so it acts like a wall.
     #   - Children (turrets, radars) are skipped: they ride on their parents.
-    movers = [thing for thing in things if "parent" not in thing]
+    #   - GEMS are skipped: they float through other things
+    movers = [thing for thing in things if "parent" not in thing and not thing.get("gem")]
     all_spheres = [world_spheres(thing) for thing in movers]            # each thing's spheres, worked out ONCE
     for i in range(len(movers)):
         for j in range(i + 1, len(movers)):                             # j starts after i: each pair only once
@@ -1323,8 +1476,8 @@ def thing_overlap(x, z):
     feet, eye = camera["y"] - 1, camera["y"]
     deepest = 0
     for thing in things:
-        if thing.get("dead"):
-            continue
+        if thing.get("dead") or thing.get("gem"):
+            continue                                        # GEMS never block you: you walk into them to collect them
         for (cx, cy, cz), radius in world_spheres(thing):
             closest_y = min(max(cy, feet), eye)             # the point of your column nearest the centre
             dx, dy, dz = (cx - x), (cy - closest_y), (cz - z)
@@ -1354,6 +1507,8 @@ def things_bump_you():
         mover = thing.get("parent_thing", thing)                # a child: its parent does the moving
         if thing.get("dead") or mover.get("dead") or mover["velocity"] == [0, 0, 0]:
             continue                                            # parked things only block you (move_camera)
+        if thing.get("gem"):
+            continue                                            # GEMS never hurt you, even moving ones
         touching = False
         for (cx, cy, cz), radius in world_spheres(thing):
             closest_y = min(max(cy, feet), eye)
@@ -1480,7 +1635,8 @@ def move_bullets():
     # A bullet is a point with a hit radius (BULLET_HIT_RADIUS), so it can't jump over a TINY shape.
     # Bullets pass through each other.
     targets = [(thing, world_spheres(thing)) for thing in things           # each thing's spheres, worked out ONCE
-               if "parent" not in thing and not thing.get("dead")]
+               if "parent" not in thing and not thing.get("dead")
+               and not thing.get("gem")]                                   # bullets fly through GEMS
     for bullet in bullets:
         angles, speeds = bullet["angles"], bullet["speeds"]
         for axis in range(3):
@@ -1519,8 +1675,14 @@ def move_bullets():
 
         # 3. A BOX: the closest point IN the box to the bullet (clamp it to the box) - near enough = a hit
         hit_box = False
+        x, y, z = position
+        r = BULLET_HIT_RADIUS
         for box in BOXES:
-            closest = [max(box["min"][axis], min(position[axis], box["max"][axis])) for axis in range(3)]
+            low, high = box["min"], box["max"]
+            if (x < low[0] - r or x > high[0] + r or y < low[1] - r or y > high[1] + r
+                    or z < low[2] - r or z > high[2] + r):
+                continue                                                    # QUICK: nowhere near this box
+            closest =[max(box["min"][axis], min(position[axis], box["max"][axis])) for axis in range(3)]
             away = [position[axis] - closest[axis] for axis in range(3)]
             if (away[0] * away[0]) + (away[1] * away[1]) + (away[2] * away[2]) < (BULLET_HIT_RADIUS * BULLET_HIT_RADIUS):
                 bullet["range"] = 0
@@ -1816,6 +1978,20 @@ def draw_level_clock():
         y = y + surface.get_height() + 4
 
 
+def save_screenshot():
+    # P key: save what's on the screen right now as a PNG in SCREENSHOT_FOLDER (made the first time).
+    # The name is the date and time, e.g. screenshot_2026-11-15_14-30-05.png, so each one is new.
+    os.makedirs(SCREENSHOT_FOLDER, exist_ok=True)
+    name = "screenshot_" + time.strftime("%Y-%m-%d_%H-%M-%S") + ".png"
+    path = os.path.join(SCREENSHOT_FOLDER, name)
+    number = 2
+    while os.path.exists(path):                           # two in the same second: add _2, _3, ...
+        path = os.path.join(SCREENSHOT_FOLDER, name[:-4] + "_" + str(number) + ".png")
+        number = number + 1
+    pygame.image.save(screen, path)
+    print("screenshot saved:", path)
+
+
 def draw_hud(faces_drawn=0):
     # The text and bars in the top-left corner, the list counts in the bottom-left, and the red flash when hit.
     # faces_drawn = how many faces made it into this frame's paint list (the rest were culled or too close).
@@ -1843,15 +2019,21 @@ def draw_hud(faces_drawn=0):
     hits_text = fps_font.render("Hits taken: " + str(you["hits_taken"]), True, (255, 80, 80))
     screen.blit(hits_text, (10, 130))
 
+    # GEMS collected, in gold (only if this level has any)
+    if level_progress["gems_total"] > 0:
+        gems_text = fps_font.render("Diamonds: " + str(level_progress["gems_collected"]) + " / "
+                                    + str(level_progress["gems_total"]), True, (255, 215, 0))
+        screen.blit(gems_text, (10, 160))
+
     # VOLUME slider: hidden for now (the - and = keys still change the volume). Set SHOW_VOLUME = True to show it.
     if SHOW_VOLUME:
         volume_text = fps_font.render("Volume", True, GREEN)
-        screen.blit(volume_text, (10, 160))
-        bar = pygame.Rect(100, 164, 150, 16)                               # the slider's track
+        screen.blit(volume_text, (10, 190))
+        bar = pygame.Rect(100, 194, 150, 16)                               # the slider's track
         pygame.draw.rect(screen, GREEN, (bar.x, bar.y, bar.width * volume["slider"], bar.height))   # filled part
         pygame.draw.rect(screen, GREEN, bar, 1)                            # outline
         percent_text = fps_font.render(str(round(volume["slider"] * 100)) + "%  (- =)", True, GREEN)
-        screen.blit(percent_text, (bar.right + 10, 160))
+        screen.blit(percent_text, (bar.right + 10, 190))
     draw_level_clock()                                                 # top right: level, time, target
 
     # The KEY LISTS, bottom-left: how much the engine is handling this frame.

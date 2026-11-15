@@ -115,17 +115,17 @@ LEVELS = {
 
         "boxes": [],
 
-        "sizes": {"SMALL": {"splits_to": None}},        # in this level: LARGE -> 2 MEDIUMs -> 4 SMALLs, which DIE
+        "sizes": {"SMALL": {"splits_to": None}},        # in this level: MEDIUM -> 2 SMALLs, which DIE
 
         "spawn": [
-            # one LARGE ice-blue cube near the far ("top" on the map) wall, floating half a unit off the floor.
+            # one MEDIUM ice-blue cube (was LARGE) near the far ("top" on the map) wall. It keeps the LARGE spot, so it floats a little higher.
             # It spins on the spot but never moves (no velocity).
             # Tilted, its corners stick out further than when it's flat (LARGE = cube size 1.25, tilt 20 degrees,
             # spinning): up to 1.78 below its centre and 2.09 behind it, instead of 1.25. So its centre is at y 1.28
             # (lowest corner 0.5 above the floor at -1) and z 5.86 (furthest corner just inside the far wall at z = 8).
             {"design": "cube", "name": "training cube",
              "position": [0, 1.28, 5.86],
-             "size": "LARGE",                       # 2.5 across, 4 health (see SIZES)
+             "size": "MEDIUM",                      # 1.5 across, 3 health (see SIZES)
              "angles": [30, 20, 0],                 # turned 30 degrees (two sides show) and TILTED 20 degrees
              "speeds": (0.5, 0, 0),                 # spins slowly round its upright axis only, so its tilt stays
                                                     #   the same (one full turn every 12 seconds at 60 FPS)
@@ -144,18 +144,18 @@ LEVELS = {
 
         "boxes": [],
 
-        "sizes": {"SMALL": {"splits_to": None}},        # as level 1: LARGE -> 2 MEDIUMs -> 4 SMALLs, which DIE
+        "sizes": {"SMALL": {"splits_to": None}},        # as level 1: MEDIUM -> 2 SMALLs, which DIE
 
         "spawn": [
-            # two LARGE cubes along the far wall, floating like level 1's (same height and distance from the wall),
+            # two MEDIUM cubes (were LARGE) along the far wall, floating like level 1's (same height and distance from the wall),
             # 7 units apart so their tilted corners never touch, spinning opposite ways
             {"design": "cube", "name": "left cube",
-             "position": [-3.5, 1.78, 5.86], "size": "LARGE",
+             "position": [-3.5, 1.78, 5.86], "size": "MEDIUM",
              "angles": [30, 20, 0], "speeds": (0.5, 0, 0),
              "colour": (120, 190, 240), "palette": PALETTE_ICE,
              "gun": {"mode": "DOWN", "volley": 1}},     # drops ONE bullet straight down each time it fires
             {"design": "cube", "name": "right cube",              # the FIRE cube
-             "position": [3.5, 1.78, 5.86], "size": "LARGE",
+             "position": [3.5, 1.78, 5.86], "size": "MEDIUM",
              "angles": [-30, 20, 0], "speeds": (-0.5, 0, 0),
              "colour": (255, 120, 60), "palette": PALETTE_SUNSET,
              "gun": {"mode": "DOWN", "volley": 1}},     # drops ONE bullet straight down each time it fires
@@ -173,25 +173,25 @@ LEVELS = {
 
         "boxes": [],
 
-        "sizes": {"SMALL": {"splits_to": None}},        # as level 1: LARGE -> 2 MEDIUMs -> 4 SMALLs, which DIE
+        "sizes": {"SMALL": {"splits_to": None}},        # as level 1: MEDIUM -> 2 SMALLs, which DIE
 
         "spawn": [
-            # three LARGE shapes along the far wall, 5 units apart, floating half a unit off the floor, spins alternating.
+            # three MEDIUM shapes (were LARGE) along the far wall, 5 units apart, floating half a unit off the floor, spins alternating.
             # A tilted LARGE cube or pyramid reaches up to 1.78 below its centre and 2.09 behind it (and about 2.1
             # sideways, so 5 apart they never touch), so: y 1.28, z 5.86 - like level 1's cube.
             # A diamond's tips are all 1 from its centre (1.25 at LARGE), whichever way it turns, so it sits at y 0.75.
             {"design": "cube", "name": "ice cube",                # ICE
-             "position": [-5, 1.78, 5.86], "size": "LARGE",
+             "position": [-5, 1.78, 5.86], "size": "MEDIUM",
              "angles": [30, 20, 0], "speeds": (0.5, 0, 0),
              "colour": (120, 190, 240), "palette": PALETTE_ICE,
              "gun": {"mode": "DOWN", "volley": 1}},     # drops ONE bullet straight down each time it fires
             {"design": "diamond", "name": "fire and ice diamond",  # FIRE AND ICE
-             "position": [0, 1.25, 5.86], "size": "LARGE",
+             "position": [0, 1.25, 5.86], "size": "MEDIUM",
              "angles": [0, 20, 0], "speeds": (-0.5, 0, 0),
              "colour": FIRE_AND_ICE, "palette": PALETTE_FIRE_AND_ICE,
              "gun": {"mode": "DOWN", "volley": 1}},     # drops ONE bullet straight down each time it fires
             {"design": "pyramid", "name": "fire pyramid",          # FIRE
-             "position": [5, 1.78, 5.86], "size": "LARGE",
+             "position": [5, 1.78, 5.86], "size": "MEDIUM",
              "angles": [-30, 20, 0], "speeds": (0.5, 0, 0),
              "colour": (255, 120, 60), "palette": PALETTE_SUNSET,
              "gun": {"mode": "DOWN", "volley": 1}},     # drops ONE bullet straight down each time it fires

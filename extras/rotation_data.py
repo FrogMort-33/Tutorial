@@ -615,6 +615,7 @@ SHAPE_GUN_MODES = ("DOWN", "TARGET")    # the modes that need no turret: they ne
 you = {"hits_taken": 0, "hurt": 0,   # how many times you've been hit, and frames left of the flash
        "hurt_colour": (255, 0, 0),   # the flash's colour: what hit you (a bullet's, or the lava's / ice's)
        "lava_timer": 0,              # frames until standing in lava hurts you again (0 = straight away)
+       "outside_timer": 0,           # frames until being OUTSIDE the play grid hurts you again (0 = straight away)
        "frozen": 0,                  # frames left FROZEN by ice (0 = free to move)
        "freeze_grace": 0,            # frames left when ice can't freeze you again
        "bump_grace": 0}              # frames left before a moving THING can hurt you again
@@ -637,11 +638,12 @@ BANNER_COLOUR = (255, 215, 0)          # the name: gold
 BANNER_INTRO_COLOUR = BANNER_COLOUR    # the intro line: the same gold as the name (both have a black shadow)
 level_banner = {"name": "", "intro": "", "frame": 0}   # what's showing now: set by load_level(), frame counts up
 
-# ---- LEVEL COMPLETED: when every shape is destroyed, a message shows, then the NEXT level loads ----
+# ---- LEVEL COMPLETED: when every shape is destroyed (and every GEM collected), a message shows, then the NEXT level loads ----
 LEVEL_COMPLETE_FRAMES = 180   # frames the "Level X completed!" message shows before the next level (3 seconds)
 TEST_LEVELS = ()           # levels that aren't part of the normal 1, 2, 3 ... order (finishing one ends there)
 level_progress = {"number": None, "cleared_frames": None,    # this level's number, and frames since it was cleared
-                  "frames": 0}                              # frames PLAYED on this level (stops when cleared): the LEVEL TIME
+                  "frames": 0,                              # frames PLAYED on this level (stops when cleared): the LEVEL TIME
+                  "gems_total": 0, "gems_collected": 0}     # GEMS: how many this level has, and how many you've got
 DEFAULT_TARGET_TIME = 120     # seconds: a level's TARGET TIME if it doesn't give its own "target_time"
                                                             #   (None = not cleared yet)
 
@@ -689,6 +691,8 @@ FREEZE_FRAMES = 60        # frames ice freezes you for (1 second): long enough f
 FREEZE_GRACE = 60         # frames after thawing when ice can't freeze you again (so you can walk off it)
 FREEZE_COLOUR = (120, 200, 255)   # the icy border round the screen while you're frozen
 LAVA_HURT_FRAMES = 30     # while you stand in lava: one hit as you step in, then one every 30 frames (half a second)
+OUTSIDE_HURT_FRAMES = 30  # while you're OUTSIDE the play grid (the world box in x and z): the same, one hit every 30 frames
+OUTSIDE_COLOUR = (200, 0, 255)   # the flash when being outside hurts you: purple, so you can tell it from lava
 DECAL_GLOW_FRAMES = 90    # frames for one slow pulse of a glowing decal (1.5 seconds)
 
 
@@ -709,3 +713,34 @@ SHOW_PIECES = False           # TEST: True = every 1-unit floor piece gets its o
 # The floor grid is drawn across the same x and z.
 WORLD_MIN = [0, FLOOR_Y, 0]     # smallest x, y, z
 WORLD_MAX = [0, 0, 0]           # biggest  x, y, z (y = the ceiling: an invisible limit, nothing draws it)
+
+
+# ================================ GEMS: little gold diamonds to COLLECT ================================
+# GEMS are THINGS with "gem": True, so they're drawn, spun, moved and shown on the mini-map like any thing.
+# What's DIFFERENT about a gem: it never blocks you, never hurts you, bullets fly through it, it has no health,
+# and it doesn't bounce off other things. Walk into it and it's COLLECTED: gold sparks and a note of the scale.
+# A level needs ALL its gems collected (as well as every shape gone) before it's completed.
+# They're scattered at RANDOM by place_gems() each time a level loads, after its boxes and floor shapes are in.
+# A level can set its own number: "gems": 12 (or 0 for none) - see LEVELS in rotation_levels.py.
+# Gems can be given a velocity later: they'll move and bounce off the world box and boxes like other things.
+GEMS_PER_LEVEL = 8            # how many gems a level gets, unless it gives its own "gems"
+GEM_ACROSS = 0.3              # world units across, tip to tip (a TINY shape is 0.5)
+GEM_HOVER = 0.5               # the LOWEST a gem's centre floats over the floor: knee-high, so walking into it collects it
+GEM_HIGHEST = 0.8            # the HIGHEST: 1.0 = as high as your best jump can still collect it (0.5 = half way up),
+                              #   worked out from JUMP_SPEED and GRAVITY. Each gem gets a random height in between.
+GEM_BOB = 0.25                # how far it bobs up and down from there
+GEM_BOB_FRAMES = 120          # frames for one bob, up and back down (2 seconds)
+GEM_SPIN = (2, 0, 0)          # (turn, tilt, spin) degrees per frame: turns slowly round its upright axis
+GEM_COLOUR = (255, 240, 150)  # its outline (and its dot on the mini-map): pale gold
+GEM_PALETTE = PALETTE_GOLD    # its faces
+GEM_PICKUP_EXTRA = 0.1        # world units: a little extra reach, so you don't have to hit it dead on
+# Where a gem may go (so every one can be reached):
+GEM_WALL_GAP = 1.0            # at least this far in from the world box's walls
+GEM_BOX_GAP = 0.6             # at least this far from any box (seen from above)
+GEM_THING_GAP = 0.8           # at least this far from the edge of any thing (seen from above)
+GEM_START_GAP = 2.0           # at least this far from where you start
+GEM_APART = 2.0               # at least this far from each other
+GEM_TRIES = 3000              # random spots tried per level before giving up (then it uses fewer, with a warning)
+# Each gem you collect plays the NEXT note of the C major scale: do re mi fa so la ti do (in Hz).
+# With more than 8 gems, the scale starts again from the bottom.
+GEM_NOTES = [523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77, 1046.50]

@@ -4,3 +4,6 @@ __pycache__/
 # PyInstaller scratch folders (rebuild with: py -m PyInstaller rotation_301.spec)
 extras/build/
 extras/dist/
+
+# Screenshots taken in the game (P key)
+extras/screenshots/

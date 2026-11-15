@@ -25,7 +25,7 @@ Run it with `python rotation_301.py` from this folder. Other `rotation_*.py` / `
 ## Icon and .exe
 - Icon: the level 6 lava tank on a bright red grid. `rotation_301_icon.png` is the window/taskbar icon (loaded in `rotation_functions.py` from `GAME_FOLDER`, so it works in the .exe too); `rotation_301_icon.ico` (16-256 px) is the .exe's icon.
 - Build the .exe from `extras` with `py -m PyInstaller rotation_301.spec` (needs `pip install pyinstaller`). One file, no console window. It lands in `extras/dist/rotation_301.exe`; `build/` and `dist/` are NOT in git, so rebuild on each PC.
-otation_301.exe`; `build\` and `dist\` are NOT in git, so rebuild on each PC.
+- **P** saves a screenshot to `screenshots/` next to the game (next to the .exe when frozen). `screenshots/` is NOT in git.
 - `WALL_GRID_STEP` (rotation_data.py) sets the wall/ceiling grid spacing; 1 = the same as the floor.
 
 The files share names with `import *`, so shared lists/dicts must be **changed in place** (`list[:] = ...`, `dict.update`), never rebound.
@@ -42,6 +42,16 @@ The files share names with `import *`, so shared lists/dicts must be **changed i
 - `"scenery": True` = not counted for clearing, not on the map, can't be killed (drippers, bunkers).
 - Your body = a column from feet (eye − 1) to eye, `YOUR_BODY_RADIUS` wide. Boxes block you (x and z checked separately, so you slide) and you can stand on them (`STEP_UP`).
   THINGS block you too (`into_a_thing`: only steps that go DEEPER are refused, so you can always get out). A MOVING thing that touches you hurts you and bounces off (`things_bump_you`, then `BUMP_GRACE` frames).
+- Being OUTSIDE the world box (x / z) hurts like lava: one hit, then every `OUTSIDE_HURT_FRAMES`, purple flash (`update_outside_hurt`).
+- GEMS (gold diamonds to collect) are THINGS with `"gem": True` (so the mini-map, drawing and "all must be cleared" come free).
+  Gems never block you, never hurt you, bullets pass through, no health, don't bounce off other things.
+  `place_gems()` scatters `GEMS_PER_LEVEL` (8, or a level's `"gems"`) at random good spots after the level is built, at a random
+  height from `GEM_HOVER` up to `GEM_HIGHEST` (0.8) of the max jump (`jump_peak()`), so some need a jump. Uses its own `gem_random`.
+  `update_gems()` bobs them (by the CHANGE in bob, so a velocity can be added later) and collects: gold sparks + the next note of
+  the C major scale (`GEM_NOTES`). A level completes only when every shape is gone AND every gem collected.
+- Speed (level 8, 115 boxes): `add_box_faces` skips boxes fully behind NEAR and faces you're not on the side of
+  (`< 0`, NOT `<= 0`: edge-on faces still go to `face_on_screen`, which paints them as a thin line - keeps the picture identical).
+  `move_bullets` does a quick "anywhere near this box?" check before the exact one. Profile scripts were headless (`SDL_VIDEODRIVER=dummy`).
 - Every grid follows `level_look["grid_colour"]`; boxes default to it × `BOX_BRIGHTER`. A gold `ORIGIN_MARK` is at x 0, z 0 in every level.
 
 ## Levels so far
@@ -49,7 +59,7 @@ The files share names with `import *`, so shared lists/dicts must be **changed i
 6 The Floor Is Lava (lava bands, drippers) · 7 Frozen (will not let you go!) (ice clone of 6) ·
 8 The Canyon (32 x 32 stone ruins, floor/wall/ceiling bunkers) · 9 The Huge Room (48 x 48, one small cube) ·
 99 Skunk works (48 x 48, everything shoots at you). 99 now comes after 9 (`TEST_LEVELS` is empty).
-Levels 1–7 use a 16 x 16 x 8 room.
+Levels 1–7 use a 16 x 16 x 8 room. Levels 1–3 start with MEDIUM shapes (were LARGE; positions kept, so they float a bit higher).
 
 ## Open ideas (not built yet)
 - Player health / game over (hits only count "Hits taken" for now).

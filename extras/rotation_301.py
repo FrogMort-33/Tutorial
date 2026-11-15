@@ -8,6 +8,7 @@ from rotation_functions import *        # (this also opens the game window)
 START_LEVEL = 1 # DEBUG: which level to play (see LEVELS in rotation_levels.py). 99 = skunk works, the test level
 show_spheres = False   # C key: draw the collision spheres (a debug view)
 show_wall_grid = True  # G key: the grid on the walls and ceiling (watch the FPS counter as you switch it)
+take_screenshot = False  # P key: save this frame as a picture (once it's fully drawn, just before it's shown)
 
 load_level(START_LEVEL)              # build the level: its world, boxes, floor shapes, things, and where you start
 
@@ -26,6 +27,8 @@ while running:
             show_spheres = not show_spheres               # flip: on -> off, off -> on (once per press)
         if event.type == pygame.KEYDOWN and event.key == pygame.K_g:
             show_wall_grid = not show_wall_grid           # the wall and ceiling grid: on / off
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+            take_screenshot = True                        # saved below, after everything is drawn
         if event.type == pygame.KEYDOWN and event.key in (pygame.K_MINUS, pygame.K_KP_MINUS):
             volume["slider"] = max(0.0, round(volume["slider"] - 0.1, 1))     # quieter (never below 0%)
             apply_volume()
@@ -43,11 +46,13 @@ while running:
     spin_things(keys)                               # each thing's own spin, plus the I J K L U O keys
     move_camera(keys)                               # you: look, walk, jump
     update_floor_hazards()                          # standing in lava (feet on the floor)? it hurts
+    update_outside_hurt()                           # outside the play grid? that hurts too
     move_things()                                   # every thing moves (and bounces off the world box)
 
     bounce_things_off_each_other()                  # after moving: things that touch bounce apart
     bounce_things_off_boxes()                       # ...and things that hit a box bounce off it
     things_bump_you()                               # ...and a MOVING thing that touches you hurts you, and bounces off
+    update_gems()                                   # gems bob; walk into one to COLLECT it (a note of the scale)
     move_bullets()                                  # bullets fly, and stop on the first thing they hit
     update_sparks()                                 # move, drop and age the sparks
     things_shoot()                                  # guns fire: turrets at you, DOWN guns straight down (after their cooldown)
@@ -79,6 +84,10 @@ while running:
     draw_hud(len(face_paint_order))                # (how many faces were drawn: for the counts in the bottom-left)
     draw_level_banner()                            # the level's name and intro: centre, then the name at the top
     draw_level_complete()                          # "Level X completed!" once every shape is gone
+
+    if take_screenshot:                            # P key: the whole frame is drawn, so save it now
+        save_screenshot()
+        take_screenshot = False
 
     pygame.display.flip()
     clock.tick(60)
