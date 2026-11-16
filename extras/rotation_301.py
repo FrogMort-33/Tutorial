@@ -46,6 +46,8 @@ while running:
             if player["y"] <= standing_height(player["x"], player["z"]) + 0.001 and you["frozen"] == 0:
                 # only jump with your feet on the ground - the floor or a box top (and not frozen)
                 player["vy"] = JUMP_SPEED
+        if event.type == pygame.MOUSEWHEEL:               # SCROLL: the third-person camera in (up) or out (down)
+            view["distance"] = min(CAMERA_FURTHEST, max(CAMERA_NEAREST, view["distance"] - (event.y * CAMERA_SCROLL_STEP)))
         if event.type == pygame.KEYDOWN and event.key == pygame.K_v:
             view["third_person"] = not view["third_person"]   # V: third person (behind your tank) <-> first person
                 

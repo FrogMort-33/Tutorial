@@ -972,7 +972,7 @@ def fire_bullet():
     # A new bullet THING: a tiny spinning cube, flying the way you're looking (turn AND tilt).
     # Your "forward" is (0, 0, 1) in front of your eye. to_camera() undoes your turn then your tilt,
     # so going the other way - tilt, then turn - gives "forward" in the WORLD.
-    aim_x, aim_y, aim_z = rotate_y(rotate_x((0, 0, 1), player["tip"]), player["turn"])
+    aim_x, aim_y, aim_z = your_fire_direction()   # first person: your aim; third person: at the CROSSHAIR's point
     start = 0.4                                   # start a little in front of your eye (closer is cut off by NEAR)
     crosshair["kick"] = CROSSHAIR_KICK            # the crosshair's arms jump out
     start_point = (player["x"] + (aim_x * start), player["y"] + (aim_y * start), player["z"] + (aim_z * start))
@@ -982,7 +982,7 @@ def fire_bullet():
 def throw_rope():
     # RIGHT button down: fire a bullet like the left button does, and remember it as THE rope
     drop_rope()                                   # only one rope at a time
-    aim = rotate_y(rotate_x((0, 0, 1), player["tip"]), player["turn"])
+    aim = your_fire_direction()                   # first person: your aim; third person: at the CROSSHAIR's point
     start = (player["x"] + (aim[0] * 0.4), player["y"] + (aim[1] * 0.4), player["z"] + (aim[2] * 0.4))
     spawn_bullet(start, aim, BULLET_SPEED, PLAYER_COLOUR, PALETTE_PLAYER, None)
     rope["bullet"] = bullets[-1]                  # the bullet we just made: the end of the list
@@ -1741,39 +1741,116 @@ def update_camera():
         camera["z"] = player["z"]
         return
 
-    # THIRD PERSON: the camera is CAMERA_BACK units BEHIND your eye, on the line you are aiming along.
+    # THIRD PERSON: the camera swings round a PIVOT just above your tank - NOT round your eye. This is how
+    # third-person games usually do it: your tank sits a little BELOW the middle of the screen, under the
+    # crosshair instead of on it, so it never covers what you are aiming at.
     #
-    # Start with an arrow pointing straight BACK from an eye that faces +z, and is level:
-    #       (0, 0, -CAMERA_BACK) = (0, 0, -3)
-    # Turn that arrow EXACTLY the way fire_bullet() turns "forward" (tip first, then turn), so it stays
-    # opposite to your aim:
-    #       back = rotate_y( rotate_x((0, 0, -3), tip), turn )
-    # e.g. tip 0, turn 30 (turned 30 degrees LEFT):
-    #       rotate_x does nothing (tip 0)              -> (0, 0, -3)
-    #       rotate_y: x = ((0 * cos 30) - (-3 * sin 30)) = (0 - (-1.5)) = 1.5
-    #                 z = ((0 * sin 30) + (-3 * cos 30)) = (0 + (-2.6)) = -2.6
-    #       back = (1.5, 0, -2.6): behind you and to the right, because you face up-and-LEFT on the map.
-    # e.g. tip 20 (looking DOWN 20 degrees), turn 0:
-    #       rotate_x: y = ((0 * cos 20) - (-3 * sin 20)) = (0 - (-1.03)) = 1.03     -> the camera RISES
-    #                 z = ((0 * sin 20) + (-3 * cos 20)) = (0 + (-2.82)) = -2.82
-    #       Look down and the camera swings UP behind you, like a camera on a 3-unit stick held at your eye.
+    #   pivot  = your eye, CAMERA_PIVOT_UP higher
+    #   camera = view["distance"] back from the pivot (the SCROLL WHEEL changes the distance), opposite your
+    #            aim:  back = rotate_y(rotate_x((0, 0, -distance), tip), turn)
     #
-    # WHY on the aim line: the middle of the screen is the camera's straight-ahead line. Because the camera
-    # sits on the backward half of YOUR aim line, its straight-ahead line goes through your eye and on
-    # along your aim. So the crosshair still marks exactly where your bullets (fired from your eye) go.
-    back_x, back_y, back_z = rotate_y(rotate_x((0, 0, -CAMERA_BACK), player["tip"]), player["turn"])
-    camera["x"] = (player["x"] + back_x)
-    camera["y"] = (player["y"] + back_y)
-    camera["z"] = (player["z"] + back_z)
+    # The crosshair now marks what the CAMERA looks at, not your own aim line. aim_point() works out WHAT
+    # that is, and your bullets fly from your eye TO that point, so shots still land on the crosshair
+    # (see your_fire_direction).
+    pivot_y = (player["y"] + CAMERA_PIVOT_UP)
+    back_x, back_y, back_z = rotate_y(rotate_x((0, 0, -view["distance"]), player["tip"]), player["turn"])
 
-    # Keep the camera inside the room, top to bottom. Looking UP 30 degrees, for example, puts it
-    #   (3 * sin 30) = 1.5 BELOW your eye: standing on the floor that's y = (0 - 1.5) = -1.5, under the floor (-1).
-    # So it stops at (FLOOR_Y + CAMERA_FLOOR_GAP) = (-1 + 0.2) = -0.8. (When it stops, the crosshair is a tiny
-    # bit off your aim. Simplest rule first: it only happens looking steeply up.)
+    # Keep the camera inside the room, top to bottom - by sliding it IN TOWARDS THE PIVOT, never off the line.
+    # Looking UP 30 degrees with distance 3 puts it (3 * sin 30) = 1.5 below the pivot. Standing on the floor
+    # the pivot is at y 0.5 and the lowest allowed is (FLOOR_Y + CAMERA_FLOOR_GAP) = -0.8: a drop of 1.3 is
+    # fine, so use (1.3 / 1.5) = 0.87 of the way back. Slid ALL the way in, the camera sits AT the pivot -
+    # above your tank, never inside it.
     lowest = (FLOOR_Y + CAMERA_FLOOR_GAP)
     highest = (WORLD_MAX[1] - CAMERA_CEILING_GAP)
-    if camera["y"] < lowest:    camera["y"] = lowest
-    if camera["y"] > highest:   camera["y"] = highest
+    share = 1                                              # how much of the way back we can go (1 = all of it)
+    if (pivot_y + back_y) < lowest and back_y < 0:
+        share = max(0, (lowest - pivot_y) / back_y)        # too low: come in until it's just above the floor
+    if (pivot_y + back_y) > highest and back_y > 0:
+        share = max(0, (highest - pivot_y) / back_y)       # too high: come in until it's just under the ceiling
+    camera["x"] = (player["x"] + (back_x * share))
+    camera["y"] = (pivot_y + (back_y * share))
+    camera["z"] = (player["z"] + (back_z * share))
+
+
+def aim_point():
+    # THIRD PERSON: the point the CROSSHAIR is on. The middle of the screen IS the camera's straight-ahead
+    # line - so walk along that line and find what it meets FIRST: the room, a box, or a thing.
+    # Only hits FURTHER than your eye count: never something between the camera and you.
+    ox, oy, oz = camera["x"], camera["y"], camera["z"]
+    dx, dy, dz = rotate_y(rotate_x((0, 0, 1), camera["tip"]), camera["turn"])
+    line = ((ox, dx), (oy, dy), (oz, dz))
+    # how far along the line your EYE is (hits closer than this are between the camera and you: ignored)
+    eye_ahead = (((player["x"] - ox) * dx) + ((player["y"] - oy) * dy) + ((player["z"] - oz) * dz))
+    nearest = None
+
+    # the ROOM: from inside, the line always leaves through a wall, the floor or the ceiling
+    for axis in range(3):
+        along, direction = line[axis]
+        if direction == 0:
+            continue
+        for edge in (WORLD_MIN[axis], WORLD_MAX[axis]):
+            t = ((edge - along) / direction)
+            if t <= eye_ahead or (nearest is not None and t >= nearest):
+                continue
+            hit = ((ox + (dx * t)), (oy + (dy * t)), (oz + (dz * t)))
+            if all(WORLD_MIN[a] - 0.01 <= hit[a] <= WORLD_MAX[a] + 0.01 for a in range(3) if a != axis):
+                nearest = t
+
+    # the BOXES: where the line ENTERS each box. Axis by axis: the stretch of the line that is between the
+    # box's two x sides, then also between its y sides, then its z ones. What's left (enter to leave) is
+    # where the line is inside the box - if enter < leave, it really goes through.
+    for box in BOXES:
+        enter = eye_ahead
+        leave = nearest if nearest is not None else 1000000.0
+        misses = False
+        for axis in range(3):
+            along, direction = line[axis]
+            low, high = box["min"][axis], box["max"][axis]
+            if direction == 0:
+                if not (low <= along <= high):
+                    misses = True                          # level with the box on this axis, and outside it
+                    break
+            else:
+                t1, t2 = ((low - along) / direction), ((high - along) / direction)
+                if t1 > t2:
+                    t1, t2 = t2, t1
+                enter, leave = max(enter, t1), min(leave, t2)
+        if not misses and enter < leave:
+            nearest = enter
+
+    # the THINGS: their collision spheres (gems too, so the ROPE can aim at them)
+    for thing in things:
+        if "parent" in thing or thing.get("dead"):
+            continue
+        for (cx, cy, cz), radius in world_spheres(thing):
+            centre_t = (((cx - ox) * dx) + ((cy - oy) * dy) + ((cz - oz) * dz))   # the centre, measured along the line
+            if centre_t <= eye_ahead or (nearest is not None and (centre_t - radius) >= nearest):
+                continue
+            off_line_sq = ((((cx - ox) ** 2) + ((cy - oy) ** 2) + ((cz - oz) ** 2)) - (centre_t ** 2))
+            if off_line_sq >= (radius * radius):
+                continue                                   # the line passes it further out than its radius
+            t = (centre_t - math.sqrt((radius * radius) - off_line_sq))
+            if t > eye_ahead and (nearest is None or t < nearest):
+                nearest = t
+
+    if nearest is None:
+        nearest = (eye_ahead + 50)                         # looking out of the room: just far ahead
+    return ((ox + (dx * nearest)), (oy + (dy * nearest)), (oz + (dz * nearest)))
+
+
+def your_fire_direction():
+    # Which way YOUR shot (or rope) flies: an arrow of length 1, from your eye.
+    #   FIRST PERSON: straight along your aim - the camera IS your eye, so that is the crosshair.
+    #   THIRD PERSON: at the point under the crosshair (aim_point), so shots LAND where the crosshair shows,
+    #   even though they leave from your eye and the picture is drawn from behind you.
+    if not view["third_person"]:
+        return rotate_y(rotate_x((0, 0, 1), player["tip"]), player["turn"])
+    px, py, pz = aim_point()
+    dx, dy, dz = ((px - player["x"]), (py - player["y"]), (pz - player["z"]))
+    length = math.sqrt((dx * dx) + (dy * dy) + (dz * dz))
+    if length < 0.5:
+        return rotate_y(rotate_x((0, 0, 1), player["tip"]), player["turn"])   # right on top of it: just use your aim
+    return ((dx / length), (dy / length), (dz / length))
 
 
 def move_player(keys):
@@ -1786,7 +1863,8 @@ def move_player(keys):
     player["turn"] = (player["turn"] - (mouse_dx * MOUSE_SPEED))     # mouse right = turn right
     player["tip"] = (player["tip"] + (mouse_dy * MOUSE_SPEED))       # mouse up = look up
     if player["tip"] > TIP_LIMIT_DOWN:   player["tip"] = TIP_LIMIT_DOWN    # stop at the limits (+ = looking DOWN)
-    if player["tip"] < -TIP_LIMIT_UP:    player["tip"] = -TIP_LIMIT_UP     #   (- = looking UP)
+    up_limit = TIP_LIMIT_UP_THIRD if view["third_person"] else TIP_LIMIT_UP   # third person: not so steep
+    if player["tip"] < -up_limit:        player["tip"] = -up_limit          #   (- = looking UP)
 
     forward_x, forward_y, forward_z = rotate_y((0, 0, 1), player["turn"])   # the way you face
     right_x, right_y, right_z = rotate_y((1, 0, 0), player["turn"])         # your right hand

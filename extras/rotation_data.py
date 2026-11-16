@@ -552,6 +552,8 @@ TURN_STEP = 1         # degrees per frame that the I J K L U O keys turn every t
 TURN_SPEED = 1.5      # degrees per frame (not used at the moment: you turn with the mouse, MOUSE_SPEED)
 TIP_LIMIT_DOWN = 60   # degrees: how far you can look DOWN at the floor
 TIP_LIMIT_UP = 85     # degrees: how far you can look UP at the ceiling (keep under 90: past it the view flips over)
+TIP_LIMIT_UP_THIRD = 60   # ...in THIRD PERSON: any steeper and the floor pushes the camera down beside your tank,
+                          #   into it (the camera is held 0.2 above the floor, behind a pivot 0.5 over your eye)
 STAND_Y = 0           # your eye height when standing: 1 above the floor (FLOOR_Y is -1)
 JUMP_SPEED = 0.15     # the upward speed a jump starts with (SPACE), in world units per frame
 GRAVITY = 0.004       # taken off player["vy"] every frame, so you slow, stop, then fall
@@ -573,12 +575,22 @@ camera = {
     "turn": 0,      # degrees: the same as player["turn"] (+ = turned LEFT)
     "tip": 0,       # degrees: the same as player["tip"] (+ = looking DOWN)
 }
-view = {"third_person": True}   # V key flips it. A DICTIONARY (not a plain True), so the game loop can change it
+view = {"third_person": True,    # V key flips it.
+        "distance": 3.0}          # how far BEHIND your eye the third-person camera is: the SCROLL WHEEL changes it
+                                #   (starts at CAMERA_BACK; CAMERA_NEAREST to CAMERA_FURTHEST)
+                                #   view is a DICTIONARY (not a plain True), so the game loop can change it
                                 #   and rotation_functions.py sees the change (see "import *" in CLAUDE.md)
 
 CAMERA_BACK = 3.0     # world units from your EYE back to the camera. Why 3? Your tank is 1.16 long at
                       #   AVATAR_SIZE 0.4, so 3 back shows the whole tank with room in front of it to aim.
                       #   Bigger = you look smaller on screen (6 = half the size); smaller = the tank fills more.
+CAMERA_NEAREST = 1.5      # SCROLL WHEEL: the closest the camera comes (up: closer)
+CAMERA_FURTHEST = 8.0     # ...and the furthest it goes (down: further)
+CAMERA_SCROLL_STEP = 0.5  # ...this much per click of the wheel
+CAMERA_PIVOT_UP = 0.5     # THIRD PERSON: the camera swings round a PIVOT this far ABOVE your eye - just over
+                          #   your tank. The tank then sits BELOW the crosshair on screen instead of on it, and
+                          #   when the camera slides all the way in (looking steeply up or down) it stops at the
+                          #   pivot, ABOVE the tank - never inside it.
 CAMERA_FLOOR_GAP = 0.2     # Looking UP swings the camera DOWN behind you: keep it at least 0.2 ABOVE the floor
                            #   (so never under (FLOOR_Y + 0.2) = (-1 + 0.2) = -0.8), or you'd see the floor from underneath.
 CAMERA_CEILING_GAP = 0.2   # ...and at least 0.2 UNDER the ceiling (the world box's top), for the same reason.
