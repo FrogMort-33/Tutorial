@@ -531,9 +531,15 @@ HEALTH_GAP = 2            # pixels between the squares
 SPLIT_KICK = 0.03         # how fast the two pieces of a broken shape push apart (world units per frame)
 
 
-# ================================ YOU (the camera) ================================
+# ================================ YOU (the player) ================================
 # One DICTIONARY, so functions in rotation_functions.py can change it (they can't change the main file's names).
-camera = {
+#
+# THIRD PERSON: this used to be called "camera", because the camera WAS you. Now there are TWO dictionaries:
+#   player - where YOUR BODY is and which way it faces. Walking, jumping, boxes, being shot, turrets aiming
+#            at you, gems, the mini-map: ALL of these read player.
+#   camera - where the picture is drawn FROM (further down). Only to_camera() reads it.
+# In first person the camera sits on your eye (camera = player). In third person it sits behind you.
+player = {
     "x": -7.8,      # where YOU stand, in WORLD coordinates: the lower-left corner
     "y": 0,         # your eye height (not shown on the map)
     "z": -3.2,      #   (right by the grid's corner at x = -8, z = -3)
@@ -548,10 +554,44 @@ TIP_LIMIT_DOWN = 60   # degrees: how far you can look DOWN at the floor
 TIP_LIMIT_UP = 85     # degrees: how far you can look UP at the ceiling (keep under 90: past it the view flips over)
 STAND_Y = 0           # your eye height when standing: 1 above the floor (FLOOR_Y is -1)
 JUMP_SPEED = 0.15     # the upward speed a jump starts with (SPACE), in world units per frame
-GRAVITY = 0.004       # taken off camera["vy"] every frame, so you slow, stop, then fall
+GRAVITY = 0.004       # taken off player["vy"] every frame, so you slow, stop, then fall
                       # (halved from 0.008: twice as high AND twice as long a jump)
 
 MOVE_SPEED = 0.05     # how far you walk in ONE frame (W A S D), in world units
+
+
+# ================================ THE CAMERA (third person) ================================
+# Where the picture is drawn FROM. update_camera() (rotation_functions.py) fills it in EVERY frame, from player:
+#   first person: the camera is ON your eye          -> camera x, y, z = player x, y, z
+#   third person: the camera is CAMERA_BACK behind   -> on the line you are AIMING along, but backwards
+# It always faces the SAME way as you (same turn, same tip), so the crosshair still points where bullets go.
+# The numbers here are only a starting point: update_camera() overwrites them before anything is drawn.
+camera = {
+    "x": 0,         # WORLD coordinates of the camera's eye
+    "y": 0,
+    "z": 0,
+    "turn": 0,      # degrees: the same as player["turn"] (+ = turned LEFT)
+    "tip": 0,       # degrees: the same as player["tip"] (+ = looking DOWN)
+}
+view = {"third_person": True}   # V key flips it. A DICTIONARY (not a plain True), so the game loop can change it
+                                #   and rotation_functions.py sees the change (see "import *" in CLAUDE.md)
+
+CAMERA_BACK = 3.0     # world units from your EYE back to the camera. Why 3? Your tank is 1.16 long at
+                      #   AVATAR_SIZE 0.4, so 3 back shows the whole tank with room in front of it to aim.
+                      #   Bigger = you look smaller on screen (6 = half the size); smaller = the tank fills more.
+CAMERA_FLOOR_GAP = 0.2     # Looking UP swings the camera DOWN behind you: keep it at least 0.2 ABOVE the floor
+                           #   (so never under (FLOOR_Y + 0.2) = (-1 + 0.2) = -0.8), or you'd see the floor from underneath.
+CAMERA_CEILING_GAP = 0.2   # ...and at least 0.2 UNDER the ceiling (the world box's top), for the same reason.
+
+# ---- YOUR AVATAR: the tank you drive in third person ----
+# A tank built from the "tank" design (rotation_levels.py): a hull, its turret and its radar.
+# It is NOT in the things list on purpose: nothing collides with it, shoots it, or counts it for clearing
+# the level. You still get hit the same way as before (bullets near your EYE, see YOUR_HIT_RADIUS).
+# update_avatar() moves it to where you stand every frame; add_thing_faces() draws it with everything else.
+AVATAR_SIZE = 0.4     # the tank's size. The hull model is 2.2 wide, 2.9 long and its base is 1 below its centre,
+                      #   so at 0.4 it is (2.2 * 0.4) = 0.88 wide, (2.9 * 0.4) = 1.16 long, and its centre sits
+                      #   0.4 above your feet. (Your body for BOXES is still 0.5 wide: YOUR_BODY_RADIUS 0.25.)
+avatar = []           # [hull, turret, radar] once build_avatar() has run. Changed IN PLACE (avatar[:] = ...).
 
 
 # ================================ SPARKS ================================
@@ -745,6 +785,7 @@ WORLD_MAX = [0, 0, 0]           # biggest  x, y, z (y = the ceiling: an invisibl
 # THE ROPE: a bullet from the RIGHT mouse button, tied to you by a line
 PLAYER_COLOUR = (240, 240, 255)      # YOUR colour: your bullets and the rope (white - gold is for gems)
 PALETTE_PLAYER = [PLAYER_COLOUR]     # every face of your bullets that colour (the lighting still shades each side)
+PALETTE_AVATAR = [(240, 240, 255), (200, 210, 230), (170, 180, 205), (220, 225, 245)]   # YOUR TANK: whites to blue-grey
 ROPE_HAND = (0.2, -0.25, 0.3)        # where the line leaves you, from your eye: a bit right, down and forward
 rope = {"bullet": None,              # the rope's bullet while it's out (None = no rope)
         "start": (0, 0, 0),          # where it was thrown from (to measure how far it has flown)

@@ -18,7 +18,7 @@ Run it with `python rotation_301.py` from this folder. Other `rotation_*.py` / `
 
 ## File split (keep it)
 - `rotation_301.py` — the game loop only. `START_LEVEL` at the top picks the level (debug).
-- `rotation_data.py` — colours, palettes, models, settings, shared state (`things`, `bullets`, `camera`, `you`, ...). Bullets have their OWN list: `move_bullets()` does everything a bullet does. No pygame.
+- `rotation_data.py` — colours, palettes, models, settings, shared state (`things`, `bullets`, `player`, `camera`, `avatar`, `you`, ...). Bullets have their OWN list: `move_bullets()` does everything a bullet does. No pygame.
 - `rotation_functions.py` — maths, camera, drawing, clipping, collisions, sounds, `load_level`, HUD, mini-map.
 - `rotation_levels.py` — `DESIGNS` (shapes, tanks) and `LEVELS` (data-driven: name, intro, world box, start, floor_shapes, boxes, spawn, optional sizes).
 - `level_builder.py` — builds big levels (recipes: glacier, furnace, slime, the PUDDING layout in themes - PUDDING_THEMES: custard, cupid, gold pudding - and fortknox = the vault) as level DATA: `py level_builder.py glacier 9` PRINTS the code to paste into LEVELS. Never edits game files. Helpers for short box pieces: walls from a list of heights, jagged columns, bunker rings, block piles. Copy a recipe to make a new level.
@@ -57,6 +57,12 @@ The files share names with `import *`, so shared lists/dicts must be **changed i
   `move_bullets` does a quick "anywhere near this box?" check before the exact one. Profile scripts were headless (`SDL_VIDEODRIVER=dummy`).
 - FLOOR HAZARDS (DECAL_TYPES): lava hurts; ice freezes + hurts; SLIME hurts + slows you to 60%; CUSTARD slows you to 30%
   (no harm). "slows" is a decal setting; floor_slowness() applies it to your walk speed (only with your feet on the floor).
+- THIRD PERSON (2026-11-16): `player` (rotation_data.py, was `camera`) is YOU: every game rule reads it. `camera` is only
+  where the picture is drawn from: `update_camera()` puts it `CAMERA_BACK` (3) behind your eye on your AIM line (so the
+  crosshair still matches your bullets), kept between floor + 0.2 and ceiling - 0.2. Only `to_camera()` and
+  `add_box_faces`' eye read `camera`. Your tank = `avatar` [hull, turret, radar] from the "tank" design at `AVATAR_SIZE`
+  0.4, NOT in `things` (nothing hits it); `update_avatar()` stands it on your feet. **V** flips first / third person
+  (`view["third_person"]`); first person draws exactly the old picture.
 - Every grid follows `level_look["grid_colour"]`; boxes default to it × `BOX_BRIGHTER`. A gold `ORIGIN_MARK` is at x 0, z 0 in every level.
 
 ## Levels so far

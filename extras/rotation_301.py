@@ -11,6 +11,7 @@ show_wall_grid = True  # G key: the grid on the walls and ceiling (watch the FPS
 take_screenshot = False  # P key: save this frame as a picture (once it's fully drawn, just before it's shown)
 
 load_level(START_LEVEL)              # build the level: its world, boxes, floor shapes, things, and where you start
+build_avatar()                       # THIRD PERSON: your tank (built once: update_avatar() moves it every frame)
 
 pygame.mouse.set_visible(False)      # hide the mouse pointer
 pygame.event.set_grab(True)          # keep the mouse locked to the window
@@ -42,13 +43,15 @@ while running:
         if event.type == pygame.MOUSEBUTTONUP and event.button == 3:
             drop_rope()                                   # right button UP: let it go
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-            if camera["y"] <= standing_height(camera["x"], camera["z"]) + 0.001 and you["frozen"] == 0:
+            if player["y"] <= standing_height(player["x"], player["z"]) + 0.001 and you["frozen"] == 0:
                 # only jump with your feet on the ground - the floor or a box top (and not frozen)
-                camera["vy"] = JUMP_SPEED
+                player["vy"] = JUMP_SPEED
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_v:
+            view["third_person"] = not view["third_person"]   # V: third person (behind your tank) <-> first person
                 
     keys = pygame.key.get_pressed()
     spin_things(keys)                               # each thing's own spin, plus the I J K L U O keys
-    move_camera(keys)                               # you: look, walk, jump
+    move_player(keys)                               # you: look, walk, jump (the PLAYER, not the camera)
     update_floor_hazards()                          # standing in lava (feet on the floor)? it hurts
     update_outside_hurt()                           # outside the play grid? that hurts too
     move_things()                                   # every thing moves (and bounces off the world box)
@@ -64,6 +67,9 @@ while running:
     things_shoot()                                  # guns fire: turrets at you, DOWN guns straight down (after their cooldown)
     remove_finished_things()                        # used-up bullets and destroyed shapes go
     update_level_progress()                         # every shape gone? "completed" message, then the next level
+
+    update_avatar()                                 # THIRD PERSON: your tank goes where you ended up this frame...
+    update_camera()                                 # ...and the camera goes behind you (or on your eye: V key)
 
     screen.fill(BLACK)
 

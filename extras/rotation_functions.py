@@ -199,8 +199,8 @@ def load_level(number):
     FLOOR_SHAPES[:] = [make_decal(entry, number) for entry in level["floor_shapes"] + [ORIGIN_MARK]]   # + the gold 0, 0 mark, LAST: drawn on top
     BOXES[:] = [dict(box) for box in level["boxes"]]      # copies: prepare_boxes() adds to each one
     particles[:] = []                                     # no sparks left over
-    camera.update(level["start"])                         # where you begin
-    camera["vy"] = 0
+    player.update(level["start"])                         # where you begin
+    player["vy"] = 0
     you["hits_taken"] = 0
     you["hurt"] = 0
     you["bump_grace"] = 0
@@ -300,11 +300,11 @@ def make_decal(entry, level_number):
 def floor_slowness():
     # How fast can you walk right now? 1 = normal. Standing (feet on the floor) on SLIME or CUSTARD slows you:
     # the slowest decal under you counts. Jumping over it is fine - only your feet on it slow you down.
-    if camera["y"] > STAND_Y + 0.001:
+    if player["y"] > STAND_Y + 0.001:
         return 1                                          # in the air
     slowest = 1
     for decal in FLOOR_SHAPES:
-        if decal["slows"] < slowest and point_in_polygon(camera["x"], camera["z"], decal["corners"]):
+        if decal["slows"] < slowest and point_in_polygon(player["x"], player["z"], decal["corners"]):
             slowest = decal["slows"]
     return slowest
 
@@ -327,14 +327,14 @@ def update_floor_hazards():
     #   ICE (freezes): you're frozen for FREEZE_FRAMES, then FREEZE_GRACE frames when it can't freeze you again
     #   HURTS (lava, ice): one hit as you step in, then one every LAVA_HURT_FRAMES frames while you stay,
     #                  flashing in the colour of the decal that hurt you
-    on_floor = camera["y"] <= STAND_Y + 0.001
+    on_floor = player["y"] <= STAND_Y + 0.001
     if you["frozen"] > 0:                                 # frozen: count down; when it ends, the grace starts
         you["frozen"] = you["frozen"] - 1
         if you["frozen"] == 0:
             you["freeze_grace"] = FREEZE_GRACE
     elif you["freeze_grace"] > 0:
         you["freeze_grace"] = you["freeze_grace"] - 1
-    elif on_floor and any(decal["freezes"] and point_in_polygon(camera["x"], camera["z"], decal["corners"])
+    elif on_floor and any(decal["freezes"] and point_in_polygon(player["x"], player["z"], decal["corners"])
                           for decal in FLOOR_SHAPES):
         you["frozen"] = FREEZE_FRAMES                     # FROZEN!
         if freeze_sound:
@@ -342,7 +342,7 @@ def update_floor_hazards():
     hurting = None                                        # the decal you're standing on that hurts (if any)
     if on_floor:
         for decal in FLOOR_SHAPES:
-            if decal["hurts"] and point_in_polygon(camera["x"], camera["z"], decal["corners"]):
+            if decal["hurts"] and point_in_polygon(player["x"], player["z"], decal["corners"]):
                 hurting = decal
                 break
     in_lava = hurting is not None
@@ -363,7 +363,7 @@ def update_floor_hazards():
 def update_outside_hurt():
     # Once per frame: are YOU outside the play grid (the world box, looking from above: x and z)?
     # Then it hurts, just like lava: one hit as you step out, then one every OUTSIDE_HURT_FRAMES frames.
-    outside = not (WORLD_MIN[0] <= camera["x"] <= WORLD_MAX[0] and WORLD_MIN[2] <= camera["z"] <= WORLD_MAX[2])
+    outside = not (WORLD_MIN[0] <= player["x"] <= WORLD_MAX[0] and WORLD_MIN[2] <= player["z"] <= WORLD_MAX[2])
     if not outside:
         you["outside_timer"] = 0                          # back inside: next time it hurts straight away
         return
@@ -405,7 +405,7 @@ def setup_gun(turret, changes, level_number):
     if config["mode"] in SHAPE_GUN_MODES:             # nothing to point: no start angle
         pass
     elif config.get("start_angle") == "you":          # start pointing straight at where YOU start the level
-        turret["angles"][0] = keep_under_360(turret_angle_to_you(turret))   # (the camera is already at the start)
+        turret["angles"][0] = keep_under_360(turret_angle_to_you(turret))   # (the player is already at the start)
     elif config.get("start_angle") is not None:       # or a number: degrees relative to the hull's front
         turret["angles"][0] = config["start_angle"]
     turret["gun_config"] = config
@@ -444,7 +444,7 @@ def good_gem_spot(x, z, spots, others):
             for px, pz in ((x, z), (x + 0.5, z), (x - 0.5, z), (x, z + 0.5), (x, z - 0.5)):
                 if point_in_polygon(px, pz, decal["corners"]):
                     return False                          # over (or right by) lava or ice
-    if math.hypot(x - camera["x"], z - camera["z"]) < GEM_START_GAP:
+    if math.hypot(x - player["x"], z - player["z"]) < GEM_START_GAP:
         return False                                      # too close to where you start
     for thing_x, thing_z, reach in others:
         if math.hypot(x - thing_x, z - thing_z) < reach + GEM_THING_GAP:
@@ -456,7 +456,7 @@ def good_gem_spot(x, z, spots, others):
 
 
 def jump_peak():
-    # How high your EYE gets at the top of a jump from the floor. Worked out the same way move_camera() does it,
+    # How high your EYE gets at the top of a jump from the floor. Worked out the same way move_player() does it,
     # one frame at a time: gravity takes a little off your speed, then you move up by that speed - until you stop rising.
     eye, speed = STAND_Y, JUMP_SPEED
     while True:
@@ -509,7 +509,7 @@ def place_gems(level, number):
 def update_gems():
     # Once per frame, for every gem: BOB up and down, then is it touching YOUR body? Then it's COLLECTED.
     # The bob moves the gem by the CHANGE in its bob height, so a gem with a velocity still moves as well.
-    feet, eye = camera["y"] - 1, camera["y"]              # your body: a column from your feet up to your eye
+    feet, eye = player["y"] - 1, player["y"]              # your body: a column from your feet up to your eye
     for gem in things:
         if not gem.get("gem") or gem.get("dead"):
             continue
@@ -521,7 +521,7 @@ def update_gems():
         # Touching you? The same test as a thing bumping you: the closest point of your column to its centre
         cx, cy, cz = gem["position"]
         closest_y = min(max(cy, feet), eye)
-        dx, dy, dz = (cx - camera["x"]), (cy - closest_y), (cz - camera["z"])
+        dx, dy, dz = (cx - player["x"]), (cy - closest_y), (cz - player["z"])
         reach = (GEM_ACROSS / 2) + YOUR_BODY_RADIUS + GEM_PICKUP_EXTRA
         if (dx * dx) + (dy * dy) + (dz * dz) < (reach * reach):
             gem["dead"] = True                            # COLLECTED: removed at the end of the frame
@@ -702,16 +702,22 @@ camera_trig = {"turn": None, "tip": None}
 
 
 def to_camera(world_point):
-    # A WORLD point -> measured from YOU: 1. measure from where you stand, 2. undo your turn (left / right),
-    # 3. undo your tip (up / down). The same sums as rotate_y(moved, -turn) then rotate_x(turned, -tip),
+    # A WORLD point -> measured from the CAMERA: 1. measure from where the camera is, 2. undo its turn (left / right),
+    # 3. undo its tip (up / down). The same sums as rotate_y(moved, -turn) then rotate_x(turned, -tip),
     # written out here so the cos and sin can be reused.
+    #
+    # THIRD PERSON: this is the ONLY place (with add_box_faces' "eye") that reads the CAMERA dictionary.
+    # Everything else - walking, jumping, being shot, aiming, the map - reads PLAYER (where your body is).
+    # In first person the camera sits ON your eye, so camera == player and nothing looks different.
+    # In third person update_camera() puts it CAMERA_BACK units behind you, and this function just
+    # measures from there instead. The rest of the drawing never needs to know.
     if camera_trig["turn"] != camera["turn"] or camera_trig["tip"] != camera["tip"]:   # you've turned: redo them
         camera_trig["turn"], camera_trig["tip"] = camera["turn"], camera["tip"]
         turn_radians, tip_radians = math.radians(-camera["turn"]), math.radians(-camera["tip"])
         camera_trig["cos_turn"], camera_trig["sin_turn"] = math.cos(turn_radians), math.sin(turn_radians)
         camera_trig["cos_tip"], camera_trig["sin_tip"] = math.cos(tip_radians), math.sin(tip_radians)
     x, y, z = world_point
-    x, y, z = (x - camera["x"]), (y - camera["y"]), (z - camera["z"])    # 1. measure from where you stand
+    x, y, z = (x - camera["x"]), (y - camera["y"]), (z - camera["z"])    # 1. measure from where the camera is
     cos_a, sin_a = camera_trig["cos_turn"], camera_trig["sin_turn"]      # 2. undo your turn (round y)
     x, z = (x * cos_a) - (z * sin_a), (x * sin_a) + (z * cos_a)
     cos_a, sin_a = camera_trig["cos_tip"], camera_trig["sin_tip"]        # 3. undo your tip (round x)
@@ -809,7 +815,7 @@ def add_box_faces(face_paint_order):
     #   1. a whole box BEHIND you (all 8 corners closer than NEAR) has nothing to paint: skip it
     #   2. a box never turns, so its +x face can only face you if you are on its +x side, and so on:
     #      one comparison per face, before the slow trimming (face_on_screen still does the exact test)
-    eye = (camera["x"], camera["y"], camera["z"])
+    eye = (camera["x"], camera["y"], camera["z"])    # the CAMERA's eye (not the player's): which box sides it can SEE
     for box in BOXES:
         camera_points = [to_camera(corner) for corner in box["corners"]]       # only this part changes: YOU move
         if all(point[2] < NEAR for point in camera_points):
@@ -966,18 +972,18 @@ def fire_bullet():
     # A new bullet THING: a tiny spinning cube, flying the way you're looking (turn AND tilt).
     # Your "forward" is (0, 0, 1) in front of your eye. to_camera() undoes your turn then your tilt,
     # so going the other way - tilt, then turn - gives "forward" in the WORLD.
-    aim_x, aim_y, aim_z = rotate_y(rotate_x((0, 0, 1), camera["tip"]), camera["turn"])
+    aim_x, aim_y, aim_z = rotate_y(rotate_x((0, 0, 1), player["tip"]), player["turn"])
     start = 0.4                                   # start a little in front of your eye (closer is cut off by NEAR)
     crosshair["kick"] = CROSSHAIR_KICK            # the crosshair's arms jump out
-    start_point = (camera["x"] + (aim_x * start), camera["y"] + (aim_y * start), camera["z"] + (aim_z * start))
+    start_point = (player["x"] + (aim_x * start), player["y"] + (aim_y * start), player["z"] + (aim_z * start))
     spawn_bullet(start_point, (aim_x, aim_y, aim_z), BULLET_SPEED, PLAYER_COLOUR, PALETTE_PLAYER, None)   # YOUR colour
 
 
 def throw_rope():
     # RIGHT button down: fire a bullet like the left button does, and remember it as THE rope
     drop_rope()                                   # only one rope at a time
-    aim = rotate_y(rotate_x((0, 0, 1), camera["tip"]), camera["turn"])
-    start = (camera["x"] + (aim[0] * 0.4), camera["y"] + (aim[1] * 0.4), camera["z"] + (aim[2] * 0.4))
+    aim = rotate_y(rotate_x((0, 0, 1), player["tip"]), player["turn"])
+    start = (player["x"] + (aim[0] * 0.4), player["y"] + (aim[1] * 0.4), player["z"] + (aim[2] * 0.4))
     spawn_bullet(start, aim, BULLET_SPEED, PLAYER_COLOUR, PALETTE_PLAYER, None)
     rope["bullet"] = bullets[-1]                  # the bullet we just made: the end of the list
     rope["start"] = start                         # to measure how far it flies (ROPE_RANGE)
@@ -1021,7 +1027,7 @@ def update_rope():
             drop_rope()                           # the thing's gone (killed or split): the rope LETS GO, as if you'd released
         else:
             if thing.get("gem"):                  # a GEM on the rope is REELED IN: it flies towards your eye
-                eye = (camera["x"], camera["y"], camera["z"])
+                eye = (player["x"], player["y"], player["z"])
                 away = [eye[axis] - thing["position"][axis] for axis in range(3)]
                 distance = math.sqrt(sum(a * a for a in away))
                 step = min(ROPE_GEM_PULL, distance)                    # never past you
@@ -1036,8 +1042,8 @@ def draw_rope():
     bullet = rope["bullet"]
     if bullet is None:
         return
-    hand = rotate_y(rotate_x(ROPE_HAND, camera["tip"]), camera["turn"])   # the hand offset, turned with you
-    start = (camera["x"] + hand[0], camera["y"] + hand[1], camera["z"] + hand[2])
+    hand = rotate_y(rotate_x(ROPE_HAND, player["tip"]), player["turn"])   # the hand offset, turned with you
+    start = (player["x"] + hand[0], player["y"] + hand[1], player["z"] + hand[2])
     draw_world_line(start, bullet["position"], PLAYER_COLOUR)
 
 
@@ -1176,7 +1182,7 @@ def you_from_turret(turret):
     # (the plane the turret turns in). Measured in the hull's own model, so it works for a turret mounted ANY way
     # up: on a tank or a floor bunker, a bunker on a WALL, or one hanging from the CEILING.
     pivot = to_world((0, 0, 0), turret)                           # the turret's centre, in the world
-    to_you = (camera["x"] - pivot[0], camera["y"] - pivot[1], camera["z"] - pivot[2])
+    to_you = (player["x"] - pivot[0], player["y"] - pivot[1], player["z"] - pivot[2])
     local_x, local_y, local_z = un_turn(to_you, turret["parent_thing"])
     return local_x, local_z
 
@@ -1223,11 +1229,11 @@ def fire_target(shooter):
     # first one). Its owner is the shooter: a bullet never hits its own owner.
     # (Squared distances: no square root needed to compare them.)
     def squared_distance_to_you(corner):
-        dx, dy, dz = (camera["x"] - corner[0]), (camera["y"] - corner[1]), (camera["z"] - corner[2])
+        dx, dy, dz = (player["x"] - corner[0]), (player["y"] - corner[1]), (player["z"] - corner[2])
         return (dx * dx) + (dy * dy) + (dz * dz)
     corners = [to_world(point, shooter) for point in shooter["model"]["points"]]
     start = min(corners, key=squared_distance_to_you)             # the nearest corner
-    dx, dy, dz = (camera["x"] - start[0]), (camera["y"] - start[1]), (camera["z"] - start[2])
+    dx, dy, dz = (player["x"] - start[0]), (player["y"] - start[1]), (player["z"] - start[2])
     distance = math.sqrt((dx * dx) + (dy * dy) + (dz * dz))       # aimed from that point, straight at your eye
     if distance == 0:
         return                                                    # you're touching it: no direction to fire
@@ -1241,7 +1247,7 @@ def fire_at_you(turret):
     muzzles = turret["model"]["muzzles"]
     muzzle = to_world(muzzles[turret["next_muzzle"]], turret)
     turret["next_muzzle"] = (turret["next_muzzle"] + 1) % len(muzzles)     # twin barrels take turns
-    dx, dy, dz = (camera["x"] - muzzle[0]), (camera["y"] - muzzle[1]), (camera["z"] - muzzle[2])
+    dx, dy, dz = (player["x"] - muzzle[0]), (player["y"] - muzzle[1]), (player["z"] - muzzle[2])
     distance = math.sqrt((dx * dx) + (dy * dy) + (dz * dz))
     spawn_bullet(muzzle, (dx / distance, dy / distance, dz / distance), turret["gun_config"]["bullet_speed"],
                  *bullet_colours(turret), turret["parent_thing"])   # the gun's (or shooter's) colours
@@ -1439,8 +1445,8 @@ def draw_your_shadow():
     ring = []
     for n in range(steps + 1):                            # + 1: the last corner joins back onto the first
         angle = math.radians((360 / steps) * n)
-        ring.append((camera["x"] + (YOUR_HIT_RADIUS * math.cos(angle)), FLOOR_Y,
-                     camera["z"] + (YOUR_HIT_RADIUS * math.sin(angle))))
+        ring.append((player["x"] + (YOUR_HIT_RADIUS * math.cos(angle)), FLOOR_Y,
+                     player["z"] + (YOUR_HIT_RADIUS * math.sin(angle))))
     for n in range(steps):
         draw_world_line(ring[n], ring[n + 1], (255, 255, 255))
 
@@ -1588,9 +1594,9 @@ def you_hit_a_box(x, z):
     # Your body runs from your FEET (1 below your eye) up to your EYE, and is YOUR_BODY_RADIUS wide each way.
     # A box blocks you if you'd be over it (see over_box) AND it overlaps your body's height. Boxes you can
     # stand on don't block you: a top below your feet, or no more than STEP_UP above them (a step: walk onto it).
-    feet = camera["y"] - 1
+    feet = player["y"] - 1
     for box in BOXES:
-        if over_box(box, x, z) and box["min"][1] < camera["y"] and box["max"][1] > feet + STEP_UP:
+        if over_box(box, x, z) and box["min"][1] < player["y"] and box["max"][1] > feet + STEP_UP:
             return True
     return False
 
@@ -1600,7 +1606,7 @@ def thing_overlap(x, z):
     # Your body is a column from your FEET (1 below your eye) up to your EYE, YOUR_BODY_RADIUS wide. For each
     # collision sphere of each thing: the closest point of that column to the sphere's centre, and how far inside
     # (the sphere's radius + your radius) it is. The deepest one counts. Children (turrets) count too.
-    feet, eye = camera["y"] - 1, camera["y"]
+    feet, eye = player["y"] - 1, player["y"]
     deepest = 0
     for thing in things:
         if thing.get("dead") or thing.get("gem"):
@@ -1619,7 +1625,7 @@ def into_a_thing(x, z):
     # Would a step to (x, z) take you DEEPER into a thing? (Then it's refused: THINGS block you.)
     # Only DEEPER: if a thing moves into YOU, you're already inside it, and every step OUT must still be allowed.
     new = thing_overlap(x, z)
-    return new > 0 and new > thing_overlap(camera["x"], camera["z"]) + 0.0001
+    return new > 0 and new > thing_overlap(player["x"], player["z"]) + 0.0001
 
 
 def things_bump_you():
@@ -1629,17 +1635,17 @@ def things_bump_you():
     # Turrets and radars ride their parent: it's the PARENT that's moving, and the parent that bounces.
     if you["bump_grace"] > 0:
         you["bump_grace"] = you["bump_grace"] - 1
-    feet, eye = camera["y"] - 1, camera["y"]
+    feet, eye = player["y"] - 1, player["y"]
     for thing in things:
         mover = thing.get("parent_thing", thing)                # a child: its parent does the moving
         if thing.get("dead") or mover.get("dead") or mover["velocity"] == [0, 0, 0]:
-            continue                                            # parked things only block you (move_camera)
+            continue                                            # parked things only block you (move_player)
         if thing.get("gem"):
             continue                                            # GEMS never hurt you, even moving ones
         touching = False
         for (cx, cy, cz), radius in world_spheres(thing):
             closest_y = min(max(cy, feet), eye)
-            dx, dy, dz = (cx - camera["x"]), (cy - closest_y), (cz - camera["z"])
+            dx, dy, dz = (cx - player["x"]), (cy - closest_y), (cz - player["z"])
             reach = radius + YOUR_BODY_RADIUS
             if (dx * dx) + (dy * dy) + (dz * dz) < (reach * reach):
                 touching = True
@@ -1647,7 +1653,7 @@ def things_bump_you():
         if not touching:
             continue
         velocity = mover["velocity"]
-        to_you = (camera["x"] - mover["position"][0], camera["y"] - mover["position"][1], camera["z"] - mover["position"][2])
+        to_you = (player["x"] - mover["position"][0], player["y"] - mover["position"][1], player["z"] - mover["position"][2])
         if (velocity[0] * to_you[0]) + (velocity[1] * to_you[1]) + (velocity[2] * to_you[2]) > 0:
             for axis in range(3):
                 velocity[axis] = -velocity[axis]                # moving towards you: now it moves away
@@ -1665,7 +1671,7 @@ def things_bump_you():
 def standing_height(x, z):
     # Your EYE height when you stand at (x, z): 1 above the GROUND there. The ground is the highest box top under
     # you that's no higher than STEP_UP above your feet (so you can step onto it), or the floor if there's none.
-    feet = camera["y"] - 1
+    feet = player["y"] - 1
     ground = FLOOR_Y
     for box in BOXES:
         if over_box(box, x, z) and box["max"][1] <= feet + STEP_UP:
@@ -1673,24 +1679,122 @@ def standing_height(x, z):
     return ground + 1
 
 
-def move_camera(keys):
-    # You: mouse to look, W A S D to move, and gravity for jumps. (camera is a dictionary: no 'global' needed)
-    # ---- CAMERA controls (as in step3_small_world) -------------------
+# ================================ THIRD PERSON: YOUR TANK AND THE CAMERA ================================
+# Three small jobs, in the order the game loop does them each frame:
+#   1. move_player()   moves YOU (the player dictionary): mouse, W A S D, jumping. (Unchanged, just renamed.)
+#   2. update_avatar() puts your TANK where you are, facing the way you face.
+#   3. update_camera() puts the CAMERA behind you (third person) or on your eye (first person).
+# Then everything is drawn from the camera, exactly as before.
+
+def build_avatar():
+    # Build YOUR TANK once: the "tank" design's hull, then its children (turret, radar), joined to the hull
+    # the same way load_level() joins a tank's children ("parent_thing"), so to_world() carries them with it.
+    hull = build_thing(DESIGNS["tank"], {"name": "you", "size": AVATAR_SIZE, "position": [0, 0, 0],   # (moved every frame)
+                                         "colour": PLAYER_COLOUR, "palette": PALETTE_AVATAR})
+    parts = [hull]
+    for child_design in DESIGNS["tank"]["children"]:
+        child = build_thing(child_design, {})
+        child["name"] = "you " + child_design["part"]       # "you turret", "you radar"
+        child["parent"] = hull["name"]
+        child["parent_thing"] = hull                         # rides on the hull: sized, turned and moved with it
+        child["colour"] = hull["colour"]
+        child["palette"] = hull["palette"]
+        child.pop("gun", None)                               # YOUR turret doesn't shoot by itself: you shoot (left click)
+        parts.append(child)
+    avatar[:] = parts                                        # IN PLACE, so every file sees the new tank
+
+
+def update_avatar():
+    # Every frame: put your tank where YOU are.
+    #
+    #   x, z  : the same as yours - the tank stands right under your eye.
+    #   y     : the hull model's base is 1 below its centre (hull_points y = -1), so once sized its base is
+    #           (1 * AVATAR_SIZE) below its centre. Your FEET are 1 below your eye. So, to stand the tank on
+    #           your feet:   centre y = (feet + AVATAR_SIZE) = ((player["y"] - 1) + AVATAR_SIZE)
+    #           e.g. standing on the floor: player y = 0, feet = (0 - 1) = -1, centre = (-1 + 0.4) = -0.6,
+    #           base = (-0.6 - 0.4) = -1 = the floor.
+    #   turn  : the same as yours. A thing's turn and your turn both go through rotate_y(), so the SAME angle
+    #           points the tank's front (+z in its model) the way you are facing.
+    hull = avatar[0]
+    feet = (player["y"] - 1)
+    hull["position"][0] = player["x"]
+    hull["position"][1] = (feet + AVATAR_SIZE)
+    hull["position"][2] = player["z"]
+    hull["angles"][0] = player["turn"]
+    # The children (turret, radar) are carried by the hull. Only their OWN spin changes: the radar's
+    # "speeds" from the design is (6, 0, 0) = 6 degrees a frame round its upright axis.
+    for part in avatar[1:]:
+        part["angles"][0] = keep_under_360((part["angles"][0] + part["speeds"][0]))
+
+
+def update_camera():
+    # Every frame, after you've moved: where is the CAMERA?
+    #
+    # It always faces the same way as you: same turn, same tip.
+    camera["turn"] = player["turn"]
+    camera["tip"] = player["tip"]
+
+    if not view["third_person"]:
+        # FIRST PERSON: the camera is your eye. (This is how the game worked before.)
+        camera["x"] = player["x"]
+        camera["y"] = player["y"]
+        camera["z"] = player["z"]
+        return
+
+    # THIRD PERSON: the camera is CAMERA_BACK units BEHIND your eye, on the line you are aiming along.
+    #
+    # Start with an arrow pointing straight BACK from an eye that faces +z, and is level:
+    #       (0, 0, -CAMERA_BACK) = (0, 0, -3)
+    # Turn that arrow EXACTLY the way fire_bullet() turns "forward" (tip first, then turn), so it stays
+    # opposite to your aim:
+    #       back = rotate_y( rotate_x((0, 0, -3), tip), turn )
+    # e.g. tip 0, turn 30 (turned 30 degrees LEFT):
+    #       rotate_x does nothing (tip 0)              -> (0, 0, -3)
+    #       rotate_y: x = ((0 * cos 30) - (-3 * sin 30)) = (0 - (-1.5)) = 1.5
+    #                 z = ((0 * sin 30) + (-3 * cos 30)) = (0 + (-2.6)) = -2.6
+    #       back = (1.5, 0, -2.6): behind you and to the right, because you face up-and-LEFT on the map.
+    # e.g. tip 20 (looking DOWN 20 degrees), turn 0:
+    #       rotate_x: y = ((0 * cos 20) - (-3 * sin 20)) = (0 - (-1.03)) = 1.03     -> the camera RISES
+    #                 z = ((0 * sin 20) + (-3 * cos 20)) = (0 + (-2.82)) = -2.82
+    #       Look down and the camera swings UP behind you, like a camera on a 3-unit stick held at your eye.
+    #
+    # WHY on the aim line: the middle of the screen is the camera's straight-ahead line. Because the camera
+    # sits on the backward half of YOUR aim line, its straight-ahead line goes through your eye and on
+    # along your aim. So the crosshair still marks exactly where your bullets (fired from your eye) go.
+    back_x, back_y, back_z = rotate_y(rotate_x((0, 0, -CAMERA_BACK), player["tip"]), player["turn"])
+    camera["x"] = (player["x"] + back_x)
+    camera["y"] = (player["y"] + back_y)
+    camera["z"] = (player["z"] + back_z)
+
+    # Keep the camera inside the room, top to bottom. Looking UP 30 degrees, for example, puts it
+    #   (3 * sin 30) = 1.5 BELOW your eye: standing on the floor that's y = (0 - 1.5) = -1.5, under the floor (-1).
+    # So it stops at (FLOOR_Y + CAMERA_FLOOR_GAP) = (-1 + 0.2) = -0.8. (When it stops, the crosshair is a tiny
+    # bit off your aim. Simplest rule first: it only happens looking steeply up.)
+    lowest = (FLOOR_Y + CAMERA_FLOOR_GAP)
+    highest = (WORLD_MAX[1] - CAMERA_CEILING_GAP)
+    if camera["y"] < lowest:    camera["y"] = lowest
+    if camera["y"] > highest:   camera["y"] = highest
+
+
+def move_player(keys):
+    # You: mouse to look, W A S D to move, and gravity for jumps. (player is a dictionary: no 'global' needed)
+    # (This was move_camera() when the camera WAS you. Now it moves the PLAYER; update_camera() follows.)
+    # ---- PLAYER controls (as in step3_small_world) -------------------
     #   mouse = turn and look up / down
     #   W / S = walk forward / back, A / D = strafe left / right
     mouse_dx, mouse_dy = pygame.mouse.get_rel()          # pixels moved since last frame
-    camera["turn"] = (camera["turn"] - (mouse_dx * MOUSE_SPEED))     # mouse right = turn right
-    camera["tip"] = (camera["tip"] + (mouse_dy * MOUSE_SPEED))       # mouse up = look up
-    if camera["tip"] > TIP_LIMIT_DOWN:   camera["tip"] = TIP_LIMIT_DOWN    # stop at the limits (+ = looking DOWN)
-    if camera["tip"] < -TIP_LIMIT_UP:    camera["tip"] = -TIP_LIMIT_UP     #   (- = looking UP)
+    player["turn"] = (player["turn"] - (mouse_dx * MOUSE_SPEED))     # mouse right = turn right
+    player["tip"] = (player["tip"] + (mouse_dy * MOUSE_SPEED))       # mouse up = look up
+    if player["tip"] > TIP_LIMIT_DOWN:   player["tip"] = TIP_LIMIT_DOWN    # stop at the limits (+ = looking DOWN)
+    if player["tip"] < -TIP_LIMIT_UP:    player["tip"] = -TIP_LIMIT_UP     #   (- = looking UP)
 
-    forward_x, forward_y, forward_z = rotate_y((0, 0, 1), camera["turn"])   # the way you face
-    right_x, right_y, right_z = rotate_y((1, 0, 0), camera["turn"])         # your right hand
+    forward_x, forward_y, forward_z = rotate_y((0, 0, 1), player["turn"])   # the way you face
+    right_x, right_y, right_z = rotate_y((1, 0, 0), player["turn"])         # your right hand
 
     walk = 0 if you["frozen"] > 0 else MOVE_SPEED          # FROZEN by ice: you can't walk (you can still look)
     walk = walk * floor_slowness()                        # SLIME and CUSTARD: you wade through it, slowly
     # Work out the whole step first (all the keys together) ...
-    new_x, new_z = camera["x"], camera["z"]
+    new_x, new_z = player["x"], player["z"]
     if keys[pygame.K_w]:                                  # forward
         new_x = (new_x + (forward_x * walk))
         new_z = (new_z + (forward_z * walk))
@@ -1706,19 +1810,19 @@ def move_camera(keys):
     # ... then check its x part and its z part SEPARATELY: each is only refused if IT runs into something. So walking at
     # an angle into a wall keeps the part that runs ALONG the wall: you SLIDE along it.
     # BOXES and THINGS both block you (a thing only if the step takes you DEEPER into it - see into_a_thing).
-    if not you_hit_a_box(new_x, camera["z"]) and not into_a_thing(new_x, camera["z"]):
-        camera["x"] = new_x                               # the x part is clear: take it
-    if not you_hit_a_box(camera["x"], new_z) and not into_a_thing(camera["x"], new_z):
-        camera["z"] = new_z                               # the z part is clear: take it
+    if not you_hit_a_box(new_x, player["z"]) and not into_a_thing(new_x, player["z"]):
+        player["x"] = new_x                               # the x part is clear: take it
+    if not you_hit_a_box(player["x"], new_z) and not into_a_thing(player["x"], new_z):
+        player["z"] = new_z                               # the z part is clear: take it
 
     # ---- Jumping and falling --------------------------------------------
     # The GROUND is the floor, or the top of the box you're standing on (walk off its edge and you fall).
-    stand = standing_height(camera["x"], camera["z"])
-    camera["vy"] = camera["vy"] - GRAVITY           # gravity pulls your speed DOWN a little each frame
-    camera["y"] = camera["y"] + camera["vy"]              # move up (or down) by that speed
-    if camera["y"] < stand:                   # gone below standing height: you've landed (or stepped up)
-        camera["y"] = stand
-        camera["vy"] = 0
+    stand = standing_height(player["x"], player["z"])
+    player["vy"] = player["vy"] - GRAVITY           # gravity pulls your speed DOWN a little each frame
+    player["y"] = player["y"] + player["vy"]              # move up (or down) by that speed
+    if player["y"] < stand:                   # gone below standing height: you've landed (or stepped up)
+        player["y"] = stand
+        player["vy"] = 0
 
 
 def move_things():
@@ -1792,7 +1896,7 @@ def move_bullets():
 
         # 2. YOU: only bullets something else fired
         if bullet["owner"] is not None:
-            dx, dy, dz = (camera["x"] - position[0]), (camera["y"] - position[1]), (camera["z"] - position[2])
+            dx, dy, dz = (player["x"] - position[0]), (player["y"] - position[1]), (player["z"] - position[2])
             if (dx * dx) + (dy * dy) + (dz * dz) < (YOUR_HIT_RADIUS * YOUR_HIT_RADIUS):
                 bullet["range"] = 0
                 you["hits_taken"] = you["hits_taken"] + 1
@@ -1867,7 +1971,12 @@ def remove_finished_things():
 def add_thing_faces(face_paint_order):
     # Every thing's visible faces go into face_paint_order (things with no faces are drawn as lines right away).
     #FOR EACH THING (and each bullet: drawn the same way, and sorted with everything else) !
-    for thing in things + bullets:
+    # THIRD PERSON: YOUR TANK (avatar) is drawn here too, the same way as any other thing - but only in
+    # third person. In first person the camera is INSIDE the tank, so it would just block the view.
+    drawn = things + bullets
+    if view["third_person"]:
+        drawn = drawn + avatar
+    for thing in drawn:
         model = thing["model"]
 
         world_points = []  # Real GAME WOrld X,Y,Z coordinates for points
@@ -1963,7 +2072,7 @@ def draw_mini_map():
             pygame.draw.polygon(screen, thing["colour"], shadow)
 
     # YOUR VIEW: two lines, the edges of what's on screen, each VIEW_HALF_ANGLE either side of where you face
-    you_on_map = to_map(camera["x"], camera["z"])
+    you_on_map = to_map(player["x"], player["z"])
     # Drawn on their own layer, in the layer's coordinates (its top-left corner is the map box's top-left),
     # so they stop at the map's edge
     view_cone_layer.fill((0, 0, 0, 0))                                          # clear: fully see-through
@@ -1982,9 +2091,9 @@ def draw_mini_map():
             # One arc: points from one edge of the view round to the other, joined by short lines
             arc = []
             for n in range(VIEW_ARC_POINTS + 1):
-                angle = camera["turn"] - VIEW_HALF_ANGLE + ((2 * VIEW_HALF_ANGLE) * n / VIEW_ARC_POINTS)
+                angle = player["turn"] - VIEW_HALF_ANGLE + ((2 * VIEW_HALF_ANGLE) * n / VIEW_ARC_POINTS)
                 point_x, point_y, point_z = rotate_y((0, 0, 1), angle)
-                on_map = to_map(camera["x"] + (point_x * distance), camera["z"] + (point_z * distance))
+                on_map = to_map(player["x"] + (point_x * distance), player["z"] + (point_z * distance))
                 arc.append((on_map[0] - MAP_LEFT, on_map[1] - MAP_BOX_TOP))
             pygame.draw.lines(view_cone_layer, PLAYER_MAP_COLOUR + (solid,), False, arc, 1)   # False: an open curve
     screen.blit(view_cone_layer, (MAP_LEFT, MAP_BOX_TOP))
@@ -2246,16 +2355,18 @@ def draw_hud(faces_drawn=0):
         screen.blit(percent_text, (bar.right + 10, 70))
 
     # ---- BOTTOM-LEFT: DIAGNOSTICS ----
-    # Facing: compass style, 0 = up the map (+z), counting up as you turn RIGHT (camera["turn"] goes DOWN, so flip it).
-    # Tilt: + = looking UP (camera["tip"] is + when looking DOWN, so flip it).
+    # Facing: compass style, 0 = up the map (+z), counting up as you turn RIGHT (player["turn"] goes DOWN, so flip it).
+    # View: "3rd" = the camera is behind your tank, "1st" = the camera is your eye (V switches).
+    # Tilt: + = looking UP (player["tip"] is + when looking DOWN, so flip it).
     # POINTS and FACES count every model's corners and faces (a box is a cube: 8 corners, 6 faces).
     # FACES drawn of total: the rest were culled (turned away from you) or too close / behind you.
     all_models = [thing["model"] for thing in things + bullets]
     total_points = sum(len(model["points"]) for model in all_models) + (8 * len(BOXES))
     total_faces = sum(len(model["faces"]) for model in all_models) + (6 * len(BOXES))
-    lines = ["FPS " + str(round(clock.get_fps())) + "   Facing " + str(round(-camera["turn"]) % 360) + "°"
-             + "   Tilt " + str(round(-camera["tip"])) + "°"
-             + "   x,y,z " + str(round(camera["x"], 1)) + ", " + str(round(camera["y"], 1)) + ", " + str(round(camera["z"], 1)),
+    lines = ["FPS " + str(round(clock.get_fps())) + "   Facing " + str(round(-player["turn"]) % 360) + "°"
+             + "   Tilt " + str(round(-player["tip"])) + "°"
+             + "   x,y,z " + str(round(player["x"], 1)) + ", " + str(round(player["y"], 1)) + ", " + str(round(player["z"], 1))
+             + "   View " + ("3rd" if view["third_person"] else "1st") + " (V)",
              "THINGS " + str(len(things)) + "  BOXES " + str(len(BOXES)) + "  DECALS " + str(len(FLOOR_SHAPES))
              + "  BULLETS " + str(len(bullets)) + "  SPARKS " + str(len(particles)),
              "POINTS " + str(total_points) + "  FACES " + str(faces_drawn) + " of " + str(total_faces)]

@@ -73,7 +73,7 @@ DESIGNS = {
 #   "world"        - the WORLD BOX: two opposite corners, "min" (smallest x, y, z) and "max" (biggest x, y, z).
 #                    min y is the FLOOR (keep it at FLOOR_Y, -1), max y the CEILING. Keep x and z whole numbers:
 #                    the floor grid has a line at every whole number. Things' CENTRES bounce inside it.
-#   "start"        - where YOU begin: x, y (eye height: STAND_Y when standing), z, turn and tip (see camera)
+#   "start"        - where YOU begin: x, y (eye height: STAND_Y when standing), z, turn and tip (see player)
 #   "floor_shapes" - DECALS on the floor. (Every level also gets a tiny GOLD square at x 0, z 0, automatically:
 #                    ORIGIN_MARK in rotation_data.py. Don't add gold squares of your own.)
 #                    Each decal is either plain paint: ([corners as (x, z)], colour)
