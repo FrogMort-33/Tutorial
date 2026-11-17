@@ -1745,39 +1745,109 @@ LEVELS = {
         ],
     },
 
-    14: {    # ---- LEVEL 14: THE HUGE ROOM - an EMPTY room three times as wide and long (48 x 48) ----
-        "name": "The Huge Room",
-        "intro": "Just even more space - and one small cube to find and kill.",
-        "world": {"min": (-24, -1, -24), "max": (24, 7, 24)},       # 48 wide (x), 48 long (z), 8 tall
-        "start": {"x": 0, "y": 0, "z": -22, "turn": 0, "tip": 0},    # near the back wall, facing the far wall
+    14: {    # ---- LEVEL 14: PANZER CANYON - desert tank battle and quicksand (32 x 32) ----
+        "name": "Panzer Canyon",
+        "intro": "A desert battlefield. Watch for quicksand - and the Panzers watching for you.",
+        "world": {"min": (-16, -1, -16), "max": (16, 7, 16)},
+        "start": {"x": 0, "y": 0, "z": -14, "turn": 0, "tip": 0},
+        "grid_colour": (140, 120, 75),
 
-        "floor_shapes": [],
-        "boxes": [],
+        "floor_shapes": [
+            {"type": "quicksand", "min": (-8, -4), "max": (-5, -1)},
+            {"type": "quicksand", "min": (3, 2), "max": (7, 5)},
+            {"type": "quicksand", "min": (-12, 6), "max": (-9, 9)},
+            {"type": "quicksand", "min": (9, -8), "max": (12, -5)},
+            {"type": "quicksand", "min": (-3, 10), "max": (1, 13)},
+        ],
+        "boxes": [
+            # DESERT RUINS in sun-bleached stone (RUIN, PALETTE_RUIN). Pieces <= 1 unit. Walls 0.4 thick.
+            # RUIN A (back left, x -13 to -10, z -11 to -7): two walls meeting at a corner, doorway, broken tops
+            {"min": (-13, -1, -11), "max": (-12.6, 2, -10), "colour": RUIN, "palette": PALETTE_RUIN},
+            {"min": (-13, -1, -10), "max": (-12.6, 2, -9), "colour": RUIN, "palette": PALETTE_RUIN},
+            {"min": (-13, 1.2, -9), "max": (-12.6, 2, -8), "colour": RUIN, "palette": PALETTE_RUIN},      # lintel over door
+            {"min": (-13, -1, -8), "max": (-12.6, 1.5, -7), "colour": RUIN, "palette": PALETTE_RUIN},     # right of door, broken
+            {"min": (-13, -1, -11), "max": (-12, 1, -10.6), "colour": RUIN, "palette": PALETTE_RUIN},     # return wall
+            {"min": (-12, -1, -11), "max": (-11, 0.5, -10.6), "colour": RUIN, "palette": PALETTE_RUIN},   # crumbled end
+            {"min": (-12.2, -1, -9.5), "max": (-11.6, -0.6, -9), "colour": RUIN, "palette": PALETTE_RUIN},  # rubble
+
+            # RUIN B (back right, x 9 to 13, z -10 to -6.5): a wall with a window, and rubble
+            {"min": (9, -1, -10), "max": (9.4, 1.8, -9), "colour": RUIN, "palette": PALETTE_RUIN},
+            {"min": (9, -1, -9), "max": (9.4, 1.5, -8), "colour": RUIN, "palette": PALETTE_RUIN},
+            {"min": (9, -1, -8), "max": (9.4, 0.3, -7.5), "colour": RUIN, "palette": PALETTE_RUIN},       # under window
+            {"min": (9, 1, -8), "max": (9.4, 1.6, -7.5), "colour": RUIN, "palette": PALETTE_RUIN},        # over window
+            {"min": (9, -1, -7.5), "max": (9.4, 1.2, -7), "colour": RUIN, "palette": PALETTE_RUIN},
+            {"min": (9, -1, -7), "max": (9.4, 0.5, -6.5), "colour": RUIN, "palette": PALETTE_RUIN},       # crumbled end
+            {"min": (10, -1, -9.5), "max": (10.5, -0.7, -9), "colour": RUIN, "palette": PALETTE_RUIN},    # rubble
+
+            # RUIN C (centre, x -2 to 2, z -1 to 3): a roofless fort, three walls with gaps (cover!)
+            {"min": (-2, -1, -1), "max": (-1.6, 2, 0), "colour": RUIN, "palette": PALETTE_RUIN},          # west wall
+            {"min": (-2, -1, 0), "max": (-1.6, 2, 1), "colour": RUIN, "palette": PALETTE_RUIN},
+            {"min": (-2, -1, 1), "max": (-1.6, 1.5, 2), "colour": RUIN, "palette": PALETTE_RUIN},         # broken top
+            {"min": (-2, -1, 2), "max": (-1.6, 1, 3), "colour": RUIN, "palette": PALETTE_RUIN},           # crumbled
+            {"min": (1.6, -1, -1), "max": (2, 2, 0), "colour": RUIN, "palette": PALETTE_RUIN},            # east wall
+            {"min": (1.6, -1, 0), "max": (2, 1.8, 1), "colour": RUIN, "palette": PALETTE_RUIN},
+            {"min": (1.6, -1, 2), "max": (2, 1.5, 3), "colour": RUIN, "palette": PALETTE_RUIN},           # gap at z 1-2 (door)
+            {"min": (-1.6, -1, -1), "max": (-0.6, 2, -0.6), "colour": RUIN, "palette": PALETTE_RUIN},     # north wall
+            {"min": (0.6, -1, -1), "max": (1.6, 2, -0.6), "colour": RUIN, "palette": PALETTE_RUIN},       # gap in middle (door)
+            {"min": (-0.6, 1.3, -1), "max": (0.6, 2, -0.6), "colour": RUIN, "palette": PALETTE_RUIN},     # lintel over door
+
+            # RUIN D (front left, x -11 to -8.5, z 9.6 to 10): a column and low wall
+            {"min": (-11, -1, 9.6), "max": (-10.5, 3, 10), "colour": RUIN, "palette": PALETTE_RUIN},      # column
+            {"min": (-10.5, -1, 9.6), "max": (-9.5, 1, 10), "colour": RUIN, "palette": PALETTE_RUIN},     # wall from column
+            {"min": (-9.5, -1, 9.6), "max": (-8.5, 0.5, 10), "colour": RUIN, "palette": PALETTE_RUIN},    # crumbled end
+            {"min": (-10.8, -1, 8.5), "max": (-10.4, -0.6, 9.2), "colour": RUIN, "palette": PALETTE_RUIN},  # rubble
+
+            # RUIN E (front right, x 8 to 11.5, z 10.2 to 11): two columns with a fallen lintel
+            {"min": (8, -1, 10.6), "max": (8.5, 3, 11), "colour": RUIN, "palette": PALETTE_RUIN},         # column 1
+            {"min": (11, -1, 10.6), "max": (11.5, 2.5, 11), "colour": RUIN, "palette": PALETTE_RUIN},     # column 2 (shorter)
+            {"min": (8.5, -1, 10.2), "max": (11, -0.5, 10.6), "colour": RUIN, "palette": PALETTE_RUIN},   # fallen lintel
+
+            # SANDBAG NEST at your start: low cover you can shoot over
+            {"min": (-1.5, -1, -12.5), "max": (-0.5, -0.6, -12.1), "colour": SAND, "palette": PALETTE_SAND},
+            {"min": (-0.5, -1, -12.5), "max": (0.5, -0.6, -12.1), "colour": SAND, "palette": PALETTE_SAND},
+            {"min": (0.5, -1, -12.5), "max": (1.5, -0.6, -12.1), "colour": SAND, "palette": PALETTE_SAND},
+            {"min": (-1.9, -1, -13.5), "max": (-1.5, -0.6, -12.5), "colour": SAND, "palette": PALETTE_SAND},
+            {"min": (1.5, -1, -13.5), "max": (1.9, -0.6, -12.5), "colour": SAND, "palette": PALETTE_SAND},
+            {"min": (-1.9, -1, -14.3), "max": (-1.5, -0.6, -13.5), "colour": SAND, "palette": PALETTE_SAND},
+            {"min": (1.5, -1, -14.3), "max": (1.9, -0.6, -13.5), "colour": SAND, "palette": PALETTE_SAND},
+        ],
         "spawn": [
-            # ONE small cube to kill, so the level can be cleared and you go on to 99. Parked, spinning, in front of you.
-            {"design": "cube", "name": "lonely cube",
-             "position": [0, 0.5, -12], "size": "SMALL", "angles": [30, 20, 0], "speeds": (1, 0, 0),
-             "colour": (120, 190, 240), "palette": PALETTE_ICE},
-
-            # a COLUMN of three tanks - big, medium, small - rolling across the far end of the huge room, in line
-            {"design": "twin tank", "name": "lead tank",
-             "position": [-6, 0.5, 18], "velocity": [0.012, 0, 0],
-             "size": 1.5, "angles": [-90, 0, 0],
-             "colour": (120, 190, 80), "palette": PALETTE_FOREST,
-             "gun": {"mode": "TRACK", "turret_spin": 0.6, "start_angle": "you", "volley": 6, "cooldown": 180},
-             "radar_spin": -6},
-            {"design": "tank", "name": "middle tank",
-             "position": [-11, 0, 18], "velocity": [0.012, 0, 0],
-             "size": 1, "angles": [-90, 0, 0],
-             "colour": (120, 190, 80), "palette": PALETTE_FOREST,
-             "gun": {"mode": "TRACK", "turret_spin": 0.8, "start_angle": "you", "volley": 3, "cooldown": 150},
-             "radar_spin": 6},
-            {"design": "tank", "name": "tail tank",
-             "position": [-15, -0.4, 18], "velocity": [0.012, 0, 0],
-             "size": 0.6, "angles": [-90, 0, 0],
-             "colour": (120, 190, 80), "palette": PALETTE_FOREST,
-             "gun": {"mode": "TRACK", "turret_spin": 1, "start_angle": "you", "volley": 3, "cooldown": 150},
-             "radar_spin": -6},
+            # PANZER TANKS: sizes 0.4 and 0.6, khaki, on the desert floor
+            # y = floor + size = -1 + size (hull base is at y=-1 in model space)
+            # --- four 0.4 scouts ---
+            {"design": "tank", "name": "scout",
+             "position": [-12, -0.6, -8], "velocity": [0.018, 0, 0], "size": 0.4, "angles": [-90, 0, 0],
+             "colour": KHAKI, "palette": PALETTE_KHAKI,
+             "gun": {"mode": "TRACK", "turret_spin": 1.2, "start_angle": "you", "volley": 1, "cooldown": 100}, "radar_spin": -6},
+            {"design": "tank", "name": "scout",
+             "position": (12, -0.6, -4), "velocity": [-0.018, 0, 0], "size": 0.4, "angles": [90, 0, 0],
+             "colour": KHAKI, "palette": PALETTE_KHAKI,
+             "gun": {"mode": "TRACK", "turret_spin": 1.2, "start_angle": "you", "volley": 1, "cooldown": 100}, "radar_spin": 6},
+            {"design": "tank", "name": "scout",
+             "position": [-8, -0.6, 6], "velocity": [0, 0, 0.018], "size": 0.4, "angles": [0, 0, 0],
+             "colour": KHAKI, "palette": PALETTE_KHAKI,
+             "gun": {"mode": "TRACK", "turret_spin": 1.2, "start_angle": "you", "volley": 1, "cooldown": 100}, "radar_spin": -6},
+            {"design": "tank", "name": "scout",
+             "position": (8, -0.6, 10), "velocity": [0, 0, -0.018], "size": 0.4, "angles": [180, 0, 0],
+             "colour": KHAKI, "palette": PALETTE_KHAKI,
+             "gun": {"mode": "TRACK", "turret_spin": 1.2, "start_angle": "you", "volley": 1, "cooldown": 100}, "radar_spin": 6},
+            # --- four 0.6 panzers ---
+            {"design": "tank", "name": "panzer",
+             "position": [-10, -0.4, 3], "velocity": [0.015, 0, 0], "size": 0.6, "angles": [-90, 0, 0],
+             "colour": KHAKI, "palette": PALETTE_KHAKI,
+             "gun": {"mode": "TRACK", "turret_spin": 0.9, "start_angle": "you", "volley": 1, "cooldown": 130}, "radar_spin": -6},
+            {"design": "tank", "name": "panzer",
+             "position": (10, -0.4, -2), "velocity": [-0.015, 0, 0], "size": 0.6, "angles": [90, 0, 0],
+             "colour": KHAKI, "palette": PALETTE_KHAKI,
+             "gun": {"mode": "TRACK", "turret_spin": 0.9, "start_angle": "you", "volley": 1, "cooldown": 130}, "radar_spin": 6},
+            {"design": "tank", "name": "panzer",
+             "position": [-5, -0.4, -10], "velocity": [0, 0, 0.014], "size": 0.6, "angles": [0, 0, 0],
+             "colour": KHAKI, "palette": PALETTE_KHAKI,
+             "gun": {"mode": "TRACK", "turret_spin": 0.9, "start_angle": "you", "volley": 1, "cooldown": 130}, "radar_spin": -6},
+            {"design": "tank", "name": "panzer",
+             "position": (5, -0.4, 12), "velocity": [0, 0, -0.014], "size": 0.6, "angles": [180, 0, 0],
+             "colour": KHAKI, "palette": PALETTE_KHAKI,
+             "gun": {"mode": "TRACK", "turret_spin": 0.9, "start_angle": "you", "volley": 1, "cooldown": 130}, "radar_spin": 6},
         ],
     },
 

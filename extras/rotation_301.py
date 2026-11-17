@@ -5,7 +5,7 @@ import pygame
 from rotation_data import *
 from rotation_functions import *        # (this also opens the game window)
 
-START_LEVEL = 1 # DEBUG: which level to play (see LEVELS in rotation_levels.py). 99 = skunk works, the test level
+START_LEVEL = 1
 show_spheres = False   # C key: draw the collision spheres (a debug view)
 show_wall_grid = True  # G key: the grid on the walls and ceiling (watch the FPS counter as you switch it)
 take_screenshot = False  # P key: save this frame as a picture (once it's fully drawn, just before it's shown)
@@ -54,6 +54,8 @@ while running:
     keys = pygame.key.get_pressed()
     spin_things(keys)                               # each thing's own spin, plus the I J K L U O keys
     move_player(keys)                               # you: look, walk, jump (the PLAYER, not the camera)
+    if you["spawn_grace"] > 0:
+        you["spawn_grace"] -= 1
     update_floor_hazards()                          # standing in lava (feet on the floor)? it hurts
     update_outside_hurt()                           # outside the play grid? that hurts too
     move_things()                                   # every thing moves (and bounces off the world box)
@@ -70,8 +72,8 @@ while running:
     remove_finished_things()                        # used-up bullets and destroyed shapes go
     update_level_progress()                         # every shape gone? "completed" message, then the next level
 
-    update_avatar()                                 # THIRD PERSON: your tank goes where you ended up this frame...
-    update_camera()                                 # ...and the camera goes behind you (or on your eye: V key)
+    update_camera()                                 # THIRD PERSON: camera goes behind you FIRST (aim_point needs it)...
+    update_avatar()                                 # ...then your tank + turret: the turret aims at the crosshair
 
     screen.fill(BLACK)
 
@@ -89,7 +91,7 @@ while running:
 
     draw_sparks()                                      # sparks on top of the shapes
     draw_rope()                                        # the line from you to the rope
-    draw_health()                                      # health squares above the shapes
+    draw_health(show_spheres)                            # health squares above the shapes (+ names when C is on)
 
     if show_spheres:                                   # C key: collision spheres on top of the shapes
         draw_collision_spheres()

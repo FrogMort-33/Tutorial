@@ -45,6 +45,10 @@ STONE = (110, 125, 95)         # mossy stone: the outline colour for jungle ruin
 PALETTE_STONE = [(120, 130, 105), (95, 108, 85), (140, 150, 120), (85, 98, 78), (150, 160, 130), (75, 88, 68)]
 SAND = (170, 150, 100)          # sandbags: the outline colour for jungle defences (boxes)
 PALETTE_SAND = [(180, 160, 110), (150, 132, 90), (200, 180, 125), (140, 122, 82), (210, 190, 135), (130, 112, 75)]
+KHAKI = (140, 130, 80)          # desert tanks
+PALETTE_KHAKI = [(150, 140, 90), (125, 115, 72), (170, 158, 105), (110, 100, 65), (180, 168, 115), (100, 92, 58)]
+RUIN = (145, 120, 85)           # desert ruins: sun-bleached stone
+PALETTE_RUIN = [(155, 130, 95), (130, 108, 78), (175, 150, 110), (120, 100, 70), (165, 140, 102), (110, 92, 65)]
 PALETTE_BLACK = [               # every face BLACK, like the background: with a coloured outline it looks like a
     (0, 0, 0),                  #   wireframe, but the faces still HIDE the edges behind them ("hidden lines")
 ]
@@ -550,6 +554,7 @@ player = {
 
 TURN_STEP = 1         # degrees per frame that the I J K L U O keys turn every thing by hand
 TURN_SPEED = 1.5      # degrees per frame (not used at the moment: you turn with the mouse, MOUSE_SPEED)
+HULL_TURN_SPEED = 2.5 # degrees per frame: how fast A/D rotate the hull in third person
 TIP_LIMIT_DOWN = 60   # degrees: how far you can look DOWN at the floor
 TIP_LIMIT_UP = 85     # degrees: how far you can look UP at the ceiling (keep under 90: past it the view flips over)
 TIP_LIMIT_UP_THIRD = 60   # ...in THIRD PERSON: any steeper and the floor pushes the camera down beside your tank,
@@ -576,7 +581,7 @@ camera = {
     "tip": 0,       # degrees: the same as player["tip"] (+ = looking DOWN)
 }
 view = {"third_person": True,    # V key flips it.
-        "distance": 3.0}          # how far BEHIND your eye the third-person camera is: the SCROLL WHEEL changes it
+        "distance": 8.0}          # how far BEHIND your eye the third-person camera is: the SCROLL WHEEL changes it
                                 #   (starts at CAMERA_BACK; CAMERA_NEAREST to CAMERA_FURTHEST)
                                 #   view is a DICTIONARY (not a plain True), so the game loop can change it
                                 #   and rotation_functions.py sees the change (see "import *" in CLAUDE.md)
@@ -644,6 +649,7 @@ TANK_BULLET_SPEED = 0.15  # world units per frame: slower than yours, so you can
 YOUR_HIT_RADIUS = 0.3     # a tank bullet this close to your eye counts as hitting YOU
 YOUR_BODY_RADIUS = 0.25   # BOXES: how close your body can get to a box's side (see you_hit_a_box)
 BUMP_GRACE = 45           # THINGS: frames after a moving thing hits you before one can hurt you again (0.75 s)
+SPAWN_GRACE = 120         # frames of invulnerability when a level starts (2 seconds at 60 fps)
 STEP_UP = 0.3             # BOXES: a box top this far above your feet (or less) you just WALK up onto, like a
                           #   step. Anything taller blocks you (jump onto it). Sandbags are 0.4: jump them.
 # A tiny GOLD square on the floor under WORLD x 0, z 0, added to EVERY level by load_level() (0.2 across).
@@ -694,7 +700,8 @@ you = {"hits_taken": 0, "hurt": 0,   # how many times you've been hit, and frame
        "outside_timer": 0,           # frames until being OUTSIDE the play grid hurts you again (0 = straight away)
        "frozen": 0,                  # frames left FROZEN by ice (0 = free to move)
        "freeze_grace": 0,            # frames left when ice can't freeze you again
-       "bump_grace": 0}              # frames left before a moving THING can hurt you again
+       "bump_grace": 0,              # frames left before a moving THING can hurt you again
+       "spawn_grace": 0}             # frames of invulnerability at the start of a level (flashing)
 
 
 # ================================ CROSSHAIR ================================
@@ -766,6 +773,7 @@ DECAL_TYPES = {
     "ice":     {"colour": (170, 225, 255), "hurts": True,  "glow": True,  "freezes": True,  "slows": 1},     # it freezes AND hurts you!
     "slime":   {"colour": (120, 220, 50),  "hurts": True,  "glow": True,  "freezes": False, "slows": 0.6},   # sticky POISON: hurts, slows
     "custard": {"colour": (245, 205, 100), "hurts": False, "glow": False, "freezes": False, "slows": 0.3},   # THICK: no harm, but SO slow
+    "quicksand": {"colour": (190, 165, 100), "hurts": False, "glow": False, "freezes": False, "slows": 0.4}, # desert sand trap
 }
 FREEZE_FRAMES = 60        # frames ice freezes you for (1 second): long enough for a tank to lock on
 FREEZE_GRACE = 60         # frames after thawing when ice can't freeze you again (so you can walk off it)

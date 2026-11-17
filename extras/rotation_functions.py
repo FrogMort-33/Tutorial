@@ -208,6 +208,7 @@ def load_level(number):
     you["outside_timer"] = 0
     you["frozen"] = 0
     you["freeze_grace"] = 0
+    you["spawn_grace"] = SPAWN_GRACE
     level_progress["number"] = number                     # which level this is, and it's not cleared yet
     level_progress["cleared_frames"] = None
     level_progress["frames"] = 0                          # the level clock starts again
@@ -352,6 +353,9 @@ def update_floor_hazards():
     if you["lava_timer"] > 0:
         you["lava_timer"] = you["lava_timer"] - 1
         return
+    if you["spawn_grace"] > 0:
+        you["lava_timer"] = LAVA_HURT_FRAMES
+        return
     you["hits_taken"] = you["hits_taken"] + 1             # OUCH: counts like a tank hit
     you["hurt"] = 12                                      # the flash round the screen ...
     you["hurt_colour"] = hurting["colour"]                # ... in the decal's colour: lava orange-red, ice blue
@@ -369,6 +373,9 @@ def update_outside_hurt():
         return
     if you["outside_timer"] > 0:
         you["outside_timer"] = you["outside_timer"] - 1
+        return
+    if you["spawn_grace"] > 0:
+        you["outside_timer"] = OUTSIDE_HURT_FRAMES
         return
     you["hits_taken"] = you["hits_taken"] + 1             # OUCH: counts like a tank hit
     you["hurt"] = 12                                      # the flash round the screen, in purple
@@ -1291,7 +1298,7 @@ def break_apart(thing):
         things.append(piece)
 
 
-def draw_health():
+def draw_health(show_names=False):
     # A row of tiny squares floating just above each shape: filled green = health left, grey outline = lost.
     # The squares are a fixed size on screen (not shrunk by distance), so they stay readable far away.
     for thing in things:
@@ -1310,6 +1317,9 @@ def draw_health():
                 pygame.draw.rect(screen, (60, 255, 60), square)               # health left: filled green
             else:
                 pygame.draw.rect(screen, (110, 110, 110), square, 1)          # health lost: grey outline
+        if show_names and "name" in thing:
+            label = diag_font.render(thing["name"], True, (255, 255, 255))
+            screen.blit(label, (round(centre_x - label.get_width() / 2), round(centre_y - 18)))
 
 
 def spawn_sparks(point, colours):
@@ -1659,7 +1669,7 @@ def things_bump_you():
                 velocity[axis] = -velocity[axis]                # moving towards you: now it moves away
             if bump_sound:
                 bump_sound.play()
-        if you["bump_grace"] == 0:
+        if you["bump_grace"] == 0 and you["spawn_grace"] == 0:
             you["hits_taken"] = you["hits_taken"] + 1           # OUCH: counts like a bullet hit
             you["hurt"] = 12                                    # the flash round the screen ...
             you["hurt_colour"] = mover["colour"]                # ... in the colour of what hit you
@@ -1720,10 +1730,16 @@ def update_avatar():
     hull["position"][0] = player["x"]
     hull["position"][1] = (feet + AVATAR_SIZE)
     hull["position"][2] = player["z"]
-    hull["angles"][0] = player["turn"]
-    # The children (turret, radar) are carried by the hull. Only their OWN spin changes: the radar's
-    # "speeds" from the design is (6, 0, 0) = 6 degrees a frame round its upright axis.
-    for part in avatar[1:]:
+    if not view["third_person"]:
+        hull["angles"][0] = player["turn"]
+    # Turret: point at the crosshair (third person) or forward (first person).
+    turret = avatar[1]
+    if view["third_person"]:
+        turret["angles"][0] = keep_under_360(player["turn"] - hull["angles"][0])
+    else:
+        turret["angles"][0] = 0
+    # Radar spins on its own axis.
+    for part in avatar[2:]:
         part["angles"][0] = keep_under_360((part["angles"][0] + part["speeds"][0]))
 
 
@@ -1866,8 +1882,17 @@ def move_player(keys):
     up_limit = TIP_LIMIT_UP_THIRD if view["third_person"] else TIP_LIMIT_UP   # third person: not so steep
     if player["tip"] < -up_limit:        player["tip"] = -up_limit          #   (- = looking UP)
 
-    forward_x, forward_y, forward_z = rotate_y((0, 0, 1), player["turn"])   # the way you face
-    right_x, right_y, right_z = rotate_y((1, 0, 0), player["turn"])         # your right hand
+    if view["third_person"]:
+        # A/D TURN the hull like tank tracks; W/S drive along the hull's facing.
+        if keys[pygame.K_a]:
+            avatar[0]["angles"][0] = keep_under_360(avatar[0]["angles"][0] + HULL_TURN_SPEED)
+        if keys[pygame.K_d]:
+            avatar[0]["angles"][0] = keep_under_360(avatar[0]["angles"][0] - HULL_TURN_SPEED)
+        hull_turn = avatar[0]["angles"][0]
+        forward_x, forward_y, forward_z = rotate_y((0, 0, 1), hull_turn)
+    else:
+        forward_x, forward_y, forward_z = rotate_y((0, 0, 1), player["turn"])   # the way you face
+        right_x, right_y, right_z = rotate_y((1, 0, 0), player["turn"])         # your right hand
 
     walk = 0 if you["frozen"] > 0 else MOVE_SPEED          # FROZEN by ice: you can't walk (you can still look)
     walk = walk * floor_slowness()                        # SLIME and CUSTARD: you wade through it, slowly
@@ -1879,12 +1904,13 @@ def move_player(keys):
     if keys[pygame.K_s]:                                  # back
         new_x = (new_x - (forward_x * walk))
         new_z = (new_z - (forward_z * walk))
-    if keys[pygame.K_d]:                                  # strafe right
-        new_x = (new_x + (right_x * walk))
-        new_z = (new_z + (right_z * walk))
-    if keys[pygame.K_a]:                                  # strafe left
-        new_x = (new_x - (right_x * walk))
-        new_z = (new_z - (right_z * walk))
+    if not view["third_person"]:
+        if keys[pygame.K_d]:                              # strafe right (first person only)
+            new_x = (new_x + (right_x * walk))
+            new_z = (new_z + (right_z * walk))
+        if keys[pygame.K_a]:                              # strafe left (first person only)
+            new_x = (new_x - (right_x * walk))
+            new_z = (new_z - (right_z * walk))
     # ... then check its x part and its z part SEPARATELY: each is only refused if IT runs into something. So walking at
     # an angle into a wall keeps the part that runs ALONG the wall: you SLIDE along it.
     # BOXES and THINGS both block you (a thing only if the step takes you DEEPER into it - see into_a_thing).
@@ -1977,11 +2003,12 @@ def move_bullets():
             dx, dy, dz = (player["x"] - position[0]), (player["y"] - position[1]), (player["z"] - position[2])
             if (dx * dx) + (dy * dy) + (dz * dz) < (YOUR_HIT_RADIUS * YOUR_HIT_RADIUS):
                 bullet["range"] = 0
-                you["hits_taken"] = you["hits_taken"] + 1
-                you["hurt"] = 12                                            # frames of flash round the screen ...
-                you["hurt_colour"] = bullet["colour"]                       # ... in the BULLET's colour
-                if hurt_sound:
-                    hurt_sound.play()                                       # a sad "wahhh"
+                if you["spawn_grace"] == 0:
+                    you["hits_taken"] = you["hits_taken"] + 1
+                    you["hurt"] = 12                                        # frames of flash round the screen ...
+                    you["hurt_colour"] = bullet["colour"]                   # ... in the BULLET's colour
+                    if hurt_sound:
+                        hurt_sound.play()                                   # a sad "wahhh"
                 continue
 
         # 3. A BOX: the closest point IN the box to the bullet (clamp it to the box) - near enough = a hit
@@ -2053,7 +2080,8 @@ def add_thing_faces(face_paint_order):
     # third person. In first person the camera is INSIDE the tank, so it would just block the view.
     drawn = things + bullets
     if view["third_person"]:
-        drawn = drawn + avatar
+        if you["spawn_grace"] == 0 or (you["spawn_grace"] // 4) % 2 == 0:
+            drawn = drawn + avatar
     for thing in drawn:
         model = thing["model"]
 
