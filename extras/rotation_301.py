@@ -90,6 +90,7 @@ while running:
     paint_faces(face_paint_order)                   # ...sorted far to near and painted
 
     draw_sparks()                                      # sparks on top of the shapes
+    draw_shield()                                       # just got hit: a wire box flashes round the tank
     draw_rope()                                        # the line from you to the rope
     draw_health(show_spheres)                            # health squares above the shapes (+ names when C is on)
 

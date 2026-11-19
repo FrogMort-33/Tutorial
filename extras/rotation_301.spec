@@ -13,7 +13,8 @@ exe = EXE(
     a.scripts,
     a.binaries,
     a.datas,
-    name="rotation_301",
+    name="Tanks and Turrets v261119",
     icon="rotation_301_icon.ico",             # the .exe's own icon (in Explorer)
+    version="build/version_info.txt",         # right-click > Properties > Details
     console=False,                            # --windowed: no black console window behind the game
 )

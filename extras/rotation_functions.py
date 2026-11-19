@@ -11,6 +11,11 @@ import pygame
 from rotation_data import *
 from rotation_levels import DESIGNS, LEVELS
 
+try:
+    import numpy                   # only used for the march music and the explosion sound
+except ImportError:
+    numpy = None
+
 pygame.init()
 GAME_FOLDER = os.path.dirname(os.path.abspath(__file__))   # where these files are (also works inside the .exe)
 pygame.display.set_icon(pygame.image.load(os.path.join(GAME_FOLDER, "rotation_301_icon.png")))   # the lava tank: taskbar + Alt+Tab
@@ -62,12 +67,130 @@ def make_sound(start_pitch, end_pitch, seconds, volume, fade):
 # None if there's no sound: check before playing them
 bump_sound = make_sound(220, 110, 0.08, 12000, 3)   # "bonk": low, falling, short - things bumping
 ping_sound = make_sound(1800, 1600, 0.25, 7000, 2)  # "ping": high, rings a little longer - a bullet hit
-hurt_sound = make_sound(330, 150, 0.7, 11000, 1.2)  # "wahhh": a slow, sad fall - YOU got hit
 thud_sound = make_sound(110, 70, 0.12, 14000, 5)    # "thud": very low, short, dies at once - hitting a BOX
 freeze_sound = make_sound(2600, 2200, 0.35, 5000, 1.5)   # "ting": very high and glassy - ice FREEZES you
 # GEM NOTES: one clear note for each step of the scale (GEM_NOTES) - the pitch stays the same, and it rings out
 note_sounds = [make_sound(pitch, pitch, 0.45, 9000, 2.5) for pitch in GEM_NOTES]
+
+
+def make_explosion():
+    # YOU got hit: a proper explosion (numpy, same technique as RedCar's whizz/chomp bang) - a sharp crack,
+    # a low rumbling boom that falls away, and a crackle of debris, louder and punchier than a plain tone.
+    if numpy is None:
+        return None
+    mixer_settings = pygame.mixer.get_init()
+    if mixer_settings is None:
+        return None
+    rate, sample_format, channels = mixer_settings
+    rng = numpy.random.default_rng(11)
+    t = numpy.arange(int(0.9 * rate)) / rate
+    crack = numpy.diff(rng.normal(0, 1, t.size), prepend=0) * numpy.exp(-t * 50)            # the sharp initial hit
+    boom = rng.normal(0, 1, t.size) * numpy.exp(-t * 6) + numpy.sin(2 * numpy.pi * (90 - 70 * t) * t) * numpy.exp(-t * 5)
+    clicks = (rng.random(t.size) < 0.0035) * rng.normal(0, 1, t.size)
+    crackle = numpy.convolve(clicks, numpy.exp(-numpy.arange(50) / 6), "same") * numpy.clip((t - 0.05) * 6, 0, 1) * numpy.exp(-t * 4)
+    wave = crack * 0.8 + boom * 0.9 + crackle * 0.6
+    wave = numpy.clip(wave / max(1e-6, numpy.abs(wave).max()), -1, 1)
+    samples = (wave * 32767).astype(numpy.int16)
+    if channels == 2:
+        samples = numpy.column_stack((samples, samples))
+    try:
+        return pygame.sndarray.make_sound(numpy.ascontiguousarray(samples))
+    except pygame.error:
+        return None
+
+
+hurt_sound = make_explosion()   # YOU got hit - a dramatic explosion, not just a sad tone
 ALL_SOUNDS = [bump_sound, ping_sound, hurt_sound, thud_sound, freeze_sound] + note_sounds   # every sound, so the volume reaches them all
+
+
+# MARCH_TUNE: "Erika" (Herms Niel, 1930 - public domain), from a simplified playing guide: verse "G C D E E D C |
+# A G E D | G G A G E C" over C - G7 - C, then a call-and-response refrain "F A C | E G C | D F B D C" over
+# F - C - G7 - C. Built the same way as RedCar's engine/song (numpy, synthesised once at start-up, no sound files).
+# In C major - a brassy lead over a tuba "oom-PAH" and a snare/bass-drum march.
+MARCH_BPM = 120
+# MIDI notes, one octave: C=72 D=74 E=76 F=77 G=79 A=81 B=83 (+12 = C=84, for the refrain's higher "B D")
+C, D, E, F, G, A, B = 72, 74, 76, 77, 79, 81, 83
+# Melody as (MIDI note or None, eighth notes) - each letter from the guide gets 2 eighths (one quarter note).
+MARCH_MELODY = [
+    (G, 2), (C, 2), (D, 2), (E, 2),  (E, 2), (D, 2), (C, 4),            # verse, bar 1: "G C D E E D C"
+    (A, 2), (G, 2), (E, 2), (D, 2),  (G, 2), (G, 2), (A, 2), (G, 2),    # "A G E D | G G A G"
+    (E, 2), (C, 4), (None, 2),                                          # "E C", then a breath
+    (G, 2), (C, 2), (D, 2), (E, 2),  (E, 2), (D, 2), (C, 4),            # the verse again
+    (A, 2), (G, 2), (E, 2), (D, 2),  (G, 2), (G, 2), (A, 2), (G, 2),
+    (E, 2), (C, 4), (None, 2),
+    (F, 2), (A, 2), (C + 12, 4),  (None, 2),                             # refrain: "F A C", (pause)
+    (E, 2), (G, 2), (C + 12, 4),  (None, 2),                             # "E G C", (pause)
+    (D, 2), (F, 2), (B, 2), (D + 12, 2),  (C + 12, 8),                  # "D F B D C", ring out the last note
+]
+# The chord under each stretch of the melody, as (eighths it lasts, root MIDI note). Chords: C - G7 - C for
+# each verse line, then F - C - G7 - C for the refrain - matching the melody's own phrase lengths above.
+MARCH_CHORDS = [
+    (16, 60), (16, 67), (8, 60),       # verse 1: "G C D E E D C | A G E D G G A G" (C) ... G7 ... "E C" + breath
+    (16, 60), (16, 67), (8, 60),       # verse 2, the same again
+    (10, 65), (10, 60), (16, 67),      # refrain: F under "F A C", C under "E G C", G7 under "D F B D C"
+]
+
+
+def march_tune_wave(rate):
+    # Render the whole loop once: a tuba oom-PAH on the beat, snare/bass-drum on a march beat, and the
+    # brassy lead on top. Notes that ring past the end wrap round to the start, so it loops cleanly.
+    rng = numpy.random.default_rng(5)
+    spe = int(round(rate / (MARCH_BPM / 60) / 2))          # samples per eighth note
+    total_eighths = sum(eighths for _, eighths in MARCH_MELODY)
+    total = spe * total_eighths
+    out = numpy.zeros(total)
+    hz = lambda m: 440 * 2 ** ((m - 69) / 12)
+
+    def add(start, wave):
+        idx = (start + numpy.arange(len(wave))) % total
+        numpy.add.at(out, idx, wave)
+
+    def tone(m, dur, kind):
+        t = numpy.arange(int(dur)) / rate
+        ph = 2 * numpy.pi * hz(m) * t
+        if kind == "brass":        # a square-ish pulse wave: buzzy, 8-bit, cuts through the mix
+            w = numpy.where((ph / (2 * numpy.pi)) % 1 < 0.5, 1.0, -1.0)
+            env = numpy.minimum(1, t * 250) * (0.7 + 0.3 * numpy.exp(-t * 6))
+        else:                        # tuba: a round, plucked triangle wave, low and short
+            w = 2 * numpy.abs(2 * ((ph / (2 * numpy.pi)) % 1) - 1) - 1
+            env = numpy.minimum(1, t * 300) * numpy.exp(-t * 7)
+        fade = numpy.minimum(1, (t[-1] - t) * 200 + 1e-9)
+        return w * env * fade
+
+    # The oom-PAH bass and the march drums: walk through MARCH_CHORDS, one beat (2 eighths) at a time.
+    at = 0
+    beat_in_chord = 0
+    for chord_eighths, root in MARCH_CHORDS:
+        for beat in range(chord_eighths // 2):
+            add(at, 0.6 * tone(root - 24 + (0 if beat % 2 == 0 else 7), spe * 1.8, "tuba"))   # oom-PAH-oom-PAH
+            kt = numpy.arange(int(spe * 1.2)) / rate                                           # the march beat: drums
+            if beat % 2 == 0:
+                add(at, 0.9 * numpy.sin(2 * numpy.pi * (120 - 280 * kt) * kt) * numpy.exp(-kt * 20))   # bass drum
+            else:
+                add(at, 0.4 * rng.normal(0, 1, kt.size) * numpy.exp(-kt * 25))             # snare
+            at += spe * 2
+
+    # The brass melody, on top.
+    at = 0
+    for note, eighths in MARCH_MELODY:
+        if note is not None:
+            add(at, 0.35 * tone(note, spe * eighths * 0.92, "brass"))
+        at += spe * eighths
+    return out
+
+
+march_tune = None
+_mixer_settings = pygame.mixer.get_init()
+if numpy is not None and _mixer_settings is not None:
+    try:
+        wave = march_tune_wave(_mixer_settings[0])
+        wave = numpy.clip(wave / max(1e-6, numpy.abs(wave).max()), -1, 1)
+        samples = (wave * 32767).astype(numpy.int16)
+        if _mixer_settings[2] == 2:
+            samples = numpy.column_stack((samples, samples))
+        march_tune = pygame.sndarray.make_sound(numpy.ascontiguousarray(samples))
+    except pygame.error:
+        march_tune = None
 
 # ---- VOLUME: one slider for every sound. Keys: - quieter, = louder (10% steps) ----
 # Our ears hear loudness on a CURVE, not a straight line: half the strength does NOT sound half as loud.
@@ -82,6 +205,8 @@ def apply_volume():
     for sound in ALL_SOUNDS:
         if sound:                                   # a sound is None if there's no sound device
             sound.set_volume(strength)
+    if march_tune:
+        march_tune.set_volume(MUSIC_VOLUME * strength)   # the march stays quieter than the slider, so SFX still cut through
 
 
 apply_volume()                                      # start at 20%
@@ -209,6 +334,10 @@ def load_level(number):
     you["frozen"] = 0
     you["freeze_grace"] = 0
     you["spawn_grace"] = SPAWN_GRACE
+    if march_tune:
+        march_tune.stop()                                  # stop any copy still playing from the last level...
+        march_tune.set_volume(MUSIC_VOLUME * volume["slider"] * volume["slider"])
+        march_tune.play(loops=-1)                          # ...then start one fresh copy, looping forever
     level_progress["number"] = number                     # which level this is, and it's not cleared yet
     level_progress["cleared_frames"] = None
     level_progress["frames"] = 0                          # the level clock starts again
@@ -361,6 +490,7 @@ def update_floor_hazards():
     you["hurt_colour"] = hurting["colour"]                # ... in the decal's colour: lava orange-red, ice blue
     if hurt_sound:
         hurt_sound.play()
+    spawn_sparks(avatar[0]["position"], [hurting["colour"], (255, 255, 255)])
     you["lava_timer"] = LAVA_HURT_FRAMES
 
 
@@ -382,6 +512,7 @@ def update_outside_hurt():
     you["hurt_colour"] = OUTSIDE_COLOUR
     if hurt_sound:
         hurt_sound.play()
+    spawn_sparks(avatar[0]["position"], [OUTSIDE_COLOUR, (255, 255, 255)])
     you["outside_timer"] = OUTSIDE_HURT_FRAMES
 
 
@@ -792,6 +923,11 @@ def draw_collision_spheres():
             # Further away = smaller, the same way project() shrinks x and y: multiply by FOCAL, divide by depth
             pixel_radius = (radius * thing["size"] * FOCAL) / centre[2]
             pygame.draw.circle(screen, (255, 255, 255), project(centre), max(1, round(pixel_radius)), 1)
+    # YOU: a yellow circle at the point enemy bullets actually check against (your_target_point(), YOUR_HIT_RADIUS).
+    target = to_camera(your_target_point())
+    if target[2] >= NEAR:
+        pixel_radius = (YOUR_HIT_RADIUS * FOCAL) / target[2]
+        pygame.draw.circle(screen, (255, 255, 0), project(target), max(1, round(pixel_radius)), 1)
 
 
 def world_spheres(thing):
@@ -1184,12 +1320,21 @@ def un_turn(direction, thing):
     return rotate_y(rotate_x(rotate_z(direction, -spin), -tilt), -turn)
 
 
+def your_target_point():
+    # Where enemies aim at YOU: your eye in first person, but your TANK (not your floating eye) in third
+    # person - otherwise shots visibly aim high, over the avatar's head.
+    if view["third_person"] and avatar:
+        return avatar[0]["position"][0], avatar[0]["position"][1], avatar[0]["position"][2]
+    return player["x"], player["y"], player["z"]
+
+
 def you_from_turret(turret):
     # Which way are YOU, as the turret's HULL sees it? (x, z) in the hull's own model, flat on the hull's "floor"
     # (the plane the turret turns in). Measured in the hull's own model, so it works for a turret mounted ANY way
     # up: on a tank or a floor bunker, a bunker on a WALL, or one hanging from the CEILING.
     pivot = to_world((0, 0, 0), turret)                           # the turret's centre, in the world
-    to_you = (player["x"] - pivot[0], player["y"] - pivot[1], player["z"] - pivot[2])
+    target_x, target_y, target_z = your_target_point()
+    to_you = (target_x - pivot[0], target_y - pivot[1], target_z - pivot[2])
     local_x, local_y, local_z = un_turn(to_you, turret["parent_thing"])
     return local_x, local_z
 
@@ -1254,7 +1399,8 @@ def fire_at_you(turret):
     muzzles = turret["model"]["muzzles"]
     muzzle = to_world(muzzles[turret["next_muzzle"]], turret)
     turret["next_muzzle"] = (turret["next_muzzle"] + 1) % len(muzzles)     # twin barrels take turns
-    dx, dy, dz = (player["x"] - muzzle[0]), (player["y"] - muzzle[1]), (player["z"] - muzzle[2])
+    target_x, target_y, target_z = your_target_point()
+    dx, dy, dz = (target_x - muzzle[0]), (target_y - muzzle[1]), (target_z - muzzle[2])
     distance = math.sqrt((dx * dx) + (dy * dy) + (dz * dz))
     spawn_bullet(muzzle, (dx / distance, dy / distance, dz / distance), turret["gun_config"]["bullet_speed"],
                  *bullet_colours(turret), turret["parent_thing"])   # the gun's (or shooter's) colours
@@ -1461,7 +1607,30 @@ def draw_your_shadow():
         draw_world_line(ring[n], ring[n + 1], (255, 255, 255))
 
 
-def draw_world_line(world_start, world_end, colour):
+def is_tank_or_bunker(thing):
+    # A TANK or BUNKER is built from a design with parts (a hull with a turret riding it) - so it has a
+    # CHILD. A plain shape (even one with a DOWN/TARGET gun) never does. Used to tell "a tank/bunker hit
+    # you" from "a shape hit you", for the shield DOME (tanks/bunkers only, not shapes).
+    return thing is not None and any(other.get("parent_thing") is thing for other in things)
+
+
+def draw_shield():
+    # Just got hit by a TANK or BUNKER: a wire dome flashes over the tank for SHIELD_FRAMES frames
+    # (on every other frame). Shape hits don't show it - see is_tank_or_bunker(). Brightened towards
+    # white, so it reads clearly even in the hit colour's darker shades.
+    if you["shield"] == 0 or not avatar or (you["shield"] // 2) % 2 == 1:
+        return
+    cx, cy, cz = avatar[0]["position"]
+    size = AVATAR_SIZE * 2.0                               # bigger than the hull, so it reads as a shield
+    cy = cy - (size * 0.4)                                 # sit it lower: nearer the hull's middle, not floating above
+    world_points = [(cx + (px * size), cy + (py * size), cz + (pz * size)) for px, py, pz in SHIELD_DOME_POINTS]
+    r, g, b = you["hurt_colour"]
+    bright_colour = (min(255, r + 100), min(255, g + 100), min(255, b + 100))
+    for a, b_edge in SHIELD_DOME_EDGES:
+        draw_world_line(world_points[a], world_points[b_edge], bright_colour, width=2)
+
+
+def draw_world_line(world_start, world_end, colour, width=1):
     # A straight line in the WORLD. If part of it is behind you (closer than NEAR), that part is TRIMMED off
     # and the rest is drawn - so only two points are worked out, however long the line is.
     start, end = to_camera(world_start), to_camera(world_end)
@@ -1478,7 +1647,7 @@ def draw_world_line(world_start, world_end, colour):
             end = crossing                           # ... or the end
     on_screen = trim_line_to_screen(project(start), project(end))
     if on_screen:
-        pygame.draw.line(screen, colour, on_screen[0], on_screen[1], 1)
+        pygame.draw.line(screen, colour, on_screen[0], on_screen[1], width)
 
 
 def trim_line_to_screen(a, b):
@@ -1675,6 +1844,9 @@ def things_bump_you():
             you["hurt_colour"] = mover["colour"]                # ... in the colour of what hit you
             if hurt_sound:
                 hurt_sound.play()
+            spawn_sparks(avatar[0]["position"], [mover["colour"], (255, 255, 255)])
+            if is_tank_or_bunker(mover):
+                you["shield"] = SHIELD_FRAMES
             you["bump_grace"] = BUMP_GRACE
 
 
@@ -2000,7 +2172,8 @@ def move_bullets():
 
         # 2. YOU: only bullets something else fired
         if bullet["owner"] is not None:
-            dx, dy, dz = (player["x"] - position[0]), (player["y"] - position[1]), (player["z"] - position[2])
+            target_x, target_y, target_z = your_target_point()
+            dx, dy, dz = (target_x - position[0]), (target_y - position[1]), (target_z - position[2])
             if (dx * dx) + (dy * dy) + (dz * dz) < (YOUR_HIT_RADIUS * YOUR_HIT_RADIUS):
                 bullet["range"] = 0
                 if you["spawn_grace"] == 0:
@@ -2009,6 +2182,9 @@ def move_bullets():
                     you["hurt_colour"] = bullet["colour"]                   # ... in the BULLET's colour
                     if hurt_sound:
                         hurt_sound.play()                                   # a sad "wahhh"
+                    spawn_sparks(avatar[0]["position"], [bullet["colour"], (255, 255, 255)])
+                    if is_tank_or_bunker(bullet["owner"]):
+                        you["shield"] = SHIELD_FRAMES
                 continue
 
         # 3. A BOX: the closest point IN the box to the bullet (clamp it to the box) - near enough = a hit
@@ -2490,3 +2666,5 @@ def draw_hud(faces_drawn=0):
         pygame.draw.rect(screen, you["hurt_colour"], screen.get_rect(), 12)   # a thick border, 12 pixels wide,
                                                                             #   in the colour of what hit you
         you["hurt"] = you["hurt"] - 1
+    if you["shield"] > 0:
+        you["shield"] = you["shield"] - 1

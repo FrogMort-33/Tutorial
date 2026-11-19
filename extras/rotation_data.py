@@ -106,6 +106,7 @@ AMBIENT = 0.2                   # everyone deserves a little light: even a face 
 SHOW_VOLUME = False   # True = show the volume slider on screen (the - and = keys work either way)
 # ---- VOLUME: the slider for every sound (- and = keys). How it's applied: apply_volume() in rotation_functions.py
 volume = {"slider": 0.20}       # 0.0 .. 1.0 = 0% .. 100%: starts at 20%
+MUSIC_VOLUME = 0.35              # the marching band loop, quieter than its own slider so SFX still cut through
 
 
 # ================================ MODELS ================================
@@ -150,6 +151,33 @@ cube_model = {
     "faces": cube_faces,
     "collision_spheres": [((0, 0, 0), 1.2)],    # one sphere: between a side (1 away) and a corner (1.73 away)
 }
+
+# ---- SHIELD DOME: the top half of a geodesic sphere (3 latitude rings + 8 longitude struts), for the
+# flashing shield effect when a TANK or BUNKER hits you (not shapes). Built once, scaled and moved in
+# draw_shield() the same way the cube shield used to be.
+def _build_shield_dome():
+    lat, lon = 3, 8                               # 3 rings from the pole down to the base; 8 struts round
+    points, index = [], {}
+    points.append((0, 1, 0))
+    index["pole"] = 0
+    for i in range(1, lat + 1):                    # i = lat is the base ring
+        theta = (math.pi / 2) * i / lat            # 0 (pole) .. pi/2 (base)
+        y, r = math.cos(theta), math.sin(theta)
+        for j in range(lon):
+            phi = 2 * math.pi * j / lon
+            index[(i, j)] = len(points)
+            points.append((r * math.cos(phi), y, r * math.sin(phi)))
+    edges = [(index["pole"], index[(1, j)]) for j in range(lon)]
+    for i in range(1, lat + 1):
+        for j in range(lon):
+            a, b = index[(i, j)], index[(i, (j + 1) % lon)]
+            edges.append((a, b))                   # round the latitude ring
+            if i < lat:
+                edges.append((a, index[(i + 1, j)]))   # up to the next ring
+    return points, edges
+
+
+SHIELD_DOME_POINTS, SHIELD_DOME_EDGES = _build_shield_dome()
 
 # ---- LOW BOX: the cube squashed to HALF height (2 wide, 2 deep, 1 tall): a bunker's base ----
 # The same corner order as the cube, so the cube's edges and faces (and their normals) fit it exactly:
@@ -701,7 +729,9 @@ you = {"hits_taken": 0, "hurt": 0,   # how many times you've been hit, and frame
        "frozen": 0,                  # frames left FROZEN by ice (0 = free to move)
        "freeze_grace": 0,            # frames left when ice can't freeze you again
        "bump_grace": 0,              # frames left before a moving THING can hurt you again
-       "spawn_grace": 0}             # frames of invulnerability at the start of a level (flashing)
+       "spawn_grace": 0,             # frames of invulnerability at the start of a level (flashing)
+       "shield": 0}                  # frames left of the wire shield box flashing round the tank (just got hit)
+SHIELD_FRAMES = 20        # how long the shield box flashes for after a hit
 
 
 # ================================ CROSSHAIR ================================
