@@ -95,6 +95,20 @@ class Boxes:
                 self.box(x + dx, -1 + level, z + dz, x + dx + 1, level, z + dz + 1,
                          comment if (i == 0 and level == 0) else "", **kw)
 
+    def staircase(self, x0, z0, direction, steps, width, rise=0.3, comment="", **kw):
+        # a STAIRCASE: each step is one box piece, 1 unit in the run direction, width units across
+        # direction is "+x", "-x", "+z", "-z"; step i rises to y = -1 + rise * (i + 1)
+        for i in range(steps):
+            top = -1 + rise * (i + 1)
+            if direction == "+x":
+                self.box(x0 + i, -1, z0, x0 + i + 1, top, z0 + width, comment if i == 0 else "", **kw)
+            elif direction == "-x":
+                self.box(x0 - i - 1, -1, z0, x0 - i, top, z0 + width, comment if i == 0 else "", **kw)
+            elif direction == "+z":
+                self.box(x0, -1, z0 + i, x0 + width, top, z0 + i + 1, comment if i == 0 else "", **kw)
+            elif direction == "-z":
+                self.box(x0, -1, z0 - i - 1, x0 + width, top, z0 - i, comment if i == 0 else "", **kw)
+
     def mound(self, x0, z0, size, comment, **kw):
         # a STEPPED heap: size x size blocks on the floor (1 tall), then (size - 2) x (size - 2) on top, and so on
         level, inset = 0, 0
@@ -326,9 +340,9 @@ def furnace(number=10):
     lava.note("THE FURNACE, built from OBSIDIAN (dark faces, glowing red edges) and EMBER blocks (sunset colours).")
     lava.note("YOUR CINDER WALL: a low U of cooled cinder round where you start (x 0, z -14), open behind you")
     lava.start_u()
-    lava.note("THE OBSIDIAN WALL: cover across the front (z -8.6 to -8.2), x -7 to 7: tall ends, a LOW middle, gaps, and a WINDOW at x 3 to 4")
-    lava.wall_x(-7, -8.6, -8.2, [1.7, 2.1, 1.3, None, None, -0.2, 0.4, -0.4, None, 0.2, 1.9, 1.6, 2.0, 1.4], "the obsidian wall",
-                window_at=10)
+    lava.note("THE OBSIDIAN WALL: cover closer in (z -6.6 to -6.2), x -7 to 7: a jagged broken-up profile, one wide gap, a WINDOW at x -2 to -1")
+    lava.wall_x(-7, -6.6, -6.2, [2.4, 0.8, 2.0, 1.2, None, None, None, 1.8, -0.2, 2.6, 0.6, 1.1, 2.2, 0.9], "the obsidian wall",
+                window_at=3)
     lava.note("THE BROKEN RIDGE: a long obsidian wall down the left side (x -6.4 to -6, z 3 to 12), gaps to slip through")
     lava.wall_z(-6.4, -6, 3, [1.5, 2.2, 1.0, None, 1.8, 2.4, 0.6, None, 1.4], "the ridge")
     lava.note("THE VOLCANO: a stepped cone at the back right (centre x 10, z 10): 4 x 4, then 2 x 2, then the glowing VENT")
@@ -497,9 +511,9 @@ def pudding(number, theme):
     cake.note(f"{t['name'].upper()}, built from {w['box'].upper()} blocks ({box_c}) and {w['tower'].upper()}S ({tower_c}).")
     cake.note(f"YOUR COVER: a low U of {w['box']} round where you start (x 0, z -14), open behind you")
     cake.start_u()
-    cake.note(f"THE {w['box'].upper()} WALL: cover across the front (z -8.6 to -8.2), tall ends, a low middle, gaps, a WINDOW at x 4 to 5")
-    cake.wall_x(-7, -8.6, -8.2, [1.5, 1.9, 1.2, None, -0.2, 0.5, -0.4, None, 0.1, None, -0.3, 1.8, 2.0, 1.3],
-                f"the {w['box']} wall", window_at=11)
+    cake.note(f"THE {w['box'].upper()} WALL: cover further out (z -10.6 to -10.2), mostly LOW with two tall end posts, a WINDOW at x -6 to -5")
+    cake.wall_x(-7, -10.6, -10.2, [1.6, None, -0.5, -0.3, -0.4, None, -0.2, -0.3, None, -0.5, -0.4, 0.3, None, 1.7],
+                f"the {w['box']} wall", window_at=0)
     cake.note(f"THE {w['tower'].upper()}S: three floor-to-CEILING wobbly columns (8 layers, each 1 tall)")
     cake.column(-10, 9, 0.9, f"left {w['tower']}", WOBBLE, colour=tower_c, palette=tower_p)
     cake.column(10, 9, 0.9, f"right {w['tower']}", WOBBLE[::-1], colour=tower_c, palette=tower_p)

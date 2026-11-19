@@ -103,41 +103,43 @@ hurt_sound = make_explosion()   # YOU got hit - a dramatic explosion, not just a
 ALL_SOUNDS = [bump_sound, ping_sound, hurt_sound, thud_sound, freeze_sound] + note_sounds   # every sound, so the volume reaches them all
 
 
-# MARCH_TUNE: "Erika" (Herms Niel, 1930 - public domain), from a simplified playing guide: verse "G C D E E D C |
-# A G E D | G G A G E C" over C - G7 - C, then a call-and-response refrain "F A C | E G C | D F B D C" over
-# F - C - G7 - C. Built the same way as RedCar's engine/song (numpy, synthesised once at start-up, no sound files).
-# In C major - a brassy lead over a tuba "oom-PAH" and a snare/bass-drum march.
+# MARCH_TUNE: "Erika" (Herms Niel, 1930 - public domain), transcribed directly from a real ABC file
+# (X:1 T:Erika, key C, cut time, L:1/8 - trillian.mit.edu/~jc/music/abc/mirror/diato.ifrance.com/Erika_1.abc).
+# Built the same way as RedCar's engine/song (numpy, synthesised once at start-up, no sound files).
 MARCH_BPM = 120
-# MIDI notes, one octave: C=72 D=74 E=76 F=77 G=79 A=81 B=83 (+12 = C=84, for the refrain's higher "B D")
-C, D, E, F, G, A, B = 72, 74, 76, 77, 79, 81, 83
-# Melody as (MIDI note or None, eighth notes) - each letter from the guide gets 2 eighths (one quarter note).
-MARCH_MELODY = [
-    (G, 2), (C, 2), (D, 2), (E, 2),  (E, 2), (D, 2), (C, 4),            # verse, bar 1: "G C D E E D C"
-    (A, 2), (G, 2), (E, 2), (D, 2),  (G, 2), (G, 2), (A, 2), (G, 2),    # "A G E D | G G A G"
-    (E, 2), (C, 4), (None, 2),                                          # "E C", then a breath
-    (G, 2), (C, 2), (D, 2), (E, 2),  (E, 2), (D, 2), (C, 4),            # the verse again
-    (A, 2), (G, 2), (E, 2), (D, 2),  (G, 2), (G, 2), (A, 2), (G, 2),
-    (E, 2), (C, 4), (None, 2),
-    (F, 2), (A, 2), (C + 12, 4),  (None, 2),                             # refrain: "F A C", (pause)
-    (E, 2), (G, 2), (C + 12, 4),  (None, 2),                             # "E G C", (pause)
-    (D, 2), (F, 2), (B, 2), (D + 12, 2),  (C + 12, 8),                  # "D F B D C", ring out the last note
+# MIDI notes, one octave (C major scale): C=72 D=74 E=76 F=77 G=79 B2=71 (B below the octave, as the ABC has it)
+C, D, E, F, G, B2 = 72, 74, 76, 77, 79, 71
+# Melody as (MIDI note or None, sixteenth notes) - straight from the ABC note letters: z2 [GG,]c [B3/2G,3/2]c/
+# [dG,]e | [c2C,2][d3/2C,3/2]e/[fF,]e[dF,]c | [d2G,2][GG,]c[B3/2G,3/2]c/[dG,]e | (repeat) |1 ... :|2 ... |
+# |: [c2A,2][d3/2A,3/2]e/[fF,]e[dF,]c | [d2G,2][e3/2G,3/2]f/[gE,]f[eE,]g | (repeat) |1 ... :|2 [c8C,8] |
+MARCH_LINES = [
+    [(None, 4), (G, 2), (C, 2), (B2, 3), (C, 1), (D, 2), (E, 2)],                      # pickup: z2 G c B3/2 c/ d e
+    [(C, 4), (D, 3), (E, 1), (F, 2), (E, 2), (D, 2), (C, 2)],                          # bar 1: c2 d3/2 e/ f e d c
+    [(D, 4), (G, 2), (C, 2), (B2, 3), (C, 1), (D, 2), (E, 2)],                         # bar 2: d2 G c B3/2 c/ d e
+    [(C, 4), (D, 3), (E, 1), (F, 2), (E, 2), (D, 2), (C, 2)],                          # bar 3: c2 d3/2 e/ f e d c (ending 1)
+    [(D, 4), (E, 3), (F, 1), (G, 2), (F, 2), (E, 2), (G, 2)],                          # ending 2: d2 e3/2 f/ g f e g
+    [(C, 4), (D, 3), (E, 1), (F, 2), (E, 2), (D, 2), (C, 2)],                          # bar 5: c2 d3/2 e/ f e d c
+    [(D, 4), (E, 3), (F, 1), (G, 2), (F, 2), (E, 2), (G, 2)],                          # bar 6: d2 e3/2 f/ g f e g
+    [(C, 4), (D, 3), (E, 1), (F, 2), (E, 2), (D, 2), (E, 2)],                          # bar 7: c2 d3/2 e/ f e d e
+    [(C, 4), (E, 3), (F, 1), (G, 2), (F, 2), (E, 2), (G, 2)],                          # ending 1: c2 e3/2 f/ g f e g
+    [(C, 16)],                                                                         # ending 2: a whole bar of C
 ]
-# The chord under each stretch of the melody, as (eighths it lasts, root MIDI note). Chords: C - G7 - C for
-# each verse line, then F - C - G7 - C for the refrain - matching the melody's own phrase lengths above.
-MARCH_CHORDS = [
-    (16, 60), (16, 67), (8, 60),       # verse 1: "G C D E E D C | A G E D G G A G" (C) ... G7 ... "E C" + breath
-    (16, 60), (16, 67), (8, 60),       # verse 2, the same again
-    (10, 65), (10, 60), (16, 67),      # refrain: F under "F A C", C under "E G C", G7 under "D F B D C"
-]
+MARCH_MELODY = [note for line in MARCH_LINES for note in line]
+# The chord under each LINE above, in the same order, as its root MIDI note - from the ABC's own bass notes
+# (G, C, F under the first section; F, E under the second). Each chord lasts exactly as long as its line,
+# so the chords and the melody always add up to the same total.
+MARCH_LINE_CHORDS = [67, 67, 67, 65, 65, 65, 64, 65, 64, 60]
+MARCH_CHORDS = [(sum(sixteenths for _, sixteenths in line), root)
+                for line, root in zip(MARCH_LINES, MARCH_LINE_CHORDS)]
 
 
 def march_tune_wave(rate):
     # Render the whole loop once: a tuba oom-PAH on the beat, snare/bass-drum on a march beat, and the
     # brassy lead on top. Notes that ring past the end wrap round to the start, so it loops cleanly.
     rng = numpy.random.default_rng(5)
-    spe = int(round(rate / (MARCH_BPM / 60) / 2))          # samples per eighth note
-    total_eighths = sum(eighths for _, eighths in MARCH_MELODY)
-    total = spe * total_eighths
+    spx = int(round(rate / (MARCH_BPM / 60) / 4))          # samples per sixteenth note
+    total_sixteenths = sum(sixteenths for _, sixteenths in MARCH_MELODY)
+    total = spx * total_sixteenths
     out = numpy.zeros(total)
     hz = lambda m: 440 * 2 ** ((m - 69) / 12)
 
@@ -157,25 +159,24 @@ def march_tune_wave(rate):
         fade = numpy.minimum(1, (t[-1] - t) * 200 + 1e-9)
         return w * env * fade
 
-    # The oom-PAH bass and the march drums: walk through MARCH_CHORDS, one beat (2 eighths) at a time.
+    # The oom-PAH bass and the march drums: walk through MARCH_CHORDS, one beat (4 sixteenths) at a time.
     at = 0
-    beat_in_chord = 0
-    for chord_eighths, root in MARCH_CHORDS:
-        for beat in range(chord_eighths // 2):
-            add(at, 0.6 * tone(root - 24 + (0 if beat % 2 == 0 else 7), spe * 1.8, "tuba"))   # oom-PAH-oom-PAH
-            kt = numpy.arange(int(spe * 1.2)) / rate                                           # the march beat: drums
+    for chord_sixteenths, root in MARCH_CHORDS:
+        for beat in range(chord_sixteenths // 4):
+            add(at, 0.6 * tone(root - 24 + (0 if beat % 2 == 0 else 7), spx * 3.6, "tuba"))   # oom-PAH-oom-PAH
+            kt = numpy.arange(int(spx * 2.4)) / rate                                           # the march beat: drums
             if beat % 2 == 0:
                 add(at, 0.9 * numpy.sin(2 * numpy.pi * (120 - 280 * kt) * kt) * numpy.exp(-kt * 20))   # bass drum
             else:
                 add(at, 0.4 * rng.normal(0, 1, kt.size) * numpy.exp(-kt * 25))             # snare
-            at += spe * 2
+            at += spx * 4
 
     # The brass melody, on top.
     at = 0
-    for note, eighths in MARCH_MELODY:
+    for note, sixteenths in MARCH_MELODY:
         if note is not None:
-            add(at, 0.35 * tone(note, spe * eighths * 0.92, "brass"))
-        at += spe * eighths
+            add(at, 0.35 * tone(note, spx * sixteenths * 0.92, "brass"))
+        at += spx * sixteenths
     return out
 
 
@@ -1181,13 +1182,36 @@ def update_rope():
 
 
 def draw_rope():
-    # A line from your hand to the rope's bullet
+    # A line from your hand to the rope's bullet - drawn as several short segments with a bit of sag and
+    # sway, so it reads as a rope rather than a laser beam. The sway animates with rope["frames"], so it
+    # ripples while flying and settles (less sway) once hooked.
     bullet = rope["bullet"]
     if bullet is None:
         return
     hand = rotate_y(rotate_x(ROPE_HAND, player["tip"]), player["turn"])   # the hand offset, turned with you
     start = (player["x"] + hand[0], player["y"] + hand[1], player["z"] + hand[2])
-    draw_world_line(start, bullet["position"], PLAYER_COLOUR)
+    end = bullet["position"]
+    hooked = bullet.get("stuck", False)
+    sway_amount = ROPE_SWAY if not hooked else ROPE_SWAY * 0.25         # calmer once it's hooked onto something
+    length = math.sqrt(sum((end[axis] - start[axis]) ** 2 for axis in range(3)))
+    if length < 0.001:
+        return
+    along = tuple((end[axis] - start[axis]) / length for axis in range(3))
+    # Any direction not parallel to 'along', to build a sideways offset from (the sway and sag directions).
+    side = (along[2], 0, -along[0]) if abs(along[1]) < 0.9 else (1, 0, 0)
+    side_len = math.sqrt(sum(a * a for a in side))
+    side = tuple(a / side_len for a in side)
+    time = rope["frames"] * ROPE_SWAY_SPEED
+    previous = start
+    for n in range(1, ROPE_SEGMENTS + 1):
+        t = n / ROPE_SEGMENTS
+        base = tuple(start[axis] + (end[axis] - start[axis]) * t for axis in range(3))
+        sag = math.sin(t * math.pi) * ROPE_SAG                          # droops most in the middle, zero at both ends
+        wave = math.sin((t * 6) + time) * sway_amount * math.sin(t * math.pi)   # a ripple, also fading at the ends
+        point = (base[0] + (side[0] * wave), base[1] - sag + (side[1] * wave), base[2] + (side[2] * wave))
+        draw_world_line(previous, point, PLAYER_COLOUR)
+        previous = point
+    draw_world_line(previous, end, PLAYER_COLOUR)
 
 
 def locked_on_thing():
@@ -1418,7 +1442,10 @@ def break_apart(thing):
         spawn_sparks(thing["position"], [thing["colour"], (255, 255, 255), (255, 220, 120)])
     if bump_sound:
         bump_sound.play()
-    has_children = any(other.get("parent_thing") is thing for other in things)
+    children = [other for other in things if other.get("parent_thing") is thing]
+    has_children = len(children) > 0
+    if has_children:
+        launch_debris(children[0])                                 # a TANK or BUNKER: its turret flies off
     splits_to = level_sizes[thing["size_name"]]["splits_to"] if "size_name" in thing else None
     if splits_to is None or has_children:
         return                                                     # it just dies
@@ -1442,6 +1469,51 @@ def break_apart(thing):
             piece["cooldown"] = random.randint(0, piece["gun_config"]["cooldown"])   # gets its own random wait,
             piece["volley_left"] = 0                                     #   so they don't drop in step either
         things.append(piece)
+
+
+def launch_debris(part):
+    # A TANK or BUNKER died: its top part (the turret) flies up and off instead of just vanishing with the
+    # hull, then falls, tumbling, and pops with a final burst of sparks when its DEBRIS_LIFE runs out.
+    # The cupola's PIVOT (0, 0, 0) is at its base, not its middle - a cube centred there would sit half
+    # buried. Use the model's own mid-height instead, so the cube lands where the cupola's body actually was.
+    mid_point = (0, 0.225, 0) if part["model"] is cupola_model else (0, 0, 0)
+    part["position"] = list(to_world(mid_point, part))              # its current world spot, now independent...
+    if "parent" in part:
+        del part["parent"]                                         # ...no longer riding the hull
+    if "parent_thing" in part:
+        del part["parent_thing"]
+    if part["model"] is turret_model:                              # swap for a version with a closed base,
+        part["model"] = turret_debris_model                        # so tumbling doesn't show the open hole
+    elif part["model"] is cupola_model:
+        # A wall/ceiling cupola can be rolled or tilted when mounted (its hull's own angles), which tumbled
+        # oddly as itself (its own "turn" axis isn't vertical any more once detached). Cheat: fake it as a
+        # plain cube of about the same size instead - no orientation to get wrong, spins cleanly any way.
+        part["model"] = cupola_debris_model
+        part["size"] = part["size"] * 0.2
+    kick = (random.uniform(-1, 1), DEBRIS_UP_KICK, random.uniform(-1, 1))
+    part["velocity"] = [kick[0] * DEBRIS_SIDE_KICK, kick[1], kick[2] * DEBRIS_SIDE_KICK]
+    part["angles"] = list(part["angles"])                          # its own list: spins independently now
+    # Spin on ONE axis only (turn, like the radar), not a full 3-axis tumble: odd tilt angles can break the
+    # painter's sort (faces sorted one centre-distance each, not perfectly for every angle) and flicker.
+    part["speeds"] = [random.uniform(-3, 3), 0, 0]
+    part["debris_life"] = DEBRIS_LIFE
+    part["gun"] = False                                             # a flying turret doesn't keep shooting
+
+
+def update_debris():
+    # Every frame: fall under gravity, tumble, and pop with sparks once its time is up.
+    for part in things:
+        if "debris_life" not in part:
+            continue
+        part["debris_life"] = part["debris_life"] - 1
+        part["velocity"][1] = part["velocity"][1] - DEBRIS_GRAVITY
+        for axis in range(3):
+            part["position"][axis] = part["position"][axis] + part["velocity"][axis]
+        for axis in range(3):
+            part["angles"][axis] = keep_under_360(part["angles"][axis] + part["speeds"][axis])
+        if part["debris_life"] <= 0 or part["position"][1] < FLOOR_Y:
+            spawn_sparks(part["position"], [part["colour"], (255, 255, 255)])
+            part["dead"] = True
 
 
 def draw_health(show_names=False):
@@ -2106,6 +2178,8 @@ def move_things():
     for thing in things:
         if "parent" in thing:                                   # a child rides on its parent: its position is
             continue                                            #   RELATIVE, so never move or bounce it here
+        if "debris_life" in thing:
+            continue                                            # DEBRIS has its own fall, in update_debris()
         position = thing["position"]
         velocity = thing["velocity"]
         smallest, biggest = WORLD_MIN, WORLD_MAX
@@ -2430,6 +2504,41 @@ def draw_level_complete():
         screen.blit(shadow, (x + 3, y + 3))               # a black shadow, so it reads on any background
         screen.blit(words, (x, y))
         y = y + words.get_height() + 10
+
+
+splash_title_font = pygame.font.SysFont("arial", 230, bold=True)
+splash_amp_font = pygame.font.SysFont("arial", 460, bold=True)      # the "&": much bigger, joining the two words
+splash_sub_font = pygame.font.SysFont("arial", 30, bold=True)
+splash_press_font = pygame.font.SysFont("arial", 26, bold=True)
+
+
+def draw_outlined_text(font, text, colour, outline, centre, thickness=3):
+    # TITLE text with a thick outline all round it, so it reads over any background (the demo level, any colour).
+    for dx, dy in ((-thickness, 0), (thickness, 0), (0, -thickness), (0, thickness),
+                   (-thickness, -thickness), (thickness, thickness), (-thickness, thickness), (thickness, -thickness)):
+        shadow = font.render(text, True, outline)
+        screen.blit(shadow, shadow.get_rect(center=(centre[0] + dx, centre[1] + dy)))
+    words = font.render(text, True, colour)
+    screen.blit(words, words.get_rect(center=centre))
+
+
+def draw_splash_overlay(frame):
+    # The TITLE SCREEN card, drawn on top of a live demo level playing underneath. 'frame' counts up from 0
+    # since the splash started, used to flash "PRESS ANY KEY" on and off.
+    # TANKS and TURRETS stack on two lines, overlapping a little, with a huge "&" ON TOP, offset to the right,
+    # joining the two words together.
+    mid_y = HEIGHT * 0.3
+    draw_outlined_text(splash_title_font, "TANKS", (240, 240, 240), BLACK, (CENTRE_X, mid_y - 90), thickness=6)
+    draw_outlined_text(splash_title_font, "TURRETS", (240, 240, 240), BLACK, (CENTRE_X, mid_y + 90), thickness=6)
+    draw_outlined_text(splash_amp_font, "&", (255, 210, 60), BLACK, (CENTRE_X + 560, mid_y), thickness=6)
+    sub = splash_sub_font.render("A 3D WIREFRAME SHOOTER", True, (255, 210, 60))
+    screen.blit(sub, sub.get_rect(center=(CENTRE_X, mid_y + 225)))
+    if (frame // 30) % 2 == 0:                          # flash every half second
+        press = splash_press_font.render("PRESS ANY KEY TO START", True, (240, 240, 240))
+        shadow = splash_press_font.render("PRESS ANY KEY TO START", True, BLACK)
+        x, y = CENTRE_X - (press.get_width() / 2), HEIGHT - 60
+        screen.blit(shadow, (x + 2, y + 2))
+        screen.blit(press, (x, y))
 
 
 def draw_level_banner():

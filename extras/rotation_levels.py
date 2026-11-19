@@ -990,19 +990,19 @@ LEVELS = {
             {"min": (1.5, -1, -13.6), "max": (1.9, -0.6, -12.6), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},   # right side
             {"min": (-1.9, -1, -14.4), "max": (-1.5, -0.6, -13.6), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},
             {"min": (1.5, -1, -14.4), "max": (1.9, -0.6, -13.6), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},
-            # THE OBSIDIAN WALL: cover across the front (z -8.6 to -8.2), x -7 to 7: tall ends, a LOW middle, gaps, and a WINDOW at x 3 to 4
-            {"min": (-7, -1, -8.6), "max": (-6, 1.7, -8.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},   # the obsidian wall
-            {"min": (-6, -1, -8.6), "max": (-5, 2.1, -8.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},
-            {"min": (-5, -1, -8.6), "max": (-4, 1.3, -8.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},
-            {"min": (-2, -1, -8.6), "max": (-1, -0.2, -8.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},
-            {"min": (-1, -1, -8.6), "max": (0, 0.4, -8.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},
-            {"min": (0, -1, -8.6), "max": (1, -0.4, -8.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},
-            {"min": (2, -1, -8.6), "max": (3, 0.2, -8.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},
-            {"min": (3, -1, -8.6), "max": (4, -0.3, -8.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},   # the obsidian wall: under the window
-            {"min": (3, 0.4, -8.6), "max": (4, 1.9, -8.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},   # the obsidian wall: over the window (y -0.3 to 0.4)
-            {"min": (4, -1, -8.6), "max": (5, 1.6, -8.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},
-            {"min": (5, -1, -8.6), "max": (6, 2, -8.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},
-            {"min": (6, -1, -8.6), "max": (7, 1.4, -8.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},
+            # THE OBSIDIAN WALL: cover closer in (z -6.6 to -6.2), x -7 to 7: a jagged broken-up profile, one wide gap, a WINDOW at x -2 to -1
+            {"min": (-7, -1, -6.6), "max": (-6, 2.4, -6.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},   # the obsidian wall
+            {"min": (-6, -1, -6.6), "max": (-5, 0.8, -6.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},
+            {"min": (-5, -1, -6.6), "max": (-4, 2.0, -6.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},
+            {"min": (-4, -1, -6.6), "max": (-3, -0.3, -6.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},   # the obsidian wall: under the window
+            {"min": (-4, 0.4, -6.6), "max": (-3, 1.2, -6.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},   # the obsidian wall: over the window (y -0.3 to 0.4)
+            {"min": (0, -1, -6.6), "max": (1, 1.8, -6.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},
+            {"min": (1, -1, -6.6), "max": (2, -0.2, -6.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},
+            {"min": (2, -1, -6.6), "max": (3, 2.6, -6.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},
+            {"min": (3, -1, -6.6), "max": (4, 0.6, -6.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},
+            {"min": (4, -1, -6.6), "max": (5, 1.1, -6.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},
+            {"min": (5, -1, -6.6), "max": (6, 2.2, -6.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},
+            {"min": (6, -1, -6.6), "max": (7, 0.9, -6.2), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},
             # THE BROKEN RIDGE: a long obsidian wall down the left side (x -6.4 to -6, z 3 to 12), gaps to slip through
             {"min": (-6.4, -1, 3), "max": (-6, 1.5, 4), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},   # the ridge
             {"min": (-6.4, -1, 4), "max": (-6, 2.2, 5), "colour": OBSIDIAN, "palette": PALETTE_OBSIDIAN},
@@ -1392,19 +1392,18 @@ LEVELS = {
             {"min": (1.5, -1, -13.6), "max": (1.9, -0.6, -12.6), "colour": CANDY, "palette": PALETTE_CANDY},   # right side
             {"min": (-1.9, -1, -14.4), "max": (-1.5, -0.6, -13.6), "colour": CANDY, "palette": PALETTE_CANDY},
             {"min": (1.5, -1, -14.4), "max": (1.9, -0.6, -13.6), "colour": CANDY, "palette": PALETTE_CANDY},
-            # THE CANDY WALL: cover across the front (z -8.6 to -8.2), tall ends, a low middle, gaps, a WINDOW at x 4 to 5
-            {"min": (-7, -1, -8.6), "max": (-6, 1.5, -8.2), "colour": CANDY, "palette": PALETTE_CANDY},   # the candy wall
-            {"min": (-6, -1, -8.6), "max": (-5, 1.9, -8.2), "colour": CANDY, "palette": PALETTE_CANDY},
-            {"min": (-5, -1, -8.6), "max": (-4, 1.2, -8.2), "colour": CANDY, "palette": PALETTE_CANDY},
-            {"min": (-3, -1, -8.6), "max": (-2, -0.2, -8.2), "colour": CANDY, "palette": PALETTE_CANDY},
-            {"min": (-2, -1, -8.6), "max": (-1, 0.5, -8.2), "colour": CANDY, "palette": PALETTE_CANDY},
-            {"min": (-1, -1, -8.6), "max": (0, -0.4, -8.2), "colour": CANDY, "palette": PALETTE_CANDY},
-            {"min": (1, -1, -8.6), "max": (2, 0.1, -8.2), "colour": CANDY, "palette": PALETTE_CANDY},
-            {"min": (3, -1, -8.6), "max": (4, -0.3, -8.2), "colour": CANDY, "palette": PALETTE_CANDY},
-            {"min": (4, -1, -8.6), "max": (5, -0.3, -8.2), "colour": CANDY, "palette": PALETTE_CANDY},   # the candy wall: under the window
-            {"min": (4, 0.4, -8.6), "max": (5, 1.8, -8.2), "colour": CANDY, "palette": PALETTE_CANDY},   # the candy wall: over the window (y -0.3 to 0.4)
-            {"min": (5, -1, -8.6), "max": (6, 2, -8.2), "colour": CANDY, "palette": PALETTE_CANDY},
-            {"min": (6, -1, -8.6), "max": (7, 1.3, -8.2), "colour": CANDY, "palette": PALETTE_CANDY},
+            # THE CANDY WALL: cover further out (z -10.6 to -10.2), mostly LOW with two tall end posts, a WINDOW at x -6 to -5
+            {"min": (-7, -1, -10.6), "max": (-6, -0.3, -10.2), "colour": CANDY, "palette": PALETTE_CANDY},   # the candy wall: under the window
+            {"min": (-7, 0.4, -10.6), "max": (-6, 1.6, -10.2), "colour": CANDY, "palette": PALETTE_CANDY},   # the candy wall: over the window (y -0.3 to 0.4)
+            {"min": (-5, -1, -10.6), "max": (-4, -0.5, -10.2), "colour": CANDY, "palette": PALETTE_CANDY},
+            {"min": (-4, -1, -10.6), "max": (-3, -0.3, -10.2), "colour": CANDY, "palette": PALETTE_CANDY},
+            {"min": (-3, -1, -10.6), "max": (-2, -0.4, -10.2), "colour": CANDY, "palette": PALETTE_CANDY},
+            {"min": (-1, -1, -10.6), "max": (0, -0.2, -10.2), "colour": CANDY, "palette": PALETTE_CANDY},
+            {"min": (0, -1, -10.6), "max": (1, -0.3, -10.2), "colour": CANDY, "palette": PALETTE_CANDY},
+            {"min": (2, -1, -10.6), "max": (3, -0.5, -10.2), "colour": CANDY, "palette": PALETTE_CANDY},
+            {"min": (3, -1, -10.6), "max": (4, -0.4, -10.2), "colour": CANDY, "palette": PALETTE_CANDY},
+            {"min": (4, -1, -10.6), "max": (5, 0.3, -10.2), "colour": CANDY, "palette": PALETTE_CANDY},
+            {"min": (6, -1, -10.6), "max": (7, 1.7, -10.2), "colour": CANDY, "palette": PALETTE_CANDY},
             # THE ROSE TOWERS: three floor-to-CEILING wobbly columns (8 layers, each 1 tall)
             {"min": (-11, -1, 8.1), "max": (-9, 0, 10), "colour": ROSE, "palette": PALETTE_ROSE},   # left rose tower: layer 1
             {"min": (-10.65, 0, 8.35), "max": (-9.25, 1, 9.85), "colour": ROSE, "palette": PALETTE_ROSE},   # left rose tower: layer 2

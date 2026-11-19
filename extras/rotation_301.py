@@ -1,6 +1,7 @@
 # rotation_301.py - the GAME: start-up and the main loop. Run this file.
 #   rotation_data.py      - the world's data: colours, models, things, settings, shared state
 #   rotation_functions.py - how it all works: maths, drawing, collisions, sounds
+import math
 import pygame
 from rotation_data import *
 from rotation_functions import *        # (this also opens the game window)
@@ -10,12 +11,73 @@ show_spheres = False   # C key: draw the collision spheres (a debug view)
 show_wall_grid = True  # G key: the grid on the walls and ceiling (watch the FPS counter as you switch it)
 take_screenshot = False  # P key: save this frame as a picture (once it's fully drawn, just before it's shown)
 
-load_level(START_LEVEL)              # build the level: its world, boxes, floor shapes, things, and where you start
-build_avatar()                       # THIRD PERSON: your tank (built once: update_avatar() moves it every frame)
+DEMO_LEVELS = [8, 9, 10, 11, 12]     # the splash screen's background: showcase levels, stepped through and looped
+SPLASH_ORBIT_CENTRE = 0              # degrees: behind the tank looking the way it faces (its own spawn direction)
+SPLASH_ORBIT_SWING = 50              # degrees either side of centre: how far the camera sweeps
+SPLASH_ORBIT_SPEED = 0.012           # radians per frame on the swing's own clock: how fast it oscillates
+SPLASH_SWEEPS_PER_LEVEL = 2          # how many full left-right sweeps before moving on to the next demo level
+SPLASH_FRAMES_PER_SWEEP = round((2 * math.pi) / SPLASH_ORBIT_SPEED)
+SPLASH_FRAMES_PER_LEVEL = SPLASH_FRAMES_PER_SWEEP * SPLASH_SWEEPS_PER_LEVEL
+
+demo_level_index = 0
+load_level(DEMO_LEVELS[demo_level_index])
+build_avatar()
+view["third_person"] = True          # the splash always shows the tank, whichever mode the player last used
 
 pygame.mouse.set_visible(False)      # hide the mouse pointer
 pygame.event.set_grab(True)          # keep the mouse locked to the window
 pygame.mouse.get_rel()               # reset, so the first frame doesn't jump
+
+# ---- SPLASH SCREEN: the demo level plays itself (things move and shoot; nothing can hurt your parked tank
+# here, since you["spawn_grace"] never runs out) while the camera slowly orbits, title card on top. Any key
+# or click ends it and starts the real level. ----
+splash_frame = 0
+splash_showing = True
+while splash_showing:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            raise SystemExit
+        if event.type in (pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN):
+            splash_showing = False
+
+    if splash_frame > 0 and splash_frame % SPLASH_FRAMES_PER_LEVEL == 0:
+        demo_level_index = (demo_level_index + 1) % len(DEMO_LEVELS)   # next level, looping back after the last
+        load_level(DEMO_LEVELS[demo_level_index])
+        build_avatar()
+
+    swing = math.sin(splash_frame * SPLASH_ORBIT_SPEED) * SPLASH_ORBIT_SWING
+    player["turn"] = keep_under_360(SPLASH_ORBIT_CENTRE + swing)   # oscillate round "behind the tank": no player input
+    you["spawn_grace"] = SPAWN_GRACE                        # always topped up: the parked tank can't be hurt
+    move_things()
+    bounce_things_off_each_other()
+    bounce_things_off_boxes()
+    update_gems()
+    move_bullets()
+    update_sparks()
+    things_shoot()
+    remove_finished_things()
+    update_camera()
+    update_avatar()
+
+    screen.fill(BLACK)
+    draw_floor()
+    draw_wall_grid()
+    draw_world_box()
+    draw_floor_shapes()
+    face_paint_order = []
+    add_thing_faces(face_paint_order)
+    add_box_faces(face_paint_order)
+    paint_faces(face_paint_order)
+    draw_sparks()
+    draw_splash_overlay(splash_frame)
+    pygame.display.flip()
+    clock.tick(60)
+    splash_frame += 1
+
+load_level(START_LEVEL)              # build the level: its world, boxes, floor shapes, things, and where you start
+build_avatar()                       # THIRD PERSON: your tank (built once: update_avatar() moves it every frame)
+pygame.mouse.get_rel()               # reset again: the splash's mouse movement shouldn't jump the real camera
 
 running = True
 while running:
@@ -68,6 +130,7 @@ while running:
     move_bullets()                                  # bullets fly, and stop on the first thing they hit
     update_rope()                                   # the rope hit something? it stays there
     update_sparks()                                 # move, drop and age the sparks
+    update_debris()                                 # a destroyed tank's turret flying off: fall, tumble, then pop
     things_shoot()                                  # guns fire: turrets at you, DOWN guns straight down (after their cooldown)
     remove_finished_things()                        # used-up bullets and destroyed shapes go
     update_level_progress()                         # every shape gone? "completed" message, then the next level

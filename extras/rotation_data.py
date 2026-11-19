@@ -405,6 +405,11 @@ turret_model = {
     "muzzles": [(0, 0.2, 2.2)],                     # where bullets come out: the barrel's tip
     "collision_spheres": [((0, 0.2, 2.05), 0.2)],   # barrel tip: swings WITH the turret
 }
+# DEBRIS version: the turret's base is open underneath (it normally sits flush on the hull, so you'd
+# never see it) - but flying free as debris, it can tumble to show that open hole. This copy adds the
+# missing base face, for launch_debris() to swap in.
+turret_debris_model = dict(turret_model)
+turret_debris_model["faces"] = turret_faces + [((3, 2, 1, 0), (0, -1, 0))]
 
 # ---- CUPOLA: a turret with NO barrel (for bunkers on walls and ceilings) ----
 # The turret's body only: its first 8 corners, its first 12 edges and its first 5 faces (no barrel).
@@ -417,6 +422,8 @@ cupola_model = {
     "muzzles": [(0, 0.45, -0.1)],                   # the middle of its roof
     "collision_spheres": [((0, 0.25, 0), 0.5)],
 }
+cupola_debris_model = cube_model                   # wall/ceiling cupolas can be any roll or tilt when mounted,
+                                                     # which tumbled oddly as themselves - cheat with a plain cube
 # Its colours: forest green, with a bright GOLD VISOR on the front (face 2), so you can see which way it faces
 PALETTE_CUPOLA = [(60, 140, 70), (60, 140, 70), (255, 215, 0), (60, 140, 70), (90, 160, 80)]
 
@@ -648,6 +655,12 @@ SPARK_LIFE = 30           # frames a spark lasts (half a second at 60 FPS)
 SPARK_GRAVITY = 0.002     # taken off a spark's up / down speed every frame, so they arc down
 SPARK_SIZE = 0.04         # a spark's radius in world units, when it's brand new
 
+# DEBRIS: a destroyed tank's or bunker's turret flies off instead of just vanishing with the hull.
+DEBRIS_UP_KICK = 0.12     # how hard it launches upward (world units per frame, before gravity pulls it back down)
+DEBRIS_SIDE_KICK = 0.03   # how hard it's pushed sideways (world units per frame)
+DEBRIS_GRAVITY = 0.006    # taken off its upward speed every frame, so it arcs down (heavier fall than a spark)
+DEBRIS_LIFE = 150         # frames before it pops into sparks and disappears, even if it hasn't landed (2.5 seconds)
+
 
 # ================================ BULLETS ================================
 # YOUR bullets: a tiny solid gold cube per left click, added to THINGS while the game runs.
@@ -840,8 +853,12 @@ ROPE_HAND = (0.2, -0.25, 0.3)        # where the line leaves you, from your eye:
 rope = {"bullet": None,              # the rope's bullet while it's out (None = no rope)
         "start": (0, 0, 0),          # where it was thrown from (to measure how far it has flown)
         "frames": 0}                 # frames left before it's gone (counts down from ROPE_LIFE)
-ROPE_RANGE = 10                      # the rope flies this far (world units); hit nothing by then and it's gone
+ROPE_RANGE = 20                      # the rope flies this far (world units); hit nothing by then and it's gone
 ROPE_LIFE = 300                      # frames from throwing until the rope is gone, hooked or not (5 seconds)
+ROPE_SEGMENTS = 8                    # the rope is drawn as this many short lines, not one straight one
+ROPE_SAG = 0.15                      # how much it droops downward in the middle (world units)
+ROPE_SWAY = 0.08                      # how far the ripple pushes the rope sideways (world units)
+ROPE_SWAY_SPEED = 0.35                # how fast the ripple travels along the rope, frame to frame
 lock_on = {"degrees": 2}             # LOCK-ON: while the rope is hooked on a THING (not a gem), your bullets turn
                                      #   up to this many degrees a frame towards its centre (0 = off). A dict, so a
                                      #   settings tab can change it later.
