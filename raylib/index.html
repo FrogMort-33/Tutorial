@@ -1,0 +1,778 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How raylib Works</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Chakra+Petch:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one readable column, like a lab notebook (same look as the 3D course lessons). */
+:root {
+  --bg:#f3f6f4; --paper:#ffffff; --fg:#17201b; --muted:#56635c; --line:#d5ded8;
+  --accent:#0d8a4a; --accent-soft:#e2f3e9; --code-bg:#121815; --code-fg:#d9f5e3; --warn:#9a6a00;
+  --display:"Chakra Petch", "Trebuchet MS", sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; --code-bg:#0a0e0c; --code-fg:#d9f5e3; --warn:#e6b84a; color-scheme:dark; } }
+:root[data-theme="dark"] {
+  --bg:#0f1412; --paper:#161d1a; --fg:#e4ece7; --muted:#9aa9a1; --line:#2a3530;
+  --accent:#4be08c; --accent-soft:#1a2e23; --code-bg:#0a0e0c; --code-fg:#d9f5e3; --warn:#e6b84a; color-scheme:dark; }
+body { background:var(--bg); color:var(--fg); font-family:var(--body); font-size:17px; line-height:1.6;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:32px 64px; }
+main { max-width:780px; margin:0 auto; display:flex; flex-direction:column; gap:20px; }
+h1,h2,h3 { font-family:var(--display); text-wrap:balance; line-height:1.2; margin:0; }
+h1 { font-size:clamp(30px,6vw,44px); }
+h2 { font-size:26px; margin-top:28px; padding-top:20px; border-top:2px solid var(--line); display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; }
+h2 .mins { font-family:var(--mono); font-size:14px; color:var(--accent); font-weight:600; letter-spacing:.04em; }
+h3 { font-size:20px; margin-top:12px; }
+p { margin:0; max-width:68ch; }
+.eyebrow { font-family:var(--mono); font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); }
+.lede { font-size:19px; color:var(--muted); }
+code { font-family:var(--mono); font-size:.88em; background:var(--accent-soft); padding:1px 5px; border-radius:4px; }
+pre { margin:0; background:var(--code-bg); color:var(--code-fg); padding:16px 18px; border-radius:8px; overflow-x:auto; font-size:14px; line-height:1.5; }
+pre code { background:none; padding:0; font-size:inherit; color:inherit; }
+figure { margin:0; display:flex; flex-direction:column; gap:8px; }
+figure img { width:100%; border-radius:8px; display:block; border:1px solid var(--line); }
+figcaption { font-size:14px; color:var(--muted); }
+table { border-collapse:collapse; width:100%; font-size:15px; }
+.tablewrap { overflow-x:auto; }
+th,td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+td.t { font-family:var(--mono); white-space:nowrap; color:var(--accent); font-variant-numeric:tabular-nums; }
+ul,ol { margin:0; padding-left:22px; max-width:68ch; }
+li+li { margin-top:4px; }
+.key { background:var(--accent-soft); border-left:4px solid var(--accent); padding:14px 18px; border-radius:0 8px 8px 0; display:flex; flex-direction:column; gap:6px; }
+.key strong { font-family:var(--display); }
+.q { background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:14px 18px; display:flex; flex-direction:column; gap:8px; }
+.qq { font-weight:700; display:flex; gap:10px; }
+.qn { font-family:var(--mono); color:var(--accent); flex:none; }
+details summary { cursor:pointer; color:var(--accent); font-weight:700; }
+details summary:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.ans { padding-top:8px; color:var(--fg); display:flex; flex-direction:column; gap:8px; }
+details.full { border:1px dashed var(--line); border-radius:8px; padding:10px 14px; }
+details.full[open] summary { margin-bottom:10px; }
+.check { display:flex; flex-direction:column; gap:12px; }
+.files li code { white-space:nowrap; }
+.key a { color:var(--accent); font-weight:700; }
+
+.fignum { font-family:var(--mono); font-weight:600; color:var(--accent); margin-right:6px; white-space:nowrap; }
+.panels { display:block; margin-top:4px; }
+.panels b { font-family:var(--mono); color:var(--fg); font-weight:600; }
+.tabcap { font-size:14px; color:var(--muted); margin-bottom:-12px; }
+figure, .tabcap { scroll-margin-top:16px; }
+/* Key concept box (same as Lesson 1). */
+.keyconcept { background:#14110a; border:3px solid #ffd23c; border-radius:10px; padding:18px 20px 20px; display:flex; flex-direction:column; gap:12px; }
+.keyconcept .kc-label { align-self:flex-start; background:#ffd23c; color:#14110a; font-family:var(--mono); font-weight:800; font-size:15px; letter-spacing:.14em; padding:4px 10px; border-radius:4px; }
+.keyconcept pre { background:none; color:#ffd23c; padding:0; font-size:clamp(14px, 3.6vw, 28px); font-weight:700; line-height:1.6; overflow-x:auto; }
+.keyconcept p { margin:0; color:#f3e7b5; font-size:16px; }
+</style>
+
+
+</head>
+<body>
+<main>
+<nav style="font-family:var(--mono, monospace);font-size:14px;"><a style="color:var(--accent)" href="../">&larr; All lessons</a> &middot; <a style="color:var(--accent)" href="../figures/">Figure index</a></nav>
+
+<header style="display:flex;flex-direction:column;gap:12px">
+  <span class="eyebrow">Wireframe 3D course · Extra lesson R · about 60 minutes</span>
+  <h1>How raylib works: your 3D maths, done by the graphics card</h1>
+  <p class="lede">For eleven lessons you have drawn 3D with your own Python: turn every corner, divide by z, sort the faces, fill the polygons. raylib does the very same jobs, but it hands them to the graphics card, which has thousands of small workers that do them all at once. This lesson takes the ideas you already know one at a time and shows what each one is called in raylib, where it went, and why that is so much faster. It is also how FrogWorld's new <code>--gpu</code> mode works.</p>
+</header>
+<div class="key">
+  <strong>Where this lesson fits</strong>
+  <p><strong>Before:</strong> Lessons 1 to 11 built a whole 3D engine in Python: projection (1), turning (2), solid faces and the clock test (3), light (3B), the camera (4), matrices (6), clipping (8) and the depth buffer (10). FrogWorld grew from the same ideas.<br><strong>Today:</strong> the same pipeline, run by the graphics card through raylib (the Python module is called <code>pyray</code>). Four small programs, each one checked against your own Lesson 1 numbers.<br><strong>Next:</strong> FrogWorld's <code>frogworld.py --gpu</code>, which uses every idea in this lesson (Part 7 shows where).</p>
+  <p>You need one install, once: <code>py -m pip install raylib</code>. raylib 6.2.0.0 has a ready-made Windows wheel for Python 3.14, so nothing is compiled.</p>
+</div>
+
+<h2>Lesson plan</h2>
+<div class="tablewrap"><table>
+<tr><th>Time</th><th>Part</th><th>You will</th></tr>
+<tr><td class="t">8 min</td><td>1. CPU vs GPU</td><td>see who does the work in your renderer and in raylib, and why many small workers win</td></tr>
+<tr><td class="t">8 min</td><td>2. Window and loop</td><td>run <code>step1_window.py</code>, line by line against pygame</td></tr>
+<tr><td class="t">14 min</td><td>3. Camera3D</td><td>meet the mirror, the camera's four numbers and fovy; prove corner 5 lands on SCREEN (500, 200)</td></tr>
+<tr><td class="t">6 min</td><td>4. Drawing shapes</td><td>use <code>draw_cube</code> and friends, and see why they look flat</td></tr>
+<tr><td class="t">8 min</td><td>5. Depth buffer for free</td><td>follow one pixel through the card's depth test; switch it off with <code>step3_depth_buffer.py</code></td></tr>
+<tr><td class="t">10 min</td><td>6. Meshes</td><td>build triangles, get their front the right way round, send them to the card once</td></tr>
+<tr><td class="t">6 min</td><td>7. Draw calls and speed</td><td>draw 1,600 cubes three ways with <code>step4_draw_calls.py</code>, then see FrogWorld's version</td></tr>
+</table></div>
+
+<h2>Part 1: Who does the work? <span class="mins">8 MIN</span></h2>
+<p>Every 3D picture, yours or raylib's, needs the same jobs done every frame: turn each corner round the camera, project it (divide by z), throw away what can't be seen, put the faces in order, and fill in the pixels. The only question is <em>who</em> does them.</p>
+<figure id="fig-r-1-1"><img src="images/r01_cpu_vs_gpu.png" alt="Top: five red boxes in a row, turn, project, clip and cull, SORT, fill pixels, all done by Python on the CPU. Bottom: Python sends the scene once to a green GPU box holding turn and project, clip and cull, depth test, fill pixels." loading="lazy"><figcaption><span class="fignum">Fig R.1.1</span>Your renderer (top) and raylib (bottom). The 14.7 ms is measured in Part 7, on the same 1,600 cubes.</figcaption></figure>
+<p>In your renderer every step is Python, and Python works on <strong>one corner at a time</strong>. Each line of Python costs a little, and a world has tens of thousands of corners. In raylib, Python only <em>describes</em> what to draw. The graphics card (the GPU, "graphics processing unit") does all the steps with its own chips.</p>
+<figure id="fig-r-1-2"><img src="images/r02_workers.png" alt="Left: a CPU drawn as 8 large cores, one marked Python. Right: a GPU drawn as 640 tiny green squares standing for 2,560 cores. Below: 57,600 corners divided by 2,560 workers is 22.5 corners each." loading="lazy"><figcaption><span class="fignum">Fig R.1.2</span>A GTX 1080 (the card in your FrogWorld test PC) has 2,560 cores. They are much simpler than a CPU core, but they all run at once.</figcaption></figure>
+<p>A GPU core can't do much: it follows the same short list of sums as all its neighbours, each on different numbers. But that is exactly what 3D needs. "Turn and project this corner" is the same sum for every corner. So the card gives each worker a few corners, and they all finish at about the same moment.</p>
+<div class="keyconcept"><span class="kc-label">KEY CONCEPT</span><pre>raylib does no new maths.
+It moves YOUR maths onto the graphics card.</pre><p>Everything below is a lesson you already know, with a new name. When something looks strange, ask: which of my old steps is this?</p></div>
+<div class="q"><p class="qq"><span class="qn">Q1</span><span>A scene has 3,000 boxes, each with 8 corners. How many corners does each of the GTX 1080's 2,560 workers turn, if the card shares them out evenly?</span></p><details><summary>Show answer</summary><div class="ans"><p>Corners: <code>(3,000 * 8)</code> = 24,000. Each worker: <code>(24,000 / 2,560)</code> = 9.375, so 9 or 10 corners each, all at the same time. In Python, one core would do all 24,000 one after the other.</p></div></details></div>
+<h2>Part 2: A window and a loop <span class="mins">8 MIN</span></h2>
+<p>raylib is written in C. <code>pyray</code> is the bridge that lets Python call it, with Python-style names.</p>
+<figure id="fig-r-2-1"><img src="images/r03_pyray_names.png" alt="Your .py file calls pyray, which calls raylib (C) and OpenGL, which talk to the graphics card. Below, a table of C names, pyray names and the pygame names you know." loading="lazy"><figcaption><span class="fignum">Fig R.2.1</span>Every C name in the raylib documentation becomes snake_case in pyray: <code>InitWindow</code> is <code>rl.init_window</code>.</figcaption></figure>
+<p>Here is the whole first program, next to the pygame program you would have written for the same picture:</p>
+<figure id="fig-r-2-2"><img src="images/r04_loop_side_by_side.png" alt="Two columns of code. Left pygame: init, set_mode, Clock, an event loop, fill, draw.rect, flip, tick. Right raylib: init_window, set_target_fps, window_should_close, begin_drawing, clear_background, draw_rectangle, end_drawing." loading="lazy"><figcaption><span class="fignum">Fig R.2.2</span><code>step1_window.py</code> (right) and its pygame twin (left). Blank cells: raylib does that job for you.</figcaption></figure>
+<pre><code>rl.init_window(WIDTH, HEIGHT, &quot;Step 1 - a raylib window&quot;)
+rl.set_target_fps(60)                       # = clock.tick(60), said once
+
+while not rl.window_should_close():         # Esc or the close button
+    x = (x + 2)                             # 2 px a frame = (2 * 60) = 120 px a second
+    rl.begin_drawing()                      # NEW: say when a frame starts
+    rl.clear_background(SKY)                # = screen.fill(SKY)
+    rl.draw_rectangle(x, 250, 100, 100, FROG_GREEN)   # SCREEN pixels, as in pygame
+    rl.end_drawing()                        # = pygame.display.flip()
+rl.close_window()</code></pre>
+<p>Two things are new. Colours have a fourth number, <em>alpha</em> (how solid: 255 = solid). And you must say <code>begin_drawing()</code> before you draw. The reason is in the next picture: the card keeps two hidden pictures, and needs to know when you start on the next one.</p>
+<figure id="fig-r-2-3"><img src="images/r05_frame_steps.png" alt="Seven numbered steps of one frame, from begin_drawing to end_drawing, with steps 3 to 5 in green for 3D and step 6 in blue for 2D. On the right the card&#x27;s BACK picture and FRONT picture swap at step 7." loading="lazy"><figcaption><span class="fignum">Fig R.2.3</span>One frame. Steps 3 to 5 are the 3D part (Part 3 onwards). The BACK picture also holds 800 × 600 depths: Part 5.</figcaption></figure>
+<figure id="fig-r-2-4"><img src="images/run_step1_window.png" alt="Screenshot of step1_window.py: blue sky, a green square, a yellow sun, a dark ground line, the text Hello from raylib and an FPS counter." loading="lazy"><figcaption><span class="fignum">Fig R.2.4</span><code>step1_window.py</code> running. SCREEN coordinates, exactly as in pygame: (0, 0) top-left, y down.</figcaption></figure>
+<div class="q"><p class="qq"><span class="qn">Q2</span><span>In <code>step1_window.py</code>, what goes wrong if you move <code>rl.clear_background(SKY)</code> to just AFTER <code>rl.draw_rectangle(...)</code>?</span></p><details><summary>Show answer</summary><div class="ans"><p>The sky colour is painted over every pixel after the square is drawn, so the square is wiped out in every frame. You only ever see sky. Order inside a frame matters exactly as it did with <code>screen.fill</code>.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q3</span><span>Why is it fine that raylib's <code>end_drawing()</code> both swaps the pictures AND waits for the 60 FPS beat?</span></p><details><summary>Show answer</summary><div class="ans"><p>Both jobs belong at the end of a frame. pygame did them in two calls (<code>flip()</code> then <code>clock.tick(60)</code>); raylib does them in one. With <code>set_target_fps(0)</code> it does not wait at all, which is what we want when we measure speed in Part 7.</p></div></details></div>
+<h2>Part 3: Camera3D, and the mirror <span class="mins">14 MIN</span></h2>
+<p>Now the 3D part. Before we can hand raylib a single corner we have to settle one difference between our coordinates and its own.</p>
+<h3>The mirror</h3>
+<figure id="fig-r-3-1"><img src="images/r06_mirror.png" alt="Two sets of axes. Left WORLD: y up, z into the page, +x to the right. Right GPU: y up, z into the page, +x to the LEFT. Below: GPU point = (-WORLD x, WORLD y, WORLD z), with corner 5 worked: WORLD (1, 1, 4) becomes GPU (-1, 1, 4)." loading="lazy"><figcaption><span class="fignum">Fig R.3.1</span>WORLD (the course and FrogWorld) against GPU (OpenGL, inside raylib). Both have (0, 0, 0) at the eye and y up; they disagree only about which side +x is on.</figcaption></figure>
+<p>Look along +z with your head along +y. In our WORLD, +x is on your right. In OpenGL, +x is on your left: it is the mirror image. Neither is wrong; they are two different habits. One minus sign on x converts every point, and every program in this lesson starts with it:</p>
+<pre><code>def gpu(x, y, z):
+    &quot;&quot;&quot;WORLD (x, y, z) -&gt; GPU (-x, y, z).&quot;&quot;&quot;
+    return ((-x), y, z)
+
+# e.g. corner 5: SHAPE (1, 1, -1), slid 5 m away -&gt; WORLD (1, 1, 4) -&gt; GPU (-1, 1, 4)</code></pre>
+<p>FrogWorld's <code>gpu_render.gpu_point</code> is the same function. Without it, corner 5 would appear at the top-left of the cube, and turning right would turn the picture left.</p>
+<h3>The camera's four numbers</h3>
+<p>Your renderer stored the camera as x, y, z, yaw and pitch, and turned the whole world round it (Lessons 4 and 6). raylib asks for the camera in a different way: where the eye is, and any point it is looking <em>at</em>.</p>
+<figure id="fig-r-3-2"><img src="images/r07_camera3d.png" alt="Top view in WORLD coordinates: the eye at (0, 0, 0), a green arrow to the target (0, 0, 1), a teal arrow for yaw 0.4 to (0.39, 0, 0.92), dashed view lines at 45 degrees each side, and the cube 4 to 6 m ahead. A box lists position, target, up, fovy and projection." loading="lazy"><figcaption><span class="fignum">Fig R.3.2</span>WORLD coordinates, seen from above. <code>target</code> can be any point straight ahead; 1 m ahead is the simplest.</figcaption></figure>
+<pre><code>eye = gpu(0, 0, 0)                                  # position: WORLD (0, 0, 0)
+look_at = gpu(math.sin(yaw), 0, math.cos(yaw))      # target: 1 m ahead, facing = (sin(yaw), cos(yaw))
+camera = rl.Camera3D(eye, look_at, (0, 1, 0), fovy, rl.CAMERA_PERSPECTIVE)</code></pre>
+<p><code>up</code> = (0, 1, 0) says the top of the window shows +y. <code>CAMERA_PERSPECTIVE</code> means "divide by z", Lesson 1's rule that far things are smaller. That leaves <code>fovy</code>.</p>
+<h3>fovy: raylib's zoom</h3>
+<p>raylib has no FOCAL. Instead it wants the view angle from the top edge of the window to the bottom edge, in degrees: "field of view, y". We can work out the fovy that matches FOCAL 400 exactly.</p>
+<figure id="fig-r-3-3"><img src="images/r08_fovy.png" alt="Side view: the eye on the left, the window edge-on 400 px away (FOCAL), its top edge 300 px up (CENTRE_Y). Two green lines from the eye to the window&#x27;s top and bottom make the angle, 36.87 degrees each half. The sum: fovy = 2 x atan(300 / 400) = 73.74 degrees." loading="lazy"><figcaption><span class="fignum">Fig R.3.3</span>Seen from the side. The window's top edge is CENTRE_Y = 300 px above its middle, FOCAL = 400 px from the eye.</figcaption></figure>
+<div class="keyconcept"><span class="kc-label">KEY CONCEPT</span><pre>fovy = (2 * atan(CENTRE_Y / FOCAL))
+     = (2 * atan(300 / 400)) = 73.74 degrees</pre><p>With this one number raylib draws exactly the picture Lesson 1's FOCAL 400 drew. FrogWorld works it out the same way for any window size.</p></div>
+<p>Bigger fovy means a wider view, so each thing takes up fewer pixels: the opposite way round to FOCAL. Here it is measured, not guessed:</p>
+<figure id="fig-r-3-4"><img src="images/r09_fovy_effect.png" alt="Three real raylib screenshots of Lesson 1&#x27;s cube. fovy 45: front face 364 px wide. fovy 73.74: 201 px. fovy 100: 126 px. Under each, the predicted width: 362, 200 and 126 px." loading="lazy"><figcaption><span class="fignum">Fig R.3.4</span>Real screenshots, the front face measured along SCREEN y = 300. The sum under each predicts the width to within 2 px.</figcaption></figure>
+<h3>The proof: corner 5</h3>
+<p><code>step2_camera_cube.py</code> draws Lesson 1's cube with raylib, then works out corner 5 both ways: with our own Lesson 1 formula (a white cross) and with raylib's own <code>get_world_to_screen</code> (a yellow ball and a yellow number).</p>
+<figure id="fig-r-3-5"><img src="images/r10_corner5_proof.png" alt="Screenshot of step2_camera_cube.py: a red square cube face from SCREEN (300, 200) to (500, 400), a yellow ball and a white cross on its top-right corner, and text saying Lesson 1 formula (500, 200) and raylib get_world_to_screen (500, 200). Beside it, the working: corner 5 WORLD (1, 1, 4), sx = 400 + (1 x 400 / 4) = 500, sy = 300 - (1 x 400 / 4) = 200." loading="lazy"><figcaption><span class="fignum">Fig R.3.5</span>SCREEN (500, 200) both ways. The flat red face is the cube's front face: from straight in front, the sides are edge-on.</figcaption></figure>
+<details class="full"><summary>Show the whole of step2_camera_cube.py (153 lines)</summary><pre><code># =====================================================================================
+# step2_camera_cube.py  -  raylib lesson, Parts 3 and 4: Camera3D and Lesson 1&#x27;s cube, drawn by the GPU
+# =====================================================================================
+#
+# WHAT THIS SHOWS
+#   Lesson 1&#x27;s cube (2 m wide, centre 5 m ahead), but this time we never call project() ourselves.
+#   We describe a CAMERA to raylib once per frame, say &quot;draw a cube here&quot;, and the graphics card does the
+#   turning, projecting and filling of every corner.
+#   To PROVE it is the same maths as Lesson 1, corner 5 is worked out BOTH ways:
+#       * by our own Lesson 1 formula  (a white cross on the screen)
+#       * by raylib&#x27;s own projection   (a yellow ball in 3D, and rl.get_world_to_screen)
+#   They land on the same pixel: SCREEN (500, 200) at the start.
+#
+# KEYS
+#   UP / DOWN      cube further / nearer        (cube_distance, as in Lesson 1)
+#   LEFT / RIGHT   turn the camera left / right (yaw)
+#   Z / X          narrower / wider view        (fovy, raylib&#x27;s version of FOCAL; Part 3)
+#   Esc            quit
+#
+# THE COORDINATE SYSTEMS in this file (picture images/r06_mirror.png):
+#   SHAPE   metres from the cube&#x27;s own centre:   cube_points, corner 5 = (1, 1, -1)
+#   WORLD   metres from the viewer at (0, 0, 0): the COURSE&#x27;s system. x right, y up, z AHEAD (into the screen).
+#   GPU     what raylib is given: (-WORLD x, WORLD y, WORLD z). One minus sign: THE MIRROR (function gpu below)
+#   SCREEN  pixels from the window&#x27;s top-left, y DOWN.
+
+import math
+import pyray as rl
+
+WIDTH = 800
+HEIGHT = 600
+CENTRE_X = (WIDTH / 2)      # 400: SCREEN x of the middle of the window
+CENTRE_Y = (HEIGHT / 2)     # 300: SCREEN y of the middle
+FOCAL = 400                 # Lesson 1&#x27;s zoom: half the window&#x27;s width -&gt; a 90 degree view across
+
+# -------------------------------------------------------------------------------------
+# 1. THE MIRROR: WORLD -&gt; GPU   (picture images/r06_mirror.png)
+# -------------------------------------------------------------------------------------
+# The course (and FrogWorld) use x RIGHT, y UP, z AHEAD.
+# OpenGL, inside raylib, is the mirror image: stand at (0, 0, 0) looking along +z with +y up, and +x is
+# on your LEFT. If we gave raylib our numbers as they are, every picture would come out flipped left for
+# right (corner 5 would appear top-LEFT).
+# The fix is one minus sign on x for every point we hand over. FrogWorld&#x27;s gpu_render.gpu_point does the same.
+#   e.g. corner 5 in WORLD (1, 1, 4) -&gt; GPU (-1, 1, 4)
+def gpu(x, y, z):
+    &quot;&quot;&quot;WORLD (x, y, z) -&gt; GPU (-x, y, z).&quot;&quot;&quot;
+    return ((-x), y, z)
+
+
+# -------------------------------------------------------------------------------------
+# 2. LESSON 1&#x27;s PROJECTION, kept only to CHECK raylib&#x27;s answer
+# -------------------------------------------------------------------------------------
+def project(x, y, z):
+    &quot;&quot;&quot;WORLD (camera at (0, 0, 0) looking along +z) -&gt; SCREEN pixels. Lesson 1, unchanged.
+       e.g. corner 5 WORLD (1, 1, 4):  sx = (400 + ((1 x 400) / 4)) = (400 + 100) = 500
+                                       sy = (300 - ((1 x 400) / 4)) = (300 - 100) = 200&quot;&quot;&quot;
+    sx = (CENTRE_X + ((x * FOCAL) / z))
+    sy = (CENTRE_Y - ((y * FOCAL) / z))
+    return (sx, sy)
+
+
+# -------------------------------------------------------------------------------------
+# 3. fovy: raylib&#x27;s zoom   (picture images/r08_fovy.png)
+# -------------------------------------------------------------------------------------
+# raylib does not use FOCAL. It wants the camera&#x27;s view angle from the TOP edge of the window to the BOTTOM
+# edge, in DEGREES: &quot;field of view, y&quot; = fovy.
+# The top edge is CENTRE_Y = 300 pixels above the middle, at FOCAL = 400 pixels &quot;in front of the eye&quot;, so
+# half the angle is atan(300 / 400):
+#       fovy = (2 x atan(CENTRE_Y / FOCAL)) = (2 x atan(300 / 400)) = (2 x 36.87) = 73.74 degrees
+# With this fovy raylib draws EXACTLY the picture Lesson 1&#x27;s FOCAL 400 drew.
+def fovy_from_focal(focal):
+    return math.degrees((2 * math.atan((CENTRE_Y / focal))))
+
+
+fovy = fovy_from_focal(FOCAL)               # 73.74 degrees
+cube_distance = 5                           # metres: WORLD z of the cube&#x27;s centre (Lesson 1&#x27;s number)
+yaw = 0.0                                   # radians: + turns the camera RIGHT (the course&#x27;s rule)
+
+# The cube&#x27;s 8 corners, SHAPE coordinates (metres from its centre), numbered as in Lesson 1
+cube_points = [
+    (-1, -1, -1), (1, -1, -1), (1, -1, 1), (-1, -1, 1),   # 0 1 2 3: the bottom four
+    (-1, 1, -1), (1, 1, -1), (1, 1, 1), (-1, 1, 1),       # 4 5 6 7: the top four
+]
+
+rl.init_window(WIDTH, HEIGHT, &quot;Step 2 - Camera3D and Lesson 1&#x27;s cube&quot;)
+rl.set_target_fps(60)
+
+while not rl.window_should_close():
+
+    # --- keys (rl.is_key_down = &quot;held this frame&quot;, like pygame.key.get_pressed()) ---
+    if rl.is_key_down(rl.KEY_UP):
+        cube_distance = (cube_distance + 0.05)
+    if rl.is_key_down(rl.KEY_DOWN):
+        cube_distance = max(2.0, (cube_distance - 0.05))
+    if rl.is_key_down(rl.KEY_RIGHT):
+        yaw = (yaw + 0.02)
+    if rl.is_key_down(rl.KEY_LEFT):
+        yaw = (yaw - 0.02)
+    if rl.is_key_down(rl.KEY_Z):
+        fovy = max(20.0, (fovy - 0.5))
+    if rl.is_key_down(rl.KEY_X):
+        fovy = min(120.0, (fovy + 0.5))
+
+    # --- THE CAMERA (picture images/r07_camera3d.png) ---
+    # position  where the eye is                 WORLD (0, 0, 0)  -&gt; GPU (0, 0, 0)
+    # target    ANY point straight ahead of it   WORLD 1 m ahead along the facing direction
+    #           facing = (sin(yaw), 0, cos(yaw)) (the course&#x27;s rule); at yaw 0 that is (0, 0, 1)
+    # up        which way is &quot;up&quot; for the eye    (0, 1, 0): the top of the window shows +y
+    # fovy      the view angle top-to-bottom     73.74 degrees (= FOCAL 400)
+    # CAMERA_PERSPECTIVE: far things smaller (divide by z). CAMERA_ORTHOGRAPHIC would not divide.
+    eye = gpu(0, 0, 0)
+    look_at = gpu(math.sin(yaw), 0, math.cos(yaw))
+    camera = rl.Camera3D(eye, look_at, (0, 1, 0), fovy, rl.CAMERA_PERSPECTIVE)
+
+    centre = gpu(0, 0, cube_distance)       # the cube&#x27;s centre: WORLD (0, 0, 5) -&gt; GPU (0, 0, 5)
+    sx5, sy5, sz5 = cube_points[5]
+    corner5 = (sx5, sy5, (sz5 + cube_distance))   # SHAPE (1, 1, -1) -&gt; WORLD (1, 1, 4): slide it away, Lesson 1
+
+    rl.begin_drawing()
+    rl.clear_background((20, 24, 32, 255))
+
+    # ======== 3D: everything between begin_mode_3d and end_mode_3d goes through the camera ========
+    rl.begin_mode_3d(camera)
+    #   From here on, positions are GPU METRES, not pixels. raylib turns them to pixels on the card.
+
+    rl.draw_cube(centre, 2, 2, 2, (200, 60, 60, 255))
+    #   centre (GPU metres), width (along x), height (along y), length (along z), colour.
+    #   2 x 2 x 2 metres: corners at +-1 from the centre, exactly cube_points. The card fills all 6 faces.
+    rl.draw_cube_wires(centre, 2, 2, 2, (255, 255, 255, 255))   # its 12 edges, as Lesson 1 drew them
+    rl.draw_sphere(gpu(*corner5), 0.08, (255, 214, 90, 255))    # a small yellow ball ON corner 5 (radius 8 cm)
+    rl.draw_grid(20, 1.0)
+    #   a floor grid at GPU y = 0: 20 squares each way, 1 m each, centred on (0, 0, 0). Our eye is ALSO at
+    #   y = 0, so we see it exactly edge-on (one line across the middle). Lift the eye to see it as a floor.
+
+    rl.end_mode_3d()
+    # ======== back to 2D: positions are SCREEN pixels again (good for the HUD) ========
+
+    # Lesson 1&#x27;s own answer for corner 5 (only true at yaw 0: our project() has no turning in it)
+    if yaw == 0.0:
+        px, py = project(*corner5)
+        rl.draw_line(int(px - 12), int(py), int(px + 12), int(py), (255, 255, 255, 255))
+        rl.draw_line(int(px), int(py - 12), int(px), int(py + 12), (255, 255, 255, 255))
+        rl.draw_text(&quot;Lesson 1 formula: (&quot; + str(round(px)) + &quot;, &quot; + str(round(py)) + &quot;)&quot;, 20, 50, 20, (255, 255, 255, 255))
+
+    # raylib&#x27;s own answer: the same sums the card does, asked for on the CPU
+    p = rl.get_world_to_screen(gpu(*corner5), camera)
+    rl.draw_text(&quot;raylib get_world_to_screen: (&quot; + str(round(p.x)) + &quot;, &quot; + str(round(p.y)) + &quot;)&quot;, 20, 80, 20, (255, 214, 90, 255))
+
+    rl.draw_text(&quot;cube_distance &quot; + str(round(cube_distance, 2)) + &quot; m   fovy &quot; + str(round(fovy, 2)) + &quot; deg   yaw &quot; + str(round(yaw, 2)),
+                 20, 20, 20, (180, 200, 230, 255))
+    rl.draw_text(&quot;UP/DOWN distance   LEFT/RIGHT turn   Z/X fovy&quot;, 20, 570, 18, (140, 150, 170, 255))
+    rl.end_drawing()
+
+rl.close_window()</code></pre></details>
+<div class="q"><p class="qq"><span class="qn">Q4</span><span>Your PC runs FrogWorld at 1920 × 1080 with FOCAL = (1920 / 2) = 960. What fovy matches it?</span></p><details><summary>Show answer</summary><div class="ans"><p>CENTRE_Y = <code>(1080 / 2)</code> = 540. fovy = <code>(2 * atan(540 / 960))</code> = <code>(2 * atan(0.5625))</code> = <code>(2 * 29.36)</code> = 58.7 degrees. That is the number in FrogWorld's <code>gpu_camera</code>.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q5</span><span>In <code>step2_camera_cube.py</code>, press DOWN until <code>cube_distance</code> is 3. Where will corner 5 be on the screen?</span></p><details><summary>Show answer</summary><div class="ans"><p>WORLD = <code>(1, 1, (-1 + 3))</code> = (1, 1, 2). sx = <code>(400 + ((1 * 400) / 2))</code> = 600, sy = <code>(300 - ((1 * 400) / 2))</code> = 100. Both numbers on the screen should say (600, 100).</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q6</span><span>What would you see if you forgot the mirror for the camera's <code>target</code>, but kept it for the cube, and turned right (yaw 0.4)?</span></p><details><summary>Show answer</summary><div class="ans"><p>The target would be (0.39, 0, 0.92) in GPU numbers, which is to the LEFT in GPU space. So pressing RIGHT would turn the view left. That is why both the camera's position and target go through <code>gpu()</code>, as in FrogWorld.</p></div></details></div>
+<h2>Part 4: Drawing shapes <span class="mins">6 MIN</span></h2>
+<p>Between <code>begin_mode_3d(camera)</code> and <code>end_mode_3d()</code> positions are GPU metres, not pixels. raylib has a set of ready-made shapes you can draw there in one line each.</p>
+<figure id="fig-r-4-1"><img src="images/r11_draw_cube.png" alt="A cube with its centre marked and arrows for width 2 along x, height 2 along y, length 2 along z. Beside it a list of easy shapes: draw_cube, draw_cube_wires, draw_sphere, draw_plane, draw_line_3d, draw_grid, draw_cylinder." loading="lazy"><figcaption><span class="fignum">Fig R.4.1</span><code>rl.draw_cube((0, 0, 5), 2, 2, 2, RED)</code> is Lesson 1's cube: x and y from −1 to 1, z from 4 to 6 (GPU metres).</figcaption></figure>
+<p>These are perfect for trying things out. But they have no light: raylib's plain drawing paints every face of a box in the one colour you gave it.</p>
+<figure id="fig-r-4-2"><img src="images/r12_flat_colour.png" alt="Two real screenshots of a red bar and a blue bar crossing, with a grey wall behind. Left, drawn with draw_cube: each bar is one flat colour, top and sides melt together. Right, a mesh with a shade per face: tops bright, sides darker, the shape is clear." loading="lazy"><figcaption><span class="fignum">Fig R.4.2</span>Left: <code>draw_cube</code>. Right: the same bars as a mesh (Part 6) with each face's colour darkened by Lesson 3B's shade.</figcaption></figure>
+<p>This is why FrogWorld does not use <code>draw_cube</code> for its houses. It works out each face's shade ONCE, when the zone loads (the same <code>render.shade</code> the pygame renderer uses), and stores the darker colour in the face's corners. The card then only has to fill it in, and the picture matches pygame's.</p>
+<div class="q"><p class="qq"><span class="qn">Q7</span><span>Write the <code>draw_cube</code> line for a 4 m wide, 3 m tall, 6 m long shed standing ON the floor, its centre at WORLD x = 10, z = 20.</span></p><details><summary>Show answer</summary><div class="ans"><p>Standing on the floor means its bottom is at y = 0, so its centre is half its height up: y = <code>(3 / 2)</code> = 1.5. Mirror the x: <code>rl.draw_cube(gpu(10, 1.5, 20), 4, 3, 6, colour)</code>, which is GPU centre (−10, 1.5, 20).</p></div></details></div>
+<h2>Part 5: The depth buffer, for free <span class="mins">8 MIN</span></h2>
+<p>In Lesson 10 you built a depth buffer in Python: one "how far away" number for every block of the window, and a face may only paint a block if it is nearer. It was correct, but slow in Python, which is why you used 4 × 4 blocks. The graphics card has one built in, for every single pixel, and <code>begin_mode_3d</code> switches it on.</p>
+<figure id="fig-r-5-1"><img src="images/r13_depth_test.png" alt="A table following SCREEN pixel (432, 282): start, far. Red bar at 6.40 m: paint, depth 6.40. Blue bar 6.76 m: skip. Floor grid 10.36 m: skip. Wall: misses this pixel. The pixel stays red. Two boxes compare Lesson 10&#x27;s Python loop with the card doing the same test for 480,000 pixels." loading="lazy"><figcaption><span class="fignum">Fig R.5.1</span>One real pixel of step 3, the shapes arriving in the order the program draws them. Distances are metres from the eye.</figcaption></figure>
+<div class="keyconcept"><span class="kc-label">KEY CONCEPT</span><pre>paint a pixel ONLY if  (new distance &lt; stored distance)</pre><p>Lesson 10's rule, run by the card for every pixel of every triangle. Because nearer always wins, the order you draw things in stops mattering, and the painter's sort can go.</p></div>
+<p><code>step3_depth_buffer.py</code> draws two bars that pass through each other (Lesson 10 showed no painter's order can get these right), then the floor grid, then a wall behind them, in that deliberately bad order. Press D to switch the card's depth test off and see plain painter's drawing again.</p>
+<figure id="fig-r-5-2"><img src="images/r14_depth_on_off.png" alt="Two real screenshots. Depth test ON: the red bar is in front of the blue one on the left and behind it on the right, floor lines hidden under the bars. OFF: the blue bar covers all of the red one and the floor lines are painted over both bars. A white ring marks pixel (432, 282) in both." loading="lazy"><figcaption><span class="fignum">Fig R.5.2</span>The white ring is the pixel from Fig R.5.1: red with the test on, blue with it off (blue was drawn after red).</figcaption></figure>
+<pre><code>rl.begin_mode_3d(camera)          # depth test ON (raylib&#x27;s normal)
+if not depth_on:
+    rl.rl_draw_render_batch_active()   # send what raylib is holding, with the old setting
+    rl.rl_disable_depth_test()         # now: last drawn wins, like the painter</code></pre>
+<p>Two lines in that snippet are about raylib holding shapes back and sending them in a bunch (a <em>batch</em>). Part 7 explains batches. For now: if you change a drawing setting in the middle of 3D, flush the batch first, or the shapes already drawn get the new setting too.</p>
+<p>One more thing comes free. <code>clear_background</code> wipes the depths as well as the colours: every pixel back to "as far as can be", like Lesson 10's <code>depth = infinity</code> at the start of each frame. Forget it and last frame's distances would hide this frame's moving people.</p>
+<div class="q"><p class="qq"><span class="qn">Q8</span><span>At pixel (432, 282) the card stores 6.40 after the red bar. If the program drew the blue bar FIRST and the red bar second, what would the pixel end up as?</span></p><details><summary>Show answer</summary><div class="ans"><p>Blue arrives first: 6.76 &lt; far, so paint blue and store 6.76. Red arrives: 6.40 &lt; 6.76, so paint red and store 6.40. Still red: the order does not matter with the depth test on.</p></div></details></div>
+<h2>Part 6: Meshes: send it once, draw it every frame <span class="mins">10 MIN</span></h2>
+<p><code>draw_cube</code> can't turn and can't shade. For real models we build a <em>mesh</em>: our own list of triangles, which raylib copies into the card's memory. Three ideas make a mesh.</p>
+<h3>Only triangles</h3>
+<figure id="fig-r-6-1"><img src="images/r15_triangles.png" alt="A square face with corners p0 to p3 split by a diagonal into triangle A (p0, p1, p2) and triangle B (p0, p2, p3). A counting box: 1 cube = 12 triangles = 36 vertices; 1,600 cubes = 19,200 triangles = 57,600 vertices." loading="lazy"><figcaption><span class="fignum">Fig R.6.1</span>A fan from corner p0: n corners make (n − 2) triangles. FrogWorld's <code>Tris.fan</code> does this for every flat face.</figcaption></figure>
+<h3>Which side is the front?</h3>
+<p>The card skips any triangle whose back is turned to the camera, as your Lesson 3 clock test did. It decides by the order of the corners: front is where they go round <em>anti-clockwise</em>.</p>
+<figure id="fig-r-6-2"><img src="images/r16_front_faces.png" alt="Left: triangle a, b, c going anti-clockwise, drawn. Right: the same triangle seen from behind, going clockwise, skipped. Below: the cross product of (b - a) and (c - a) worked out for (0,0,0), (1,0,0), (0,1,0), giving (0, 0, 1)." loading="lazy"><figcaption><span class="fignum">Fig R.6.2</span>Lesson 3's face lists go clockwise from outside; OpenGL wants anti-clockwise. The mirror flips one into the other, so they work after <code>gpu()</code>.</figcaption></figure>
+<pre><code>def front_way_round(a, b, c, normal):
+    ux, uy, uz = (b[0] - a[0]), (b[1] - a[1]), (b[2] - a[2])     # edge a -&gt; b
+    vx, vy, vz = (c[0] - a[0]), (c[1] - a[1]), (c[2] - a[2])     # edge a -&gt; c
+    cx = ((uy * vz) - (uz * vy))                                  # the cross product:
+    cy = ((uz * vx) - (ux * vz))                                  #   it points OUT of
+    cz = ((ux * vy) - (uy * vx))                                  #   the front side
+    return (((cx * normal[0]) + (cy * normal[1]) + (cz * normal[2])) &gt; 0)</code></pre>
+<h3>Two long lists of numbers</h3>
+<p>A mesh is just every corner's position and colour, one after another, in two flat lists. numpy keeps each list as one solid block of memory, which is the shape the card wants.</p>
+<figure id="fig-r-6-3"><img src="images/r17_mesh_arrays.png" alt="Worked example: cube (0, 0) at WORLD (-39, 0.5, 10), mirrored to GPU (39, 0.5, 10); its first three vertices (39.5, 0, 9.5), (39.5, 1, 9.5), (39.5, 1, 10.5). Below, the positions list as coloured cells 39.5, 0.0, 9.5 ... and the colours list 210, 70, 60, 255 three times." loading="lazy"><figcaption><span class="fignum">Fig R.6.3</span>GPU metres. The card reads the lists in threes: vertices 0, 1, 2 are triangle 0, and so on.</figcaption></figure>
+<pre><code>pos_array = np.array(positions, dtype=np.float32)    # 172,800 numbers: x, y, z for each vertex
+col_array = np.array(colours, dtype=np.uint8)        # 230,400 numbers: r, g, b, a for each vertex
+
+big_mesh = rl.ffi.new(&quot;Mesh *&quot;)                      # an empty raylib Mesh record
+big_mesh.vertexCount = (len(pos_array) // 3)         # (172,800 / 3) = 57,600
+big_mesh.triangleCount = (big_mesh.vertexCount // 3) # 19,200
+big_mesh.vertices = rl.ffi.cast(&quot;float *&quot;, rl.ffi.from_buffer(pos_array))
+big_mesh.colors = rl.ffi.cast(&quot;unsigned char *&quot;, rl.ffi.from_buffer(col_array))
+rl.upload_mesh(big_mesh, False)                      # copy into the card. False = never changes</code></pre>
+<p><code>rl.ffi</code> is the bridge between Python and raylib's C. The two <code>cast</code> lines tell the Mesh record where the numpy lists are in memory. Keep the numpy arrays alive (a module-level name is enough) while the program runs; FrogWorld keeps them in a dictionary called <code>KEEP</code>.</p>
+<figure id="fig-r-6-4"><img src="images/r18_upload_once.png" alt="RAM on the CPU side holding pos_array 691,200 bytes and col_array 230,400 bytes. A thick yellow arrow ONCE at the start, upload_mesh 0.9 MB, to VRAM on the graphics card. A thin green arrow EVERY frame, draw_mesh, a few bytes." loading="lazy"><figcaption><span class="fignum">Fig R.6.4</span>The big win. The world's corners cross to the card once; after that each frame only says which mesh to draw.</figcaption></figure>
+<div class="keyconcept"><span class="kc-label">KEY CONCEPT</span><pre>upload once:  rl.upload_mesh(mesh, False)
+every frame:  rl.draw_mesh(mesh[0], material, matrix_identity())</pre><p>Still things (houses, fences, ground) never cross to the card again. This is the main reason FrogWorld --gpu is faster.</p></div>
+<div class="q"><p class="qq"><span class="qn">Q9</span><span>A FrogWorld chunk holds 120 still boxes. Every face of every box is kept (none skipped). How many vertices does its mesh have, and how many bytes do its positions take?</span></p><details><summary>Show answer</summary><div class="ans"><p>Per box <code>(6 * 2 * 3)</code> = 36 vertices, so <code>(120 * 36)</code> = 4,320 vertices. Positions: <code>(4,320 * 3)</code> = 12,960 numbers, <code>(12,960 * 4)</code> = 51,840 bytes, about 52 KB. Sent once.</p></div></details></div>
+<div class="q"><p class="qq"><span class="qn">Q10</span><span>A person walks across the meadow. Can their boxes go in the chunk's still mesh?</span></p><details><summary>Show answer</summary><div class="ans"><p>No: the still mesh is sent once and never changes, so the person would stay where they were baked. Things that move are sent again each frame. FrogWorld puts every mover's boxes in one CHANGING mesh (<code>upload_mesh(mesh, True)</code>, refilled with <code>update_mesh_buffer</code>), and people in small part meshes that the card turns (<code>gpu_people.py</code>).</p></div></details></div>
+<h2>Part 7: Draw calls and speed <span class="mins">6 MIN</span></h2>
+<p>A <em>draw call</em> is one "draw this now" order to the card. Each one has a fixed cost, however small the shape, because Python has to call into C and the card has to set itself up. <code>step4_draw_calls.py</code> draws the same field of 1,600 cubes three ways: press 1, 2 or 3.</p>
+<figure id="fig-r-7-1"><img src="images/r19_draw_calls.png" alt="Three rows. 1 draw_cube x 1,600: 1,600 Python calls fed into a batch, about 1 to 4 draw calls. 2 draw_model x 1,600: 1,600 draw calls. 3 draw_mesh x 1: one call, 57,600 corners already on the card." loading="lazy"><figcaption><span class="fignum">Fig R.7.1</span>The same picture three ways. Way 1 is quicker than it looks because raylib quietly gathers small shapes into a batch.</figcaption></figure>
+<figure id="fig-r-7-2"><img src="images/run_step4_draw_calls.png" alt="Three real screenshots of the 40 by 40 field of green and red cubes, identical pictures, captioned way 1 draw_cube 4.71 ms, way 2 draw_model 9.41 ms, way 3 draw_mesh 2.43 ms." loading="lazy"><figcaption><span class="fignum">Fig R.7.2</span><code>step4_draw_calls.py</code>, ways 1, 2 and 3. The pictures are the same; only the cost differs.</figcaption></figure>
+<figure id="fig-r-7-3"><img src="images/r20_measured.png" alt="Bar chart of milliseconds per frame: your pygame renderer 14.7, way 1 draw_cube 4.71, way 2 draw_model 9.41, way 3 draw_mesh 2.43. A note says this is the cloud computer with a software stand-in for the card." loading="lazy"><figcaption><span class="fignum">Fig R.7.3</span>Measured on the cloud computer, which has no graphics card: the card's job is done by software on the CPU. Run step 4 on your PC for the real numbers.</figcaption></figure>
+<p>Way 2 is the slowest because it makes 1,600 separate draw calls. Way 3 sends nothing but one order. On the cloud computer even way 3 costs 2.43 ms, because the "card" there is the CPU filling pixels. On a real card that work happens on the card, alongside Python, and way 3's Python time is close to nothing. Please run <code>step4_draw_calls.py</code> on your PC and press 1, 2, 3: those are the numbers that count.</p>
+<div class="keyconcept"><span class="kc-label">KEY CONCEPT</span><pre>fewer, bigger draw calls  =  faster</pre><p>Pack everything that never moves into as few meshes as you can. The number of corners matters much less than the number of calls.</p></div>
+<h3>How FrogWorld --gpu puts it all together</h3>
+<figure id="fig-r-7-4"><img src="images/r21_frogworld_gpu.png" alt="Left, ONCE when the world loads: chunk faces already lit, cut into mirrored triangles, one mesh per chunk, people as part meshes. Right, EVERY frame: clear, sky bands, gpu_camera with fovy 58.7 degrees at 1920 x 1080, draw_mesh per chunk, one changing mesh for movers, HUD as a texture, swap. Below: pygame 32 to 44 FPS, --gpu 70 FPS on the GTX 1080." loading="lazy"><figcaption><span class="fignum">Fig R.7.4</span>Every idea of this lesson, in FrogWorld. The FPS numbers were measured on your GTX 1080 test PC in AshWorld (PRs 261 and 262).</figcaption></figure>
+<div class="q"><p class="qq"><span class="qn">Q11</span><span>Suppose 100 chunks are in reach. With one mesh per chunk, how many draw calls does the still world need each frame? How many would it need if every box were its own <code>draw_model</code>, at 120 boxes a chunk?</span></p><details><summary>Show answer</summary><div class="ans"><p>One per chunk: about 100 draw calls. One per box: <code>(100 * 120)</code> = 12,000 draw calls, which Part 7's way 2 shows would be far slower even though the picture is identical.</p></div></details></div>
+<h2>Wrap up <span class="mins">3 MIN</span></h2>
+<p>Everything you learnt in the course is still there in raylib. It just has new names, and a new worker.</p>
+<figure id="fig-r-8-1"><img src="images/r22_cheat_sheet.png" alt="A two-column table from the course words to raylib words, with the lesson part for each: set_mode to init_window, fill/flip to begin/clear/end_drawing, WORLD handedness to gpu(), camera to Camera3D, FOCAL 400 to fovy 73.74, project to the card, polygons to triangles, the clock test to back-face culling, shade to baked colours or a shader, painter&#x27;s sort to the depth test, faces rebuilt each frame to a mesh uploaded once, one polygon call per face to one draw call per mesh." loading="lazy"><figcaption><span class="fignum">Fig R.8.1</span>Keep this beside you when you read FrogWorld's <code>gpu_render.py</code>.</figcaption></figure>
+<ul>
+<li><strong>The card does your maths.</strong> Turning, projecting, clipping, the clock test, the depth test and filling all run on the graphics card's thousands of workers.</li>
+<li><strong>One minus sign</strong> (<code>gpu()</code>) turns WORLD points into GPU points, for shapes and the camera alike.</li>
+<li><strong>fovy = (2 * atan(CENTRE_Y / FOCAL))</strong> gives the same picture as your FOCAL.</li>
+<li><strong>Bake still things into meshes once</strong>, with the light already in their colours. Each frame: few draw calls, no sort.</li>
+</ul>
+<div class="key"><strong>Try it on your PC</strong>
+<p>1. <code>py -m pip install raylib</code> &nbsp; 2. run the four programs in order &nbsp; 3. in step 4, press 1, 2 and 3 and note the "Python drawing time" for each. Then try <code>N_SIDE = 80</code> (6,400 cubes) and see which way grows the most.</p></div>
+
+<h2>Files</h2>
+<p>Download the code for this lesson (right-click a file and choose <em>Save link as</em>):</p>
+<ul class="files">
+<li><a href="code/step1_window.py" download><code>code/step1_window.py</code></a>: a window, a loop, 2D drawing (Part 2)</li>
+<li><a href="code/step2_camera_cube.py" download><code>code/step2_camera_cube.py</code></a>: Camera3D, fovy and Lesson 1's cube, corner 5 checked both ways (Parts 3 and 4)</li>
+<li><a href="code/step3_depth_buffer.py" download><code>code/step3_depth_buffer.py</code></a>: the card's depth test, D switches it off (Part 5)</li>
+<li><a href="code/step4_draw_calls.py" download><code>code/step4_draw_calls.py</code></a>: 1,600 cubes drawn three ways, timed (Parts 6 and 7)</li>
+</ul>
+<p>The full listings are below. Every picture was made by the scripts in <code>3d-course/raylib/_build/</code>, and every screenshot is a real raylib run.</p>
+
+<details class="full"><summary>Show the whole of step1_window.py (90 lines)</summary><pre><code># =====================================================================================
+# step1_window.py  -  raylib lesson, Part 2: a window, a loop, and some 2D drawing
+# =====================================================================================
+#
+# WHAT THIS SHOWS
+#   The smallest raylib program: open a window, run a loop, wipe the picture, draw a few 2D things, show it.
+#   It is the raylib copy of the very first pygame program of Lesson 1 (step1_line.py).
+#
+# HOW TO RUN (Windows, Python 3.14):
+#       py -m pip install raylib          &lt;- once. It gives you the module called &quot;pyray&quot;.
+#       py step1_window.py
+#   Esc or the window&#x27;s close button ends it.
+#
+# THE COORDINATE SYSTEM in this file: SCREEN only.
+#   SCREEN = pixels from the window&#x27;s TOP-LEFT corner, x to the right, y DOWN. Exactly the same as pygame.
+#     (0, 0) is the top-left pixel, (799, 599) the bottom-right one in an 800 x 600 window.
+#
+# PICTURE: images/r04_loop_side_by_side.png puts this file next to the pygame version, line by line.
+
+import pyray as rl          # &quot;pyray&quot; = raylib with Python-style names (init_window, not InitWindow).
+                            # &quot;as rl&quot; so every raylib call starts with rl. and you can see at once which
+                            # lines talk to raylib.
+
+# -------------------------------------------------------------------------------------
+# 1. THE WINDOW
+# -------------------------------------------------------------------------------------
+WIDTH = 800                 # pixels across  (the same 800 x 600 as every lesson of the 3D course)
+HEIGHT = 600                # pixels down
+
+rl.init_window(WIDTH, HEIGHT, &quot;Step 1 - a raylib window&quot;)
+#   pygame needed two lines for this:  pygame.init()  and  screen = pygame.display.set_mode((800, 600))
+#   raylib does both in one, AND it quietly asks the graphics card for an OpenGL &quot;context&quot;: the card&#x27;s own
+#   memory for this window (the picture, and later the depth memory of Part 5). You never see that object;
+#   raylib keeps it inside itself, so there is no &quot;screen&quot; variable to pass around.
+
+rl.set_target_fps(60)
+#   = pygame&#x27;s clock.tick(60), but said ONCE here instead of every frame. end_drawing() (below) waits
+#   for the rest of each 1/60 s = 16.7 ms. Set 0 to run flat out (useful when you measure speed: step 4).
+
+# -------------------------------------------------------------------------------------
+# 2. COLOURS
+# -------------------------------------------------------------------------------------
+# A raylib colour has FOUR numbers: red, green, blue, and ALPHA (how solid: 255 = solid, 0 = invisible).
+# pygame mostly used three. A plain Python tuple works anywhere raylib wants a colour.
+SKY = (135, 190, 235, 255)
+FROG_GREEN = (60, 170, 70, 255)
+DARK = (25, 30, 40, 255)
+
+x = 100                     # SCREEN x of the moving square&#x27;s left edge, pixels. It slides right each frame.
+
+# -------------------------------------------------------------------------------------
+# 3. THE LOOP
+# -------------------------------------------------------------------------------------
+# rl.window_should_close() is True once Esc is pressed or the close button clicked.
+# pygame needed a &quot;for event in pygame.event.get(): if event.type == pygame.QUIT&quot; loop for that;
+# raylib reads the events for you inside end_drawing(), and you just ASK it (rl.is_key_down etc).
+while not rl.window_should_close():
+
+    # --- move things (no drawing yet) ---
+    x = (x + 2)                                 # 2 pixels per frame = (2 x 60) = 120 pixels per second
+    if x &gt; (WIDTH - 100):                       # off the right edge? start again on the left
+        x = 0
+
+    # --- draw ONE frame ---
+    rl.begin_drawing()
+    #   &quot;I am starting a new picture.&quot; Everything drawn from here goes into the BACK picture: a hidden
+    #   copy that the player cannot see yet (picture r05_frame_steps.png). pygame drew into a hidden copy
+    #   too; you just never had to say &quot;begin&quot;.
+
+    rl.clear_background(SKY)                    # = screen.fill(SKY): every pixel of the back picture to SKY
+
+    rl.draw_rectangle(x, 250, 100, 100, FROG_GREEN)
+    #   left x, top y, width, height, colour  (SCREEN pixels). pygame: pygame.draw.rect(screen, colour, (x, 250, 100, 100))
+
+    rl.draw_line(0, 400, WIDTH, 400, DARK)      # from (0, 400) to (800, 400): the ground line
+    rl.draw_circle(650, 120, 40, (250, 220, 80, 255))   # centre (650, 120), radius 40: a sun
+
+    rl.draw_text(&quot;Hello from raylib&quot;, 20, 20, 30, DARK)
+    #   text, left x, top y, size (pixels tall), colour. pygame needed a Font object and a blit for this.
+
+    rl.draw_fps(20, 60)                         # raylib counts the frames per second for you
+
+    rl.end_drawing()
+    #   &quot;The picture is finished&quot;: the back picture is SWAPPED to the front so the player sees it all at
+    #   once (= pygame.display.flip()). It also waits for the 60 FPS beat and reads the keyboard and mouse.
+
+# -------------------------------------------------------------------------------------
+# 4. THE END
+# -------------------------------------------------------------------------------------
+rl.close_window()           # = pygame.quit(): gives the window and the card&#x27;s memory back</code></pre></details>
+<details class="full"><summary>Show the whole of step3_depth_buffer.py (96 lines)</summary><pre><code># =====================================================================================
+# step3_depth_buffer.py  -  raylib lesson, Part 5: the depth buffer, done by the graphics card
+# =====================================================================================
+#
+# WHAT THIS SHOWS
+#   Lesson 10&#x27;s depth buffer (one &quot;how far away&quot; number kept for every pixel), but now the GRAPHICS CARD
+#   keeps it, for free, and we never sort anything.
+#   Things are drawn in a deliberately BAD order:  red bar, blue bar, floor grid, and the FAR wall LAST.
+#     * a red bar and a blue bar that pass THROUGH each other (a cross). Lesson 10 showed there is no
+#       right painter&#x27;s order for these: each bar is partly in front of the other.
+#     * the floor grid&#x27;s lines, drawn AFTER the bars although the bars stand on top of them
+#     * a grey wall 1 m behind them, drawn last of all
+#   With the depth test ON  : the picture is right anyway (the card compares distances pixel by pixel).
+#   With the depth test OFF : the card just paints in the order we drew: the blue bar covers ALL of the red
+#                             one, and the floor lines are painted across both bars.
+#                             (The wall never overlaps the bars on screen from up here, so it shows no
+#                             change: it is there to prove the card does not care that we drew it last.)
+#
+# KEYS
+#   D              depth test on / off
+#   LEFT / RIGHT   walk the camera round the cross (to see the bars pass through each other)
+#   Esc            quit
+#
+# THE COORDINATE SYSTEMS (as step 2):
+#   WORLD   metres from (0, 0, 0) on the floor, x right, y up, z ahead (the course / FrogWorld)
+#   GPU     (-WORLD x, WORLD y, WORLD z): the mirror, function gpu()
+#   SCREEN  pixels from the window&#x27;s top-left, y down
+
+import math
+import pyray as rl
+
+WIDTH = 800
+HEIGHT = 600
+FOVY = 73.74                # degrees, = Lesson 1&#x27;s FOCAL 400 in an 800 x 600 window (step 2 worked it out)
+
+
+def gpu(x, y, z):
+    &quot;&quot;&quot;WORLD (x, y, z) -&gt; GPU (-x, y, z): the mirror (step 2, picture r06_mirror.png).&quot;&quot;&quot;
+    return ((-x), y, z)
+
+
+depth_on = True
+angle = 0.5                 # radians: where the camera stands on its circle round the cross (0 = straight south of it)
+
+rl.init_window(WIDTH, HEIGHT, &quot;Step 3 - the GPU depth buffer&quot;)
+rl.set_target_fps(60)
+
+while not rl.window_should_close():
+
+    if rl.is_key_pressed(rl.KEY_D):                 # is_key_pressed: True only on the frame the key goes DOWN
+        depth_on = (not depth_on)
+    if rl.is_key_down(rl.KEY_RIGHT):
+        angle = (angle + 0.02)
+    if rl.is_key_down(rl.KEY_LEFT):
+        angle = (angle - 0.02)
+
+    # The camera walks round a circle, radius 6 m, round the cross&#x27;s centre WORLD (0, 1, 6), 3.4 m up,
+    # always looking at that centre.
+    #   e.g. angle 0.5:  x = (6 x sin(0.5)) = (6 x 0.479) = 2.88    z = (6 - (6 x cos(0.5))) = (6 - 5.27) = 0.73
+    eye = ((6 * math.sin(angle)), 3.4, (6 - (6 * math.cos(angle))))
+    camera = rl.Camera3D(gpu(*eye), gpu(0, 1, 6), (0, 1, 0), FOVY, rl.CAMERA_PERSPECTIVE)
+
+    rl.begin_drawing()
+    rl.clear_background((20, 24, 32, 255))
+    #   clear_background wipes the colours AND the card&#x27;s depth memory: every pixel&#x27;s &quot;nearest so far&quot;
+    #   goes back to &quot;as far as can be&quot;. (Lesson 10: depth[...] = infinity at the start of every frame.)
+
+    rl.begin_mode_3d(camera)
+
+    if not depth_on:
+        rl.rl_draw_render_batch_active()    # draw anything raylib is still holding, with the OLD setting
+        rl.rl_disable_depth_test()          # from now on: no distance test, last drawn wins (painter&#x27;s)
+
+    # 1. the red bar: 6 m long along WORLD x, 0.6 m tall, 0.6 m deep, centre WORLD (0, 1, 6)
+    rl.draw_cube(gpu(0, 1, 6), 6.0, 0.6, 0.6, (210, 60, 60, 255))
+    # 2. the blue bar: 6 m long along WORLD z, through the SAME centre: the two bars pass through each other
+    rl.draw_cube(gpu(0, 1, 6), 0.6, 0.6, 6.0, (60, 110, 220, 255))
+    rl.draw_grid(20, 1.0)                   # the floor, y = 0
+    # 3. the grey wall, drawn LAST although it is the FURTHEST thing: 10 m wide, 4 m tall, 1 m behind the
+    #    blue bar&#x27;s far end (that end is at WORLD z = (6 + 3) = 9; the wall at z = 10)
+    rl.draw_cube(gpu(0, 2, 10), 10.0, 4.0, 0.2, (120, 125, 135, 255))
+
+    if not depth_on:
+        rl.rl_draw_render_batch_active()    # draw the held shapes NOW, while the test is still off
+        rl.rl_enable_depth_test()           # and put it back the way raylib expects
+
+    rl.end_mode_3d()
+
+    if depth_on:
+        rl.draw_text(&quot;depth test ON: the card keeps the nearest distance per pixel&quot;, 20, 20, 20, (120, 230, 140, 255))
+    else:
+        rl.draw_text(&quot;depth test OFF: last drawn wins (blue over red, lines over both)&quot;, 20, 20, 20, (250, 140, 110, 255))
+    rl.draw_text(&quot;D depth on/off    LEFT/RIGHT walk round&quot;, 20, 570, 18, (140, 150, 170, 255))
+    rl.end_drawing()
+
+rl.close_window()</code></pre></details>
+<details class="full"><summary>Show the whole of step4_draw_calls.py (189 lines)</summary><pre><code># =====================================================================================
+# step4_draw_calls.py  -  raylib lesson, Parts 6 and 7: meshes, models, and why DRAW CALLS cost time
+# =====================================================================================
+#
+# WHAT THIS SHOWS
+#   The SAME picture, 1,600 cubes (a 40 x 40 field of them), drawn three different ways. Press 1, 2 or 3:
+#
+#     1  draw_cube x 1,600      raylib&#x27;s easy shape call, once per cube, every frame.
+#                               Python -&gt; raylib 1,600 times; raylib works out 36 corners for each, ON THE CPU.
+#     2  draw_model x 1,600     ONE cube mesh, sent to the card ONCE at the start. Each frame we say
+#                               &quot;draw that mesh again, here&quot; 1,600 times: 1,600 DRAW CALLS.
+#     3  draw_mesh x 1          ALL 1,600 cubes baked into ONE big mesh at the start (57,600 corners),
+#                               sent to the card ONCE. Each frame: ONE call. This is what FrogWorld --gpu does
+#                               with each chunk of the world.
+#
+#   The top line shows how many milliseconds the PYTHON side of the drawing took (the average of the last
+#   60 frames) and the FPS. On the cloud computer (no graphics card) we measured, in milliseconds:
+#   see the lesson page, Part 7. Run it on YOUR PC and compare: that is the real test.
+#
+# KEYS:  1 / 2 / 3  the three ways      Esc  quit
+#
+# THE COORDINATE SYSTEMS:
+#   WORLD   metres from (0, 0, 0) on the floor, x right, y up, z ahead (the course / FrogWorld)
+#   GPU     (-WORLD x, WORLD y, WORLD z): the mirror, function gpu() (step 2, picture r06_mirror.png)
+#   SCREEN  pixels from the window&#x27;s top-left, y down
+
+import time
+import numpy as np
+import pyray as rl
+
+WIDTH = 800
+HEIGHT = 600
+FOVY = 73.74                # degrees (= Lesson 1&#x27;s FOCAL 400, step 2)
+N_SIDE = 40                 # cubes along each side: (40 x 40) = 1,600 cubes. Try 80 (6,400) on a fast PC.
+GAP = 2.0                   # metres from one cube&#x27;s centre to the next: a 1 m cube, then 1 m of floor
+SIZE = 1.0                  # metres: each cube is 1 x 1 x 1
+
+
+def gpu(x, y, z):
+    &quot;&quot;&quot;WORLD (x, y, z) -&gt; GPU (-x, y, z): the mirror.&quot;&quot;&quot;
+    return ((-x), y, z)
+
+
+# -------------------------------------------------------------------------------------
+# 1. WHERE THE CUBES ARE, AND THEIR COLOURS (the same for all three ways)
+# -------------------------------------------------------------------------------------
+# Cube (i, j), i and j from 0 to 39, sits at WORLD x = ((i - 19.5) x 2), z = (10 + (j x 2)), y = 0.5
+# (y = half its height, so it stands ON the floor).
+#   e.g. cube (0, 0):   x = ((0 - 19.5) x 2) = -39    z = (10 + 0) = 10       -&gt; WORLD (-39, 0.5, 10)
+#        cube (39, 39): x = ((39 - 19.5) x 2) = 39    z = (10 + (39 x 2)) = 88 -&gt; WORLD (39, 0.5, 88)
+cubes = []
+for i in range(N_SIDE):
+    for j in range(N_SIDE):
+        x = ((i - ((N_SIDE - 1) / 2)) * GAP)
+        z = (10 + (j * GAP))
+        if ((i + j) % 2) == 0:                          # a chess board of two greens
+            colour = (70, 170, 80, 255)
+        else:
+            colour = (40, 120, 60, 255)
+        if (i % 10) == 0 and (j % 10) == 0:             # and a few red ones, to find your way
+            colour = (210, 70, 60, 255)
+        cubes.append(((x, (SIZE / 2), z), colour))
+
+
+# -------------------------------------------------------------------------------------
+# 2. WAY 3&#x27;s BIG MESH: every cube&#x27;s 12 triangles in two flat number lists   (picture r17_mesh_arrays.png)
+# -------------------------------------------------------------------------------------
+# A graphics card only draws TRIANGLES. A cube = 6 square faces = (6 x 2) = 12 triangles = (12 x 3) = 36
+# corners (&quot;vertices&quot;). Each vertex gets:
+#     a position  3 numbers, GPU metres:       x, y, z
+#     a colour    4 numbers, 0 to 255:         red, green, blue, alpha
+# and they all go, one after the other, into two long flat lists:
+#     positions  [x0, y0, z0,  x1, y1, z1,  x2, y2, z2,  ...]     (1,600 x 36 x 3) = 172,800 numbers
+#     colours    [r0, g0, b0, a0,  r1, g1, b1, a1,  ...]          (1,600 x 36 x 4) = 230,400 numbers
+# The card reads them 3 vertices at a time: vertices 0, 1, 2 are triangle 0; 3, 4, 5 triangle 1; ...
+
+# The 6 faces of a cube centred on (0, 0, 0), half-size h = 0.5, in GPU coordinates.
+# Each face: its OUT direction (normal), and its 4 corners going round it.
+h = (SIZE / 2)
+FACES = [
+    ((1, 0, 0),  [(h, -h, -h), (h, h, -h), (h, h, h), (h, -h, h)]),       # +x side
+    ((-1, 0, 0), [(-h, -h, -h), (-h, -h, h), (-h, h, h), (-h, h, -h)]),   # -x side
+    ((0, 1, 0),  [(-h, h, -h), (-h, h, h), (h, h, h), (h, h, -h)]),       # top
+    ((0, -1, 0), [(-h, -h, -h), (h, -h, -h), (h, -h, h), (-h, -h, h)]),   # bottom
+    ((0, 0, 1),  [(-h, -h, h), (h, -h, h), (h, h, h), (-h, h, h)]),       # +z side
+    ((0, 0, -1), [(-h, -h, -h), (-h, h, -h), (h, h, -h), (h, -h, -h)]),   # -z side
+]
+
+
+def front_way_round(a, b, c, normal):
+    &quot;&quot;&quot;THE CLOCK TEST of Lesson 3, in 3D (picture r16_front_faces.png).
+    The card only draws a triangle&#x27;s FRONT: the side from which its corners a -&gt; b -&gt; c go ANTI-clockwise.
+    The cross product of the two edges (b - a) and (c - a) points OUT of that front side, so:
+        front faces the way we want  when  ((b - a) cross (c - a)) . normal  &gt;  0
+      e.g. a = (0, 0, 0), b = (1, 0, 0), c = (0, 1, 0):  (b - a) = (1, 0, 0), (c - a) = (0, 1, 0)
+           cross = ((0 x 0) - (0 x 1), (0 x 0) - (1 x 0), (1 x 1) - (0 x 0)) = (0, 0, 1): its front faces +z.&quot;&quot;&quot;
+    ux, uy, uz = (b[0] - a[0]), (b[1] - a[1]), (b[2] - a[2])
+    vx, vy, vz = (c[0] - a[0]), (c[1] - a[1]), (c[2] - a[2])
+    cx = ((uy * vz) - (uz * vy))
+    cy = ((uz * vx) - (ux * vz))
+    cz = ((ux * vy) - (uy * vx))
+    return (((cx * normal[0]) + (cy * normal[1]) + (cz * normal[2])) &gt; 0)
+
+
+# Turn each face into 2 triangles going the right way round, ONCE: (p0, p1, p2) and (p0, p2, p3)
+CUBE_TRIANGLES = []
+for normal, (p0, p1, p2, p3) in FACES:
+    if not front_way_round(p0, p1, p2, normal):
+        p0, p1, p2, p3 = p3, p2, p1, p0             # the other way round
+    CUBE_TRIANGLES.append((p0, p1, p2))
+    CUBE_TRIANGLES.append((p0, p2, p3))
+
+# The two long lists, as numpy arrays (numpy makes ONE block of memory the card can copy in one go)
+positions = []
+colours = []
+for (wx, wy, wz), colour in cubes:
+    cx, cy, cz = gpu(wx, wy, wz)                    # the cube&#x27;s centre, GPU metres
+    for tri in CUBE_TRIANGLES:
+        for (ox, oy, oz) in tri:                    # each corner = centre + its offset
+            positions.extend(((cx + ox), (cy + oy), (cz + oz)))
+            colours.extend(colour)
+pos_array = np.array(positions, dtype=np.float32)   # float32 = the 4-byte numbers the card uses
+col_array = np.array(colours, dtype=np.uint8)       # uint8 = whole numbers 0 to 255, 1 byte each
+
+rl.init_window(WIDTH, HEIGHT, &quot;Step 4 - draw calls&quot;)
+rl.set_target_fps(0)        # 0 = no 60 FPS cap: run flat out, so we can see the real cost
+
+# -------------------------------------------------------------------------------------
+# 3. SEND THE BIG MESH TO THE CARD, ONCE   (picture r18_upload_once.png)
+# -------------------------------------------------------------------------------------
+# rl.ffi is the &quot;bridge&quot; between Python and raylib&#x27;s C code. A Mesh is a C record; we fill in how many
+# vertices and triangles, and WHERE in memory the two lists are, then upload_mesh copies them into the
+# card&#x27;s own memory (VRAM). FrogWorld&#x27;s gpu_render.make_mesh does exactly this.
+big_mesh = rl.ffi.new(&quot;Mesh *&quot;)
+big_mesh.vertexCount = (len(pos_array) // 3)        # (172,800 / 3) = 57,600 vertices
+big_mesh.triangleCount = (big_mesh.vertexCount // 3)   # 19,200 triangles
+big_mesh.vertices = rl.ffi.cast(&quot;float *&quot;, rl.ffi.from_buffer(pos_array))
+big_mesh.colors = rl.ffi.cast(&quot;unsigned char *&quot;, rl.ffi.from_buffer(col_array))
+rl.upload_mesh(big_mesh, False)                     # False = &quot;this mesh will never change&quot; (static)
+material = rl.load_material_default()               # the plain &quot;use the vertex colours&quot; way of filling
+no_move = rl.matrix_identity()                      # &quot;draw it where it is&quot;: no turn, no slide
+
+# WAY 2&#x27;s cube: raylib makes the 36 corners of a 1 m cube for us, and a MODEL wraps mesh + material.
+cube_model = rl.load_model_from_mesh(rl.gen_mesh_cube(SIZE, SIZE, SIZE))
+
+# The camera: 25 m up, behind the field, looking at its middle (WORLD (0, 0, 49))
+camera = rl.Camera3D(gpu(0, 25, -12), gpu(0, 0, 49), (0, 1, 0), FOVY, rl.CAMERA_PERSPECTIVE)
+
+way = 1
+times = []                  # the last 60 frames&#x27; drawing times, milliseconds
+NAMES = {1: &quot;1  draw_cube x 1,600&quot;, 2: &quot;2  draw_model x 1,600&quot;, 3: &quot;3  draw_mesh x 1 (one big mesh)&quot;}
+
+while not rl.window_should_close():
+    if rl.is_key_pressed(rl.KEY_ONE):
+        way, times = 1, []
+    if rl.is_key_pressed(rl.KEY_TWO):
+        way, times = 2, []
+    if rl.is_key_pressed(rl.KEY_THREE):
+        way, times = 3, []
+
+    rl.begin_drawing()
+    rl.clear_background((20, 24, 32, 255))
+    rl.begin_mode_3d(camera)
+
+    t0 = time.perf_counter()
+    if way == 1:
+        for (wx, wy, wz), colour in cubes:
+            rl.draw_cube(gpu(wx, wy, wz), SIZE, SIZE, SIZE, colour)
+    elif way == 2:
+        for (wx, wy, wz), colour in cubes:
+            rl.draw_model(cube_model, gpu(wx, wy, wz), 1.0, colour)
+    else:
+        rl.draw_mesh(big_mesh[0], material, no_move)    # big_mesh[0]: &quot;the Mesh itself&quot;, not its address
+    rl.end_mode_3d()                                    # also hands raylib&#x27;s held-back shapes to the card
+    ms = ((time.perf_counter() - t0) * 1000)
+
+    times.append(ms)
+    if len(times) &gt; 60:
+        times.pop(0)
+    average = (sum(times) / len(times))
+
+    rl.draw_text(&quot;way &quot; + NAMES[way], 20, 20, 20, (255, 214, 90, 255))
+    rl.draw_text(&quot;Python drawing time: &quot; + str(round(average, 2)) + &quot; ms per frame&quot;, 20, 50, 20, (230, 230, 230, 255))
+    rl.draw_fps(20, 80)
+    rl.draw_text(&quot;1 / 2 / 3: the three ways&quot;, 20, 570, 18, (140, 150, 170, 255))
+    rl.end_drawing()
+
+rl.unload_model(cube_model)
+rl.close_window()</code></pre></details>
+</main>
+</body>
+</html>
